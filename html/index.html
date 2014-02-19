@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Moses Grid Manager</title>
+		<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.terminal.css" />
+        <link rel="stylesheet" type="text/css" href="css/alertify.core.css" />
+        <link rel="stylesheet" type="text/css" href="css/alertify.default.css" />
+        <link rel="stylesheet" type="text/css" href="css/mgm.css" />
+        
+        <script src="js/alertify-0.3.11.min.js"></script>
+		<script src="js/jquery-1.11.0.min.js"></script>
+		<script src="js/jquery-ui.min.js"></script>
+        <script src="js/jquery.mousewheel.js"></script>
+        <script src="js/jquery.terminal-0.7.5.min.js"></script>
+		<script src="js/knockout-3.0.0.js"></script>
+        <script type="text/javascript" src="js/sammy.js"></script>
+        <script src="js/jcanvas.min.js"></script>
+        <script type="text/javascript" src="js/map.js"></script>
+		<script type="text/javascript" src="js/mgm.js"></script>
+		<script>
+        
+            var MGM = new MGMViewModel();
+            MGM.auth.resumeSession();
+			$(document).ready(function(){
+                MGM.initMap();
+                MGM.initSammy();
+                ko.applyBindings(MGM);
+                $('#template-container').load("html/templates.html", function(){
+                    ko.applyBindings(MGM, document.getElementById("template-container"));
+                });
+                $('#dialog-container').load("html/dialogs.html", function(){
+                    ko.applyBindings(MGM, document.getElementById("dialog-container"));
+                });
+			});
+		</script>
+	</head>
+	<body onunload="MGM.unload();">
+<!--+++++++++++++++++++++++++++++++++++ HEADERS ++++++++++++++++++++++++++++++++++++++++++++++-->
+        <div id="header">
+            <table data-bind="visible: !auth.loggedIn()" style="width: 100%;">
+            <tr>
+                <td><h1>MGM</h1></td>
+                <td style="text-align: right">
+                    <div style="float:right;">
+                        <button data-bind="click: task.showPasswordResetForm">Forgot Password?</button>
+                    </div>
+                    <div style="float:right;">
+                        <form data-bind="submit: auth.login">
+                            <strong style="color:red" data-bind="text: auth.errorMessage"></strong>
+                            <strong>Username</strong><input size="10" data-bind="value: auth.userName"></input>
+                            <strong>Password</strong><input size="10" type="password" data-bind="value: auth.password"></input>
+                            <button type="submit">Login</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </table>
+            <table data-bind="visible: auth.loggedIn()" style="width: 100%;">
+            <tr>
+                <td><h1>MGM</h1></td>
+                <td>
+                    <div style="width:550px;">
+                        <ul class="sections" data-bind="foreach: sections">
+                            <li data-bind="text: $data, 
+                                           css: { selected: $data == $root.sectionId() },
+                                           click: $root.goToSection"></li>
+                        </ul>
+                    </div>
+
+                </td>
+                <td style="text-align: right"><button data-bind="click: auth.logout">Logout</button></td>
+            </tr>
+            </table>
+        </div>
+<!--++++++++++++++++++++++++++++++++++++ BODY +++++++++++++++++++++++++++++++++++++++++++++++-->
+        <div id="body">
+            <div id="content" data-bind="visible: !auth.loggedIn()">
+                <div align="center">
+                    <div style="width: 600px; height: 600px; overflow: hidden">
+                        <img border="0" src="images/splash.png" alt="MOSES">
+                    </div>
+                </div>
+            </div>
+            <div id="content" data-bind="visible: auth.loggedIn()">
+<!--+++++++++++++++++++++++++++++++++++ ACCOUNT ++++++++++++++++++++++++++++++++++++++++++++++-->
+                <div data-bind='visible: sectionId() == "Account"'>
+                    <div id="user-account-div">
+                        <div class="accountBlock">
+                            <table data-bind="with: auth.activeUser">
+                                <tr><td><label>Avatar Name:</label></td><td><span data-bind="text: Name"></span></td></tr>
+                                <tr><td><label>Avatar User Level:</label></td><td><span data-bind="text: AccessLevel"></span></td></tr>
+                                <tr><td><label>User Email:</label></td><td><span data-bind="text: Email"></span></td></tr>
+                            </table>
+                        </div>
+                        <div class="accountBlock">
+                            <span>Reset Password</span>
+                            <form data-bind="submit: auth.changePassword">
+                                <label>Password:</label>
+                                <input type="password" data-bind="value: auth.changePasswordP1" /><br>
+                                <label>Confirm:</label>
+                                <input type="password" data-bind="value: auth.changePasswordP2" /><br>
+                                <button type="submit">Submit reset</button>
+                            </form>
+                        </div>
+                        <div class="accountBlock">
+                            <p>Iar functions:</p>
+                            <button data-bind="click: auth.loadIar">Load IAR</button>
+                            <button data-bind="click: auth.saveIar">Save IAR</button>
+                        </div>
+                    </div>
+                </div>
+<!--++++++++++++++++++++++++++++++++ REGION / ESTATE ++++++++++++++++++++++++++++++++++++++++++++-->
+                <div data-bind='visible: sectionId() == "Regions"'>
+                    <div id="regions" data-bind="if: $root.auth.activeUser">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="text-align: left"><span data-bind="text: Regions().length"></span> Region(s)</td>
+                                <td>Name:<input placeholder="Search..." type="search" name="q" data-bind="value: regionSearch, valueUpdate: 'input'" autocomplete="off"></td>
+                                <td>Estate:<select data-bind="options: regionsEstateFilters, value: selectedRegionEstateFilter"></select></td>
+                                <td>Status:<select data-bind="options: regionsStatusFilters, value: selectedRegionStatusFilter"></select></td>
+                                <td>Host:<select data-bind="options: regionsHostFilters, value: selectedRegionHostFilter, visible: auth.activeUser().AccessLevel() > 249"></select></td>
+                                <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
+                                    <button data-bind="click: $root.startListedRegions">Start Listed</button>
+                                    <button data-bind="click: $root.stopListedRegions">Stop Listed</button>
+                                    <button data-bind="click: $root.createNewRegion">Add Region</button>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <div style="width:100%; overflow: auto;">
+                            <span style="float: left; width: 10%">Name</span>
+                            <span style="float: left; width: 8%">X,Y</span>
+                            <span style="float: left; width: 10%">Estate</span>
+                            <div style="float: left; width: 52%">
+                                <span style="float: left; width: 15%">CPU</span>
+                                <span style="float: left; width: 20%">MEM %</span>
+                                <span style="float: left; width: 20%">MEM KB</span>
+                                <span style="float: left; width: 30%">Uptime</span>
+                                <span style="float: left; width: 15%">Users</span>
+                            </div>
+                            <span style="float: left; width: 5%" data-bind="visible: auth.activeUser().AccessLevel() > 249">Host</span>
+
+                        </div>
+                        <div style="width:100%;" data-bind="template: {name: 'region-template', foreach: Regions }, stripe: Regions, evenClass: 'light', oddClass: 'dark'"></div>
+                        
+                    </div>
+                </div>
+<!--+++++++++++++++++++++++++++++++++++ GRID +++++++++++++++++++++++++++++++++++++++++++++++++-->
+                <div data-bind='visible: sectionId() == "Grid"'>
+                    <div data-bind="visible: $root.auth.activeUser().AccessLevel() > 249">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="text-align: left">Hosts:</td>
+                                <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
+                                    <button data-bind="click: createNewHost">Add Host</button>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div style="width: 100%; overflow: auto;">
+                            <span style="float: left; width: 10%">Name</span>
+                            <span style="float: left; width: 10%">Address</span>
+                            <span style="float: left; width: 10%">Regions</span>
+                            <div style="float: left; width: 70%">
+                                <span style="float: left; width: 30%">CPU</span>
+                                <span style="float: left; width: 30%">MEM</span>
+                                <span style="float: left; width: 40%">Net</span>
+                            </div>
+                        </div>
+                                        
+                        <div style="width: 100%; overflow: auto;" data-bind="template: {name: 'host-template', foreach: Hosts }, stripe: Hosts, evenClass: 'light', oddClass: 'dark'"></div>
+                        &nbsp
+                    </div>
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="text-align: left">Estates:</td>
+                            <div data-bind="if: auth.activeUser">
+                                <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
+                                    <button data-bind="click: createNewEstate">Add Estate</button>
+                                </td>
+                            </div>
+                        </tr>
+                    </table>
+                    <div style="width: 100%;">
+                        <span style="float: left; width: 10%">Name</span>
+                        <span style="float: left; width: 10%">Regions</span>
+                        <span style="float: left; width: 10%">Owner</span>
+                        <span style="floatn: left; width: 70%">Managers</span>
+                    </div>
+                    <div style="width: 100%;" data-bind="template: {name: 'estate-template', foreach: Estates }, stripe: Estates, evenClass: 'light', oddClass: 'dark'"></div>
+                </div>
+<!--+++++++++++++++++++++++++++++++++++ MAP +++++++++++++++++++++++++++++++++++++++++++++++++-->
+                <div id="content" data-bind='visible: sectionId() == "Map"'>
+                    <canvas id="mosesMap"></canvas>
+                </div>
+<!--+++++++++++++++++++++++++++++++++++ USER +++++++++++++++++++++++++++++++++++++++++++++++++-->
+                <div data-bind='visible: sectionId() == "Users"'>
+                    <div style="width:100%; overflow: auto;">
+                        <div style="float: left; width: 10%"><span data-bind="text: Users().length"></span> User(s)</div>
+                        <div style="float: left; width: 30%">Name:<input placeholder="Search..." type="search" name="q" data-bind="value: userNameSearch, valueUpdate: 'input'" autocomplete="off"></div>
+                        <div style="float: left; width: 30%">Email:<input placeholder="Search..." type="search" name="q" data-bind="value: userEmailSearch, valueUpdate: 'input'" autocomplete="off"></div>
+                    </div>
+                    <div style="width: 100%; overflow: auto;" >
+                        <span style="float: left; width: 20%">Name</span>
+                        <span style="float: left; width: 20%">Address</span>
+                    </div>
+                    <div data-bind="template: {name: 'user-template', foreach: Users }, stripe: Users, evenClass: 'light', oddClass: 'dark'"></div>
+                </div>
+<!--++++++++++++++++++++++++++++++PENDING USER +++++++++++++++++++++++++++++++++++++++++++++++++-->
+                <div data-bind='visible: sectionId() == "Pending Users"'>
+                    <div style="width: 100%; overflow: auto;">
+                        <span style="float: left; width: 20%;">Name</span>
+                        <span style="float: left; width: 20%;">Address</span>
+                        <span style="float: left; width: 20%;">Gender</span>
+                        <span style="float: left; width: 20%;">Registration Timestamp</span>
+                        <!--<span style="float: left; width: 20%;">Last Seen</span>-->
+                    </div>
+                    <div data-bind="template: {name: 'pending-user-template', foreach: PendingUsers }, stripe: PendingUsers, evenClass: 'light', oddClass: 'dark'"></div>
+                </div>
+<!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+                
+            </div>
+            
+            <div id="template-container"></div>
+            <div id="dialog-container"></div>
+        </div>
+        <div id="footer" data-bind="visible: auth.loggedIn()">
+                <table style="width: 100%;" border="1">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left" width="80"><span data-bind="text: task.tasks().length"></span> Task(s)</th>
+                            <th style="text-align: left" width="140">Timestamp</th>
+                            <th style="text-align: left" width="200">Type</th>
+                            <th style="text-align: left">Status</th>
+                          </tr>
+                    </thead>
+                </table>
+                <div id="jobs">
+                    <table style="width: 100%;" border="1">
+                        <tbody data-bind="template: {name: 'task-template', foreach: task.tasks}" style="height: 9em; overflow: auto;"></tbody>
+                    </table>
+                </div>
+                
+        </div>
+        <div id="footer" data-bind="visible: !auth.loggedIn()">
+            <p>YOU ARE ACCESSING A U.S. GOVERNMENT (USG) INFORMATION SYSTEM (IS) THAT IS PROVIDED FOR USG-AUTHORIZED USE ONLY. By using this IS (which includes any device attached to this IS), you consent to the following conditions: The USG routinely intercepts and monitors communications on this IS for purposes including, but not limited to, penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM), law enforcement (LE), and counterintelligence (CI) investigations. At any time, the USG may inspect and seize data stored on this IS. Communications using, or data stored on, this IS are not private, are subject to routine monitoring, interception, and search, and may be disclosed or used for any USG-authorized purpose.  This IS includes security measures (e.g., authentication and access controls) to protect USG interests--not for your personal benefit or privacy. Notwithstanding the above, using this IS does not constitute consent to PM, LE, or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.</p>
+        </div>
+	</body>
+</html>

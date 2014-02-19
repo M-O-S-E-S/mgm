@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+    * { margin:0; padding:0; }
+    html, body { width:100%; height:100%; }
+    canvas { display:block;  }</style>
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script src="js/jquery.mousewheel.js"></script>
+    <script src="js/jcanvas.min.js"></script>
+    <script src="js/map.js"></script>
+    <script>
+    
+    var map = null;
+    
+    $(document).ready(function(){
+        var map = new MosesMap("/maps/", $("#mosesMap"));
+        window.addEventListener('resize', map.resize, false);
+        
+        map.resize();
+        map.centerTile(1000,1000);
+        map.updateTiles();
+        map.updateNames();
+    });
+    
+    </script>
+    <meta charset="utf-8" />
+    <title>MGM Simian Map</title>
+</head>
+
+<body>
+    <canvas id="mosesMap"></canvas>
+</body>
+</html>

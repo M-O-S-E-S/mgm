@@ -1,0 +1,25 @@
+        
+<div id="forgotPasswordWindow" title="Password Reset" style="display: none;">
+    <strong data-bind="text: task.passwordResetFormMessage"></strong>
+    <form data-bind="submit: task.sendPasswordResetCode">
+        <p>If you have forgotten your password, enter your email here and we will send you a special code to reset your password</p>
+        <label>Email:</label>
+        <input data-bind="value: task.resetPasswordEmail" /><br>
+        <button type="submit">Get Reset Code</button>
+    </form>
+    <form data-bind="submit: task.resetPassword">
+        <p>Once you have your code, enter it, your email, and your new password here</p>
+        <label>Avatar Name:</label>
+        <input data-bind="value: task.resetPasswordName" /><br>
+        <label>Token:</label>
+        <input data-bind="value: task.resetPasswordToken" /><br>
+        <label>Password:</label>
+        <input type="password" data-bind="value: task.resetPasswordPass1" /><br>
+        <label>Confirm:</label>
+        <input type="password" data-bind="value: task.resetPasswordPass2" /><br>
+        <button type="submit">Submit reset</button>
+    </form>
+</div>
+
+
+

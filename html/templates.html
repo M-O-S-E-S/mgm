@@ -1,0 +1,163 @@
+<script type="text/html" id="region-template">
+	<div style="overflow: auto;">
+		<div>
+			<div style="float: left; width: 10%">
+				<span data-bind="text: Name"></span>
+				<button title="logbutton" data-bind="click: dumpLogs, tooltip: {content: 'Download available logs'}" style="float: right;">log</button>
+			</div>
+			<div style="float: left; width: 8%"><span data-bind="text: X"></span>,<span data-bind="text: Y"></span></div>
+			<div style="float: left; width: 10%">
+				<div data-bind="if: Estate()"><span data-bind="text: Estate().Name"></span></div>
+			</div>
+			<div data-bind="visible: !isRunning()" style="float: left; width: 52%">
+				<span data-bind="text: stage"></span>
+			</div>
+				
+			<div data-bind="visible: isRunning()" style="float: left; width: 52%">
+				<span style="float: left; width: 15%" data-bind="text: cpuPercent"></span>
+				<span style="float: left; width: 20%" data-bind="text: memPercent"></span>
+				<span style="float: left; width: 20%" data-bind="text: memKb"></span>
+				<span style="float: left; width: 30%" data-bind="text: uptime"></span>
+				<span style="float: left; width: 15%" data-bind="text: numUsers"></span>
+			</div>
+			<div style="float: left; width: 5%" data-bind="visible: $root.auth.activeUser().AccessLevel() > 249">
+				<span title="host" data-bind="text: Host().Name, tooltip: {content: Host().SelectName}"></span>
+			</div>
+			<div style="text-align: right"  style="float: left; width: 10%">
+				<button data-bind="enable: !isRunning(), click: start">Start</button>
+				<button data-bind="enable: isRunning(), click: stop">Stop</button>
+				<button data-bind="enable: isRunning(), click: toggleOar">Content</button>
+				<button data-bind="enable: $root.auth.activeUser().AccessLevel() > 249, click: toggleManage">Manage</button>
+			</div>
+		</div>
+		<div data-bind="visible: oarVisible">
+			<div style="width: 50%; margin: 0 auto;">
+				<div class="regionBlock" style="float: left">
+					Queue oar load:
+					<form id="uploadOarForm" data-bind="submit: loadOar">
+						<input type="file" data-bind='value: oarFile, attr: {"id": "oarFile"+Name()}'>
+						<button type="submit">Load</button>
+					</form>
+				</div>
+				<div class="regionBlock" style="float: left">
+					Queue oar download:
+					<button data-bind="visible: isRunning(), click: saveOar">Save Oar</button>
+				</div>
+                <div class="regionBlock" style="float: left">
+					Wipe Region Content:
+					<button data-bind="visible: isRunning(), click: nukeContent">Nuke</button>
+				</div>
+			</div>
+		</div>
+		<div data-bind="visible: manageVisible">
+			<div>
+                <div class="regionBlock" style="width: 1000px; margin: 0 auto;" data-bind="visible:isRunning()">
+					<div data-bind="attr: {'id': Name()+'Console'}" ></div>
+				</div>
+                <div style="width: 50%; margin: 0 auto;" data-bind="visible:!isRunning()">
+					<div class="regionBlock" style="float: left">
+                        <button data-bind="visible: $root.auth.activeUser().AccessLevel() > 249, click: destroy">Delete</button>
+                    </div>
+                    <div class="regionBlock" style="float: left">
+                        <form data-bind="submit: setHost">
+                            <label>Host:</label>
+                            <select data-bind="options: $root.Hosts, optionsText: 'SelectName', value: CandidateHost, optionsCaption: '[none]'"></select><br>
+                            <button type="submit">UpdateHost</button>
+                        </form>
+                    </div>
+                    <div class="regionBlock" style="float: left">
+                        <form data-bind="submit: setEstate" style="vertical-align:top">
+                            <label>Estate:</label>
+                            <select data-bind="options: $root.Estates, optionsText: 'Name', value: CandidateEstate"></select>
+                            <span>Note that the region must be restarted for this to take effect</span><br>
+                            <button>Update</button>
+                        </form>
+                    </div>
+				</div>
+			</div>
+		</div>
+    </div>
+</script>
+
+<script type="text/html" id="task-template">
+    <tr data-bind="template: {name: $root.task.getTemplateForType(Type())}"></tr>
+</script>
+
+<script type="text/html" id="task-template-save-oar">
+    <td width="80"><button data-bind="click: destroy">delete</button></td>
+    <td width="140" data-bind="text: Timestamp"></td>
+    <td width="200" data-bind="text: Type"></td>
+    <td>
+        <div data-bind="visible: isDone()">
+            <label data-bind="text: Data().Name"></label>
+            <button data-bind="click: download">Download</button>
+        </div>
+        <div data-bind="visible: !isDone(), text: Data().Status">
+        </div>
+    </td>
+</script>
+
+<script type="text/html" id="task-template-task">
+    <td><button data-bind="click: destroy">delete</button></td>
+    <td data-bind="text: Timestamp"></td>
+    <td data-bind="text: Type"></td>
+    <td>
+        <div data-bind="text: Data().Status"></div>
+    </td>
+</script>
+
+
+<script type="text/html" id="host-template">
+    <div style="overflow: auto;">
+        <div style="float: left; width: 10%">
+            <span data-bind="text: Name"></span>
+            <button data-bind="click: destroy" style="float: right;">Remove</button>
+        </div>
+        <div data-bind="text: Address" style="float: left; width: 10%"></div>
+        <div style="float: left; width: 10%;"><span data-bind="text: Regions().length"></span>/<span data-bind="text: Capacity"></span></div>
+        <div style="float: left; width: 70%;">
+            <span style="float: left; width: 30%" data-bind="text: cpuPercent">CPU</span>
+            <span style="float: left; width: 15%" data-bind="text: memPercent">MEM%</span>
+            <span style="float: left; width: 15%" data-bind="text: memMb">MEMMB</span>
+            <span style="float: left; width: 10%" data-bind="text: netSentkBps">NETSENT</span>
+            <span style="float: left; width: 5%">/</span>
+            <span style="float: left; width: 10%" data-bind="text: netRcvkBps">NETRCV</span>
+        </div>
+    </div>
+</script>
+        
+<script type="text/html" id="pending-user-template">
+    <div style="overflow: auto; width: 100%">
+        <span data-bind="text: Name" style="float: left; width: 20%;"></span>
+        <span data-bind="text: Email" style="float: left; width: 20%;"></span>
+        <span data-bind="text: Gender" style="float: left; width: 20%;"></span>
+        <span data-bind="text: Registered" style="float: left; width: 20%;"></span>
+		<span><button data-bind="visible: $root.auth.activeUser().AccessLevel() > 249, click: review">Review</button></span>
+    </div>
+</script>
+        
+<script type="text/html" id="user-template">
+    <div style="overflow: auto;">
+        <div style="float:left; width: 20%">
+            <span data-bind="visible: !Enabled()" style="color:red">[Suspended] </span>
+            <span data-bind="text: Name"></span>
+            <button data-bind="click: destroy, visible: $root.auth.activeUser().AccessLevel() > 249" style="float: right;">Remove</button>
+        </div>
+        <div style="float:left; width: 20%">
+            <span data-bind="text: Email" style="white-space: nowrap;"></span>
+        </div>
+        <div style="white-space: nowrap;" data-bind="visible: $root.auth.activeUser().AccessLevel() > 249"><button data-bind="click: manage">Manage</button></div>
+    </div>
+</script>
+        
+<script type="text/html" id="estate-template">
+    <div style="overflow: auto;">
+        <div style="float: left; width: 10%">
+            <span data-bind="text: Name"></span>
+            <button data-bind="click: destroy, visible: $root.auth.activeUser().AccessLevel() > 249" style="float: right;">Remove</button>
+        </div>
+        <div style="float: left; width: 10%" data-bind="text: Regions().length"></div>
+        <div style="float: left; width: 10%" data-bind="text: Owner().Name"></div>
+        <div style="float: left; width: 70%" data-bind='text: Managers().join(",")'></div>
+    </div>
+</script>

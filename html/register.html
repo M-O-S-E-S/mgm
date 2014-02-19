@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Moses Grid Manager</title>
+		<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
+        
+		<script src="js/jquery-1.9.1.min.js"></script>
+		<script src="js/jquery-ui.min.js"></script>
+		<script src="js/knockout-2.2.1.js"></script>
+		<script type="text/javascript" src="js/register.js"></script>
+	</head>
+	<body >
+<!--++++++++++++++++++++++++++++++++++++ TITLE +++++++++++++++++++++++++++++++++++++++++++++++-->
+		<div id="title_page" data-bind="visible: !titlePageConfirmed()">
+			<div align="center">
+  				<div style="width: 600px; height: 600px; overflow: hidden">
+  					<img border="0" src="images/splash.png" alt="MOSES">
+  				</div>
+				<p>YOU ARE ACCESSING A U.S. GOVERNMENT (USG) INFORMATION SYSTEM (IS) THAT IS PROVIDED FOR USG-AUTHORIZED USE ONLY. By using this IS (which includes any device attached to this IS), you consent to the following conditions: The USG routinely intercepts and monitors communications on this IS for purposes including, but not limited to, penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM), law enforcement (LE), and counterintelligence (CI) investigations. At any time, the USG may inspect and seize data stored on this IS. Communications using, or data stored on, this IS are not private, are subject to routine monitoring, interception, and search, and may be disclosed or used for any USG-authorized purpose.  This IS includes security measures (e.g., authentication and access controls) to protect USG interests--not for your personal benefit or privacy. Notwithstanding the above, using this IS does not constitute consent to PM, LE, or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.</p>
+				<button data-bind="click: confirmTitlePage">NEXT</button>
+			</div>
+		</div>
+<!--++++++++++++++++++++++++++++++++++++ EUPA +++++++++++++++++++++++++++++++++++++++++++++++++-->
+		<div id="eupa_page" data-bind="visible: titlePageConfirmed() && !projectEUPAConfirmed()">
+			<div align="center">
+				<h1>The Military Open Simulator Enterprise Strategy</h1><br>
+				<div style="width: 800px; text-align: left;">
+				<h3>High Level Overview</h3>
+				<p>MOSES is a strategy for deploying an OpenSimulator based experimentation platform for military training.  It involves a client software piece that you must install to participate and requires an active internet connection to communicate with the simulation servers located at the US Army Research Laboratory Simulation and Training Technology Center.  By agreeing to the End User Participation Agreement below and registering on the next page, you are applying for an account to participate in-world in MOSES.  You must use your legal name and a valid email address.  Applying for an account does not automatically grant you access.  In the following page, you will be given the opportunity to briefly summarize your work and why you wish to be a MOSES participant.</p>
+				<h3>Participation Agreement Synopsis</h3>
+				<p>It is highly recommended that you read and understand the participation agreement below before clicking the "I Agree" button. Here is a brief synopsis:</p>
+				<ol>
+					<li>The participation agreement below outlines the MOSES code of conduct.  All participants will behave in a professional manner and treat the MOSES grid as if they were actually visiting the ARL Simulation and Technology Center.</li>
+				<li>Minimum participation qualifications and eligibility as well as roles and responsibilities.</li>
+				<li>Terms of participation and release or termination.</li>
+				<li>Explanation of Intellectual Property rights.</li>
+				</ol>
+				</div>
+				<a href="files/eupa.pdf">View/Save PDF copy</a><br>
+				<iframe src="html/eupa.html" width="800" height="600"></iframe><br>
+				<button data-bind="click: confirmEUPAPage">I Agree</button>
+			</div>
+		</div>
+<!--++++++++++++++++++++++++++++++++++++ Actual Registration Form ++++++++++++++++++++++++++++++-->
+		<div id="registration_page" data-bind="visible: titlePageConfirmed() && projectEUPAConfirmed() && !registrationSuccessful()">
+			<div align="center">
+				<h3>Application</h3>
+				<p>This is an application for an avatar account in the MOSES Grid.
+					Your legal first name and your legal last name is your avatar name.
+					Please complete the form below and press the Apply button to apply for a MOSES account.</p>
+				<form data-bind="submit: register">
+					<table>
+						<tr>
+							<td><label>Legal First Name:</label></td>
+							<td><input type="text" placeholder="First Name", data-bind="value: userFirstName"/></td>
+							<td><strong style="color:red" data-bind="text:firstNameError"></strong>
+						</tr>
+						<tr>
+							<td><label>Legal Last Name:</label></td>
+							<td><input type="text" placeholder="Last Name", data-bind="value: userLastName"/></td>
+							<td><strong style="color:red" data-bind="text:lastNameError"></strong>
+						</tr>
+						<tr>
+							<td><label>Applicant Email:</label></td>
+							<td><input type="text" placeholder="email@ccount.com" data-bind="value:userEmail"/></td>
+							<td><strong style="color:red" data-bind="text:emailError"></strong>
+						</tr>
+						<tr>
+							<td><label>Applicant Password:</label></td>
+							<td><input type="password" data-bind="value:userPassword"/></td>
+							<td><strong style="color:red" data-bind="text:passwordError"></strong>
+						</tr>
+						<tr>
+							<td><label>Confirm Password:</label></td>
+							<td><input type="password" data-bind="value:userPassword2"/></td>
+							<td><strong style="color:red" data-bind="text:passwordError2"></strong>
+						</tr>
+						<tr>
+							<td><label>Applicant Gender:</label></td>
+							<td>
+								<input type="radio" name="gender" value="M" data-bind="checked: userGender">Male</input>
+								<input type="radio" name="gender" value="F" data-bind="checked:userGender">Female</input>
+							</td>
+							<td><strong style="color:red" data-bind="text:genderError"></strong>
+						</tr>
+						<tr>
+							<td colspan="2"><label>Summarize why you would like to join the MOSES Project, and discuss relavant work where appropriate:</label></td>
+						</tr>
+						<tr>
+							<td colspan="2"><textarea rows="4" cols="80" data-bind="value: userSummary"></textarea></td>
+						</tr>
+						<tr><td colspan="2" align="center"><button type="submit" data-bind="click: register">Apply</button></td</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+<!--++++++++++++++++++++++++++++++++++++ Registration Successfull ++++++++++++++++++++++++++++++-->
+		<div id="success_page" data-bind="visible: titlePageConfirmed() && projectEUPAConfirmed() && registrationSuccessful()">
+			<div align="center">
+				<h3>Thank You</h3>
+				<p>Thank you for your interest in participating on project MOSES.  You will receive an email at your registered email address should your account and participation be approved.</p>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,83 @@
+* { margin:0; padding:0; }
+html, body { width:100%; height:100%; }
+
+#container {
+   min-height:100%;
+   position:relative;
+}
+#header {
+    position:   fixed;
+    top:    0px;
+    margin:0;
+    padding:0;
+    height: 3em;
+    width:  100%;
+    color:  white;
+    background-color: #036F85;
+}
+#header h1 {
+    padding: 0;
+    margin: 0;
+}
+#body {
+    position:   fixed;
+    top:    3em;
+    bottom: 10em;
+    
+    width:  100%;
+    overflow: auto;
+}
+#content {
+    height: 100%;
+    width:  100%;
+}
+#footer {
+   position:absolute;
+   bottom:0;
+   margin:0;
+   padding:0;
+   width:100%;
+   height:10em;
+   background:#B2BEB5;
+}
+#jobs {
+    height: 8em;
+    overflow-y: scroll;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+canvas { display:block;  }
+
+.accountBlock {
+    padding: 5px 10px 5px 10px;
+    float: left;
+    height: 100px;
+}
+
+.regionBlock {
+    padding: 5px 10px 5px 10px;
+    border-left: 1px solid black;
+}
+
+.light { background-color: #FFF; }
+.dark { background-color: #EEE; }
+
+.sections { background-color: #bbb; list-style-type: none; padding: 0; margin: 0; border-radius: 7px; 
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #d6d6d6), color-stop(0.4, #c0c0c0), color-stop(1,#a4a4a4)); 
+	margin: 10px 0 16px 0;
+	font-size: 0px;
+}
+.sections li:hover { background-color: #ddd; }    
+.sections li:first-child { border-left: none; border-radius: 7px 0 0 7px; }
+.sections li { font-size: 16px; font-weight: bold; display: inline-block; padding: 0.1em 1.0em; cursor: pointer; color: #444; text-shadow: #f7f7f7 0 1px 1px; border-left: 1px solid #ddd; border-right: 1px solid #888; }
+.sections li { *display: inline !important; } /* IE7 only */
+.sections .selected { background-color: #444 !important; color: white; text-shadow:none; border-right-color: #aaa; border-left: none; box-shadow:inset 1px 2px 6px #070707; } 
+
+
+.alertify-button-grey,
+.alertify-button-grey:hover,
+.alertify-button-grey:focus {
+    background-color: #1F1F1F;
+    border: 1px solid #3B7808;
+}
+

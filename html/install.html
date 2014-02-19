@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Moses Grid Manager</title>
+		<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
+        
+		<script src="js/jquery-1.9.1.min.js"></script>
+		<script src="js/jquery-ui.min.js"></script>
+		<script src="js/knockout-2.2.1.js"></script>
+		<script src="js/install.js"></script>
+	</head>
+	<body >
+<!--++++++++++++++++++++++++++++++++++++ TITLE +++++++++++++++++++++++++++++++++++++++++++++++-->
+		<div id="title_page" data-bind="visible: !titlePageConfirmed()">
+			<div align="center">
+  				<div style="width: 400px; height: 470px; overflow: hidden">
+  					<img border="0" src="images/splash.png" alt="MOSES">
+  				</div>
+				<p>YOU ARE ACCESSING A U.S. GOVERNMENT (USG) INFORMATION SYSTEM (IS) THAT IS PROVIDED FOR USG-AUTHORIZED USE ONLY. By using this IS (which includes any device attached to this IS), you consent to the following conditions: The USG routinely intercepts and monitors communications on this IS for purposes including, but not limited to, penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM), law enforcement (LE), and counterintelligence (CI) investigations. At any time, the USG may inspect and seize data stored on this IS. Communications using, or data stored on, this IS are not private, are subject to routine monitoring, interception, and search, and may be disclosed or used for any USG-authorized purpose.  This IS includes security measures (e.g., authentication and access controls) to protect USG interests--not for your personal benefit or privacy. Notwithstanding the above, using this IS does not constitute consent to PM, LE, or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.</p>
+				<button data-bind="click: confirmTitlePage">NEXT</button>
+			</div>
+		</div>
+<!--++++++++++++++++++++++++++++++++++++ INITIAL ACCOUNT +++++++++++++++++++++++++++++++++++++-->
+		<div id="registration_page" data-bind="visible: titlePageConfirmed() && !registrationSuccessful()">
+			<div align="center">
+				<h3>Initial Administration Account</h3>
+				<div style="width: 800px; text-align: left">
+					<p>This form allows you to create an initial administrator account.  This account is required in order to log into mgm and create regions, and approve users who apply for accounts using the registration page.  This form will only appear when you have no users.</p>
+					<p>This avatar is the first on a new grid, so there is no gender, there are no templates, you will be a cloud on login.  You do not have an initial location or last location set.</p>
+					<p>It is expected that you will use this account to create the necessary templates and bootstrap your grid.  After that, this account can be used as a normal Grid God account.</p>
+				</div>
+				<form data-bind="submit: register">
+					<table>
+						<tr>
+							<td><label>Applicant Name:</label></td>
+							<td><input type="text" placeholder="First Last", data-bind="value: userName"/></td>
+							<td><strong style="color:red" data-bind="text:nameError"></strong>
+						</tr>
+						<tr>
+							<td><label>Applicant Email:</label></td>
+							<td><input type="text" placeholder="email@ccount.com" data-bind="value:userEmail"/></td>
+							<td><strong style="color:red" data-bind="text:emailError"></strong>
+						</tr>
+						<tr>
+							<td><label>Applicant Password:</label></td>
+							<td><input type="password" data-bind="value:userPassword"/></td>
+							<td><strong style="color:red" data-bind="text:passwordError"></strong>
+						</tr>
+						<tr><td colspan="2" align="center"><button type="submit" data-bind="click: register">Apply</button></td</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+<!--++++++++++++++++++++++++++++++++++++ Registration Successfull ++++++++++++++++++++++++++++++-->
+		<div id="success_page" data-bind="visible: titlePageConfirmed() && registrationSuccessful()">
+			<div align="center">
+				<h3>Inital Avatar Created</h3>
+				<p>Congratulations on creating your first admin avatar.  This avatar can now be used to log into mgm and administer your grid.</p>
+			</div>
+		</div>
+	</body>
+</html>

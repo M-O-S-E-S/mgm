@@ -81,12 +81,3 @@ canvas { display:block;  }
     border: 1px solid #3B7808;
 }
 
-.alertify-console {
-    position: fixed;
-    z-index: 99999;
-    top: 50px;
-    left: 50%;
-    width: 1070px;
-    margin-left: -535px;
-    opacity: 1;
-}

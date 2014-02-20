@@ -84,7 +84,8 @@ function User(name, uuid, email, accessLevel, identities){
         self.CandidatePassword('');
         self.CandidateAccessLevel(self.AccessLevel());
         alertify.alert("");
-        $('.alertify-message').html('<div id="ManageUser"><div class="alertify-text-wrapper"><p data-bind="text: Name"></p><hr><label>Change Email:</label><input type="text" class="alertify-text" data-bind="value: CandidateEmail"/><button class="alertify-button alertify-button-ok" data-bind="click: setEmail">set</button><hr><label>Set Password:</label><input class="alertify-text" data-bind="value: CandidatePassword"><button class="alertify-button alertify-button-ok" data-bind="click: setPassword">set</button><hr><label>Suspend Account:</label><button class="alertify-button alertify-button-cancel" data-bind="click: suspend, visible: Enabled()">Suspend</button><button class="alertify-button alertify-button-ok" data-bind="click: restore, visible: !Enabled()">Restore</button><hr></div></div>');
+        $('.alertify-message').html('<div id="ManageUser"><div class="alertify-text-wrapper"><p data-bind="text: Name"></p><hr><label>Change Email:</label><input type="text" data-bind="value: CandidateEmail"/><button data-bind="click: setEmail">set</button><hr><label>Set Password:</label><input data-bind="value: CandidatePassword"><button data-bind="click: setPassword">set</button><hr><label>Suspend Account:</label><button data-bind="click: suspend, visible: Enabled()">Suspend</button><button data-bind="click: restore, visible: !Enabled()">Restore</button><hr></div></div>');
+        $('#alertify-ok').html('Close');
         ko.applyBindings(self, $(".alertify-inner")[0]);
         return;
 
@@ -425,10 +426,8 @@ function Region(name, x, y, uuid, host, isRunning){
         });
 	}
     
-    this.manageVisible = ko.observable(false);
-    this.toggleManage = function(){
-        var vis = self.manageVisible();
-        $.each(MGM.regionsModel, function(index, reg){
+    this.triggerManage = function(){
+        /*$.each(MGM.regionsModel, function(index, reg){
             if(reg == self){
                 return;
             }
@@ -438,18 +437,28 @@ function Region(name, x, y, uuid, host, isRunning){
             if(reg.oarVisible()){
                 reg.toggleOar();
             } 
-        });
-        if(!vis){
-            self.manageVisible(true);
-            self.CandidateHost(self.Host());
-            if(self.isRunning()){
-                self.Console.open();
-            }
+        });*/
+        if(self.isRunning()){
+            alertify.prompt("", function(success){
+                self.Console.close();
+            });
+            $('#alertify-cancel').html('Close');
+            $('.alertify-text-wrapper').html('<div id=' + self.Name()+'Console ></div>');
+            $('#alertify').addClass('alertify-console');
+            $('#alertify-ok').hide();
+            $('.alertify-inner').css('text-align',"left");
+            self.Console.open();
         } else {
-            self.manageVisible(false);
-            self.Console.close();
+            self.CandidateHost(self.Host());
+            alertify.prompt("", function(success){
+                self.Console.close();
+            });
+            $('#alertify-cancel').html('Close');
+            $('.alertify-text-wrapper').html('<div><button data-bind="visible: $root.auth.activeUser().AccessLevel() > 249, click: MGM.regionsModel[\'' + self.UUID() +'\'].destroy">Delete</button><hr><label>Host:</label><select data-bind="options: $root.Hosts, optionsText: \'SelectName\', value: MGM.regionsModel[\'' + self.UUID() +'\'].CandidateHost, optionsCaption: \'[none]\'"></select><button data-bind="setHost">UpdateHost</button><hr><label>Estate:</label><select data-bind="options: $root.Estates, optionsText: \'Name\', value: MGM.regionsModel[\'' + self.UUID() +'\'].CandidateEstate"></select><button data-bind="setEstate">Update</button><hr></div>');
+            $('#alertify-ok').hide();
+            $('.alertify-inner').css('text-align',"left");
+            ko.applyBindings(MGM, $(".alertify-inner")[0]);
         }
-        self.oarVisible(false); 
     };
     this.oarVisible = ko.observable(false);
     this.toggleOar = function(){
@@ -457,12 +466,10 @@ function Region(name, x, y, uuid, host, isRunning){
         $.each(MGM.regionsModel, function(index, reg){
            reg.oarVisible(false); 
            reg.manageVisible(false);
-           reg.Console.close();
         });
         
         self.oarVisible(!vis);
         self.manageVisible(false);
-        self.Console.close();
     };
     this.Estate = ko.computed(function(){
         MGM.estateUpdateDummy();

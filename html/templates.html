@@ -27,7 +27,7 @@
 				<button data-bind="enable: !isRunning(), click: start">Start</button>
 				<button data-bind="enable: isRunning(), click: stop">Stop</button>
 				<button data-bind="enable: isRunning(), click: toggleOar">Content</button>
-				<button data-bind="enable: $root.auth.activeUser().AccessLevel() > 249, click: toggleManage">Manage</button>
+				<button data-bind="enable: $root.auth.activeUser().AccessLevel() > 249, click: triggerManage">Manage</button>
 			</div>
 		</div>
 		<div data-bind="visible: oarVisible">
@@ -46,33 +46,6 @@
                 <div class="regionBlock" style="float: left">
 					Wipe Region Content:
 					<button data-bind="visible: isRunning(), click: nukeContent">Nuke</button>
-				</div>
-			</div>
-		</div>
-		<div data-bind="visible: manageVisible">
-			<div>
-                <div class="regionBlock" style="width: 1000px; margin: 0 auto;" data-bind="visible:isRunning()">
-					<div data-bind="attr: {'id': Name()+'Console'}" ></div>
-				</div>
-                <div style="width: 50%; margin: 0 auto;" data-bind="visible:!isRunning()">
-					<div class="regionBlock" style="float: left">
-                        <button data-bind="visible: $root.auth.activeUser().AccessLevel() > 249, click: destroy">Delete</button>
-                    </div>
-                    <div class="regionBlock" style="float: left">
-                        <form data-bind="submit: setHost">
-                            <label>Host:</label>
-                            <select data-bind="options: $root.Hosts, optionsText: 'SelectName', value: CandidateHost, optionsCaption: '[none]'"></select><br>
-                            <button type="submit">UpdateHost</button>
-                        </form>
-                    </div>
-                    <div class="regionBlock" style="float: left">
-                        <form data-bind="submit: setEstate" style="vertical-align:top">
-                            <label>Estate:</label>
-                            <select data-bind="options: $root.Estates, optionsText: 'Name', value: CandidateEstate"></select>
-                            <span>Note that the region must be restarted for this to take effect</span><br>
-                            <button>Update</button>
-                        </form>
-                    </div>
 				</div>
 			</div>
 		</div>

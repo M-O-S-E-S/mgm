@@ -85,6 +85,8 @@ function User(name, uuid, email, accessLevel, identities){
         self.CandidateAccessLevel(self.AccessLevel());
         alertify.alert("");
         $('.alertify-message').html('<div id="ManageUser"><div class="alertify-text-wrapper"><p data-bind="text: Name"></p><hr><label>Change Email:</label><input type="text" class="alertify-text" data-bind="value: CandidateEmail"/><button class="alertify-button alertify-button-ok" data-bind="click: setEmail">set</button><hr><label>Set Password:</label><input class="alertify-text" data-bind="value: CandidatePassword"><button class="alertify-button alertify-button-ok" data-bind="click: setPassword">set</button><hr><label>Suspend Account:</label><button class="alertify-button alertify-button-cancel" data-bind="click: suspend, visible: Enabled()">Suspend</button><button class="alertify-button alertify-button-ok" data-bind="click: restore, visible: !Enabled()">Restore</button><hr></div></div>');
+        $('.alertify-text').css("width","auto");
+        $('#alertify-ok').html("Close");
         ko.applyBindings(self, $(".alertify-inner")[0]);
         return;
 
@@ -1263,6 +1265,7 @@ function MGMViewModel(){
             }
         }, "");
         $('.alertify-message').html('<div id="EstateForm"><p class="alertify-message">Please select the Owner and Name for the new estate.</p><div class="alertify-text-wrapper"><label>Estate Owner:</label><select class="alertify-text" data-bind="options: Users, optionsText: \'Name\', value: EstateFormEstateOwner"></select><br><label>Estate Name:</label><input type="text" class="alertify-text" data-bind="value: EstateFormEstateName" /></div></div>');
+        $('.alertify-text').css("width","auto");
         ko.applyBindings(MGM, document.getElementById("EstateForm"));
     };
         

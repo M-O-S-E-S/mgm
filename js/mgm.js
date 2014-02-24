@@ -427,44 +427,45 @@ function Region(name, x, y, uuid, host, isRunning){
         });
 	}
     
-    this.manageVisible = ko.observable(false);
-    this.toggleManage = function(){
-        var vis = self.manageVisible();
-        $.each(MGM.regionsModel, function(index, reg){
-            if(reg == self){
-                return;
-            }
-            if(reg.manageVisible()){
-                reg.toggleManage();
-            }
-            if(reg.oarVisible()){
-                reg.toggleOar();
-            } 
-        });
-        if(!vis){
-            self.manageVisible(true);
+    this.manageVisible = false;
+    this.toggleManage = function(recurse){
+        if(recurse == 'undefined'){
+            $.each(MGM.regionsModel, function(index, reg){
+                if(reg.manageVisible){  reg.toggleManage(); }
+                if(reg.oarVisible){ reg.toggleOar();    } 
+            });
+        }
+        if(self.manageVisible){
+            self.manageVisible = false;
+            $('#' + self.Name() + 'ManageSlider').slideUp(function(){
+                self.Console.close();
+            });
+        }else{
+            self.manageVisible = true;
             self.CandidateHost(self.Host());
             if(self.isRunning()){
                 self.Console.open();
             }
-        } else {
-            self.manageVisible(false);
-            self.Console.close();
+            $('#' + self.Name() + 'ManageSlider').slideDown();
         }
-        self.oarVisible(false); 
+
     };
-    this.oarVisible = ko.observable(false);
-    this.toggleOar = function(){
-        var vis = self.oarVisible();
-        $.each(MGM.regionsModel, function(index, reg){
-           reg.oarVisible(false); 
-           reg.manageVisible(false);
-           reg.Console.close();
-        });
-        
-        self.oarVisible(!vis);
-        self.manageVisible(false);
-        self.Console.close();
+    this.oarVisible = false;
+    this.toggleOar = function(recurse){
+        if(recurse == 'undefined'){
+            $.each(MGM.regionsModel, function(index, reg){
+               if(reg.oarVisible()){ reg.toggleOar(false); } 
+               if(reg.manageVisible()){ reg.toggleManage(); }
+            });
+        }
+        if(self.oarVisible){
+            self.oarVisible = false;
+            $('#' + self.Name() + 'ContentSlider').slideUp();
+        } else {
+            self.oarVisible = true;
+            $('#' + self.Name() + 'ContentSlider').slideDown();
+            if(self.manageVisible) { self.toggleManage(); }
+        }
     };
     this.Estate = ko.computed(function(){
         MGM.estateUpdateDummy();
@@ -496,7 +497,7 @@ function Region(name, x, y, uuid, host, isRunning){
             $.post("task/nukeContent/" + self.UUID()).done(function(msg){
                 var result = $.parseJSON(msg);
                 if(result["Success"]){
-                    var newTask = new task(result['ID'], "", "nuke_content", "", {"Status":"Initializing"});
+                    var newTask = new Task(result['ID'], "", "nuke_content", "", {"Status":"Initializing"});
                     MGM.task.tasks.push(newTask);
                     MGM.task.tasksModel[result['ID']] = newTask;
                     alertify.success("Nuke Content initiated for " + self.Name());
@@ -514,7 +515,7 @@ function Region(name, x, y, uuid, host, isRunning){
         $.post("task/loadOar/" + self.UUID()).done(function(msg){
             var result = $.parseJSON(msg);
             if(result["Success"]){
-                var newTask = new task(result['ID'], "", "load_oar", "", {"Status":"Initializing"});
+                var newTask = new Task(result['ID'], "", "load_oar", "", {"Status":"Initializing"});
                 MGM.task.tasks.push(newTask);
                 MGM.task.tasksModel[result['ID']] = newTask;
 
@@ -552,7 +553,7 @@ function Region(name, x, y, uuid, host, isRunning){
                 $.post("task/saveOar/" + self.UUID()).done(function(msg){
                     var result = $.parseJSON(msg);
                     if(result["Success"]){
-                        var newTask = new saveOarTask(result['ID'], "", "save_oar", "", {"Status":"Initializing"});
+                        var newTask = new SaveOarTask(result['ID'], "", "save_oar", "", {"Status":"Initializing"});
                         MGM.task.tasks.push(newTask);
                         MGM.task.tasksModel[result['ID']] = newTask;
                         $( "#saveOarWindow" ).dialog("close");

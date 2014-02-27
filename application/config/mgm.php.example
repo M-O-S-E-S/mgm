@@ -2,7 +2,7 @@
 
 /* performance data is both performance statistics, as well as process logs */
 $config['mgm_performanceDataRetentionDays']	= 10;
-$config['mgm_uploadDownloadStorageArea'] = '/var/www/mgm/archives/';
+$config['mgm_uploadDownloadStorageArea'] = '/var/www/archives/';
 $config['mgm_adminEmail'] = 'admin';
 $config['mgm_pathToSimianMapsFolder'] = '/var/www/maps';
 

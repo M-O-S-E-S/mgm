@@ -83,10 +83,12 @@ function User(name, uuid, email, accessLevel, identities){
         self.CandidateEmail(self.Email());
         self.CandidatePassword('');
         self.CandidateAccessLevel(self.AccessLevel());
-        alertify.alert("");
-        $('.alertify-message').html('<div id="ManageUser"><div class="alertify-text-wrapper"><p data-bind="text: Name"></p><hr><label>Change Email:</label><input type="text" class="alertify-text" data-bind="value: CandidateEmail"/><button class="alertify-button alertify-button-ok" data-bind="click: setEmail">set</button><hr><label>Set Password:</label><input class="alertify-text" data-bind="value: CandidatePassword"><button class="alertify-button alertify-button-ok" data-bind="click: setPassword">set</button><hr><label>Suspend Account:</label><button class="alertify-button alertify-button-cancel" data-bind="click: suspend, visible: Enabled()">Suspend</button><button class="alertify-button alertify-button-ok" data-bind="click: restore, visible: !Enabled()">Restore</button><hr></div></div>');
+        alertify.prompt("");
+        $('.alertify-message').html('<div id="ManageUser"><p data-bind="text: Name"></p><hr><label>Change Email:</label><input type="text" class="alertify-text" data-bind="value: CandidateEmail"/><button class="alertify-button alertify-button-ok" data-bind="click: setEmail">set</button><hr><label>Set Password:</label><input class="alertify-text" data-bind="value: CandidatePassword"><button class="alertify-button alertify-button-ok" data-bind="click: setPassword">set</button><hr><label>Suspend Account:</label><button class="alertify-button alertify-button-cancel" data-bind="click: suspend, visible: Enabled()">Suspend</button><button class="alertify-button alertify-button-ok" data-bind="click: restore, visible: !Enabled()">Restore</button><hr></div>');
         $('.alertify-text').css("width","auto");
         $('#alertify-ok').html("Close");
+        $('.alertify-text-wrapper').hide();
+        $('.alertify-button-cancel').hide();
         ko.applyBindings(self, $(".alertify-inner")[0]);
         return;
 
@@ -203,10 +205,11 @@ function PendingUser(name, email, gender, registered, summary){
     
     this.review = function(){
         self.denyReason("");
-        alertify.confirm("");
-        $('.alertify-message').html('<div id="ReviewPending"><div class="alertify-text-wrapper"><p data-bind="text: Name"></p><p data-bind="text: Email"></p><label>Summary:</label><p class="alertify-text" data-bind="text: Summary" style="height:200px; width: 500px; overflow: auto;"></p><p>Explanation to user if denied:</p><textarea class="alertify-text" rrows="4" cols="70" data-bind="value: denyReason"></textarea></div></div>');
+        alertify.prompt("");
+        $('.alertify-message').html('<div id="ReviewPending"><p data-bind="text: Name"></p><p data-bind="text: Email"></p><label>Summary:</label><p class="alertify-text" data-bind="text: Summary" style="height:200px; width: 500px; overflow: auto;"></p><p>Explanation to user if denied:</p><textarea class="alertify-text" rrows="4" cols="70" data-bind="value: denyReason"></textarea></div>');
         $('.alertify-buttons').append('<button id="approve-button" class="alertify-button alertify-button-ok" data-bind="click: approve">Approve</button><button id="deny-button" class="alertify-button alertify-button-cancel" data-bind="click: deny">Deny</button>');
         $('#alertify-ok').hide();
+        $('.alertify-text-wrapper').hide();
         $('#alertify-cancel').removeClass("alertify-button-cancel");
         $('#alertify-cancel').addClass("alertify-button-grey");
         ko.applyBindings(self, $(".alertify-inner")[0]);
@@ -963,7 +966,7 @@ function AuthenticationHandler(){
     this.iarFile = ko.observable('');
     this.iarPassword = ko.observable('');
     this.loadIar = function(){
-        alertify.confirm("", function(success){
+        alertify.prompt("", function(success){
             if(success){
                 if(self.iarPassword() == ""){
                     alertify.error('Password cannot be blank');
@@ -1010,12 +1013,13 @@ function AuthenticationHandler(){
                 });
             }
         }, "");
+        $('.alertify-text-wrapper').hide();
         $('.alertify-message').html('<div id="LoadIar"><p class="alertify-message">Select a file and enter your password to load an iar file</p><div class="alertify-text-wrapper"><label>IAR file:</label><input type="file" class="alertify-text" id="iarFile" data-bind=\'value: auth.iarFile\'><label>Password:</label><input type="password" class="alertify-text" data-bind="value: auth.iarPassword" /></div></div>');
         ko.applyBindings(MGM, document.getElementById("LoadIar"));
     }
     this.saveIar = function(){
         self.iarPassword("");
-        alertify.confirm("", function(success){
+        alertify.prompt("", function(success){
             if(success){
                 if(self.iarPassword() == ""){
                     alertify.error('Password cannot be blank');
@@ -1033,7 +1037,8 @@ function AuthenticationHandler(){
                 });
             }
         });
-         $('.alertify-message').html('<div id="SaveIar"><p class="alertify-message">Please enter your password to save an iar file<div class="alertify-text-wrapper"><label>Password:</label><input type="password" class="alertify-text" data-bind="value: auth.iarPassword" /></div></div>');
+        $('.alertify-text-wrapper').hide();
+        $('.alertify-message').html('<div id="SaveIar"><p class="alertify-message">Please enter your password to save an iar file<div class="alertify-text-wrapper"><label>Password:</label><input type="password" class="alertify-text" data-bind="value: auth.iarPassword" /></div></div>');
         ko.applyBindings(MGM, document.getElementById("SaveIar"));
     }
 }
@@ -1242,7 +1247,7 @@ function MGMViewModel(){
     this.EstateFormEstateName = ko.observable('');
     this.EstateFormEstateOwner = ko.observable('');
     this.createNewEstate = function(){
-        alertify.confirm("", function(success){
+        alertify.prompt("", function(success){
             if(success){
                 if(self.EstateFormEstateName() == ""){
                     alertify.error('Add Estate Error: Estate Name cannot be blank');
@@ -1265,6 +1270,7 @@ function MGMViewModel(){
                 });
             }
         }, "");
+        $('.alertify-text-wrapper').hide();
         $('.alertify-message').html('<div id="EstateForm"><p class="alertify-message">Please select the Owner and Name for the new estate.</p><div class="alertify-text-wrapper"><label>Estate Owner:</label><select class="alertify-text" data-bind="options: Users, optionsText: \'Name\', value: EstateFormEstateOwner"></select><br><label>Estate Name:</label><input type="text" class="alertify-text" data-bind="value: EstateFormEstateName" /></div></div>');
         $('.alertify-text').css("width","auto");
         ko.applyBindings(MGM, document.getElementById("EstateForm"));
@@ -1275,7 +1281,7 @@ function MGMViewModel(){
     this.RegionFormRegionLocY = ko.observable('');
     this.RegionFormEstate = ko.observable('');
     this.createNewRegion = function(){
-        alertify.confirm("", function(success){
+        alertify.prompt("", function(success){
             if(success){
                 if(self.RegionFormRegionName() == ""){
                     alertify.error('Add Region Error: Region Name cannot be blank');
@@ -1319,6 +1325,7 @@ function MGMViewModel(){
                 });
             }
         });
+        $('.alertify-text-wrapper').hide();
         $('.alertify-message').html('<div id="RegionForm"><p class="alertify-message">Please select a name and location for your region.  The region does not have a host by default.</p><div class="alertify-text-wrapper"><label>Region Name:</label><input type="text" class="alertify-text" data-bind="value: RegionFormRegionName" /><label>X:</label><input type="text" class="alertify-text" data-bind="value: RegionFormRegionLocX" /><label>Y:</label><input type="text" class="alertify-text" data-bind="value: RegionFormRegionLocY" /><label>Estate:</label><select class="alertify-text" data-bind="options: Estates, optionsText: \'Name\', value: RegionFormEstate"></select></div></div>');
         ko.applyBindings(MGM, document.getElementById("RegionForm"));
     }

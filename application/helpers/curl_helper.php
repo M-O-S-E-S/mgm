@@ -14,6 +14,9 @@ function simple_curl($url, $post_args = null){
     curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,FALSE);
     curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,0);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    if(curl_errno($ch)){
+        die(json_encode(array('Success' => false, 'Message' => "Could not contact service")));
+    }
     $result = curl_exec($ch);
     curl_close($ch);
     return $result;

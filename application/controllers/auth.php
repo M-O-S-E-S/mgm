@@ -11,6 +11,7 @@ class Auth extends CI_Controller {
     
     public function login(){
         $this->client->login($this->input->post('username'),$this->input->post('password'));
+        die(json_encode(array('Success' => false, 'Message' => "An Error Occurred")));
     }
     
     public function logout(){
@@ -43,4 +44,4 @@ class Auth extends CI_Controller {
 }
 
 /* End of file controller.php */
-/* Location: ./application/controllers/controller.php */
+/* Location: ./application/controllers/auth.php */

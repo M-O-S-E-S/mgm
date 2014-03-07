@@ -37,7 +37,7 @@
             */
 		</script>
 	</head>
-	<body onunload="MGM.unload();">
+	<body onunload="MGM.unload();" ng-controller="mgmCtrl">
         {{currentTab}}
 <!--+++++++++++++++++++++++++++++++++++ HEADERS ++++++++++++++++++++++++++++++++++++++++++++++-->
         <div id="header">
@@ -49,10 +49,10 @@
                         <button data-bind="click: task.showPasswordResetForm">Forgot Password?</button>
                     </div>
                     <div style="float:right;">
-                        <form data-bind="submit: auth.login">
+                        <form ng-submit="auth.login()">
                             <strong style="color:red" data-bind="text: auth.errorMessage"></strong>
-                            <strong>Username</strong><input size="10" data-bind="value: auth.userName"></input>
-                            <strong>Password</strong><input size="10" type="password" data-bind="value: auth.password"></input>
+                            <strong>Username</strong><input size="10" ng-model="auth.userName"></input>
+                            <strong>Password</strong><input size="10" ng-model="auth.password" type="password"></input>
                             <button type="submit">Login</button>
                         </form>
                     </div>
@@ -72,7 +72,7 @@
                     </div>
 
                 </td>
-                <td style="text-align: right"><button data-bind="click: auth.logout">Logout</button></td>
+                <td style="text-align: right"><button ng-click="auth.logout()">Logout</button></td>
             </tr>
             </table>
         </div>

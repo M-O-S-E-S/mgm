@@ -1,12 +1,55 @@
 
 var mgmApp = angular.module('mgmApp',[]);
 
+/*
 mgmApp.service("auth", function(){
     this.loggedIn = false;
+    this.loginCallback = {};
+    this.logoutCallback = {};
+    this.userName = "TROGDOR";
+    this.password = "BURNINATOR";
+    this.login = function(){
+        console.log(this.username + " " + this.password);
+    };
 });
+*/
 
-mgmApp.controller('mgmCtrl', function($scope){
+mgmApp.controller('mgmCtrl', function($scope,$http){
     $scope.currentTab = "None";
+    
+    $scope.auth = {
+        loggedIn: false,
+        activeUser: {},
+        userName: "",
+        password: "",
+        login: function(){
+            $http({
+                method: 'POST',
+                url: "auth/login", 
+                data: $.param({ 'username':this.userName, 'password': this.password }),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).success(function(data, status, headers, config){
+                if(data.Success){
+                    console.log("login successfull");
+                    $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
+                    $scope.auth.loggedIn = true;
+                    $scope.auth.userName = "";
+                    $scope.auth.password = "";
+                } else {
+                    console.log(data.Message);
+                    alertify.error(data.Message);
+                };
+            }).error(function(data, status, headers, config){
+                alertify.error("Error connecting to MGM");
+            });
+          
+        },
+        logout: function(){
+            this.loggedIn = false;
+            this.userName = "";
+            this.password = "";
+        }
+    };
 });
 
 var strings = {
@@ -36,21 +79,21 @@ function downloadUrl(url){
 function User(name, uuid, email, accessLevel, identities){
     var self = this;
  
-    this.Name = ko.observable(name);
-    this.Email = ko.observable(email);
-    this.AccessLevel = ko.observable(accessLevel);
-    this.UUID = ko.observable(uuid);
-    this.Identities = ko.observableArray(identities);
+    this.name = name;
+    this.email = email;
+    this.accessLevel = accessLevel;
+    this.uuid = uuid;
+    this.identities = identities;
     
-    this.Enabled = ko.computed(function(){
+    this.Enabled = function(){
         var enabled = false;
-        ko.utils.arrayForEach(self.Identities(), function(identity){
+        $.each(self.identities, function(index, identity){
             if(identity['Enabled']){
                 enabled = true;
             }
         });
         return enabled;
-    });
+    };
     
     this.suspend = function(){
         if(!self.Enabled()){
@@ -110,7 +153,7 @@ function User(name, uuid, email, accessLevel, identities){
         self.manageVisible(!vis); 
     };
 
-    this.CandidateEmail = ko.observable("");
+    this.CandidateEmail = "";
     this.setEmail = function(){
         var email = self.CandidateEmail().trim();
         if(email == self.Email()){
@@ -140,7 +183,7 @@ function User(name, uuid, email, accessLevel, identities){
         });
     };
     
-    this.CandidateAccessLevel = ko.observable("");
+    this.CandidateAccessLevel = "";
     this.setAccessLevel = function(){
         var userLevel = parseInt(self.CandidateAccessLevel());
         if(userLevel < 0) userLevel = 0;
@@ -167,7 +210,7 @@ function User(name, uuid, email, accessLevel, identities){
         });
     };
     
-    this.CandidatePassword = ko.observable("");
+    this.CandidatePassword = "";
     this.setPassword = function(){
         var password = self.CandidatePassword().trim();
         if(password == ""){
@@ -1504,7 +1547,7 @@ function MGMViewModel(){
 };
 
 //Custom binding to stripe lists for readability
-ko.bindingHandlers.stripe = {
+/*ko.bindingHandlers.stripe = {
     update: function(element, valueAccessor, allBindingsAccessor) {
         var value = ko.utils.unwrapObservable(valueAccessor()); //creates the dependency
         var allBindings = allBindingsAccessor();
@@ -1551,4 +1594,4 @@ ko.bindingHandlers.tooltip = {
         placement: "right",
         trigger: "hover"
     }
-};
+};*/

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="mgmApp">
 	<head>
 		<title>Moses Grid Manager</title>
 		<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
@@ -13,13 +13,14 @@
 		<script src="js/jquery-ui.min.js"></script>
         <script src="js/jquery.mousewheel.js"></script>
         <script src="js/jquery.terminal-0.7.5.min.js"></script>
-		<script src="js/knockout-3.0.0.js"></script>
+		<script src="js/angular-1.2.14.min.js"></script>
         <script type="text/javascript" src="js/sammy.js"></script>
         <script src="js/jcanvas.min.js"></script>
         <script type="text/javascript" src="js/map.js"></script>
 		<script type="text/javascript" src="js/mgm.js"></script>
 		<script>
         
+        /*
             var MGM = new MGMViewModel();
             MGM.auth.resumeSession();
 			$(document).ready(function(){
@@ -33,12 +34,14 @@
                     ko.applyBindings(MGM, document.getElementById("dialog-container"));
                 });
 			});
+            */
 		</script>
 	</head>
 	<body onunload="MGM.unload();">
+        {{currentTab}}
 <!--+++++++++++++++++++++++++++++++++++ HEADERS ++++++++++++++++++++++++++++++++++++++++++++++-->
         <div id="header">
-            <table data-bind="visible: !auth.loggedIn()" style="width: 100%;">
+            <table ng-show="!auth.loggedIn" style="width: 100%;">
             <tr>
                 <td><h1>MGM</h1></td>
                 <td style="text-align: right">
@@ -56,7 +59,7 @@
                 </td>
             </tr>
             </table>
-            <table data-bind="visible: auth.loggedIn()" style="width: 100%;">
+            <table ng-show="auth.loggedIn" style="width: 100%;">
             <tr>
                 <td><h1>MGM</h1></td>
                 <td>
@@ -75,16 +78,16 @@
         </div>
 <!--++++++++++++++++++++++++++++++++++++ BODY +++++++++++++++++++++++++++++++++++++++++++++++-->
         <div id="body">
-            <div id="content" data-bind="visible: !auth.loggedIn()">
+            <div id="content" ng-show="!auth.loggedIn">
                 <div align="center">
                     <div style="width: 600px; height: 600px; overflow: hidden">
                         <img border="0" src="images/splash.png" alt="MOSES">
                     </div>
                 </div>
             </div>
-            <div id="content" data-bind="visible: auth.loggedIn()">
+            <div id="content" ng-show="auth.loggedIn">
 <!--+++++++++++++++++++++++++++++++++++ ACCOUNT ++++++++++++++++++++++++++++++++++++++++++++++-->
-                <div data-bind='visible: sectionId() == "Account"'>
+                <div ng-show="currentTab == 'Account'">
                     <div id="user-account-div">
                         <div class="accountBlock">
                             <table data-bind="with: auth.activeUser">
@@ -111,7 +114,7 @@
                     </div>
                 </div>
 <!--++++++++++++++++++++++++++++++++ REGION / ESTATE ++++++++++++++++++++++++++++++++++++++++++++-->
-                <div data-bind='visible: sectionId() == "Regions"'>
+                <div ng-show="currentTab == 'Regions'">
                     <div id="regions" data-bind="if: $root.auth.activeUser">
                         <table style="width: 100%;">
                             <tr>
@@ -147,7 +150,7 @@
                     </div>
                 </div>
 <!--+++++++++++++++++++++++++++++++++++ GRID +++++++++++++++++++++++++++++++++++++++++++++++++-->
-                <div data-bind='visible: sectionId() == "Grid"'>
+                <div ng-show="currentTab == 'Grid'">
                     <div data-bind="visible: $root.auth.activeUser().AccessLevel() > 249">
                         <table style="width: 100%;">
                             <tr>
@@ -191,11 +194,11 @@
                     <div style="width: 100%;" data-bind="template: {name: 'estate-template', foreach: Estates }, stripe: Estates, evenClass: 'light', oddClass: 'dark'"></div>
                 </div>
 <!--+++++++++++++++++++++++++++++++++++ MAP +++++++++++++++++++++++++++++++++++++++++++++++++-->
-                <div id="content" data-bind='visible: sectionId() == "Map"'>
+                <div id="content" ng-show="currentTab == 'Map'">
                     <canvas id="mosesMap"></canvas>
                 </div>
 <!--+++++++++++++++++++++++++++++++++++ USER +++++++++++++++++++++++++++++++++++++++++++++++++-->
-                <div data-bind='visible: sectionId() == "Users"'>
+                <div ng-show="currentTab == 'Users'">
                     <div style="width:100%; overflow: auto;">
                         <div style="float: left; width: 10%"><span data-bind="text: Users().length"></span> User(s)</div>
                         <div style="float: left; width: 30%">Name:<input placeholder="Search..." type="search" name="q" data-bind="value: userNameSearch, valueUpdate: 'input'" autocomplete="off"></div>
@@ -208,7 +211,7 @@
                     <div data-bind="template: {name: 'user-template', foreach: Users }, stripe: Users, evenClass: 'light', oddClass: 'dark'"></div>
                 </div>
 <!--++++++++++++++++++++++++++++++PENDING USER +++++++++++++++++++++++++++++++++++++++++++++++++-->
-                <div data-bind='visible: sectionId() == "Pending Users"'>
+                <div ng-show="currentTab == 'Pending Users'">
                     <div style="width: 100%; overflow: auto;">
                         <span style="float: left; width: 20%;">Name</span>
                         <span style="float: left; width: 20%;">Address</span>
@@ -225,7 +228,7 @@
             <div id="template-container"></div>
             <div id="dialog-container"></div>
         </div>
-        <div id="footer" data-bind="visible: auth.loggedIn()">
+        <div id="footer" ng-show="auth.loggedIn">
                 <table style="width: 100%;" border="1">
                     <thead>
                         <tr>
@@ -243,7 +246,7 @@
                 </div>
                 
         </div>
-        <div id="footer" data-bind="visible: !auth.loggedIn()">
+        <div id="footer" ng-show="!auth.loggedIn">
             <p>YOU ARE ACCESSING A U.S. GOVERNMENT (USG) INFORMATION SYSTEM (IS) THAT IS PROVIDED FOR USG-AUTHORIZED USE ONLY. By using this IS (which includes any device attached to this IS), you consent to the following conditions: The USG routinely intercepts and monitors communications on this IS for purposes including, but not limited to, penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM), law enforcement (LE), and counterintelligence (CI) investigations. At any time, the USG may inspect and seize data stored on this IS. Communications using, or data stored on, this IS are not private, are subject to routine monitoring, interception, and search, and may be disclosed or used for any USG-authorized purpose.  This IS includes security measures (e.g., authentication and access controls) to protect USG interests--not for your personal benefit or privacy. Notwithstanding the above, using this IS does not constitute consent to PM, LE, or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.</p>
         </div>
 	</body>

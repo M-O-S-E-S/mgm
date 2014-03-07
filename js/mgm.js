@@ -1,3 +1,14 @@
+
+var mgmApp = angular.module('mgmApp',[]);
+
+mgmApp.service("auth", function(){
+    this.loggedIn = false;
+});
+
+mgmApp.controller('mgmCtrl', function($scope){
+    $scope.currentTab = "None";
+});
+
 var strings = {
     "destroyHost": "Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.",
     "destroyEstate": "Are you sure you want to delete this estate?  Any running processes in this estate will need to be restarted",

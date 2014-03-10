@@ -20,9 +20,9 @@ php php-common php-gd php-mcrypt php-pear php-pecl-memcache php-mhash php-mysql 
 1. Copy /var/www/mgm/application/config/database.php.example to /var/www/mgm/application/contif/database.php
 1. Update database.php config file with mgm and opensim credentials
 1. Load /var/www/mgm/mgm.sql into the mgm database
-'''mysql
+```bash
 mysql -u mgmUname -pmgmPword mgmTable < mgm.sql
-'''
+```
 1. Copy /var/www/mgm/application/config/mgm.php.example to /var/www/mgm/application/config/mgm.php
 1. Update mgm.php with your deployment-specifics, such as simiangrid url, email credentials, etc
 1. Modify your apache file, making the following changes:

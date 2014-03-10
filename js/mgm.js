@@ -1,80 +1,11 @@
 
 var mgmApp = angular.module('mgmApp',[]);
 
-/*
-mgmApp.service("auth", function(){
-    this.loggedIn = false;
-    this.loginCallback = {};
-    this.logoutCallback = {};
-    this.userName = "TROGDOR";
-    this.password = "BURNINATOR";
-    this.login = function(){
-        console.log(this.username + " " + this.password);
-    };
-});
-*/
 
-mgmApp.controller('mgmCtrl', function($scope,$http){
-    $scope.currentTab = "None";
+mgmApp.service("UserService", function(){
+    this.users = [];
     
-    $scope.auth = {
-        loggedIn: false,
-        activeUser: {},
-        userName: "",
-        password: "",
-        login: function(){
-            $http({
-                method: 'POST',
-                url: "auth/login", 
-                data: $.param({ 'username':this.userName, 'password': this.password }),
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-            }).success(function(data, status, headers, config){
-                if(data.Success){
-                    console.log("login successfull");
-                    $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
-                    $scope.auth.loggedIn = true;
-                    $scope.auth.userName = "";
-                    $scope.auth.password = "";
-                } else {
-                    console.log(data.Message);
-                    alertify.error(data.Message);
-                };
-            }).error(function(data, status, headers, config){
-                alertify.error("Error connecting to MGM");
-            });
-          
-        },
-        logout: function(){
-            this.loggedIn = false;
-            this.userName = "";
-            this.password = "";
-        }
-    };
 });
-
-var strings = {
-    "destroyHost": "Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.",
-    "destroyEstate": "Are you sure you want to delete this estate?  Any running processes in this estate will need to be restarted",
-    "saveOar": "Saving an oar file may take in excess of 30 minutes.<br>MGM will process this offline, and send you an email when it is ready for download.<br>You do not need to stay logged in during this process.<br>Please press Save below to begin.",
-    "destroyRegion": "Are you sure? Deleting a region is irreversable without a separate backup or oar file",
-    "destroyUser": "Are you sure? This purges the user and their avatar from the grid",
-    "startListed": "Are you sure? This starts all regions currently displayed.  Regions already running are not affected",
-    "stopListed": "Are you sure? This starts all regions currently displayed.  Regions already stopped are not affected",
-    "dumpLogs": "Are you sure? This will download all logs available from this region, and can be large if MGM is  configured to retain logs for an extended amount of time, or if the region has logged excessively",
-    "nukeContent": "Are you sure? This will irreversably wipe out any content you have in your region.",
-    "addHost": "Register a new region host by entering its ip address as seen from MGM:"
-}
-
-function downloadUrl(url){
-    var iframe = document.getElementById('hiddenDownloader');
-    if (iframe === null) {
-        iframe = document.createElement('iframe');
-        iframe.id = 'hiddenDownloader';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-    }
-    iframe.src = url;
-}
 
 function User(name, uuid, email, accessLevel, identities){
     var self = this;
@@ -88,7 +19,7 @@ function User(name, uuid, email, accessLevel, identities){
     this.Enabled = function(){
         var enabled = false;
         $.each(self.identities, function(index, identity){
-            if(identity['Enabled']){
+            if(identity.enabled){
                 enabled = true;
             }
         });
@@ -99,18 +30,22 @@ function User(name, uuid, email, accessLevel, identities){
         if(!self.Enabled()){
             return;
         }
-        $.post("user/suspend", { 
-                    'id': self.UUID() }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                alertify.success(self.Name() + " has been suspended");
-                ko.utils.arrayForEach(self.Identities(), function(identity){
-                    identity['Enabled'] = false;
+        $http({
+            method: 'POST',
+            url: "user/suspend", 
+            data: $.param({ 'id': self.uuid }),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+        }).success(function(data, status, headers, config){
+            if(data.Success){
+                alertify.success(self.name + " has been suspended");
+                $.each(self.identities, function(index, identity){
+                    identity.enabled = false;
                 });
-                self.Identities.valueHasMutated();
             } else {
-                alertify.error("Error suspending " + self.Name() + ": " + result["Message"]);
+                alertify.error("Error suspending " + self.name + ": " + data.Message);
             }
+        }).error(function(data, status, headers, config){
+            alertify.error("Error connecting to MGM");
         });
     }
     
@@ -118,45 +53,42 @@ function User(name, uuid, email, accessLevel, identities){
         if(self.Enabled()){
             return;
         }
-        $.post("user/restore", { 
-                    'id': self.UUID() }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                alertify.success(self.Name() + " has been restored");
-                ko.utils.arrayForEach(self.Identities(), function(identity){
-                    identity['Enabled'] = true;
+        $http({
+            method: 'POST',
+            url: "user/restore", 
+            data: $.param({ 'id': self.uuid }),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+        }).success(function(data, status, headers, config){
+            if(data.Success){
+                alertify.success(self.name + " has been restored");
+                $.each(self.identities, function(index, identity){
+                    identity.enabled = true;
                 });
-                self.Identities.valueHasMutated();
             } else {
-                alertify.error("Error restoring " + self.Name() + ": " + result["Message"]);
+                alertify.error("Error restoring " + self.name + ": " + data.Message);
             }
+        }).error(function(data, status, headers, config){
+            alertify.error("Error connecting to MGM");
         });
     }
     
     this.manage = function(){
-        self.CandidateEmail(self.Email());
-        self.CandidatePassword('');
-        self.CandidateAccessLevel(self.AccessLevel());
+        self.candidateEmail = self.email;
+        self.candidatePassword = "";
+        self.candidateAccessLevel = self.accessLevel;
         alertify.prompt("");
         $('.alertify-message').html('<div id="ManageUser"><p data-bind="text: Name"></p><hr><label>Change Email:</label><input type="text" class="alertify-text" data-bind="value: CandidateEmail"/><button class="alertify-button alertify-button-ok" data-bind="click: setEmail">set</button><hr><label>Set Password:</label><input class="alertify-text" data-bind="value: CandidatePassword"><button class="alertify-button alertify-button-ok" data-bind="click: setPassword">set</button><hr><label>Suspend Account:</label><button class="alertify-button alertify-button-cancel" data-bind="click: suspend, visible: Enabled()">Suspend</button><button class="alertify-button alertify-button-ok" data-bind="click: restore, visible: !Enabled()">Restore</button><hr></div>');
         $('.alertify-text').css("width","auto");
         $('#alertify-ok').html("Close");
         $('.alertify-text-wrapper').hide();
         $('.alertify-button-cancel').hide();
-        ko.applyBindings(self, $(".alertify-inner")[0]);
         return;
-
-        
-        
-        var vis = self.manageVisible();
-        $.each(MGM.usersModel, function(index, u){ u.manageVisible(false);});
-        self.manageVisible(!vis); 
     };
 
-    this.CandidateEmail = "";
+    this.candidateEmail = "";
     this.setEmail = function(){
-        var email = self.CandidateEmail().trim();
-        if(email == self.Email()){
+        var email = self.candidateEmail.trim();
+        if(email == self.email){
             alertify.log('No Change in Email');
             return;
         }
@@ -164,22 +96,27 @@ function User(name, uuid, email, accessLevel, identities){
             alertify.error("email cannot be blank");
             return;
         }
-        var dupe = MGM.findUserByEmail(email);
+        var dupe = false;
+        MGM.findUserByEmail(email);
         if( dupe != null){
             alertify.error("Error changing email for " + self.Name() + ", email already in use by " + dupe.Name());
             return;
         }
-        $.post("user/email", { 
-                    'id': self.UUID(), 
-                    'email': email }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                alertify.success("Email for " + self.Name() + " changed successfully");
-                self.Email(email);
+        $http({
+            method: 'POST',
+            url: "user/email", 
+            data: $.param({ 'id': self.uuid, 'email': email }),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+        }).success(function(data, status, headers, config){
+            if(data.Success){
+                alertify.success("Email for " + self.name + " changed successfully");
+                self.email = email;
             } else {
-                alertify.error("Error changing email for " + self.Name() + ": " + result["Message"]);
-                self.CandidateEmail(self.Email());
+                alertify.error("Error changing email for " + self.name + ": " + result["Message"]);
+                self.candidateEmail = self.email;
             }
+        }).error(function(data, status, headers, config){
+            alertify.error("Error connecting to MGM");
         });
     };
     
@@ -248,6 +185,69 @@ function User(name, uuid, email, accessLevel, identities){
         });
     };
 };
+
+mgmApp.controller('mgmCtrl', function($scope,$http){
+    $scope.currentTab = "None";
+    $scope.users = [];
+    
+    $scope.auth = {
+        loggedIn: false,
+        activeUser: {},
+        userName: "",
+        password: "",
+        login: function(){
+            $http({
+                method: 'POST',
+                url: "auth/login", 
+                data: $.param({ 'username':this.userName, 'password': this.password }),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).success(function(data, status, headers, config){
+                if(data.Success){
+                    console.log("login successfull");
+                    $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
+                    $scope.auth.loggedIn = true;
+                    $scope.auth.userName = "";
+                    $scope.auth.password = "";
+                } else {
+                    console.log(data.Message);
+                    alertify.error(data.Message);
+                };
+            }).error(function(data, status, headers, config){
+                alertify.error("Error connecting to MGM");
+            });
+          
+        },
+        logout: function(){
+            this.loggedIn = false;
+            this.userName = "";
+            this.password = "";
+        }
+    };
+});
+
+var strings = {
+    "destroyHost": "Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.",
+    "destroyEstate": "Are you sure you want to delete this estate?  Any running processes in this estate will need to be restarted",
+    "saveOar": "Saving an oar file may take in excess of 30 minutes.<br>MGM will process this offline, and send you an email when it is ready for download.<br>You do not need to stay logged in during this process.<br>Please press Save below to begin.",
+    "destroyRegion": "Are you sure? Deleting a region is irreversable without a separate backup or oar file",
+    "destroyUser": "Are you sure? This purges the user and their avatar from the grid",
+    "startListed": "Are you sure? This starts all regions currently displayed.  Regions already running are not affected",
+    "stopListed": "Are you sure? This starts all regions currently displayed.  Regions already stopped are not affected",
+    "dumpLogs": "Are you sure? This will download all logs available from this region, and can be large if MGM is  configured to retain logs for an extended amount of time, or if the region has logged excessively",
+    "nukeContent": "Are you sure? This will irreversably wipe out any content you have in your region.",
+    "addHost": "Register a new region host by entering its ip address as seen from MGM:"
+}
+
+function downloadUrl(url){
+    var iframe = document.getElementById('hiddenDownloader');
+    if (iframe === null) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'hiddenDownloader';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+    }
+    iframe.src = url;
+}
 
 function PendingUser(name, email, gender, registered, summary){
     var self = this;

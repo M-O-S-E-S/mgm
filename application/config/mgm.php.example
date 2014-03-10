@@ -13,9 +13,10 @@ $config['gridInfo_publicIP'] = 'client-visible-ip';
 $config['simian_groups_read_key'] = 'password123';
 $config['simian_groups_write_key'] = 'password123';
 
-$config['simian_gridUrl'] = 'http://127.0.0.1/Grid/';
+$config['simian_gridUrl'] = 'http://simulator-visible-ip/Grid/';
 $config['mgm_internal_address'] = "http://simulator-visible-ip/";
 
+/* these refer to simiangrid avatar templates, which must be created manually */
 $config['registration_maleTemplate'] = 'MaleAvatar';
 $config['registration_femaleTemplate'] = 'FemaleAvatar';
 $config['mgm_hubRegion'] = 'default-home-and-iar-functionality';

@@ -314,19 +314,7 @@ class Regions {
             die(json_encode(array('Success' => false, 'Message' => "region does not exist")));
         }
         
-        $xml = new SimpleXMLElement('<Regions/>');
-        $root = $xml->addChild("Root");
-        $config = $root->addChild("Config");
-        $config->addAttribute("sim_UUID",$region->uuid);
-        $config->addAttribute("sim_name",$name);
-        $config->addAttribute("sim_location_x",(string)$region->locX);
-        $config->addAttribute("sim_location_y",(string)$region->locY);
-        $config->addAttribute("internal_ip_address","0.0.0.0");
-        $config->addAttribute("internal_ip_port",(string)$region->httpPort);
-        $config->addAttribute("allow_alternate_ports","false");
-        $config->addAttribute("external_host_name",$region->externalAddress);
-        header('Content-type: text/plain');
-        die(substr($xml->asXML(), strpos($xml->asXML(), '?>') + 3));
+        die(json_encode(array('Success' => true, 'Region' => $region)));
     }
     
     function serveNiniConfig($regionName, $consoleUser, $consolePass, $consolePort, $httpPort){
@@ -340,7 +328,7 @@ class Regions {
         $groupsWrite = $ci->config->item('simian_groups_write_key');
         $sections = array();
         $sections['Startup'] = array();
-        $sections['Startup']['regionload_webserver_url'] = $mgmUrl . "dispatch/region/". $regionName;
+        $sections['Startup']['region_info_source'] = "filesystem";
         $sections['Startup']['Stats_URI'] = "jsonSimStats";
         $sections['Network'] = array();
         $sections['Network']['ConsoleUser'] = $consoleUser;

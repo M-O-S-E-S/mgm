@@ -317,7 +317,7 @@ class Regions {
         die(json_encode(array('Success' => true, 'Region' => $region)));
     }
     
-    function serveNiniConfig($regionName, $consoleUser, $consolePass, $consolePort, $httpPort){
+    function serveOpensimConfig($regionName, $consoleUser, $consolePass, $consolePort, $httpPort){
         $ci = &get_instance();
         $mgmConnectionString = "Data Source=".$ci->db->hostname.";Database=".$ci->db->database.";User ID=".$ci->db->username.";Password=".$ci->db->password.";Old Guids=true;";
         $odb = $ci->load->database('opensim', TRUE);
@@ -404,18 +404,7 @@ class Regions {
             $sections[$r->section][$r->item] = $r->content;
         }
         
-        $xml = new SimpleXMLElement('<Nini/>');
-        foreach($sections as $sectionName => $sectionData){
-            $section = $xml->addChild('Section');
-            $section->addAttribute("Name", $sectionName);
-            foreach($sectionData as $key => $value){
-                $item = $section->addChild('Key');
-                $item->addAttribute("Name", $key);
-                $item->addAttribute("Value", $value);
-            }
-        }
-        header('Content-type: text/plain');
-        die(substr($xml->asXML(), strpos($xml->asXML(), '?>') + 3));
+        die(json_encode(array('Success' => true, 'Region' => $sections)));
     }
 }
 

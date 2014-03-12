@@ -37,7 +37,7 @@ class Dispatch extends CI_Controller {
                 "externalAddress"=>$externalAddress)
         );
 
-        $this->regions->serveNiniConfig($name, $consoleUser, $consolePass, $consolePort, $httpPort);
+        $this->regions->serveOpensimConfig($name, $consoleUser, $consolePass, $consolePort, $httpPort);
         die(json_encode(array('Success' => false, 'Message' => "Unknown Error")));
     }
     

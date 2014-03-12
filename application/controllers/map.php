@@ -26,13 +26,11 @@ class Map extends CI_Controller {
         $regionList = array();
         $query = $this->db->get('regions');
         foreach($query->result() as $row){
-            if($row->isRunning){
-                $r = array();
-                $r['Name'] = $row->name;
-                $r['x'] = $row->locX;
-                $r['y'] = $row->locY;
-                array_push($regionList, $r);
-            }
+            $r = array();
+            $r['Name'] = $row->name;
+            $r['x'] = $row->locX;
+            $r['y'] = $row->locY;
+            array_push($regionList, $r);
         }
         die(json_encode($regionList));
     }

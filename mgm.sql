@@ -32,7 +32,6 @@ CREATE TABLE IF NOT EXISTS `iniConfig` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
 INSERT INTO `iniConfig` (`region`, `section`, `item`, `content`) VALUES
-('default', 'Startup', 'region_info_source', 'web'),
 ('default', 'Startup', 'allow_regionless', 'False'),
 ('default', 'Startup', 'gridmode', 'False'),
 ('default', 'Startup', 'physics', 'BulletSim'),

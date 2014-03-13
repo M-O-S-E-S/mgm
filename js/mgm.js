@@ -186,7 +186,7 @@ function User(name, uuid, email, accessLevel, identities){
     };
 };
 
-mgmApp.controller('mgmCtrl', function($scope,$http){
+mgmApp.controller('MGMCtrl', function($scope,$http){
     $scope.currentTab = "None";
     $scope.users = [];
     
@@ -198,7 +198,7 @@ mgmApp.controller('mgmCtrl', function($scope,$http){
         login: function(){
             $http({
                 method: 'POST',
-                url: "auth/login", 
+                url: "/auth/login", 
                 data: $.param({ 'username':this.userName, 'password': this.password }),
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'}
             }).success(function(data, status, headers, config){
@@ -217,12 +217,27 @@ mgmApp.controller('mgmCtrl', function($scope,$http){
             });
           
         },
+        resume: function(){
+            $http.get("/auth").success(function(data, status, headers, config){
+                if(data.Success){
+                    console.log("login successfull");
+                    $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
+                    $scope.auth.loggedIn = true;
+                    $scope.auth.userName = "";
+                    $scope.auth.password = "";
+                } else {
+                    console.log("session resume failed");
+                };
+            });
+        },
         logout: function(){
+            $http.get("/auth/logout");
             this.loggedIn = false;
             this.userName = "";
             this.password = "";
         }
     };
+    $scope.auth.resume();
 });
 
 var strings = {

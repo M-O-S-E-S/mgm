@@ -1,16 +1,9 @@
-RewriteEngine On
-RewriteBase /
+RewriteEngine on
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php/$1 [L]
+# Don't rewrite files or directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-<Files ~ "\.ini$">
-    <IfModule mod_authz_core.c>
-        Require all denied
-    </IfModule>
-    <IfModule !mod_authz_core.c>
-        order allow,deny
-        deny from all
-	</IfModule>
-</Files>
+# Rewrite everything else to index.html to allow html5 state links
+RewriteRule ^ index.html [L]

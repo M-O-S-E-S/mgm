@@ -4,25 +4,25 @@ var mgmApp = angular.module('mgmApp',['ngRoute']);
 mgmApp.config(function($routeProvider, $locationProvider){
     $routeProvider
         .when('/Account', {
-            templateUrl : 'html/pages/account.html'
+            templateUrl : 'pages/account.html'
         })
         .when('/Regions', {
-            templateUrl : 'html/pages/regions.html'
+            templateUrl : 'pages/regions.html'
         })
         .when('/Grid', {
-            templateUrl : 'html/pages/grid.html'
+            templateUrl : 'pages/grid.html'
         })
         .when('/Map', {
-            templateUrl : 'html/pages/map.html'
+            templateUrl : 'pages/map.html'
         })
         .when('/Users', {
-            templateUrl : 'html/pages/users.html'
+            templateUrl : 'pages/users.html'
         })
         .when('/PendingUsers', {
-            templateUrl : 'html/pages/pendingUsers.html'
+            templateUrl : 'pages/pendingUsers.html'
         })
         .otherwise({
-            templateUrl : 'html/pages/account.html'
+            templateUrl : 'pages/account.html'
         });
     if(window.history && window.history.pushState){
         $locationProvider.html5Mode(true);

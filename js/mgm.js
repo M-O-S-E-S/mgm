@@ -1,5 +1,33 @@
 
-var mgmApp = angular.module('mgmApp',[]);
+var mgmApp = angular.module('mgmApp',['ngRoute']);
+
+mgmApp.config(function($routeProvider, $locationProvider){
+    $routeProvider
+        .when('/Account', {
+            templateUrl : 'html/pages/account.html'
+        })
+        .when('/Regions', {
+            templateUrl : 'html/pages/regions.html'
+        })
+        .when('/Grid', {
+            templateUrl : 'html/pages/grid.html'
+        })
+        .when('/Map', {
+            templateUrl : 'html/pages/map.html'
+        })
+        .when('/Users', {
+            templateUrl : 'html/pages/users.html'
+        })
+        .when('/PendingUsers', {
+            templateUrl : 'html/pages/pendingUsers.html'
+        })
+        .otherwise({
+            templateUrl : 'html/pages/account.html'
+        });
+    if(window.history && window.history.pushState){
+        $locationProvider.html5Mode(true);
+    }
+});
 
 mgmApp.controller('MGMCtrl', function($scope,$http){
     $scope.currentTab = "None";

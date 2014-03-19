@@ -9,13 +9,14 @@
         <link rel="stylesheet" type="text/css" href="css/mgm.css" />
         
         <script src="js/alertify-0.3.11.min.js"></script>
-		<script src="js/jquery-1.11.0.min.js"></script>
+		<!--<script src="js/jquery-1.11.0.min.js"></script>
 		<script src="js/jquery-ui.min.js"></script>
         <script src="js/jquery.mousewheel.js"></script>
-        <script src="js/jquery.terminal-0.7.5.min.js"></script>
+        <script src="js/jquery.terminal-0.7.5.min.js"></script>-->
 		<script src="js/angular-1.2.14.min.js"></script>
-        <script type="text/javascript" src="js/sammy.js"></script>
-        <script src="js/jcanvas.min.js"></script>
+		<script src="js/angular-route-1.2.14.min.js"></script>
+        <!--<script type="text/javascript" src="js/sammy.js"></script>
+        <script src="js/jcanvas.min.js"></script>-->
         <script type="text/javascript" src="js/map.js"></script>
 		<script type="text/javascript" src="js/mgm.js"></script>
 	</head>
@@ -48,7 +49,7 @@
                     <div style="width:550px;">
                         <ul class="sections">
                             <li data-bind="css: { selected: $data == $root.sectionId() },
-                                           click: $root.goToSection" ng-repeat="section in location.sections" ng-click="location.goto(section)">{{ section }}</li>
+                                           click: $root.goToSection" ng-repeat="section in location.sections"><a href="#{{section}}">{{ section }}</a></li>
                         </ul>
                     </div>
 
@@ -66,148 +67,9 @@
                     </div>
                 </div>
             </div>
-            <div id="content" ng-show="auth.loggedIn">
-<!--+++++++++++++++++++++++++++++++++++ ACCOUNT ++++++++++++++++++++++++++++++++++++++++++++++-->
-                <div ng-show="location.current == 'Account'">
-                    <div id="user-account-div">
-                        <div class="accountBlock">
-                            <table data-bind="with: auth.activeUser">
-                                <tr><td><label>Avatar Name:</label></td><td><span data-bind="text: Name"></span></td></tr>
-                                <tr><td><label>Avatar User Level:</label></td><td><span data-bind="text: AccessLevel"></span></td></tr>
-                                <tr><td><label>User Email:</label></td><td><span data-bind="text: Email"></span></td></tr>
-                            </table>
-                        </div>
-                        <div class="accountBlock">
-                            <span>Reset Password</span>
-                            <form data-bind="submit: auth.changePassword">
-                                <label>Password:</label>
-                                <input type="password" data-bind="value: auth.changePasswordP1" /><br>
-                                <label>Confirm:</label>
-                                <input type="password" data-bind="value: auth.changePasswordP2" /><br>
-                                <button type="submit">Submit reset</button>
-                            </form>
-                        </div>
-                        <div class="accountBlock">
-                            <p>Iar functions:</p>
-                            <button data-bind="click: auth.loadIar">Load IAR</button>
-                            <button data-bind="click: auth.saveIar">Save IAR</button>
-                        </div>
-                    </div>
-                </div>
-<!--++++++++++++++++++++++++++++++++ REGION / ESTATE ++++++++++++++++++++++++++++++++++++++++++++-->
-                <div ng-show="currentTab == 'Regions'">
-                    <div id="regions" data-bind="if: $root.auth.activeUser">
-                        <table style="width: 100%;">
-                            <tr>
-                                <td style="text-align: left"><span data-bind="text: Regions().length"></span> Region(s)</td>
-                                <td>Name:<input placeholder="Search..." type="search" name="q" data-bind="value: regionSearch, valueUpdate: 'input'" autocomplete="off"></td>
-                                <td>Estate:<select data-bind="options: regionsEstateFilters, value: selectedRegionEstateFilter"></select></td>
-                                <td>Status:<select data-bind="options: regionsStatusFilters, value: selectedRegionStatusFilter"></select></td>
-                                <td>Host:<select data-bind="options: regionsHostFilters, value: selectedRegionHostFilter, visible: auth.activeUser().AccessLevel() > 249"></select></td>
-                                <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
-                                    <button data-bind="click: $root.startListedRegions">Start Listed</button>
-                                    <button data-bind="click: $root.stopListedRegions">Stop Listed</button>
-                                    <button data-bind="click: $root.createNewRegion">Add Region</button>
-                                </td>
-                            </tr>
-                        </table>
-                        
-                        <div style="width:100%; overflow: auto;">
-                            <span style="float: left; width: 10%">Name</span>
-                            <span style="float: left; width: 8%">X,Y</span>
-                            <span style="float: left; width: 10%">Estate</span>
-                            <div style="float: left; width: 52%">
-                                <span style="float: left; width: 15%">CPU</span>
-                                <span style="float: left; width: 20%">MEM %</span>
-                                <span style="float: left; width: 20%">MEM KB</span>
-                                <span style="float: left; width: 30%">Uptime</span>
-                                <span style="float: left; width: 15%">Users</span>
-                            </div>
-                            <span style="float: left; width: 5%" data-bind="visible: auth.activeUser().AccessLevel() > 249">Host</span>
-
-                        </div>
-                        <div style="width:100%;" data-bind="template: {name: 'region-template', foreach: Regions }, stripe: Regions, evenClass: 'light', oddClass: 'dark'"></div>
-                        
-                    </div>
-                </div>
-<!--+++++++++++++++++++++++++++++++++++ GRID +++++++++++++++++++++++++++++++++++++++++++++++++-->
-                <div ng-show="currentTab == 'Grid'">
-                    <div data-bind="visible: $root.auth.activeUser().AccessLevel() > 249">
-                        <table style="width: 100%;">
-                            <tr>
-                                <td style="text-align: left">Hosts:</td>
-                                <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
-                                    <button data-bind="click: createNewHost">Add Host</button>
-                                </td>
-                            </tr>
-                        </table>
-
-                        <div style="width: 100%; overflow: auto;">
-                            <span style="float: left; width: 10%">Name</span>
-                            <span style="float: left; width: 10%">Address</span>
-                            <span style="float: left; width: 10%">Regions</span>
-                            <div style="float: left; width: 70%">
-                                <span style="float: left; width: 30%">CPU</span>
-                                <span style="float: left; width: 30%">MEM</span>
-                                <span style="float: left; width: 40%">Net</span>
-                            </div>
-                        </div>
-                                        
-                        <div style="width: 100%; overflow: auto;" data-bind="template: {name: 'host-template', foreach: Hosts }, stripe: Hosts, evenClass: 'light', oddClass: 'dark'"></div>
-                        &nbsp
-                    </div>
-                    <table style="width: 100%;">
-                        <tr>
-                            <td style="text-align: left">Estates:</td>
-                            <div data-bind="if: auth.activeUser">
-                                <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
-                                    <button data-bind="click: createNewEstate">Add Estate</button>
-                                </td>
-                            </div>
-                        </tr>
-                    </table>
-                    <div style="width: 100%;">
-                        <span style="float: left; width: 10%">Name</span>
-                        <span style="float: left; width: 10%">Regions</span>
-                        <span style="float: left; width: 10%">Owner</span>
-                        <span style="floatn: left; width: 70%">Managers</span>
-                    </div>
-                    <div style="width: 100%;" data-bind="template: {name: 'estate-template', foreach: Estates }, stripe: Estates, evenClass: 'light', oddClass: 'dark'"></div>
-                </div>
-<!--+++++++++++++++++++++++++++++++++++ MAP +++++++++++++++++++++++++++++++++++++++++++++++++-->
-                <div id="content" ng-show="currentTab == 'Map'">
-                    <canvas id="mosesMap"></canvas>
-                </div>
-<!--+++++++++++++++++++++++++++++++++++ USER +++++++++++++++++++++++++++++++++++++++++++++++++-->
-                <div ng-show="currentTab == 'Users'">
-                    <div style="width:100%; overflow: auto;">
-                        <div style="float: left; width: 10%"><span data-bind="text: Users().length"></span> User(s)</div>
-                        <div style="float: left; width: 30%">Name:<input placeholder="Search..." type="search" name="q" data-bind="value: userNameSearch, valueUpdate: 'input'" autocomplete="off"></div>
-                        <div style="float: left; width: 30%">Email:<input placeholder="Search..." type="search" name="q" data-bind="value: userEmailSearch, valueUpdate: 'input'" autocomplete="off"></div>
-                    </div>
-                    <div style="width: 100%; overflow: auto;" >
-                        <span style="float: left; width: 20%">Name</span>
-                        <span style="float: left; width: 20%">Address</span>
-                    </div>
-                    <div data-bind="template: {name: 'user-template', foreach: Users }, stripe: Users, evenClass: 'light', oddClass: 'dark'"></div>
-                </div>
-<!--++++++++++++++++++++++++++++++PENDING USER +++++++++++++++++++++++++++++++++++++++++++++++++-->
-                <div ng-show="currentTab == 'Pending Users'">
-                    <div style="width: 100%; overflow: auto;">
-                        <span style="float: left; width: 20%;">Name</span>
-                        <span style="float: left; width: 20%;">Address</span>
-                        <span style="float: left; width: 20%;">Gender</span>
-                        <span style="float: left; width: 20%;">Registration Timestamp</span>
-                        <!--<span style="float: left; width: 20%;">Last Seen</span>-->
-                    </div>
-                    <div data-bind="template: {name: 'pending-user-template', foreach: PendingUsers }, stripe: PendingUsers, evenClass: 'light', oddClass: 'dark'"></div>
-                </div>
-<!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
-                
+            <div id="main" ng-show="auth.loggedIn">
+                <div ng-view></div>
             </div>
-            
-            <div id="template-container"></div>
-            <div id="dialog-container"></div>
         </div>
         <div id="footer" ng-show="auth.loggedIn">
                 <table style="width: 100%;" border="1">

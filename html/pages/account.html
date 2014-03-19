@@ -1,0 +1,24 @@
+<div id="user-account-div">
+    <div class="accountBlock">
+        <table>
+            <tr><td><label>Avatar Name:</label></td><td><span ng-value="auth.activeUser.name"></span></td></tr>
+            <tr><td><label>Avatar User Level:</label></td><td><span data-bind="text: AccessLevel"></span></td></tr>
+            <tr><td><label>User Email:</label></td><td><span data-bind="text: Email"></span></td></tr>
+        </table>
+    </div>
+    <div class="accountBlock">
+        <span>Reset Password</span>
+        <form data-bind="submit: auth.changePassword">
+            <label>Password:</label>
+            <input type="password" data-bind="value: auth.changePasswordP1" /><br>
+            <label>Confirm:</label>
+            <input type="password" data-bind="value: auth.changePasswordP2" /><br>
+            <button type="submit">Submit reset</button>
+        </form>
+    </div>
+    <div class="accountBlock">
+        <p>Iar functions:</p>
+        <button data-bind="click: auth.loadIar">Load IAR</button>
+        <button data-bind="click: auth.saveIar">Save IAR</button>
+    </div>
+</div>

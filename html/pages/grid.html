@@ -1,0 +1,41 @@
+<div data-bind="visible: $root.auth.activeUser().AccessLevel() > 249">
+    <table style="width: 100%;">
+        <tr>
+            <td style="text-align: left">Hosts:</td>
+            <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
+                <button data-bind="click: createNewHost">Add Host</button>
+            </td>
+        </tr>
+    </table>
+
+    <div style="width: 100%; overflow: auto;">
+        <span style="float: left; width: 10%">Name</span>
+        <span style="float: left; width: 10%">Address</span>
+        <span style="float: left; width: 10%">Regions</span>
+        <div style="float: left; width: 70%">
+            <span style="float: left; width: 30%">CPU</span>
+            <span style="float: left; width: 30%">MEM</span>
+            <span style="float: left; width: 40%">Net</span>
+        </div>
+    </div>
+                    
+    <div style="width: 100%; overflow: auto;" data-bind="template: {name: 'host-template', foreach: Hosts }, stripe: Hosts, evenClass: 'light', oddClass: 'dark'"></div>
+    &nbsp
+</div>
+<table style="width: 100%;">
+    <tr>
+        <td style="text-align: left">Estates:</td>
+        <div data-bind="if: auth.activeUser">
+            <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
+                <button data-bind="click: createNewEstate">Add Estate</button>
+            </td>
+        </div>
+    </tr>
+</table>
+<div style="width: 100%;">
+    <span style="float: left; width: 10%">Name</span>
+    <span style="float: left; width: 10%">Regions</span>
+    <span style="float: left; width: 10%">Owner</span>
+    <span style="floatn: left; width: 70%">Managers</span>
+</div>
+<div style="width: 100%;" data-bind="template: {name: 'estate-template', foreach: Estates }, stripe: Estates, evenClass: 'light', oddClass: 'dark'"></div>

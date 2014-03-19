@@ -1,0 +1,32 @@
+<div id="regions" data-bind="if: $root.auth.activeUser">
+    <table style="width: 100%;">
+        <tr>
+            <td style="text-align: left"><span data-bind="text: Regions().length"></span> Region(s)</td>
+            <td>Name:<input placeholder="Search..." type="search" name="q" data-bind="value: regionSearch, valueUpdate: 'input'" autocomplete="off"></td>
+            <td>Estate:<select data-bind="options: regionsEstateFilters, value: selectedRegionEstateFilter"></select></td>
+            <td>Status:<select data-bind="options: regionsStatusFilters, value: selectedRegionStatusFilter"></select></td>
+            <td>Host:<select data-bind="options: regionsHostFilters, value: selectedRegionHostFilter, visible: auth.activeUser().AccessLevel() > 249"></select></td>
+            <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
+                <button data-bind="click: $root.startListedRegions">Start Listed</button>
+                <button data-bind="click: $root.stopListedRegions">Stop Listed</button>
+                <button data-bind="click: $root.createNewRegion">Add Region</button>
+            </td>
+        </tr>
+    </table>
+    
+    <div style="width:100%; overflow: auto;">
+        <span style="float: left; width: 10%">Name</span>
+        <span style="float: left; width: 8%">X,Y</span>
+        <span style="float: left; width: 10%">Estate</span>
+        <div style="float: left; width: 52%">
+            <span style="float: left; width: 15%">CPU</span>
+            <span style="float: left; width: 20%">MEM %</span>
+            <span style="float: left; width: 20%">MEM KB</span>
+            <span style="float: left; width: 30%">Uptime</span>
+            <span style="float: left; width: 15%">Users</span>
+        </div>
+        <span style="float: left; width: 5%" data-bind="visible: auth.activeUser().AccessLevel() > 249">Host</span>
+
+    </div>
+    <div style="width:100%;" data-bind="template: {name: 'region-template', foreach: Regions }, stripe: Regions, evenClass: 'light', oddClass: 'dark'"></div>
+</div>

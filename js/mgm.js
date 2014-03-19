@@ -3,6 +3,9 @@ var mgmApp = angular.module('mgmApp',['ngRoute']);
 
 mgmApp.config(function($routeProvider, $locationProvider){
     $routeProvider
+        .when('/', {
+            templateUrl : 'pages/splash.html'
+        })
         .when('/account', {
             templateUrl : 'pages/account.html'
         })
@@ -24,26 +27,24 @@ mgmApp.config(function($routeProvider, $locationProvider){
         .otherwise({
             templateUrl : 'pages/account.html'
         });
-    if(window.history && window.history.pushState){
-        $locationProvider.html5Mode(true);
-    }
+        $locationProvider.html5Mode(true).hashPrefix('!');
 });
 
-mgmApp.controller('MGMCtrl', function($scope,$http){
+mgmApp.controller('MGMCtrl', function($scope,$http,$location){
     $scope.currentTab = "None";
     $scope.users = [];
     
     $scope.location = {
         sections: [
-            { name: 'Account', link: '/#account' },
-            { name: 'Regions', link: '/#regions' },
-            { name: 'Grid', link: '/#grid'},
-            { name: 'Map', link: '/#map'},
-            { name: 'Users', link: '/#users'},
-            { name: 'Pending Users', link: '/#pending'} ],
+            { name: 'Account', link: '/account' },
+            { name: 'Regions', link: '/regions' },
+            { name: 'Grid', link: '/grid'},
+            { name: 'Map', link: '/map'},
+            { name: 'Users', link: '/users'},
+            { name: 'Pending Users', link: '/pending'} ],
         current: "Account",
-        goto: function(newLocation){
-            this.current = newLocation;
+        goto: function(path){
+            $location.path(path);
         }
     };
     
@@ -65,6 +66,7 @@ mgmApp.controller('MGMCtrl', function($scope,$http){
                     $scope.auth.loggedIn = true;
                     $scope.auth.userName = "";
                     $scope.auth.password = "";
+                    $scope.location.goto('/account');
                 } else {
                     console.log(data.Message);
                     alertify.error(data.Message);
@@ -82,8 +84,10 @@ mgmApp.controller('MGMCtrl', function($scope,$http){
                     $scope.auth.loggedIn = true;
                     $scope.auth.userName = "";
                     $scope.auth.password = "";
+                    $scope.location.goto('/account');
                 } else {
                     console.log("session resume failed");
+                    $scope.location.goto('/');
                 };
             });
         },
@@ -92,6 +96,7 @@ mgmApp.controller('MGMCtrl', function($scope,$http){
             this.loggedIn = false;
             this.userName = "";
             this.password = "";
+            $scope.location.goto('/');
         }
     };
     $scope.auth.resume();
@@ -1196,20 +1201,6 @@ function MGMViewModel(){
     this.sections = ['Account','Regions','Grid','Map', 'Users','Pending Users'];
     this.sectionId = ko.observable();
     this.goToSection = function(folder){ location.hash = folder; self.sectionId(folder);};
-    this.initSammy = function(){
-        Sammy(function() {
-            this.get('#:folder', function(){
-                var folder = this.params.folder;
-                self.sectionId(folder);
-                self.syncState();
-            });
-            this.get('/', function(){});
-            //no default route, as we are single page and so a lot of ajax
-            if(location.hash == ""){
-                location.hash = "Account";
-            }
-        }).run();
-    };
     
     this.PendingUsers = ko.computed(function(){
         self.pendingUserUpdateDummy();

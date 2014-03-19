@@ -48,7 +48,7 @@
                 <td>
                     <div style="width:550px;">
                         <ul class="sections">
-                            <li ng-repeat="section in location.sections"><a href="{{ section.link }}">{{ section.name }}</a></li>
+                            <li ng-repeat="section in location.sections" ng-click="location.goto(section.link)">{{ section.name }}</li>
                         </ul>
                     </div>
 
@@ -59,16 +59,7 @@
         </div>
 <!--++++++++++++++++++++++++++++++++++++ BODY +++++++++++++++++++++++++++++++++++++++++++++++-->
         <div id="body">
-            <div id="content" ng-show="!auth.loggedIn">
-                <div align="center">
-                    <div style="width: 600px; height: 600px; overflow: hidden">
-                        <img border="0" src="images/splash.png" alt="MOSES">
-                    </div>
-                </div>
-            </div>
-            <div id="main" ng-show="auth.loggedIn">
-                <div ng-view></div>
-            </div>
+            <div ng-view></div>
         </div>
         <div id="footer" ng-show="auth.loggedIn">
                 <table style="width: 100%;" border="1">

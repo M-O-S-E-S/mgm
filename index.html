@@ -9,7 +9,7 @@
         <link rel="stylesheet" type="text/css" href="css/mgm.css" />
         
         <script src="js/alertify-0.3.11.min.js"></script>
-		<!--<script src="js/jquery-1.11.0.min.js"></script>
+		<script src="js/jquery-1.11.0.min.js"></script>
 		<script src="js/jquery-ui.min.js"></script>
         <script src="js/jquery.mousewheel.js"></script>
         <script src="js/jquery.terminal-0.7.5.min.js"></script>-->
@@ -48,8 +48,7 @@
                 <td>
                     <div style="width:550px;">
                         <ul class="sections">
-                            <li data-bind="css: { selected: $data == $root.sectionId() },
-                                           click: $root.goToSection" ng-repeat="section in location.sections"><a href="#{{section}}">{{ section }}</a></li>
+                            <li ng-repeat="section in location.sections"><a href="{{ section.link }}">{{ section.name }}</a></li>
                         </ul>
                     </div>
 

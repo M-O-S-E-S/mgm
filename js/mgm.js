@@ -3,22 +3,22 @@ var mgmApp = angular.module('mgmApp',['ngRoute']);
 
 mgmApp.config(function($routeProvider, $locationProvider){
     $routeProvider
-        .when('/Account', {
+        .when('/account', {
             templateUrl : 'pages/account.html'
         })
-        .when('/Regions', {
+        .when('/regions', {
             templateUrl : 'pages/regions.html'
         })
-        .when('/Grid', {
+        .when('/grid', {
             templateUrl : 'pages/grid.html'
         })
-        .when('/Map', {
+        .when('/map', {
             templateUrl : 'pages/map.html'
         })
-        .when('/Users', {
+        .when('/users', {
             templateUrl : 'pages/users.html'
         })
-        .when('/PendingUsers', {
+        .when('/pending', {
             templateUrl : 'pages/pendingUsers.html'
         })
         .otherwise({
@@ -34,7 +34,13 @@ mgmApp.controller('MGMCtrl', function($scope,$http){
     $scope.users = [];
     
     $scope.location = {
-        sections: ['Account','Regions','Grid','Map', 'Users','Pending Users'],
+        sections: [
+            { name: 'Account', link: '/#account' },
+            { name: 'Regions', link: '/#regions' },
+            { name: 'Grid', link: '/#grid'},
+            { name: 'Map', link: '/#map'},
+            { name: 'Users', link: '/#users'},
+            { name: 'Pending Users', link: '/#pending'} ],
         current: "Account",
         goto: function(newLocation){
             this.current = newLocation;
@@ -49,7 +55,7 @@ mgmApp.controller('MGMCtrl', function($scope,$http){
         login: function(){
             $http({
                 method: 'POST',
-                url: "/auth/login", 
+                url: "/server/auth/login", 
                 data: $.param({ 'username':this.userName, 'password': this.password }),
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'}
             }).success(function(data, status, headers, config){
@@ -69,7 +75,7 @@ mgmApp.controller('MGMCtrl', function($scope,$http){
           
         },
         resume: function(){
-            $http.get("/auth").success(function(data, status, headers, config){
+            $http.get("/server/auth").success(function(data, status, headers, config){
                 if(data.Success){
                     console.log("login successfull");
                     $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
@@ -82,7 +88,7 @@ mgmApp.controller('MGMCtrl', function($scope,$http){
             });
         },
         logout: function(){
-            $http.get("/auth/logout");
+            $http.get("/server/auth/logout");
             this.loggedIn = false;
             this.userName = "";
             this.password = "";

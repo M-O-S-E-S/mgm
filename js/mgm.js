@@ -7,7 +7,8 @@ mgmApp.config(function($routeProvider, $locationProvider){
             templateUrl : 'pages/splash.html'
         })
         .when('/account', {
-            templateUrl : 'pages/account.html'
+            templateUrl : 'pages/account.html',
+            controller  : AccountController
         })
         .when('/regions', {
             templateUrl : 'pages/regions.html'
@@ -29,6 +30,33 @@ mgmApp.config(function($routeProvider, $locationProvider){
         });
         $locationProvider.html5Mode(true).hashPrefix('!');
 });
+
+AccountController = function($scope, $http){
+    $scope.account = {
+        password: "",
+        passwordConfirm: "",
+        resetPassword: function(){
+            if(this.password == ""){
+                alertify.error('Password cannot be blank');
+                return;
+            }
+            if(this.password != this.passwordConfirm){
+                alertify.error('Passwords must match');
+                return;
+            }
+            $.post("/server/auth/changePassword", { 
+                        'password': this.password }).done(function(msg){
+                var result = $.parseJSON(msg);
+                if(result["Success"]){
+                    alertify.success("Password Changed Successfully");
+                } else {
+                    alertify.error(result["Message"]);
+                }
+            });
+
+        }
+    }
+};
 
 mgmApp.controller('MGMCtrl', function($scope,$http,$location){
     $scope.currentTab = "None";

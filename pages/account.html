@@ -8,13 +8,11 @@
     </div>
     <div class="accountBlock">
         <span>Reset Password</span>
-        <form data-bind="submit: auth.changePassword">
             <label>Password:</label>
-            <input type="password" data-bind="value: auth.changePasswordP1" /><br>
+            <input type="password" ng-model="account.password" /><br>
             <label>Confirm:</label>
-            <input type="password" data-bind="value: auth.changePasswordP2" /><br>
-            <button type="submit">Submit reset</button>
-        </form>
+            <input type="password" ng-model="account.passwordConfirm" /><br>
+            <button ng-click="account.resetPassword()">Submit reset</button>
     </div>
     <div class="accountBlock">
         <p>Iar functions:</p>

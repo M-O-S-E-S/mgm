@@ -18,24 +18,6 @@
         <script src="js/jcanvas.min.js"></script>
         <script type="text/javascript" src="js/map.js"></script>
 		<script type="text/javascript" src="js/mgm.js"></script>
-		<script>
-        
-        /*
-            var MGM = new MGMViewModel();
-            MGM.auth.resumeSession();
-			$(document).ready(function(){
-                MGM.initMap();
-                MGM.initSammy();
-                ko.applyBindings(MGM);
-                $('#template-container').load("html/templates.html", function(){
-                    ko.applyBindings(MGM, document.getElementById("template-container"));
-                });
-                $('#dialog-container').load("html/dialogs.html", function(){
-                    ko.applyBindings(MGM, document.getElementById("dialog-container"));
-                });
-			});
-            */
-		</script>
 	</head>
 	<body onunload="MGM.unload();" ng-controller="MGMCtrl">
         {{currentTab}}
@@ -64,10 +46,9 @@
                 <td><h1>MGM</h1></td>
                 <td>
                     <div style="width:550px;">
-                        <ul class="sections" data-bind="foreach: sections">
-                            <li data-bind="text: $data, 
-                                           css: { selected: $data == $root.sectionId() },
-                                           click: $root.goToSection"></li>
+                        <ul class="sections">
+                            <li data-bind="css: { selected: $data == $root.sectionId() },
+                                           click: $root.goToSection" ng-repeat="section in location.sections" ng-click="location.goto(section)">{{ section }}</li>
                         </ul>
                     </div>
 
@@ -87,7 +68,7 @@
             </div>
             <div id="content" ng-show="auth.loggedIn">
 <!--+++++++++++++++++++++++++++++++++++ ACCOUNT ++++++++++++++++++++++++++++++++++++++++++++++-->
-                <div ng-show="currentTab == 'Account'">
+                <div ng-show="location.current == 'Account'">
                     <div id="user-account-div">
                         <div class="accountBlock">
                             <table data-bind="with: auth.activeUser">

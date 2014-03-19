@@ -1,11 +1,95 @@
 
 var mgmApp = angular.module('mgmApp',[]);
 
-
-mgmApp.service("UserService", function(){
-    this.users = [];
+mgmApp.controller('MGMCtrl', function($scope,$http){
+    $scope.currentTab = "None";
+    $scope.users = [];
     
+    $scope.location = {
+        sections: ['Account','Regions','Grid','Map', 'Users','Pending Users'],
+        current: "Account",
+        goto: function(newLocation){
+            this.current = newLocation;
+        }
+    };
+    
+    $scope.auth = {
+        loggedIn: false,
+        activeUser: {},
+        userName: "",
+        password: "",
+        login: function(){
+            $http({
+                method: 'POST',
+                url: "/auth/login", 
+                data: $.param({ 'username':this.userName, 'password': this.password }),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).success(function(data, status, headers, config){
+                if(data.Success){
+                    console.log("login successfull");
+                    $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
+                    $scope.auth.loggedIn = true;
+                    $scope.auth.userName = "";
+                    $scope.auth.password = "";
+                } else {
+                    console.log(data.Message);
+                    alertify.error(data.Message);
+                };
+            }).error(function(data, status, headers, config){
+                alertify.error("Error connecting to MGM");
+            });
+          
+        },
+        resume: function(){
+            $http.get("/auth").success(function(data, status, headers, config){
+                if(data.Success){
+                    console.log("login successfull");
+                    $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
+                    $scope.auth.loggedIn = true;
+                    $scope.auth.userName = "";
+                    $scope.auth.password = "";
+                } else {
+                    console.log("session resume failed");
+                };
+            });
+        },
+        logout: function(){
+            $http.get("/auth/logout");
+            this.loggedIn = false;
+            this.userName = "";
+            this.password = "";
+        }
+    };
+    $scope.auth.resume();
 });
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+var strings = {
+    "destroyHost": "Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.",
+    "destroyEstate": "Are you sure you want to delete this estate?  Any running processes in this estate will need to be restarted",
+    "saveOar": "Saving an oar file may take in excess of 30 minutes.<br>MGM will process this offline, and send you an email when it is ready for download.<br>You do not need to stay logged in during this process.<br>Please press Save below to begin.",
+    "destroyRegion": "Are you sure? Deleting a region is irreversable without a separate backup or oar file",
+    "destroyUser": "Are you sure? This purges the user and their avatar from the grid",
+    "startListed": "Are you sure? This starts all regions currently displayed.  Regions already running are not affected",
+    "stopListed": "Are you sure? This starts all regions currently displayed.  Regions already stopped are not affected",
+    "dumpLogs": "Are you sure? This will download all logs available from this region, and can be large if MGM is  configured to retain logs for an extended amount of time, or if the region has logged excessively",
+    "nukeContent": "Are you sure? This will irreversably wipe out any content you have in your region.",
+    "addHost": "Register a new region host by entering its ip address as seen from MGM:"
+}
+
+function downloadUrl(url){
+    var iframe = document.getElementById('hiddenDownloader');
+    if (iframe === null) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'hiddenDownloader';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+    }
+    iframe.src = url;
+}
 
 function User(name, uuid, email, accessLevel, identities){
     var self = this;
@@ -185,84 +269,6 @@ function User(name, uuid, email, accessLevel, identities){
         });
     };
 };
-
-mgmApp.controller('MGMCtrl', function($scope,$http){
-    $scope.currentTab = "None";
-    $scope.users = [];
-    
-    $scope.auth = {
-        loggedIn: false,
-        activeUser: {},
-        userName: "",
-        password: "",
-        login: function(){
-            $http({
-                method: 'POST',
-                url: "/auth/login", 
-                data: $.param({ 'username':this.userName, 'password': this.password }),
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-            }).success(function(data, status, headers, config){
-                if(data.Success){
-                    console.log("login successfull");
-                    $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
-                    $scope.auth.loggedIn = true;
-                    $scope.auth.userName = "";
-                    $scope.auth.password = "";
-                } else {
-                    console.log(data.Message);
-                    alertify.error(data.Message);
-                };
-            }).error(function(data, status, headers, config){
-                alertify.error("Error connecting to MGM");
-            });
-          
-        },
-        resume: function(){
-            $http.get("/auth").success(function(data, status, headers, config){
-                if(data.Success){
-                    console.log("login successfull");
-                    $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
-                    $scope.auth.loggedIn = true;
-                    $scope.auth.userName = "";
-                    $scope.auth.password = "";
-                } else {
-                    console.log("session resume failed");
-                };
-            });
-        },
-        logout: function(){
-            $http.get("/auth/logout");
-            this.loggedIn = false;
-            this.userName = "";
-            this.password = "";
-        }
-    };
-    $scope.auth.resume();
-});
-
-var strings = {
-    "destroyHost": "Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.",
-    "destroyEstate": "Are you sure you want to delete this estate?  Any running processes in this estate will need to be restarted",
-    "saveOar": "Saving an oar file may take in excess of 30 minutes.<br>MGM will process this offline, and send you an email when it is ready for download.<br>You do not need to stay logged in during this process.<br>Please press Save below to begin.",
-    "destroyRegion": "Are you sure? Deleting a region is irreversable without a separate backup or oar file",
-    "destroyUser": "Are you sure? This purges the user and their avatar from the grid",
-    "startListed": "Are you sure? This starts all regions currently displayed.  Regions already running are not affected",
-    "stopListed": "Are you sure? This starts all regions currently displayed.  Regions already stopped are not affected",
-    "dumpLogs": "Are you sure? This will download all logs available from this region, and can be large if MGM is  configured to retain logs for an extended amount of time, or if the region has logged excessively",
-    "nukeContent": "Are you sure? This will irreversably wipe out any content you have in your region.",
-    "addHost": "Register a new region host by entering its ip address as seen from MGM:"
-}
-
-function downloadUrl(url){
-    var iframe = document.getElementById('hiddenDownloader');
-    if (iframe === null) {
-        iframe = document.createElement('iframe');
-        iframe.id = 'hiddenDownloader';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-    }
-    iframe.src = url;
-}
 
 function PendingUser(name, email, gender, registered, summary){
     var self = this;

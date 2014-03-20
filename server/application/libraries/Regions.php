@@ -24,7 +24,7 @@ class Regions {
     
     function lastStat($region){
         $db = &get_instance()->db;
-        $sql = "SELECT timestamp, status FROM regionStats WHERE region=". $db->escape($region) ." AND timestamp >= DATE_SUB(NOW(), INTERVAL 1 HOUR) ORDER BY timestamp DESC LIMIT 1";
+        $sql = "SELECT timestamp, status FROM regionStats WHERE region=". $db->escape($region) ." ORDER BY timestamp DESC LIMIT 1";
         $q = $db->query($sql);
         if(!$q){
             return null;
@@ -34,7 +34,8 @@ class Regions {
     
     function forUser($user){
         $db = &get_instance()->db;
-        $sql = "SELECT * FROM regions WHERE uuid in ";
+        $sql = "Select name, uuid, locX, locY, slaveAddress, isRunning, EstateName from regions, estate_map, estate_settings ";
+        $sql.= "where estate_map.RegionID = regions.uuid AND estate_map.EstateID = estate_settings.EstateID AND uuid in ";
         $sql.= "(SELECT RegionID FROM estate_map WHERE ";
         $sql.= "EstateID in (SELECT EstateID FROM estate_settings WHERE EstateOwner=". $db->escape($user) .") OR ";
         $sql.= "EstateID in (SELECT EstateID from estate_managers WHERE uuid=". $db->escape($user) ."))";
@@ -47,7 +48,12 @@ class Regions {
     
     function allRegions(){
         $db = &get_instance()->db;
-        $q = $db->get("regions");
+        $sql = "Select name, uuid, locX, locY, slaveAddress, isRunning, EstateName from ";
+        $sql.= "regions, estate_map, estate_settings where estate_map.RegionID = regions.uuid AND estate_map.EstateID = estate_settings.EstateID";
+        $q = $db->query($sql);
+        if(! $q ){
+            return array();
+        }
         return $q->result();
     }
     

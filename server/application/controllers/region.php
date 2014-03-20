@@ -25,12 +25,20 @@ class Region extends CI_Controller {
             $region['name'] = $r->name;
             $region['x'] = $r->locX;
             $region['y'] = $r->locY;
+            $region['estateName'] = $r->EstateName;
             if($level >= 250){
                 $region['node'] = $r->slaveAddress;
             } else {
                 $region['node'] = "omitted";
             }
             $region['isRunning'] = $r->isRunning == true;
+    
+            $region['stat'] = array();
+            $rStat = $this->regions->lastStat($r->uuid);
+            if($rStat){
+                $region['stat']['timestamp'] = $rStat->timestamp;
+                $region['stat']['status'] = json_decode($rStat->status, true);
+            }
 
             array_push($regions, $region);
         } 

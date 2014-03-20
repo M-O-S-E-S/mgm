@@ -2,13 +2,13 @@
 var mgmApp = angular.module('mgmApp',['ngRoute','ui.bootstrap']);
 
 mgmApp.service('taskService', function($rootScope, $http){
-    this.tasks = {};
+    var tasks = [];
+    this.getTasks = function(){ return tasks; };
     this.addTask = function(task) { 
         tasks[task['id']] = task;
         $rootScope.$broadcast("taskService", "update");
     };
     this.updateTasks = function(){
-        console.log("tasks update called" );
         $http.get("/server/task").success(function(data, status, headers, config){
             if(data.Success){
                 tasks = data.Tasks;
@@ -28,6 +28,74 @@ mgmApp.service('taskService', function($rootScope, $http){
             });
     };
     $rootScope.$on("mgmUpdate", this.updateTasks);
+});
+
+mgmApp.service('regionService', function($rootScope, $http){
+    var regions = [];
+    this.getRegions = function(){
+        return regions;
+    };
+    this.addRegion = function(region) { 
+        regions.append(region);
+        $rootScope.$broadcast("regionService");
+    };
+    this.updateRegions = function(){
+        $http.get("/server/region").success(function(data, status, headers, config){
+            if(data.Success){
+                regions = data.Regions;
+                $rootScope.$broadcast("regionService");
+            }
+        });
+    };
+    this.remove = function(id){
+        $http.post("/server/region/delete/" + id)
+            .success(function(data, status, headers, config){
+                if(data.Success){
+                    delete regions[id];
+                    $rootScope.$broadcast("regionService");
+                } else {
+                    alertify.error(data.Message);
+                }
+            });
+    };
+    $rootScope.$on("mgmUpdate", this.updateRegions);
+});
+
+mgmApp.service('estateService', function($rootScope, $http){
+    var estates = [];
+    this.getEstates = function(){ return estates; };
+    this.addEstate = function(estate) { 
+        estates.append(estate);
+        $rootScope.$broadcast("estateService");
+    };
+    this.updateEstates = function(){
+        $http.get("/server/estate").success(function(data, status, headers, config){
+            if(data.Success){
+                estates = data.Estates;
+                $rootScope.$broadcast("estateService");
+            }
+        });
+    };
+    this.remove = function(id){
+        $http.post("/server/region/delete/" + id)
+            .success(function(data, status, headers, config){
+                if(data.Success){
+                    delete estates[id];
+                    $rootScope.$broadcast("regionService");
+                } else {
+                    alertify.error(data.Message);
+                }
+            });
+    };
+    this.getEstateNameForRegion = function(uuid){
+        angular.forEach(estates, function(estate){
+            if(estate.regions.indexOf(uuid) > -1){
+                return estate.name;
+            }
+        });
+        return "...";
+    };
+    $rootScope.$on("mgmUpdate", this.updateEstates);
 });
 
 /*
@@ -102,41 +170,39 @@ function TaskHandler(){
 mgmApp.config(function($routeProvider, $locationProvider){
     $routeProvider
         .when('/', {
-            templateUrl : 'pages/splash.html'
+            templateUrl : '/pages/splash.html'
         })
         .when('/account', {
-            templateUrl : 'pages/account.html',
+            templateUrl : '/pages/account.html',
             controller  : 'AccountController'
         })
         .when('/regions', {
-            templateUrl : 'pages/regions.html'
+            templateUrl : '/pages/regions.html',
+            controller  : 'RegionController'
         })
         .when('/grid', {
-            templateUrl : 'pages/grid.html'
+            templateUrl : '/pages/grid.html'
         })
         .when('/map', {
-            templateUrl : 'pages/map.html'
+            templateUrl : '/pages/map.html'
         })
         .when('/users', {
-            templateUrl : 'pages/users.html'
+            templateUrl : '/pages/users.html'
         })
         .when('/pending', {
-            templateUrl : 'pages/pendingUsers.html'
+            templateUrl : '/pages/pendingUsers.html'
         })
         .otherwise({
-            templateUrl : 'pages/account.html'
+            templateUrl : '/pages/account.html'
         });
     $locationProvider.html5Mode(true).hashPrefix('!');
 });
 
 mgmApp.controller('TaskController', function($scope, taskService){
-    $scope.$watch('taskService.tasks', function (newValue) {
-        $scope.tasks = taskService.tasks;
+    $scope.tasks = taskService.getTasks();
+    $scope.$on("taskService", function(){
+        $scope.tasks = taskService.getTasks();
     });
-    //$scope.tasks = taskService.getTasks();
-    //$scope.$on("taskService", function(){
-    //    $scope.tasks = taskService.getTasks();
-    //});
     $scope.delete = function(id){
         console.log("delete job " + id);
         taskService.remove(id);
@@ -144,6 +210,24 @@ mgmApp.controller('TaskController', function($scope, taskService){
     $scope.download = function(id){
         alertify.error("file download not implemented yet");
     };
+});
+
+mgmApp.controller('RegionController', function($scope, regionService, estateService){
+    $scope.regions = regionService.getRegions();
+    $scope.$on("regionService", function(){
+        $scope.regions = regionService.getRegions();
+    });
+    
+    $scope.delete = function(id){
+        alertify.log("deleting a region is not currently implemented");
+    };
+    
+    $scope.getEstate = function(uuid){
+        return estateService.getEstateNameForRegion(uuid);
+    }
+    
+    regionService.updateRegions();
+    estateService.updateEstates();
 });
 
 mgmApp.controller('AccountController', function($scope, $http, $modal, taskService){

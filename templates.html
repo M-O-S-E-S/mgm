@@ -77,34 +77,6 @@
     </div>
 </script>
 
-<script type="text/html" id="task-template">
-    <tr data-bind="template: {name: $root.task.getTemplateForType(Type())}"></tr>
-</script>
-
-<script type="text/html" id="task-template-save-oar">
-    <td width="80"><button data-bind="click: destroy">delete</button></td>
-    <td width="140" data-bind="text: Timestamp"></td>
-    <td width="200" data-bind="text: Type"></td>
-    <td>
-        <div data-bind="visible: isDone()">
-            <label data-bind="text: Data().Name"></label>
-            <button data-bind="click: download">Download</button>
-        </div>
-        <div data-bind="visible: !isDone(), text: Data().Status">
-        </div>
-    </td>
-</script>
-
-<script type="text/html" id="task-template-task">
-    <td><button data-bind="click: destroy">delete</button></td>
-    <td data-bind="text: Timestamp"></td>
-    <td data-bind="text: Type"></td>
-    <td>
-        <div data-bind="text: Data().Status"></div>
-    </td>
-</script>
-
-
 <script type="text/html" id="host-template">
     <div style="overflow: auto;">
         <div style="float: left; width: 10%">

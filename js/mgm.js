@@ -1,6 +1,132 @@
 
 var mgmApp = angular.module('mgmApp',['ngRoute','ui.bootstrap']);
 
+mgmApp.service('taskService', function($rootScope, $http){
+    var tasks = {};
+    this.getTasks = function(){ return tasks; },
+    this.addTask = function(task) { 
+        tasks[task['id']] = task;
+        $rootScope.$broadcast("taskService", "update");
+    };
+    this.updateTasks = function(){
+        console.log("tasks update called" );
+        $http.get("/server/task").success(function(data, status, headers, config){
+            if(data.Success){
+                tasks = data.Tasks;
+                $rootScope.$broadcast('taskService');
+            }
+        });
+    };
+    $rootScope.$on("mgmUpdate", this.updateTasks);
+});
+
+/*
+function TaskHandler(){
+    this.addOrUpdateTasks = function(data){
+        var appender = [];
+        $.each(data, function(index, datum){
+            if( datum['id'] in self.tasksModel ){
+                self.tasksModel[datum['id']].Data(datum['data']);
+                self.tasksModel[datum['id']].Timestamp(datum['timestamp']);
+                self.tasksModel[datum['id']].User(datum['user']);
+            } else {
+                switch(datum['type']){
+                    case "save_oar":
+                        var newTask = new SaveOarTask(datum['id'], datum['timestamp'], datum['type'], datum['user'], datum['data']);
+                        break;
+                    case "save_iar":
+                        var newTask = new SaveOarTask(datum['id'], datum['timestamp'], datum['type'], datum['user'], datum['data']);
+                        break;
+                    case "password_reset":
+                        var newTask = new ResetPasswordTask(datum['id'], datum['timestamp'], datum['type'], datum['user'], {'Status': 'active'});
+                        break;
+                    default:
+                        var newTask = new Task(datum['id'], datum['timestamp'], datum['type'], datum['user'], datum['data']);
+                }
+                self.tasksModel[datum['id']] = newTask;
+                appender.push(newTask);
+            }
+        });
+        
+        ko.utils.arrayPushAll(self.tasks, appender);
+    }
+
+    this.getTemplateForType = function(taskType){
+        switch(taskType){
+            case "save_oar":
+            case "save_iar":
+                return "task-template-save-oar";
+            default:
+                return "task-template-task";
+        }
+    }
+    
+    this.resetPasswordName = ko.observable('');
+    this.resetPasswordToken = ko.observable('');
+    this.resetPasswordEmail = ko.observable('');
+    this.resetPasswordPass1 = ko.observable('');
+    this.resetPasswordPass2 = ko.observable('');
+    this.resetPasswordCode = ko.observable('');
+    this.showPasswordResetForm = function(){
+        $( "#forgotPasswordWindow" ).dialog({
+            width: "600px",
+            height: "auto",
+            closeOnEscape: false,
+            close: self.close,
+            modal: true
+        });
+    }
+    this.sendPasswordResetCode = function(){
+        if(self.resetPasswordEmail() == ""){
+            alertify.error('Email cannot be blank');
+            return;
+        }
+        $.post("task/resetCode", { 
+                    'email': self.resetPasswordEmail() }).done(function(msg){
+            var result = $.parseJSON(msg);
+            if(result["Success"]){
+                alertify.success("Email submitted Sucessfully");
+            } else {
+                alertify.error("Error submitting email for password reset: " + result["Message"]);
+            }
+        });
+    }
+    this.resetPassword= function(){
+        if(self.resetPasswordName() == ""){
+            alertify.error('Name cannot be blank');
+            return;
+        }
+        if(self.resetPasswordName().trim().split(" ").length != 2){
+            alertify.error('First and Last name are required');
+            return;
+        }
+        if(self.resetPasswordToken() == ""){
+            alertify.error('Token cannot be blank');
+            return;
+        }
+        if(self.resetPasswordPass1() == ""){
+            alertify.error('Password cannot be blank');
+            return;
+        }
+        if(self.resetPasswordPass1() != self.resetPasswordPass2()){
+            alertify.error('Passwords must match');
+            return;
+        }
+        $.post("task/resetPassword", { 
+                    'name': self.resetPasswordName(),
+                    'token': self.resetPasswordToken(),
+                    'password': self.resetPasswordPass1() }).done(function(msg){
+            var result = $.parseJSON(msg);
+            if(result["Success"]){
+                alertify.success("Password changed successfully");
+            } else {
+                alertify.error(result["Message"]);
+            }
+        });
+    }
+}
+*/
+
 mgmApp.config(function($routeProvider, $locationProvider){
     $routeProvider
         .when('/', {
@@ -8,7 +134,7 @@ mgmApp.config(function($routeProvider, $locationProvider){
         })
         .when('/account', {
             templateUrl : 'pages/account.html',
-            controller  : AccountController
+            controller  : 'AccountController'
         })
         .when('/regions', {
             templateUrl : 'pages/regions.html'
@@ -31,7 +157,14 @@ mgmApp.config(function($routeProvider, $locationProvider){
     $locationProvider.html5Mode(true).hashPrefix('!');
 });
 
-AccountController = function($scope, $http, $modal){
+mgmApp.controller('TaskController', function($scope, taskService){
+    $scope.tasks = taskService.getTasks();
+    $scope.$on("taskService", function(){
+        $scope.tasks = taskService.getTasks();
+    });
+});
+
+mgmApp.controller('AccountController', function($scope, $http, $modal, taskService){
     $scope.account = {
         password: "",
         passwordConfirm: "",
@@ -57,11 +190,11 @@ AccountController = function($scope, $http, $modal){
     };
     $scope.iar = {
         modal: undefined,
-        file: "",
+        file: undefined,
         password: "",
         showLoad: function(){
             this.modal = $modal.open({
-                templateUrl: '/templates/loadIar.html',
+                templateUrl: '/templates/loadIarModal.html',
                 keyboard: false,
                 scope: $scope
             });
@@ -78,12 +211,28 @@ AccountController = function($scope, $http, $modal){
                 alertify.error('Password cannot be blank');
                 return;
             }
-            if(this.file == null){
+            if(this.file == undefined){
                 alertify.error('No file selected');
                 return;
             }
                     
-            return;
+            //create job ticket
+            $http.post("/server/task/loadIar",{ 'password':this.password }).success(function(data, status, headers, config){
+                if(data.Success){
+                    var newTask = { id: data.ID, timestamp: "", type: "load_iar", data: {"Status":"Initializing"}};
+                    taskService.addTask(newTask);
+                    alertify.error("no task service to hold tasks, skipping actual upload");
+                    return;
+                    var fd = new FormData();
+                    fd.append("file",$scope.iar.file[0]);
+                    $http.post("/server/task/upload/" + data.ID, fd)
+                        .success(function(data, status, headers, config){
+                            console.log("file uploaded");
+                        });
+                } else {
+                    alertify.error(data.Message);
+                };
+            });
             /*        
                 //create job ticket for iar
                 $.post("task/loadIar", { 'password': self.iarPassword() }).done(function(msg){
@@ -129,9 +278,9 @@ AccountController = function($scope, $http, $modal){
             alertify.log("save iar called");
         }
     }
-};
+});
 
-mgmApp.controller('MGMCtrl', function($scope,$http,$location){
+mgmApp.controller('MGMCtrl', function($rootScope,$scope,$http,$location, $interval){
     $scope.currentTab = "None";
     $scope.users = [];
     
@@ -163,6 +312,8 @@ mgmApp.controller('MGMCtrl', function($scope,$http,$location){
                     $scope.auth.userName = "";
                     $scope.auth.password = "";
                     $scope.location.goto('/account');
+                    $scope.updater = $interval(function(){ $rootScope.$broadcast('mgmUpdate','trigger'); }, 10*1000);
+                    $rootScope.$broadcast('mgmUpdate','trigger'); 
                 } else {
                     console.log(data.Message);
                     alertify.error(data.Message);
@@ -175,12 +326,14 @@ mgmApp.controller('MGMCtrl', function($scope,$http,$location){
         resume: function(){
             $http.get("/server/auth").success(function(data, status, headers, config){
                 if(data.Success){
-                    console.log("login successfull");
+                    console.log("session resume successfull");
                     $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
                     $scope.auth.loggedIn = true;
                     $scope.auth.userName = "";
                     $scope.auth.password = "";
                     $scope.location.goto('/account');
+                    $scope.updater = $interval(function(){ $rootScope.$broadcast('mgmUpdate','trigger'); }, 10*1000);
+                    $rootScope.$broadcast('mgmUpdate','trigger'); 
                 } else {
                     console.log("session resume failed");
                     $scope.location.goto('/');
@@ -193,6 +346,7 @@ mgmApp.controller('MGMCtrl', function($scope,$http,$location){
             this.userName = "";
             this.password = "";
             $scope.location.goto('/');
+            $interval.cancel($scope.updater);
         }
     };
     $scope.auth.resume();
@@ -983,116 +1137,6 @@ function Host(name, address, lastSeen, system, capacity){
             }
         });
     };
-}
-
-function TaskHandler(){
-    var self = this;
-    
-    this.tasks = ko.observableArray([]);
-    this.tasksModel = {};
-    
-    this.getTemplateForType = function(taskType){
-        switch(taskType){
-            case "save_oar":
-            case "save_iar":
-                return "task-template-save-oar";
-            default:
-                return "task-template-task";
-        }
-    }
-    
-    this.resetPasswordName = ko.observable('');
-    this.resetPasswordToken = ko.observable('');
-    this.resetPasswordEmail = ko.observable('');
-    this.resetPasswordPass1 = ko.observable('');
-    this.resetPasswordPass2 = ko.observable('');
-    this.resetPasswordCode = ko.observable('');
-    this.showPasswordResetForm = function(){
-        $( "#forgotPasswordWindow" ).dialog({
-            width: "600px",
-            height: "auto",
-            closeOnEscape: false,
-            close: self.close,
-            modal: true
-        });
-    }
-    this.sendPasswordResetCode = function(){
-        if(self.resetPasswordEmail() == ""){
-            alertify.error('Email cannot be blank');
-            return;
-        }
-        $.post("task/resetCode", { 
-                    'email': self.resetPasswordEmail() }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                alertify.success("Email submitted Sucessfully");
-            } else {
-                alertify.error("Error submitting email for password reset: " + result["Message"]);
-            }
-        });
-    }
-    this.resetPassword= function(){
-        if(self.resetPasswordName() == ""){
-            alertify.error('Name cannot be blank');
-            return;
-        }
-        if(self.resetPasswordName().trim().split(" ").length != 2){
-            alertify.error('First and Last name are required');
-            return;
-        }
-        if(self.resetPasswordToken() == ""){
-            alertify.error('Token cannot be blank');
-            return;
-        }
-        if(self.resetPasswordPass1() == ""){
-            alertify.error('Password cannot be blank');
-            return;
-        }
-        if(self.resetPasswordPass1() != self.resetPasswordPass2()){
-            alertify.error('Passwords must match');
-            return;
-        }
-        $.post("task/resetPassword", { 
-                    'name': self.resetPasswordName(),
-                    'token': self.resetPasswordToken(),
-                    'password': self.resetPasswordPass1() }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                alertify.success("Password changed successfully");
-            } else {
-                alertify.error(result["Message"]);
-            }
-        });
-    }
-    
-    this.addOrUpdateTasks = function(data){
-        var appender = [];
-        $.each(data, function(index, datum){
-            if( datum['id'] in self.tasksModel ){
-                self.tasksModel[datum['id']].Data(datum['data']);
-                self.tasksModel[datum['id']].Timestamp(datum['timestamp']);
-                self.tasksModel[datum['id']].User(datum['user']);
-            } else {
-                switch(datum['type']){
-                    case "save_oar":
-                        var newTask = new SaveOarTask(datum['id'], datum['timestamp'], datum['type'], datum['user'], datum['data']);
-                        break;
-                    case "save_iar":
-                        var newTask = new SaveOarTask(datum['id'], datum['timestamp'], datum['type'], datum['user'], datum['data']);
-                        break;
-                    case "password_reset":
-                        var newTask = new ResetPasswordTask(datum['id'], datum['timestamp'], datum['type'], datum['user'], {'Status': 'active'});
-                        break;
-                    default:
-                        var newTask = new Task(datum['id'], datum['timestamp'], datum['type'], datum['user'], datum['data']);
-                }
-                self.tasksModel[datum['id']] = newTask;
-                appender.push(newTask);
-            }
-        });
-        
-        ko.utils.arrayPushAll(self.tasks, appender);
-    }
 }
 
 function AuthenticationHandler(){

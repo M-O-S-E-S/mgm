@@ -19,6 +19,12 @@ html, body { width:100%; height:100%; }
     padding: 0;
     margin: 0;
 }
+#header input{
+    color: black;
+}
+#header button{
+    color: black;
+}
 #body {
     position:   fixed;
     top:    3em;

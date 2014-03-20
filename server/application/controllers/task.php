@@ -321,6 +321,7 @@ class Task extends CI_Controller {
                     die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
                 }
                 $data = json_decode($job->data);
+                
                 if(! isset($_FILES["file"])){
                     $data->Status = "Error uploading iar file";
                     $this->db->where('id', $job->id);

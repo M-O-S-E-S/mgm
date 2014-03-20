@@ -13,9 +13,20 @@ mgmApp.service('taskService', function($rootScope, $http){
         $http.get("/server/task").success(function(data, status, headers, config){
             if(data.Success){
                 tasks = data.Tasks;
-                $rootScope.$broadcast('taskService');
+                $rootScope.$broadcast("taskService", "update");
             }
         });
+    };
+    this.remove = function(id){
+        $http.post("/server/task/delete/" + id)
+            .success(function(data, status, headers, config){
+                if(data.Success){
+                    delete tasks[id];
+                    $rootScope.$broadcast("taskService", "update");
+                } else {
+                    alertify.error(data.Message);
+                }
+            });
     };
     $rootScope.$on("mgmUpdate", this.updateTasks);
 });
@@ -162,6 +173,10 @@ mgmApp.controller('TaskController', function($scope, taskService){
     $scope.$on("taskService", function(){
         $scope.tasks = taskService.getTasks();
     });
+    $scope.delete = function(id){
+        console.log("delete job " + id);
+        taskService.remove(id);
+    };
 });
 
 mgmApp.controller('AccountController', function($scope, $http, $modal, taskService){
@@ -205,8 +220,6 @@ mgmApp.controller('AccountController', function($scope, $http, $modal, taskServi
             }
         },
         load: function(){
-            alertify.log("load iar called");
-               
             if(this.password == ""){
                 alertify.error('Password cannot be blank');
                 return;
@@ -219,15 +232,19 @@ mgmApp.controller('AccountController', function($scope, $http, $modal, taskServi
             //create job ticket
             $http.post("/server/task/loadIar",{ 'password':this.password }).success(function(data, status, headers, config){
                 if(data.Success){
-                    var newTask = { id: data.ID, timestamp: "", type: "load_iar", data: {"Status":"Initializing"}};
-                    taskService.addTask(newTask);
-                    alertify.error("no task service to hold tasks, skipping actual upload");
-                    return;
+                    taskService.addTask({ id: data.ID, timestamp: "", type: "load_iar", data: {"Status":"Initializing"}});
                     var fd = new FormData();
+                    console.log($scope.iar.file[0]);
                     fd.append("file",$scope.iar.file[0]);
-                    $http.post("/server/task/upload/" + data.ID, fd)
+                    $http.post("/server/task/upload/" + data.ID, fd, {
+                        transformRequest: angular.identity,
+                        headers: {'Content-Type': undefined}})
                         .success(function(data, status, headers, config){
-                            console.log("file uploaded");
+                            if(data.Success){
+                                console.log("file uploaded");
+                            } else {
+                                alertify.error(data.Message);
+                            }
                         });
                 } else {
                     alertify.error(data.Message);

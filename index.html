@@ -64,6 +64,7 @@
         <div id="body">
             <div ng-view></div>
         </div>
+<!--++++++++++++++++++++++++++++++++++ Footers +++++++++++++++++++++++++++++++++++++++++++++++-->
         <div id="footer" ng-show="auth.loggedIn" ng-controller="TaskController">
                 <table style="width: 100%;" border="1">
                     <thead>
@@ -77,9 +78,9 @@
                 </table>
                 <div id="jobs">
                     <table style="width: 100%;" border="1">
-                        <tbody data-bind="template: {name: 'task-template', foreach: task.tasks}" style="height: 9em; overflow: auto;">
-                            <tr ng-repeat="task in tasks">
-                                <td width="80"><button>delete</button></td>
+                        <tbody style="height: 9em; overflow: auto;">
+                            <tr ng-repeat="task in tasks track by task.id">
+                                <td width="80"><button ng-click="delete(task.id)">delete</button></td>
                                 <td width="140">{{task.timestamp}}</td>
                                 <td width="200">{{task.type}}</td>
                                 <td>{{task.data.Status}}</td>

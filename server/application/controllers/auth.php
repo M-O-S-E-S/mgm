@@ -10,7 +10,8 @@ class Auth extends CI_Controller {
     }
     
     public function login(){
-        $this->client->login($this->input->post('username'),$this->input->post('password'));
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $this->client->login($input_data['username'],$input_data['password']);
         die(json_encode(array('Success' => false, 'Message' => "An Error Occurred")));
     }
     
@@ -26,8 +27,9 @@ class Auth extends CI_Controller {
         }
         
         $user = $this->simiangrid->getUserByID($_SESSION['uuid']);
-        $password = $this->input->post('password');
-        
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $password = $input_data['password'];
+
         if(!$user){
             die(json_encode(array('Success' => false, 'Message' => "Error in Grid")));
         }
@@ -36,7 +38,7 @@ class Auth extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Invalid Password")));
         }
         
-        if($this->simiangrid->setUserPassword($user->UserID, $user->Name, $this->input->post('password'))){
+        if($this->simiangrid->setUserPassword($user->UserID, $user->Name, $password)){
             die(json_encode(array('Success' => true)));
         }
         die(json_encode(array('Success' => false, 'Message' => "An Error Occurred")));

@@ -1,5 +1,5 @@
 
-var mgmApp = angular.module('mgmApp',['ngRoute']);
+var mgmApp = angular.module('mgmApp',['ngRoute','ui.bootstrap']);
 
 mgmApp.config(function($routeProvider, $locationProvider){
     $routeProvider
@@ -28,10 +28,10 @@ mgmApp.config(function($routeProvider, $locationProvider){
         .otherwise({
             templateUrl : 'pages/account.html'
         });
-        $locationProvider.html5Mode(true).hashPrefix('!');
+    $locationProvider.html5Mode(true).hashPrefix('!');
 });
 
-AccountController = function($scope, $http){
+AccountController = function($scope, $http, $modal){
     $scope.account = {
         password: "",
         passwordConfirm: "",
@@ -44,16 +44,89 @@ AccountController = function($scope, $http){
                 alertify.error('Passwords must match');
                 return;
             }
-            $.post("/server/auth/changePassword", { 
-                        'password': this.password }).done(function(msg){
-                var result = $.parseJSON(msg);
-                if(result["Success"]){
+            $http.post("/server/auth/changePassword",{ 'password':this.password }).success(function(data, status, headers, config){
+                if(data.Success){
                     alertify.success("Password Changed Successfully");
+                    $scope.account.password="";
+                    $scope.account.passwordConfirm="";
                 } else {
-                    alertify.error(result["Message"]);
-                }
+                    alertify.error(data.Message);
+                };
             });
+        }
+    };
+    $scope.iar = {
+        modal: undefined,
+        file: "",
+        password: "",
+        showLoad: function(){
+            this.modal = $modal.open({
+                templateUrl: '/templates/loadIar.html',
+                keyboard: false,
+                scope: $scope
+            });
+        },
+        cancel: function(){
+            if(this.modal != undefined){
+                this.modal.close();
+            }
+        },
+        load: function(){
+            alertify.log("load iar called");
+               
+            if(this.password == ""){
+                alertify.error('Password cannot be blank');
+                return;
+            }
+            if(this.file == null){
+                alertify.error('No file selected');
+                return;
+            }
+                    
+            return;
+            /*        
+                //create job ticket for iar
+                $.post("task/loadIar", { 'password': self.iarPassword() }).done(function(msg){
+                    self.iarPassword('');
+                    var result = $.parseJSON(msg);
+                    if(result["Success"]){
+                        var newTask = new task(result['ID'], "", "load_iar", "", {"Status":"Initializing"});
+                        MGM.task.tasks.push(newTask);
+                        MGM.task.tasksModel[result['ID']] = newTask;
 
+                        //with valid ticket, upload file
+                        var data = new FormData();
+                        data.append('file', $('#iarFile')[0].files[0]);
+                        
+                        try{
+                            var xmlHttp = new XMLHttpRequest();
+                            xmlHttp.open('POST', 'task/upload/' + result['ID'], true);
+                            xmlHttp.onreadystatechange = function(){
+                                if(xmlHttp.readyState == 4){
+                                    var result = $.parseJSON(xmlHttp.responseText);
+                                    if( result['Success'] ){
+                                        alertify.success("Iar load initiated");
+                                    } else {
+                                        alertify.error("Error loading iar: " + result['Message'] );
+                                    }
+                                }
+                            }
+                            xmlHttp.send(data);
+                            location.hash = MGM.sectionId();
+                        } catch(e){
+                            alertify.error("Error: could not upload file");
+                        }
+                    } else {
+                        alertify.error("Error loading oar for " + self.Name() + ": " + result["Message"]);
+                    }
+                });
+            });
+            $('.alertify-text-wrapper').hide();
+            $('.alertify-message').html('<div id="LoadIar"><p class="alertify-message">Select a file and enter your password to load an iar file</p><div class="alertify-text-wrapper"><label>IAR file:</label><input type="file" class="alertify-text" id="iarFile" data-bind=\'value: auth.iarFile\'><label>Password:</label><input type="password" class="alertify-text" data-bind="value: auth.iarPassword" /></div></div>');
+            */
+        },
+        save: function(){
+            alertify.log("save iar called");
         }
     }
 };
@@ -82,12 +155,7 @@ mgmApp.controller('MGMCtrl', function($scope,$http,$location){
         userName: "",
         password: "",
         login: function(){
-            $http({
-                method: 'POST',
-                url: "/server/auth/login", 
-                data: $.param({ 'username':this.userName, 'password': this.password }),
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-            }).success(function(data, status, headers, config){
+            $http.post("/server/auth/login",{ 'username':this.userName, 'password': this.password }).success(function(data, status, headers, config){
                 if(data.Success){
                     console.log("login successfull");
                     $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
@@ -1030,135 +1098,6 @@ function TaskHandler(){
 function AuthenticationHandler(){
     var self = this;
     
-    this.userName = ko.observable();
-	this.password = ko.observable();
-	this.errorMessage = ko.observable();
-	this.loggedIn = ko.observable(false);
-	
-    this.activeUser = ko.observable(new User("", "", "", "", []));
-    
-    //stub for registered function on successful logins
-    this.loginCallback = {}
-    this.logoutCallback = {}
-    
-    this.login = function(username,password){
-        $.post("auth/login", { 'username':self.userName(), 'password': self.password() }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                var ctDate = new Date(1000*result['created']);
-                self.activeUser(new User(result["username"], result['uuid'], result["email"], result["accessLevel"], []));
-                self.loggedIn(true);
-                self.password('');
-                self.loginCallback();
-			} else {
-                self.errorMessage(result["Message"]);
-                self.password('');
-            }
-        });
-    };
-    
-    this.resumeSession = function(success){
-		$.ajax({
-			url: "auth",
-			success: function (msg){
-                var result = $.parseJSON(msg);
-				if(result["Success"]){
-					var result = $.parseJSON(msg);
-                    self.activeUser(new User(result["username"], result['uuid'], result["email"], result["accessLevel"], []));
-                    self.loggedIn(true);
-                    self.loginCallback();
-				}
-			},
-			error: function(xhr){
-				
-			}
-			
-		});
-	};
-    
-    this.logout = function(){
-		self.loggedIn(false);
-		$.post( "auth/logout");
-		window.clearInterval(self.watchdog);
-        self.logoutCallback();
-	};
-    
-    this.changePasswordP1 = ko.observable('');
-    this.changePasswordP2 = ko.observable('');
-    this.changePassword = function(){
-        if(self.changePasswordP1() == ""){
-            alertify.error('Password cannot be blank');
-            return;
-        }
-        if(self.changePasswordP1() != self.changePasswordP2()){
-            alertify.error('Passwords must match');
-            return;
-        }
-        $.post("auth/changePassword", { 
-                    'password': self.changePasswordP1() }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                alertify.success("Password Changed Successfully");
-            } else {
-                alertify.error(result["Message"]);
-            }
-        });
-    }
-    
-    this.iarFile = ko.observable('');
-    this.iarPassword = ko.observable('');
-    this.loadIar = function(){
-        alertify.prompt("", function(success){
-            if(success){
-                if(self.iarPassword() == ""){
-                    alertify.error('Password cannot be blank');
-                    return;
-                }
-                if(self.iarFile() == null){
-                    alertify.error('No file selected');
-                    return;
-                }
-                //create job ticket for iar
-                $.post("task/loadIar", { 'password': self.iarPassword() }).done(function(msg){
-                    self.iarPassword('');
-                    var result = $.parseJSON(msg);
-                    if(result["Success"]){
-                        var newTask = new task(result['ID'], "", "load_iar", "", {"Status":"Initializing"});
-                        MGM.task.tasks.push(newTask);
-                        MGM.task.tasksModel[result['ID']] = newTask;
-
-                        //with valid ticket, upload file
-                        var data = new FormData();
-                        data.append('file', $('#iarFile')[0].files[0]);
-                        
-                        try{
-                            var xmlHttp = new XMLHttpRequest();
-                            xmlHttp.open('POST', 'task/upload/' + result['ID'], true);
-                            xmlHttp.onreadystatechange = function(){
-                                if(xmlHttp.readyState == 4){
-                                    var result = $.parseJSON(xmlHttp.responseText);
-                                    if( result['Success'] ){
-                                        alertify.success("Iar load initiated");
-                                    } else {
-                                        alertify.error("Error loading iar: " + result['Message'] );
-                                    }
-                                }
-                            }
-                            xmlHttp.send(data);
-                            location.hash = MGM.sectionId();
-                        } catch(e){
-                            alertify.error("Error: could not upload file");
-                        }
-                    } else {
-                        alertify.error("Error loading oar for " + self.Name() + ": " + result["Message"]);
-                    }
-                });
-            }
-        }, "");
-        $('.alertify-text-wrapper').hide();
-        $('.alertify-message').html('<div id="LoadIar"><p class="alertify-message">Select a file and enter your password to load an iar file</p><div class="alertify-text-wrapper"><label>IAR file:</label><input type="file" class="alertify-text" id="iarFile" data-bind=\'value: auth.iarFile\'><label>Password:</label><input type="password" class="alertify-text" data-bind="value: auth.iarPassword" /></div></div>');
-        ko.applyBindings(MGM, document.getElementById("LoadIar"));
-    }
     this.saveIar = function(){
         self.iarPassword("");
         alertify.prompt("", function(success){

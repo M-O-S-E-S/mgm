@@ -2,21 +2,24 @@
 <html ng-app="mgmApp">
 	<head>
 		<title>Moses Grid Manager</title>
-		<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="css/jquery.terminal.css" />
+		<!--<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.terminal.css" />-->
         <link rel="stylesheet" type="text/css" href="css/alertify.core.css" />
         <link rel="stylesheet" type="text/css" href="css/alertify.default.css" />
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css" />
         <link rel="stylesheet" type="text/css" href="css/mgm.css" />
         
         <script src="js/alertify-0.3.11.min.js"></script>
-		<script src="js/jquery-1.11.0.min.js"></script>
+		<!--<script src="js/jquery-1.11.0.min.js"></script>
 		<script src="js/jquery-ui.min.js"></script>
         <script src="js/jquery.mousewheel.js"></script>
         <script src="js/jquery.terminal-0.7.5.min.js"></script>-->
+        
 		<script src="js/angular-1.2.14.min.js"></script>
 		<script src="js/angular-route-1.2.14.min.js"></script>
-        <!--<script type="text/javascript" src="js/sammy.js"></script>
-        <script src="js/jcanvas.min.js"></script>-->
+		<script src="js/ui-bootstrap-tpls-0.10.0.min.js"></script>
+        <!--<script src="js/jcanvas.min.js"></script>-->
         <script type="text/javascript" src="js/map.js"></script>
 		<script type="text/javascript" src="js/mgm.js"></script>
 	</head>
@@ -46,9 +49,9 @@
             <tr>
                 <td><h1>MGM</h1></td>
                 <td>
-                    <div style="width:550px;">
+                    <div >
                         <ul class="sections">
-                            <li ng-repeat="section in location.sections" ng-click="location.goto(section.link)">{{ section.name }}</li>
+                            <li ng-repeat="section in location.sections" ng-click="location.goto(section.link)" data-toggle="tab">{{ section.name }}</li>
                         </ul>
                     </div>
 

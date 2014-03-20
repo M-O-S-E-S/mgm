@@ -2,8 +2,7 @@
 var mgmApp = angular.module('mgmApp',['ngRoute','ui.bootstrap']);
 
 mgmApp.service('taskService', function($rootScope, $http){
-    var tasks = {};
-    this.getTasks = function(){ return tasks; },
+    this.tasks = {};
     this.addTask = function(task) { 
         tasks[task['id']] = task;
         $rootScope.$broadcast("taskService", "update");
@@ -33,44 +32,6 @@ mgmApp.service('taskService', function($rootScope, $http){
 
 /*
 function TaskHandler(){
-    this.addOrUpdateTasks = function(data){
-        var appender = [];
-        $.each(data, function(index, datum){
-            if( datum['id'] in self.tasksModel ){
-                self.tasksModel[datum['id']].Data(datum['data']);
-                self.tasksModel[datum['id']].Timestamp(datum['timestamp']);
-                self.tasksModel[datum['id']].User(datum['user']);
-            } else {
-                switch(datum['type']){
-                    case "save_oar":
-                        var newTask = new SaveOarTask(datum['id'], datum['timestamp'], datum['type'], datum['user'], datum['data']);
-                        break;
-                    case "save_iar":
-                        var newTask = new SaveOarTask(datum['id'], datum['timestamp'], datum['type'], datum['user'], datum['data']);
-                        break;
-                    case "password_reset":
-                        var newTask = new ResetPasswordTask(datum['id'], datum['timestamp'], datum['type'], datum['user'], {'Status': 'active'});
-                        break;
-                    default:
-                        var newTask = new Task(datum['id'], datum['timestamp'], datum['type'], datum['user'], datum['data']);
-                }
-                self.tasksModel[datum['id']] = newTask;
-                appender.push(newTask);
-            }
-        });
-        
-        ko.utils.arrayPushAll(self.tasks, appender);
-    }
-
-    this.getTemplateForType = function(taskType){
-        switch(taskType){
-            case "save_oar":
-            case "save_iar":
-                return "task-template-save-oar";
-            default:
-                return "task-template-task";
-        }
-    }
     
     this.resetPasswordName = ko.observable('');
     this.resetPasswordToken = ko.observable('');
@@ -169,13 +130,19 @@ mgmApp.config(function($routeProvider, $locationProvider){
 });
 
 mgmApp.controller('TaskController', function($scope, taskService){
-    $scope.tasks = taskService.getTasks();
-    $scope.$on("taskService", function(){
-        $scope.tasks = taskService.getTasks();
+    $scope.$watch('taskService.tasks', function (newValue) {
+        $scope.tasks = taskService.tasks;
     });
+    //$scope.tasks = taskService.getTasks();
+    //$scope.$on("taskService", function(){
+    //    $scope.tasks = taskService.getTasks();
+    //});
     $scope.delete = function(id){
         console.log("delete job " + id);
         taskService.remove(id);
+    };
+    $scope.download = function(id){
+        alertify.error("file download not implemented yet");
     };
 });
 
@@ -208,8 +175,19 @@ mgmApp.controller('AccountController', function($scope, $http, $modal, taskServi
         file: undefined,
         password: "",
         showLoad: function(){
+            this.password = "";
+            this.file = undefined;
             this.modal = $modal.open({
                 templateUrl: '/templates/loadIarModal.html',
+                keyboard: false,
+                scope: $scope
+            });
+        },
+        showSave: function(){
+            this.password = "";
+            this.file = undefined;
+            this.modal = $modal.open({
+                templateUrl: '/templates/saveIarModal.html',
                 keyboard: false,
                 scope: $scope
             });
@@ -233,6 +211,8 @@ mgmApp.controller('AccountController', function($scope, $http, $modal, taskServi
             $http.post("/server/task/loadIar",{ 'password':this.password }).success(function(data, status, headers, config){
                 if(data.Success){
                     taskService.addTask({ id: data.ID, timestamp: "", type: "load_iar", data: {"Status":"Initializing"}});
+                    
+                    //upload file
                     var fd = new FormData();
                     console.log($scope.iar.file[0]);
                     fd.append("file",$scope.iar.file[0]);
@@ -242,6 +222,7 @@ mgmApp.controller('AccountController', function($scope, $http, $modal, taskServi
                         .success(function(data, status, headers, config){
                             if(data.Success){
                                 console.log("file uploaded");
+                                this.modal.close();
                             } else {
                                 alertify.error(data.Message);
                             }
@@ -250,49 +231,23 @@ mgmApp.controller('AccountController', function($scope, $http, $modal, taskServi
                     alertify.error(data.Message);
                 };
             });
-            /*        
-                //create job ticket for iar
-                $.post("task/loadIar", { 'password': self.iarPassword() }).done(function(msg){
-                    self.iarPassword('');
-                    var result = $.parseJSON(msg);
-                    if(result["Success"]){
-                        var newTask = new task(result['ID'], "", "load_iar", "", {"Status":"Initializing"});
-                        MGM.task.tasks.push(newTask);
-                        MGM.task.tasksModel[result['ID']] = newTask;
-
-                        //with valid ticket, upload file
-                        var data = new FormData();
-                        data.append('file', $('#iarFile')[0].files[0]);
-                        
-                        try{
-                            var xmlHttp = new XMLHttpRequest();
-                            xmlHttp.open('POST', 'task/upload/' + result['ID'], true);
-                            xmlHttp.onreadystatechange = function(){
-                                if(xmlHttp.readyState == 4){
-                                    var result = $.parseJSON(xmlHttp.responseText);
-                                    if( result['Success'] ){
-                                        alertify.success("Iar load initiated");
-                                    } else {
-                                        alertify.error("Error loading iar: " + result['Message'] );
-                                    }
-                                }
-                            }
-                            xmlHttp.send(data);
-                            location.hash = MGM.sectionId();
-                        } catch(e){
-                            alertify.error("Error: could not upload file");
-                        }
-                    } else {
-                        alertify.error("Error loading oar for " + self.Name() + ": " + result["Message"]);
-                    }
-                });
-            });
-            $('.alertify-text-wrapper').hide();
-            $('.alertify-message').html('<div id="LoadIar"><p class="alertify-message">Select a file and enter your password to load an iar file</p><div class="alertify-text-wrapper"><label>IAR file:</label><input type="file" class="alertify-text" id="iarFile" data-bind=\'value: auth.iarFile\'><label>Password:</label><input type="password" class="alertify-text" data-bind="value: auth.iarPassword" /></div></div>');
-            */
         },
         save: function(){
-            alertify.log("save iar called");
+            if(this.password == ""){
+                alertify.error('Password cannot be blank');
+                return;
+            }
+            
+            //create job
+            $http.post("/server/task/saveIar",{ 'password':this.password }).success(function(data, status, headers, config){
+                if( data.Success ){
+                    alertify.success("Save Iar task scheduled");
+                    this.modal.close();
+                } else {
+                    alertify.error(data.Message);
+                }
+                this.password = "";
+            });
         }
     }
 });
@@ -1156,35 +1111,6 @@ function Host(name, address, lastSeen, system, capacity){
     };
 }
 
-function AuthenticationHandler(){
-    var self = this;
-    
-    this.saveIar = function(){
-        self.iarPassword("");
-        alertify.prompt("", function(success){
-            if(success){
-                if(self.iarPassword() == ""){
-                    alertify.error('Password cannot be blank');
-                    return;
-                }
-                $.post("task/saveIar", { 
-                    'password': self.iarPassword() }).done(function(msg){
-                    var result = $.parseJSON(msg);
-                    if(result["Success"]){
-                        alertify.success("Save iar queued successfully");
-                    } else {
-                        alertify.error(result["Message"]);
-                    }
-                    self.iarPassword('');
-                });
-            }
-        });
-        $('.alertify-text-wrapper').hide();
-        $('.alertify-message').html('<div id="SaveIar"><p class="alertify-message">Please enter your password to save an iar file<div class="alertify-text-wrapper"><label>Password:</label><input type="password" class="alertify-text" data-bind="value: auth.iarPassword" /></div></div>');
-        ko.applyBindings(MGM, document.getElementById("SaveIar"));
-    }
-}
-
 function MGMViewModel(){
     var self = this;
 
@@ -1337,16 +1263,6 @@ function MGMViewModel(){
     }
     
     /*****************************************/
-
-    this.saveIarWindow = function(){
-        $( "#newHostWindow" ).dialog({
-            width: "auto",
-            height: "auto",
-            closeOnEscape: false,
-            close: self.close,
-            modal: true
-        });
-    }   
 
     this.createNewHost = function(){
         alertify.prompt(strings["addHost"], function(success, address){

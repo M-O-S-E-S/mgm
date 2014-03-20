@@ -1,0 +1,16 @@
+<div class="modal-header">
+    <h3>Load IAR File</h3>
+</div>
+<div class="modal-body">
+    <div id="LoadIar">
+        <p class="alertify-message">Select a file and enter your password to load an iar file.  The iar file will be loaded into the root of your inventory, it will not merge with any existing folders.</p>
+        <div class="alertify-text-wrapper">
+            <label>IAR file:</label><input type="file" class="alertify-text" id="iarFile" data-bind=\'value: auth.iarFile\'>
+            <label>Password:</label><input type="password" class="alertify-text" data-bind="value: auth.iarPassword" />
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="iar.load()">OK</button>
+    <button class="btn btn-warning" ng-click="iar.cancel()">Cancel</button>
+</div>

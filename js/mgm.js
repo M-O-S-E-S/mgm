@@ -121,7 +121,9 @@ mgmApp.service('hostService', function($rootScope, $http){
 
 mgmApp.service('userService', function($rootScope, $http){
     var users = [];
+    var pending = [];
     this.getUsers = function(){ return users; };
+    this.getPending = function(){ return pending; };
     this.addUser = function(user) { 
         users.push(host);
         $rootScope.$broadcast("userService");
@@ -130,6 +132,7 @@ mgmApp.service('userService', function($rootScope, $http){
         $http.get("/server/user").success(function(data, status, headers, config){
             if(data.Success){
                 users = data.Users;
+                pending = data.Pending;
                 $rootScope.$broadcast("userService");
             }
         });
@@ -243,7 +246,8 @@ mgmApp.config(function($routeProvider, $locationProvider){
             controller  : 'UserController'
         })
         .when('/pending', {
-            templateUrl : '/pages/pendingUsers.html'
+            templateUrl : '/pages/pendingUsers.html',
+            controller  :  'PendingUserController'
         })
         .otherwise({
             templateUrl : '/pages/account.html'

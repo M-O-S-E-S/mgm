@@ -1,18 +1,30 @@
 <div id="regions">
-    <table style="width: 100%;">
-        <tr>
-            <td style="text-align: left"><span data-bind="text: Regions().length"></span> Region(s)</td>
-            <td>Name:<input placeholder="Search..." type="search" name="q" data-bind="value: regionSearch, valueUpdate: 'input'" autocomplete="off"></td>
-            <td>Estate:<select data-bind="options: regionsEstateFilters, value: selectedRegionEstateFilter"></select></td>
-            <td>Status:<select data-bind="options: regionsStatusFilters, value: selectedRegionStatusFilter"></select></td>
-            <td>Host:<select data-bind="options: regionsHostFilters, value: selectedRegionHostFilter, visible: auth.activeUser().AccessLevel() > 249"></select></td>
-            <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
-                <button data-bind="click: $root.startListedRegions">Start Listed</button>
+    <div style="width:100%; overflow: auto;">
+        <div style="float: left; width: 10em">
+            <input placeholder="Name Search" type="search" ng-model="search.name" style="width: 10em">
+        </div>
+        <div style="float: left; width: 10em">
+            <input placeholder="Estate Search" type="search" ng-model="search.estateName" style="width: 10em" typeahead="estate.name for estate in estates">
+        </div>
+        <div style="float: left; width: 10em">
+            <select ng-model="search.isRunning">
+                <option value="">All Regions</option>
+                <option value="true">Running</option>
+                <option value="false">Stopped</option>
+            </select>
+        </div>
+        <div style="float: left; width: 50em">
+            Showing {{(regions|filter:search).length}} of {{regions.length}} Region(s)
+        </div>
+        <div style="float: left; width: 10em" style="width: 10em">
+            <input ng-if="auth.activeUser.accessLevel > 249" placeholder="host search" ng-model="search.node"></input>
+        </div>
+        <div style="float: left; width: 20em">
+            <button data-bind="click: $root.startListedRegions">Start Listed</button>
                 <button data-bind="click: $root.stopListedRegions">Stop Listed</button>
                 <button data-bind="click: $root.createNewRegion">Add Region</button>
-            </td>
-        </tr>
-    </table>
+        </div>
+    </div>
     
     <div style="width:100%; overflow: auto;">
         <span style="float: left; width: 10em">Name</span>
@@ -25,20 +37,19 @@
             <span style="float: left; width: 10em">Users</span>
             <span style="float: left; width: 10em" ng-if="auth.activeUser.accessLevel > 249">Host</span>
         </div>
-        <span style="float: left; width: 5%" data-bind="visible: auth.activeUser().AccessLevel() > 249">Host</span>
-
     </div>
-    <div style="width:100%;" data-bind="template: {name: 'region-template', foreach: Regions }, stripe: Regions, evenClass: 'light', oddClass: 'dark'">
-        <div ng-repeat="region in regions track by region.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
+
+    <div style="width:100%;">
+        <div ng-repeat="region in regions | orderBy:['estateName','name'] | filter:search track by region.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
             <div style="overflow: auto;">
                 <div style="float: left; width: 10em">
                     <span>{{region.name}}</span>
                     <button title="logbutton" data-bind="click: dumpLogs, tooltip: {content: 'Download available logs'}" style="float: right;">log</button>
                 </div>
+                <div style="float: left; width: 10em">
+                    <span>{{region.estateName}}</span>
+                </div>
                 <div ng-if="region.isRunning == true">
-                    <div style="float: left; width: 10em">
-                        <span>{{region.estateName}}</span>
-                    </div>
                     <div style="float: left; width: 10em">
                         <span>{{lastSeen(region.stat.timestamp)}}</span>
                     </div>
@@ -62,7 +73,7 @@
                     </div>
                 </div>
                 <div ng-if="region.isRunning != true">
-                    <div style="float: left; width: 80em">
+                    <div style="float: left; width: 70em">
                         Is not running...
                     </div> 
                 </div>

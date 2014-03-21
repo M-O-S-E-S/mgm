@@ -87,14 +87,6 @@ mgmApp.service('estateService', function($rootScope, $http){
                 }
             });
     };
-    this.getEstateNameForRegion = function(uuid){
-        angular.forEach(estates, function(estate){
-            if(estate.regions.indexOf(uuid) > -1){
-                return estate.name;
-            }
-        });
-        return "...";
-    };
     $rootScope.$on("mgmUpdate", this.updateEstates);
 });
 
@@ -217,6 +209,10 @@ mgmApp.controller('RegionController', function($scope, regionService, estateServ
     $scope.$on("regionService", function(){
         $scope.regions = regionService.getRegions();
     });
+    $scope.estates = estateService.getEstates();
+    $scope.$on("estateService", function(){
+        $scope.estates = estateService.getEstates();
+    });
     
     $scope.delete = function(id){
         alertify.log("deleting a region is not currently implemented");
@@ -248,6 +244,13 @@ mgmApp.controller('RegionController', function($scope, regionService, estateServ
     $scope.hostInfo = function(node){
         return node;
     }
+    
+    $scope.search = {
+        name: "",
+        estateName: "",
+        isRunning: "",
+        node: ""
+    };
     
     regionService.updateRegions();
     estateService.updateEstates();

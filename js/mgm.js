@@ -5,7 +5,7 @@ mgmApp.service('taskService', function($rootScope, $http){
     var tasks = [];
     this.getTasks = function(){ return tasks; };
     this.addTask = function(task) { 
-        tasks[task['id']] = task;
+        tasks.push(task);
         $rootScope.$broadcast("taskService", "update");
     };
     this.updateTasks = function(){
@@ -36,7 +36,7 @@ mgmApp.service('regionService', function($rootScope, $http){
         return regions;
     };
     this.addRegion = function(region) { 
-        regions.append(region);
+        regions.push(region);
         $rootScope.$broadcast("regionService");
     };
     this.updateRegions = function(){
@@ -65,7 +65,7 @@ mgmApp.service('estateService', function($rootScope, $http){
     var estates = [];
     this.getEstates = function(){ return estates; };
     this.addEstate = function(estate) { 
-        estates.append(estate);
+        estates.push(estate);
         $rootScope.$broadcast("estateService");
     };
     this.updateEstates = function(){
@@ -77,17 +77,46 @@ mgmApp.service('estateService', function($rootScope, $http){
         });
     };
     this.remove = function(id){
-        $http.post("/server/region/delete/" + id)
+        $http.post("/server/estate/delete/" + id)
             .success(function(data, status, headers, config){
                 if(data.Success){
                     delete estates[id];
-                    $rootScope.$broadcast("regionService");
+                    $rootScope.$broadcast("estateService");
                 } else {
                     alertify.error(data.Message);
                 }
             });
     };
     $rootScope.$on("mgmUpdate", this.updateEstates);
+});
+
+mgmApp.service('hostService', function($rootScope, $http){
+    var hosts = [];
+    this.getHosts = function(){ return hosts; };
+    this.addHost = function(host) { 
+        hosts.push(host);
+        $rootScope.$broadcast("hostService");
+    };
+    this.updateHosts = function(){
+        $http.get("/server/host").success(function(data, status, headers, config){
+            if(data.Success){
+                hosts = data.Hosts;
+                $rootScope.$broadcast("hostService");
+            }
+        });
+    };
+    this.remove = function(id){
+        $http.post("/server/host/delete/" + id)
+            .success(function(data, status, headers, config){
+                if(data.Success){
+                    delete hosts[id];
+                    $rootScope.$broadcast("hostService");
+                } else {
+                    alertify.error(data.Message);
+                }
+            });
+    };
+    $rootScope.$on("mgmUpdate", this.updateHosts);
 });
 
 /*
@@ -173,7 +202,8 @@ mgmApp.config(function($routeProvider, $locationProvider){
             controller  : 'RegionController'
         })
         .when('/grid', {
-            templateUrl : '/pages/grid.html'
+            templateUrl : '/pages/grid.html',
+            controller  : 'GridController'
         })
         .when('/map', {
             templateUrl : '/pages/map.html'
@@ -187,7 +217,7 @@ mgmApp.config(function($routeProvider, $locationProvider){
         .otherwise({
             templateUrl : '/pages/account.html'
         });
-    $locationProvider.html5Mode(true).hashPrefix('!');
+    $locationProvider.html5Mode(true);
 });
 
 mgmApp.controller('TaskController', function($scope, taskService){
@@ -254,6 +284,20 @@ mgmApp.controller('RegionController', function($scope, regionService, estateServ
     
     regionService.updateRegions();
     estateService.updateEstates();
+});
+
+mgmApp.controller('GridController', function($scope, estateService, hostService){
+    $scope.estates = estateService.getEstates();
+    $scope.$on("estateService", function(){
+        $scope.estates = estateService.getEstates();
+    });
+    $scope.hosts = hostService.getHosts();
+    $scope.$on("hostService", function(){
+        $scope.hosts = hostService.getHosts();
+    });
+    
+    estateService.updateEstates();
+    hostService.updateHosts();
 });
 
 mgmApp.controller('AccountController', function($scope, $http, $modal, taskService){
@@ -393,7 +437,6 @@ mgmApp.controller('MGMCtrl', function($rootScope,$scope,$http,$location, $interv
                     $scope.auth.loggedIn = true;
                     $scope.auth.userName = "";
                     $scope.auth.password = "";
-                    $scope.location.goto('/account');
                     $scope.updater = $interval(function(){ $rootScope.$broadcast('mgmUpdate','trigger'); }, 10*1000);
                     $rootScope.$broadcast('mgmUpdate','trigger'); 
                 } else {
@@ -413,7 +456,6 @@ mgmApp.controller('MGMCtrl', function($rootScope,$scope,$http,$location, $interv
                     $scope.auth.loggedIn = true;
                     $scope.auth.userName = "";
                     $scope.auth.password = "";
-                    $scope.location.goto('/account');
                     $scope.updater = $interval(function(){ $rootScope.$broadcast('mgmUpdate','trigger'); }, 10*1000);
                     $rootScope.$broadcast('mgmUpdate','trigger'); 
                 } else {

@@ -4,7 +4,10 @@
     <div style="float: left; width: 30%">Email:<input placeholder="Search..." type="search" name="q" data-bind="value: userEmailSearch, valueUpdate: 'input'" autocomplete="off"></div>
 </div>
 <div style="width: 100%; overflow: auto;" >
-    <span style="float: left; width: 20%">Name</span>
-    <span style="float: left; width: 20%">Address</span>
+    <span style="float: left; width: 20em">Name</span>
+    <span style="float: left; width: 20em">Address</span>
 </div>
-<div data-bind="template: {name: 'user-template', foreach: Users }, stripe: Users, evenClass: 'light', oddClass: 'dark'"></div>
+<div style="width: 100%;" ng-repeat="user in users | orderBy:'name'" ng-class-odd="'odd'" ng-class-even="'even'">
+    <span style="display:inline-block; width: 20em">{{user.name}} <button style="float:right">Remove</button></span>
+    <span style="display:inline-block; width: 40em">{{user.email}} <button style="float:right">Manage</button></span>
+</div>

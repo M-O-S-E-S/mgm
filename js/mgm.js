@@ -235,10 +235,12 @@ mgmApp.config(function($routeProvider, $locationProvider){
             controller  : 'GridController'
         })
         .when('/map', {
-            templateUrl : '/pages/map.html'
+            templateUrl : '/pages/map.html',
+            controller  : 'MapController'
         })
         .when('/users', {
-            templateUrl : '/pages/users.html'
+            templateUrl : '/pages/users.html',
+            controller  : 'UserController'
         })
         .when('/pending', {
             templateUrl : '/pages/pendingUsers.html'

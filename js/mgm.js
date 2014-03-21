@@ -226,6 +226,29 @@ mgmApp.controller('RegionController', function($scope, regionService, estateServ
         return estateService.getEstateNameForRegion(uuid);
     }
     
+    $scope.lastSeen = function(timestamp){
+        if(timestamp == undefined || timestamp == ""){
+            return "~";
+        }
+        var last = new Date(timestamp);
+        var seconds = Math.floor(((new Date()).getTime() - last.getTime())/1000);
+        
+        var numdays = Math.floor(seconds / 86400);
+        if(numdays > 0){
+            return numdays + " days ago";
+        }
+        var numhours = Math.floor((seconds % 86400) / 3600);
+        if(numhours > 0){
+            return numhours + " hours ago";
+        }
+        var numminutes = Math.floor(((seconds % 86400) % 3600) / 60);
+        return numminutes + " minutes ago";
+    }
+    
+    $scope.hostInfo = function(node){
+        return node;
+    }
+    
     regionService.updateRegions();
     estateService.updateEstates();
 });
@@ -408,10 +431,16 @@ mgmApp.controller('MGMCtrl', function($rootScope,$scope,$http,$location, $interv
     $scope.auth.resume();
 });
 
-/**********************************************************************/
-/**********************************************************************/
-/**********************************************************************/
-/**********************************************************************/
+/********************************************************************************************************************************************/
+/********************************************************************************************************************************************/
+/********************************************************************************************************************************************/
+/********************************************************************************************************************************************/
+/********************************************************************************************************************************************/
+/********************************************************************************************************************************************/
+/********************************************************************************************************************************************/
+/********************************************************************************************************************************************/
+
+
 var strings = {
     "destroyHost": "Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.",
     "destroyEstate": "Are you sure you want to delete this estate?  Any running processes in this estate will need to be restarted",

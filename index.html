@@ -32,14 +32,14 @@
                 <td><h1>MGM</h1></td>
                 <td style="text-align: right">
                     <div style="float:right;">
-                        <button data-bind="click: task.showPasswordResetForm">Forgot Password?</button>
+                        <button class="btn btn-success" data-bind="click: task.showPasswordResetForm">Forgot Password?</button>
                     </div>
                     <div style="float:right;">
                         <form ng-submit="auth.login()">
                             <strong style="color:red" data-bind="text: auth.errorMessage"></strong>
                             <strong>Username</strong><input size="10" ng-model="auth.userName"></input>
                             <strong>Password</strong><input size="10" ng-model="auth.password" type="password"></input>
-                            <button type="submit">Login</button>
+                            <button type="submit" class="btn btn-success">Login</button>
                         </form>
                     </div>
                 </td>
@@ -49,14 +49,13 @@
             <tr>
                 <td><h1>MGM</h1></td>
                 <td>
-                    <div >
-                        <ul class="sections">
-                            <li ng-repeat="section in location.sections" ng-click="location.goto(section.link)" data-toggle="tab">{{ section.name }}</li>
-                        </ul>
+                    <div class="btn-group">
+                            <button class="btn btn-success" ng-repeat="section in location.sections" 
+                            ng-click="location.goto(section.link)" ng-class="{active: (location.current==section.link)}">{{ section.name }}</button>
                     </div>
 
                 </td>
-                <td style="text-align: right"><button ng-click="auth.logout()">Logout</button></td>
+                <td style="text-align: right"><button class="btn btn-success" ng-click="auth.logout()">Logout</button></td>
             </tr>
             </table>
         </div>

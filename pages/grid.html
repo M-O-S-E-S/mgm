@@ -1,41 +1,54 @@
-<div data-bind="visible: $root.auth.activeUser().AccessLevel() > 249">
+<div ng-if="auth.activeUser.accessLevel > 249">
+    
     <table style="width: 100%;">
         <tr>
-            <td style="text-align: left">Hosts:</td>
+            <td style="text-align: left"><h3>Hosts:</h3></td>
             <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
-                <button data-bind="click: createNewHost">Add Host</button>
+                <button data-bind="click: createNewHost" class="btn btn-secondary">Add Host</button>
             </td>
         </tr>
     </table>
 
     <div style="width: 100%; overflow: auto;">
-        <span style="float: left; width: 10%">Name</span>
-        <span style="float: left; width: 10%">Address</span>
-        <span style="float: left; width: 10%">Regions</span>
-        <div style="float: left; width: 70%">
-            <span style="float: left; width: 30%">CPU</span>
-            <span style="float: left; width: 30%">MEM</span>
-            <span style="float: left; width: 40%">Net</span>
-        </div>
+        <span style="float: left; width: 10em">Name</span>
+        <span style="float: left; width: 10em">Address</span>
+        <span style="float: left; width: 10em">Timestamp</span>
+        <span style="float: left; width: 5em">Regions</span>
+        <span style="float: left; width: 25em">CPU</span>
+        <span style="float: left; width: 10em">MEM</span>
+        <span style="float: left; width: 10em">Net</span>
     </div>
                     
-    <div style="width: 100%; overflow: auto;" data-bind="template: {name: 'host-template', foreach: Hosts }, stripe: Hosts, evenClass: 'light', oddClass: 'dark'"></div>
+    <div style="width: 100%; overflow: auto;" ng-repeat="host in hosts | orderBy:'name'" ng-class-odd="'odd'" ng-class-even="'even'">
+        <span style="float: left; width: 10em">{{host.name}}</span>
+        <span style="float: left; width: 10em">{{host.address}}</span>
+        <span style="float: left; width: 10em">{{lastSeen(host.lastSeen)}}</span>
+        <span style="float: left; width: 5em">{{regionCount(host.address)}}/{{host.capacity}}</span>
+        <span style="float: left; width: 25em">{{host.system.cpuPercent}}</span>
+        <span style="float: left; width: 10em">{{host.system.memPercent}}% {{(host.system.memKB/1024).toFixed(2)}}MB</span>
+        <span style="float: left; width: 10em">{{(host.system.netSentPer/1024).toFixed(2)}} / {{(host.system.netRecvPer/1024).toFixed(2)}} KBps</span>
+    </div>
     &nbsp
 </div>
 <table style="width: 100%;">
     <tr>
-        <td style="text-align: left">Estates:</td>
+        <td style="text-align: left"><h3>Estates:</h3></td>
         <div data-bind="if: auth.activeUser">
             <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
-                <button data-bind="click: createNewEstate">Add Estate</button>
+                <button data-bind="click: createNewEstate" class="btn btn-secondary">Add Estate</button>
             </td>
         </div>
     </tr>
 </table>
 <div style="width: 100%;">
-    <span style="float: left; width: 10%">Name</span>
-    <span style="float: left; width: 10%">Regions</span>
-    <span style="float: left; width: 10%">Owner</span>
-    <span style="floatn: left; width: 70%">Managers</span>
+    <span style="float: left; width: 15em">Name</span>
+    <span style="float: left; width: 10em">Regions</span>
+    <span style="float: left; width: 20em">Owner</span>
+    <span style="floatn: left; width: 50em">Managers</span>
 </div>
-<div style="width: 100%;" data-bind="template: {name: 'estate-template', foreach: Estates }, stripe: Estates, evenClass: 'light', oddClass: 'dark'"></div>
+<div style="width: 100%; overflow: auto;" ng-repeat="estate in estates | orderBy:'name'" ng-class-odd="'odd'" ng-class-even="'even'">
+    <span style="float: left; width: 15em">{{estate.name}}</span>
+    <span style="float: left; width: 10em">{{estate.regions.length}}</span>
+    <span style="float: left; width: 20em">{{userName(estate.owner)}}</span>
+    <span style="float: left">{{userNameList(estate.managers)}}</span>
+</div>

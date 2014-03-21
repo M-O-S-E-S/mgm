@@ -119,6 +119,35 @@ mgmApp.service('hostService', function($rootScope, $http){
     $rootScope.$on("mgmUpdate", this.updateHosts);
 });
 
+mgmApp.service('userService', function($rootScope, $http){
+    var users = [];
+    this.getUsers = function(){ return users; };
+    this.addUser = function(user) { 
+        users.push(host);
+        $rootScope.$broadcast("userService");
+    };
+    this.updateUsers = function(){
+        $http.get("/server/user").success(function(data, status, headers, config){
+            if(data.Success){
+                users = data.Users;
+                $rootScope.$broadcast("userService");
+            }
+        });
+    };
+    this.remove = function(id){
+        $http.post("/server/user/delete/" + id)
+            .success(function(data, status, headers, config){
+                if(data.Success){
+                    delete users[id];
+                    $rootScope.$broadcast("userService");
+                } else {
+                    alertify.error(data.Message);
+                }
+            });
+    };
+    $rootScope.$on("mgmUpdate", this.updateUsers);
+});
+
 /*
 function TaskHandler(){
     
@@ -286,7 +315,7 @@ mgmApp.controller('RegionController', function($scope, regionService, estateServ
     estateService.updateEstates();
 });
 
-mgmApp.controller('GridController', function($scope, estateService, hostService){
+mgmApp.controller('GridController', function($scope, estateService, hostService, userService, regionService){
     $scope.estates = estateService.getEstates();
     $scope.$on("estateService", function(){
         $scope.estates = estateService.getEstates();
@@ -295,9 +324,68 @@ mgmApp.controller('GridController', function($scope, estateService, hostService)
     $scope.$on("hostService", function(){
         $scope.hosts = hostService.getHosts();
     });
+    $scope.users = userService.getUsers();
+    $scope.$on("userService", function(){
+        $scope.users = userService.getUsers();
+    });
+    $scope.regions = regionService.getRegions();
+    $scope.$on("regionService", function(){
+        $scope.regions = regionService.getRegions();
+    });
+    
+    $scope.regionCount = function(address){
+        var count = 0;
+        for(var i = 0; i < $scope.regions.length; i++){
+            if($scope.regions[i].node == address){
+                count = count + 1;
+            }
+        }
+        return count;
+    };
+    
+    $scope.lastSeen = function(timestamp){
+        if(timestamp == undefined || timestamp == ""){
+            return "~";
+        }
+        var last = new Date(timestamp);
+        var seconds = Math.floor(((new Date()).getTime() - last.getTime())/1000);
+        
+        var numdays = Math.floor(seconds / 86400);
+        if(numdays > 0){
+            return numdays + " days ago";
+        }
+        var numhours = Math.floor((seconds % 86400) / 3600);
+        if(numhours > 0){
+            return numhours + " hours ago";
+        }
+        var numminutes = Math.floor(((seconds % 86400) % 3600) / 60);
+        return numminutes + " minutes ago";
+    }
+    $scope.userName = function(uuid){
+        for(var i = 0; i < $scope.users.length; i++){
+            if($scope.users[i].uuid == uuid){
+                return $scope.users[i].name
+            }
+        }
+        return "~";
+    };
+    $scope.userNameList = function(users){
+        var names = [];
+        for(var i = 0; i < users.length; i++){
+            for(var j = 0; j < $scope.users.length; j++){
+                if($scope.users[j].uuid == users[i]){
+                    names.push($scope.users[j].name);
+                    break;
+                }
+            }
+        }
+        return names.join();
+    }
     
     estateService.updateEstates();
     hostService.updateHosts();
+    userService.updateUsers();
+    regionService.updateRegions();
 });
 
 mgmApp.controller('AccountController', function($scope, $http, $modal, taskService){
@@ -418,9 +506,10 @@ mgmApp.controller('MGMCtrl', function($rootScope,$scope,$http,$location, $interv
             { name: 'Map', link: '/map'},
             { name: 'Users', link: '/users'},
             { name: 'Pending Users', link: '/pending'} ],
-        current: "Account",
+        current: $location.path(),
         goto: function(path){
             $location.path(path);
+            $scope.location.current = $location.path();
         }
     };
     
@@ -438,7 +527,8 @@ mgmApp.controller('MGMCtrl', function($rootScope,$scope,$http,$location, $interv
                     $scope.auth.userName = "";
                     $scope.auth.password = "";
                     $scope.updater = $interval(function(){ $rootScope.$broadcast('mgmUpdate','trigger'); }, 10*1000);
-                    $rootScope.$broadcast('mgmUpdate','trigger'); 
+                    $rootScope.$broadcast('mgmUpdate','trigger');
+                    $scope.location.goto('/account');
                 } else {
                     console.log(data.Message);
                     alertify.error(data.Message);

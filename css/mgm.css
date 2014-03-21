@@ -23,7 +23,7 @@ html, body { width:100%; height:100%; }
     color: black;
 }
 #header button{
-    color: black;
+    #color: black;
 }
 #body {
     position:   fixed;

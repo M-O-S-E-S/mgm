@@ -21,8 +21,8 @@
         </div>
         <div style="float: left; width: 20em">
             <button data-bind="click: $root.startListedRegions">Start Listed</button>
-                <button data-bind="click: $root.stopListedRegions">Stop Listed</button>
-                <button data-bind="click: $root.createNewRegion">Add Region</button>
+            <button data-bind="click: $root.stopListedRegions">Stop Listed</button>
+            <button data-bind="click: $root.createNewRegion">Add Region</button>
         </div>
     </div>
     
@@ -47,7 +47,7 @@
                     <button title="logbutton" data-bind="click: dumpLogs, tooltip: {content: 'Download available logs'}" style="float: right;">log</button>
                 </div>
                 <div style="float: left; width: 10em">
-                    <span>{{region.estateName}}</span>
+                    <span>{{region.estateName.substring(0,15)}}</span>
                 </div>
                 <div ng-if="region.isRunning == true">
                     <div style="float: left; width: 10em">
@@ -68,18 +68,18 @@
                     <div style="float: left; width: 10em">
                         <span>{{region.stat.status.simStats['RootAg']}}</span>
                     </div>
-                    <div style="float: left; width: 10em">
-                        <span ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(region.node)}}</span>
-                    </div>
                 </div>
                 <div ng-if="region.isRunning != true">
-                    <div style="float: left; width: 70em">
+                    <div style="float: left; width: 60em">
                         Is not running...
                     </div> 
                 </div>
+                <div style="float: left; width: 10em">
+                        <span ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(region.node)}}</span>
+                    </div>
                 <div style="float: left; width: 20em">
-                    <button>Start</button>
-                    <button>Stop</button>
+                    <button ng-disabled="region.isRunning" class="ui-button">Start</button>
+                    <button ng-disabled="!region.isRunning">Stop</button>
                     <button>Content</button>
                     <button>Manage</button>
                 </div>

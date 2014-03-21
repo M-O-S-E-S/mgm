@@ -18,7 +18,7 @@ class Host extends CI_Controller {
             $host['address'] = $h->address;
             $host['name'] = $h->name;
             
-            $sql = "SELECT timestamp, status FROM hostStats WHERE host=(SELECT id FROM hosts WHERE address=". $this->db->escape($h->address) .") AND timestamp >= DATE_SUB(NOW(), INTERVAL 1 HOUR) ORDER BY timestamp DESC LIMIT 1";
+            $sql = "SELECT timestamp, status FROM hostStats WHERE host=". $h->id ." ORDER BY timestamp DESC LIMIT 1";
             $iq =  $this->db->query($sql);
             $stat = $iq->row();
             if($stat){

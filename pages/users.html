@@ -7,7 +7,7 @@
     <span style="float: left; width: 20em">Name</span>
     <span style="float: left; width: 20em">Address</span>
 </div>
-<div style="width: 100%;" ng-repeat="user in users | orderBy:'name'" ng-class-odd="'odd'" ng-class-even="'even'">
-    <span style="display:inline-block; width: 20em">{{user.name}} <button style="float:right">Remove</button></span>
-    <span style="display:inline-block; width: 40em">{{user.email}} <button style="float:right">Manage</button></span>
+<div style="width: 100%;" ng-repeat="u in users | orderBy:'name' track by u.email" ng-class-odd="'odd'" ng-class-even="'even'">
+    <span style="display:inline-block; width: 20em">{{u.name}} <button style="float:right">Remove</button></span>
+    <span style="display:inline-block; width: 40em">{{u.email}} <button style="float:right" ng-click="user.manage(u)">Manage</button></span>
 </div>

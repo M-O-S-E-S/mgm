@@ -32,10 +32,7 @@ angular.module('mgmApp')
             this.modal = $modal.open({
                 templateUrl: '/templates/reviewPendingModal.html',
                 keyboard: false,
-                scope: $scope,
-                resolve: {
-                    "user": function() { return selected; }
-                }
+                scope: $scope
             });
         },
         approve: function(){

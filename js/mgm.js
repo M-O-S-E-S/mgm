@@ -93,9 +93,16 @@ mgmApp.service('estateService', function($rootScope, $http){
 mgmApp.service('hostService', function($rootScope, $http){
     var hosts = [];
     this.getHosts = function(){ return hosts; };
-    this.addHost = function(host) { 
-        hosts.push(host);
-        $rootScope.$broadcast("hostService");
+    this.add = function(address) {
+        $http.post("/server/host/add", {'host': address})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                hosts.push({address:address});
+                $rootScope.$broadcast("hostService");
+            } else {
+                alertify.error("Error adding new host: " + result["Message"]);
+            }
+        });
     };
     this.updateHosts = function(){
         $http.get("/server/host").success(function(data, status, headers, config){
@@ -105,11 +112,18 @@ mgmApp.service('hostService', function($rootScope, $http){
             }
         });
     };
-    this.remove = function(id){
-        $http.post("/server/host/delete/" + id)
+    this.remove = function(address){
+        $http.post("/server/host/remove", {'host': address})
             .success(function(data, status, headers, config){
                 if(data.Success){
-                    delete hosts[id];
+                    var hostIndex = -1;
+                    for(var i = 0; i < hosts.length; i++){
+                        if(hosts[i].address == address){
+                            hostIndex = i;
+                        }
+                    }
+                    delete hosts[hostIndex];
+                    alertify.success("Host: " + address + " removed Successfully");
                     $rootScope.$broadcast("hostService");
                 } else {
                     alertify.error(data.Message);
@@ -264,9 +278,8 @@ mgmApp.config(function($routeProvider, $locationProvider){
 /********************************************************************************************************************************************/
 /********************************************************************************************************************************************/
 
-
+/*
 var strings = {
-    "destroyHost": "Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.",
     "destroyEstate": "Are you sure you want to delete this estate?  Any running processes in this estate will need to be restarted",
     "saveOar": "Saving an oar file may take in excess of 30 minutes.<br>MGM will process this offline, and send you an email when it is ready for download.<br>You do not need to stay logged in during this process.<br>Please press Save below to begin.",
     "destroyRegion": "Are you sure? Deleting a region is irreversable without a separate backup or oar file",
@@ -275,8 +288,8 @@ var strings = {
     "stopListed": "Are you sure? This starts all regions currently displayed.  Regions already stopped are not affected",
     "dumpLogs": "Are you sure? This will download all logs available from this region, and can be large if MGM is  configured to retain logs for an extended amount of time, or if the region has logged excessively",
     "nukeContent": "Are you sure? This will irreversably wipe out any content you have in your region.",
-    "addHost": "Register a new region host by entering its ip address as seen from MGM:"
 }
+*/
 
 function downloadUrl(url){
     var iframe = document.getElementById('hiddenDownloader');

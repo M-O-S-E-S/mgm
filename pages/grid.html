@@ -4,13 +4,13 @@
         <tr>
             <td style="text-align: left"><h3>Hosts:</h3></td>
             <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
-                <button data-bind="click: createNewHost" class="btn btn-secondary">Add Host</button>
+                <button ng-click="addHost()" class="btn btn-secondary">Add Host</button>
             </td>
         </tr>
     </table>
 
     <div style="width: 100%; overflow: auto;">
-        <span style="float: left; width: 10em">Name</span>
+        <span style="float: left; width: 15em">Name</span>
         <span style="float: left; width: 10em">Address</span>
         <span style="float: left; width: 10em">Timestamp</span>
         <span style="float: left; width: 5em">Regions</span>
@@ -19,8 +19,8 @@
         <span style="float: left; width: 10em">Net</span>
     </div>
                     
-    <div style="width: 100%; overflow: auto;" ng-repeat="host in hosts | orderBy:'name'" ng-class-odd="'odd'" ng-class-even="'even'">
-        <span style="float: left; width: 10em">{{host.name}}</span>
+    <div style="width: 100%; overflow: auto;" ng-repeat="host in hosts | orderBy:'name' track by host.address" ng-class-odd="'odd'" ng-class-even="'even'">
+        <span style="float: left; width: 15em">{{host.name}} <button ng-click="removeHost(host.address)" style="float: right;">Remove</button></span>
         <span style="float: left; width: 10em">{{host.address}}</span>
         <span style="float: left; width: 10em">{{lastSeen(host.lastSeen)}}</span>
         <span style="float: left; width: 5em">{{regionCount(host.address)}}/{{host.capacity}}</span>

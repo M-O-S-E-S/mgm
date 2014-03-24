@@ -66,6 +66,27 @@ angular.module('mgmApp')
         return names.join();
     }
     
+    $scope.removeHost = function(address){
+        alertify.confirm("Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.", function(confirmed){
+            if(confirmed){
+                hostService.remove(address);
+            }
+        });
+    }
+    
+    $scope.addHost = function(){
+        alertify.prompt("Register a new region host by entering its ip address as seen from MGM:", function(confirmed, address){
+            if(confirmed){
+                Pattern = /^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/
+                if( ! address.match(Pattern)){
+                    alertify.error('Add Host Error: Invalid ip entered');
+                    return;
+                }
+                hostService.add(address);
+            }
+        });
+    }
+    
     estateService.updateEstates();
     hostService.updateHosts();
     userService.updateUsers();

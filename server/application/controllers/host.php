@@ -40,7 +40,8 @@ class Host extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         session_write_close();
-        $address = $this->input->post('host');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $address = $input_data['host'];
         if(filter_var($address, FILTER_VALIDATE_IP) === false){
             die(json_encode(array('Success' => false, 'Message' => "Invalid Address")));
         }
@@ -69,7 +70,8 @@ class Host extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         session_write_close();
-        $address = $this->input->post('host');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $address = $input_data['host'];
         if(filter_var($address, FILTER_VALIDATE_IP) === false){
             die(json_encode(array('Success' => false, 'Message' => "Invalid Address")));
         }

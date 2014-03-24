@@ -71,7 +71,7 @@ var viewModel = {
 
 	var summary = this.userSummary();
 
-        $.post("register/submit", {"name": uname, "email": email, "gender": gender, 'password': password, 'summary': summary}).done(function(data){
+        $.post("/server/register/submit", {"name": uname, "email": email, "gender": gender, 'password': password, 'summary': summary}).done(function(data){
             var result = JSON.parse(data);
             if( result['Success'] ){
                 viewModel.registrationSuccessful(true);

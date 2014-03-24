@@ -5,4 +5,4 @@
     <span style="float: left; width: 20%;">Registration Timestamp</span>
     <!--<span style="float: left; width: 20%;">Last Seen</span>-->
 </div>
-<div data-bind="template: {name: 'pending-user-template', foreach: PendingUsers }, stripe: PendingUsers, evenClass: 'light', oddClass: 'dark'"></div>
+<div style="width: 100%; overflow: auto;" ng-repeat="u in pending | orderBy:'name' track by e.email" ng-class-odd="'odd'" ng-class-even="'even'">{{u}}</div>

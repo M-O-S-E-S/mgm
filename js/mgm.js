@@ -64,9 +64,16 @@ mgmApp.service('regionService', function($rootScope, $http){
 mgmApp.service('estateService', function($rootScope, $http){
     var estates = [];
     this.getEstates = function(){ return estates; };
-    this.addEstate = function(estate) { 
-        estates.push(estate);
-        $rootScope.$broadcast("estateService");
+    this.add = function(owner, name) { 
+        $http.post("/server/estate/create", {'name': name, 'owner': owner})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                estates.push({name:name, owner:owner, managers:[]});
+                $rootScope.$broadcast("estateService");
+            } else {
+                alertify.error("Error adding new estate: " + data.Message);
+            }
+        });
     };
     this.updateEstates = function(){
         $http.get("/server/estate").success(function(data, status, headers, config){
@@ -76,11 +83,13 @@ mgmApp.service('estateService', function($rootScope, $http){
             }
         });
     };
-    this.remove = function(id){
-        $http.post("/server/estate/delete/" + id)
+    this.remove = function(est){
+        $http.post("/server/estate/destroy/" + est.id)
             .success(function(data, status, headers, config){
                 if(data.Success){
-                    delete estates[id];
+                    var index = estates.indexOf(est);
+                    estates.splice(index,1);
+                    alertify.success("Estate: " + name + " removed Successfully");
                     $rootScope.$broadcast("estateService");
                 } else {
                     alertify.error(data.Message);
@@ -97,7 +106,7 @@ mgmApp.service('hostService', function($rootScope, $http){
         $http.post("/server/host/add", {'host': address})
         .success(function(data, status, headers, config){
             if(data.Success){
-                hosts.push({address:address});
+                hosts.push({address:address,regions:[]});
                 $rootScope.$broadcast("hostService");
             } else {
                 alertify.error("Error adding new host: " + result["Message"]);
@@ -112,18 +121,13 @@ mgmApp.service('hostService', function($rootScope, $http){
             }
         });
     };
-    this.remove = function(address){
-        $http.post("/server/host/remove", {'host': address})
+    this.remove = function(host){
+        $http.post("/server/host/remove", {'host': host.address})
             .success(function(data, status, headers, config){
                 if(data.Success){
-                    var hostIndex = -1;
-                    for(var i = 0; i < hosts.length; i++){
-                        if(hosts[i].address == address){
-                            hostIndex = i;
-                        }
-                    }
-                    delete hosts[hostIndex];
-                    alertify.success("Host: " + address + " removed Successfully");
+                    var index = hosts.indexOf(host);
+                    hosts.splice(index,1);
+                    alertify.success("Host: " + host.address + " removed Successfully");
                     $rootScope.$broadcast("hostService");
                 } else {
                     alertify.error(data.Message);
@@ -280,7 +284,6 @@ mgmApp.config(function($routeProvider, $locationProvider){
 
 /*
 var strings = {
-    "destroyEstate": "Are you sure you want to delete this estate?  Any running processes in this estate will need to be restarted",
     "saveOar": "Saving an oar file may take in excess of 30 minutes.<br>MGM will process this offline, and send you an email when it is ready for download.<br>You do not need to stay logged in during this process.<br>Please press Save below to begin.",
     "destroyRegion": "Are you sure? Deleting a region is irreversable without a separate backup or oar file",
     "destroyUser": "Are you sure? This purges the user and their avatar from the grid",

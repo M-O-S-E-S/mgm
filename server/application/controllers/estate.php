@@ -58,8 +58,9 @@ class Estate extends CI_Controller {
         }
         session_write_close();
         
-        $name = $this->input->post('name');
-        $owner = $this->input->post('owner');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $name = $input_data['name'];
+        $owner = $input_data['owner'];
         
         if( $name == ""){
             die(json_encode(array('Success' => false, 'Message' => "Estate Name cannot be blank")));

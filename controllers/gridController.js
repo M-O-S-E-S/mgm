@@ -1,5 +1,5 @@
 angular.module('mgmApp')
-.controller('GridController', function($scope, estateService, hostService, userService, regionService){
+.controller('GridController', function($scope, $modal, estateService, hostService, userService, regionService){
     $scope.estates = estateService.getEstates();
     $scope.$on("estateService", function(){
         $scope.estates = estateService.getEstates();
@@ -45,6 +45,7 @@ angular.module('mgmApp')
         var numminutes = Math.floor(((seconds % 86400) % 3600) / 60);
         return numminutes + " minutes ago";
     }
+    
     $scope.userName = function(uuid){
         for(var i = 0; i < $scope.users.length; i++){
             if($scope.users[i].uuid == uuid){
@@ -66,25 +67,66 @@ angular.module('mgmApp')
         return names.join();
     }
     
-    $scope.removeHost = function(address){
-        alertify.confirm("Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.", function(confirmed){
-            if(confirmed){
-                hostService.remove(address);
-            }
-        });
+    $scope.host = {
+        remove: function(host){
+            alertify.confirm("Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.", function(confirmed){
+                if(confirmed){
+                    hostService.remove(host);
+                }
+            });
+        },
+        add: function(){
+            alertify.prompt("Register a new region host by entering its ip address as seen from MGM:", function(confirmed, address){
+                if(confirmed){
+                    Pattern = /^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/
+                    if( ! address.match(Pattern)){
+                        alertify.error('Add Host Error: Invalid ip entered');
+                        return;
+                    }
+                    hostService.add(address);
+                }
+            });
+        }
     }
+
     
-    $scope.addHost = function(){
-        alertify.prompt("Register a new region host by entering its ip address as seen from MGM:", function(confirmed, address){
-            if(confirmed){
-                Pattern = /^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/
-                if( ! address.match(Pattern)){
-                    alertify.error('Add Host Error: Invalid ip entered');
+    $scope.estate = {
+        modal: undefined,
+        name: "",
+        owner: "",
+        remove: function(est){
+            alertify.confirm("Are you sure you want to delete this estate?  Any running processes in this estate will need to be restarted", function(confirmed){
+                if(confirmed){
+                    estateService.remove(est);
+                }
+            });
+        },
+        showAddModal: function(){
+            this.modal = $modal.open({
+                templateUrl: '/templates/addEstateModal.html',
+                keyboard: false,
+                scope: $scope
+            });
+        },
+        add: function(){
+            //check for empty name
+            if(this.name == ""){
+                alertify.error("Estate name cannot be empty");
+                return;
+            }
+            //check for duplicate estate name
+            for(var i = 0; i < $scope.estates.length; i++){
+                if($scope.estates[i].name == this.name){
+                    alertify.error("Estate name " + this.name + " already exists");
                     return;
                 }
-                hostService.add(address);
             }
-        });
+            estateService.add(this.owner.uuid, this.name);
+            this.modal.close();
+        },
+        cancel: function(){
+            this.modal.close();
+        }
     }
     
     estateService.updateEstates();

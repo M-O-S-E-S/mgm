@@ -1,0 +1,16 @@
+<div class="modal-header">
+    <h3>Create a new Estate</h3>
+</div>
+<div class="modal-body">
+    <div id="LoadIar">
+        <p class="alertify-message">Please select the Owner and Name for the new estate.</p>
+        <div class="alertify-text-wrapper">
+            <label>Owner:</label><select ng-model="estate.owner" ng-options="user.name for user in users track by user.uuid" class="alertify-text" />
+            <label>Name:</label><input ng-model="estate.name" class="alertify-text" />
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-warning" ng-click="estate.cancel()">Cancel</button>
+    <button class="btn btn-primary" ng-click="estate.add()">Create</button>
+</div>

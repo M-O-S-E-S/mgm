@@ -3,8 +3,8 @@
     <table style="width: 100%;">
         <tr>
             <td style="text-align: left"><h3>Hosts:</h3></td>
-            <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
-                <button ng-click="addHost()" class="btn btn-secondary">Add Host</button>
+            <td style="text-align: right">
+                <button ng-click="host.add()" class="btn btn-secondary">Add Host</button>
             </td>
         </tr>
     </table>
@@ -19,23 +19,23 @@
         <span style="float: left; width: 10em">Net</span>
     </div>
                     
-    <div style="width: 100%; overflow: auto;" ng-repeat="host in hosts | orderBy:'name' track by host.address" ng-class-odd="'odd'" ng-class-even="'even'">
-        <span style="float: left; width: 15em">{{host.name}} <button ng-click="removeHost(host.address)" style="float: right;">Remove</button></span>
-        <span style="float: left; width: 10em">{{host.address}}</span>
-        <span style="float: left; width: 10em">{{lastSeen(host.lastSeen)}}</span>
-        <span style="float: left; width: 5em">{{regionCount(host.address)}}/{{host.capacity}}</span>
-        <span style="float: left; width: 25em">{{host.system.cpuPercent}}</span>
-        <span style="float: left; width: 10em">{{host.system.memPercent}}% {{(host.system.memKB/1024).toFixed(2)}}MB</span>
-        <span style="float: left; width: 10em">{{(host.system.netSentPer/1024).toFixed(2)}} / {{(host.system.netRecvPer/1024).toFixed(2)}} KBps</span>
+    <div style="width: 100%; overflow: auto;" ng-repeat="h in hosts | orderBy:'name' track by h.address" ng-class-odd="'odd'" ng-class-even="'even'">
+        <span style="float: left; width: 15em">{{h.name}} <button ng-click="host.remove(h)" style="float: right;">Remove</button></span>
+        <span style="float: left; width: 10em">{{h.address}}</span>
+        <span style="float: left; width: 10em">{{lastSeen(h.lastSeen)}}</span>
+        <span style="float: left; width: 5em">{{regionCount(h.address)}}/{{host.capacity}}</span>
+        <span style="float: left; width: 25em">{{h.system.cpuPercent}}</span>
+        <span style="float: left; width: 10em">{{h.system.memPercent}}% {{(h.system.memKB/1024).toFixed(2)}}MB</span>
+        <span style="float: left; width: 10em">{{(h.system.netSentPer/1024).toFixed(2)}} / {{(h.system.netRecvPer/1024).toFixed(2)}} KBps</span>
     </div>
     &nbsp
 </div>
 <table style="width: 100%;">
     <tr>
         <td style="text-align: left"><h3>Estates:</h3></td>
-        <div data-bind="if: auth.activeUser">
-            <td style="text-align: right" data-bind="visible: auth.activeUser().AccessLevel() > 249">
-                <button data-bind="click: createNewEstate" class="btn btn-secondary">Add Estate</button>
+        <div>
+            <td style="text-align: right" ng-if="auth.activeUser.accessLevel > 249">
+                <button ng-click="estate.showAddModal()" class="btn btn-secondary">Add Estate</button>
             </td>
         </div>
     </tr>
@@ -46,9 +46,9 @@
     <span style="float: left; width: 20em">Owner</span>
     <span style="floatn: left; width: 50em">Managers</span>
 </div>
-<div style="width: 100%; overflow: auto;" ng-repeat="estate in estates | orderBy:'name'" ng-class-odd="'odd'" ng-class-even="'even'">
-    <span style="float: left; width: 15em">{{estate.name}}</span>
-    <span style="float: left; width: 10em">{{estate.regions.length}}</span>
-    <span style="float: left; width: 20em">{{userName(estate.owner)}}</span>
-    <span style="float: left">{{userNameList(estate.managers)}}</span>
+<div style="width: 100%; overflow: auto;" ng-repeat="est in estates | orderBy:'name'" ng-class-odd="'odd'" ng-class-even="'even'">
+    <span style="float: left; width: 15em">{{est.name}} <button ng-click="estate.remove(est)" style="float: right;">Remove</button></span>
+    <span style="float: left; width: 10em">{{est.regions.length}}</span>
+    <span style="float: left; width: 20em">{{userName(est.owner)}}</span>
+    <span style="float: left">{{userNameList(est.managers)}}</span>
 </div>

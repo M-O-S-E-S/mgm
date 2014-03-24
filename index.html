@@ -20,7 +20,7 @@
 		<script src="js/angular-route-1.2.14.min.js"></script>
 		<script src="js/ui-bootstrap-tpls-0.10.0.min.js"></script>
         <!--<script src="js/jcanvas.min.js"></script>-->
-        <script type="text/javascript" src="js/map.js"></script>
+        <!--<script type="text/javascript" src="js/map.js"></script>-->
 		<script type="text/javascript" src="js/mgm.js"></script>
         <script type="text/javascript" src="controllers/mgmController.js"></script>
         <script type="text/javascript" src="controllers/taskController.js"></script>
@@ -31,8 +31,7 @@
 		<script type="text/javascript" src="controllers/userController.js"></script>
 		<script type="text/javascript" src="controllers/pendingUserController.js"></script>
 	</head>
-	<body onunload="MGM.unload();" ng-controller="mgmController">
-        {{currentTab}}
+	<body ng-controller="mgmController">
 <!--+++++++++++++++++++++++++++++++++++ HEADERS ++++++++++++++++++++++++++++++++++++++++++++++-->
         <div id="header">
             <table ng-show="!auth.loggedIn" style="width: 100%;">

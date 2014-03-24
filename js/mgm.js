@@ -109,7 +109,7 @@ mgmApp.service('hostService', function($rootScope, $http, $q){
             if(data.Success){
                 hosts.push({address:address,regions:[]});
                 $rootScope.$broadcast("hostService");
-                defer.resolve(true);
+                defer.resolve();
             } else {
                 defer.reject(data.Message);
             }
@@ -132,7 +132,7 @@ mgmApp.service('hostService', function($rootScope, $http, $q){
                     var index = hosts.indexOf(host);
                     hosts.splice(index,1);
                     $rootScope.$broadcast("hostService");
-                    defer.resolve(true);
+                    defer.resolve();
                 } else {
                     defer.reject(data.Message);
                 }
@@ -142,7 +142,7 @@ mgmApp.service('hostService', function($rootScope, $http, $q){
     $rootScope.$on("mgmUpdate", this.updateHosts);
 });
 
-mgmApp.service('userService', function($rootScope, $http){
+mgmApp.service('userService', function($rootScope, $http, $q){
     var users = [];
     var pending = [];
     this.getUsers = function(){ return users; };
@@ -172,6 +172,7 @@ mgmApp.service('userService', function($rootScope, $http){
             });
     };
     this.approvePending = function(user){
+        var defer = new $q.defer();
         $http.post("/server/user/approve", {"email": user.email})
         .success(function(data, status, headers, config){
             if(data.Success){
@@ -179,13 +180,27 @@ mgmApp.service('userService', function($rootScope, $http){
                 pending.splice(index,1);
                 users.push(user);
                 $rootScope.$broadcast("userService");
-                return true;
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
             }
-            return data.Message;
         });
+        return defer.promise;
     };
-    this.denyPending = function(user){
-        
+    this.denyPending = function(user, reasons){
+        var defer = new $q.defer();
+        $http.post("/server/user/deny", {"email": user.email, 'reason': reasons})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                var index = pending.indexOf(user);
+                pending.splice(index,1);
+                $rootScope.$broadcast("userService");
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
     };
     $rootScope.$on("mgmUpdate", this.updateUsers);
 });
@@ -503,66 +518,6 @@ function User(name, uuid, email, accessLevel, identities){
             }
         });
     };
-};
-
-function PendingUser(name, email, gender, registered, summary){
-    var self = this;
-    this.Name = ko.observable(name);
-    this.Email = ko.observable(email);
-    this.Gender = ko.observable(gender);
-    this.Registered = ko.observable(registered);
-    this.Summary = ko.observable(summary);
-    
-    this.review = function(){
-        self.denyReason("");
-        alertify.prompt("");
-        $('.alertify-message').html('<div id="ReviewPending"><p data-bind="text: Name"></p><p data-bind="text: Email"></p><label>Summary:</label><p class="alertify-text" data-bind="text: Summary" style="height:200px; width: 500px; overflow: auto;"></p><p>Explanation to user if denied:</p><textarea class="alertify-text" rrows="4" cols="70" data-bind="value: denyReason"></textarea></div>');
-        $('.alertify-buttons').append('<button id="approve-button" class="alertify-button alertify-button-ok" data-bind="click: approve">Approve</button><button id="deny-button" class="alertify-button alertify-button-cancel" data-bind="click: deny">Deny</button>');
-        $('#alertify-ok').hide();
-        $('.alertify-text-wrapper').hide();
-        $('#alertify-cancel').removeClass("alertify-button-cancel");
-        $('#alertify-cancel').addClass("alertify-button-grey");
-        ko.applyBindings(self, $(".alertify-inner")[0]);
-    };
-    
-    this.approve = function(){
-        $.post("user/approve", {
-            "email": self.Email()
-            }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                delete MGM.pendingUsersModel[self.Email()];
-                MGM.pendingUserUpdateDummy(self.Email());
-                MGM.syncState();
-                $("#approve-button").remove();
-                $("#deny-button").remove();
-                $('#alertify-cancel').html('OK');
-                $('.alertify-message').html('User ' + self.Name() + ' has been approved.');
-            } else {
-                alertify.error(result["Message"]);
-            }
-        });
-    };
-    
-    this.denyReason = ko.observable('');
-    this.deny = function(){
-        $.post("user/deny", { 
-                    'email': self.Email(),
-                    'reason': self.denyReason() }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                delete MGM.pendingUsersModel[self.Email()];
-                MGM.pendingUserUpdateDummy(self.Email());
-                MGM.pendingUserUpdateDummy(Math.random());
-                $("#approve-button").remove();
-                $("#deny-button").remove();
-                $('#alertify-cancel').html('OK');
-                $('.alertify-message').html('User ' + self.Name() + ' has been denied.');
-            } else {
-                alertify.error("Error denying user " + self.Name() + ": " + result["Message"]);
-            }
-        });
-    }
 };
 
 function Task(id, timestamp, type, user, data){

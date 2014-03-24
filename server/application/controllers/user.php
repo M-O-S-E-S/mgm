@@ -60,7 +60,8 @@ class User extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         session_write_close();
-        $email = $this->input->post('email');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $email = $input_data['email'];
         
         $query = $this->db->get_where("users", array("email" => $email));
         $user = $query->row();
@@ -73,7 +74,7 @@ class User extends CI_Controller {
         $region = $query->row();
 
         if(!$region){
-            die(json_encode(array('Success' => false, 'Message' => "Error: Could not find default region")));
+            die(json_encode(array('Success' => false, 'Message' => "Error: Could not find default region ")));
         }
 
         if($user->gender == 'M'){
@@ -118,8 +119,9 @@ class User extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         session_write_close();
-        $email = $this->input->post('email');
-		$reason = $this->input->post('reason');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $email = $input_data['email'];
+        $reason = $input_data['reason'];
 
         $this->db->delete('users', array('email' => $email));
 		if( $reason && $reason != ""){

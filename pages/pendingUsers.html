@@ -2,7 +2,12 @@
     <span style="float: left; width: 20%;">Name</span>
     <span style="float: left; width: 20%;">Address</span>
     <span style="float: left; width: 20%;">Gender</span>
-    <span style="float: left; width: 20%;">Registration Timestamp</span>
-    <!--<span style="float: left; width: 20%;">Last Seen</span>-->
+    <span style="float: left; width: 20%;">Registered</span>
 </div>
-<div style="width: 100%; overflow: auto;" ng-repeat="u in pending | orderBy:'name' track by e.email" ng-class-odd="'odd'" ng-class-even="'even'">{{u}}</div>
+<div style="width: 100%; overflow: auto;" ng-repeat="u in users | orderBy:'name' track by u.email" ng-class-odd="'odd'" ng-class-even="'even'">
+    <span style="float: left; width: 20%;">{{u.name}}</span>
+    <span style="float: left; width: 20%;">{{u.email}}</span>
+    <span style="float: left; width: 20%;">{{u.gender}}</span>
+    <span style="float: left; width: 20%;">{{lastSeen(u.registered)}}</span>
+    <span style="float: left; width: 20%;"><button ng-click="user.review(u)">Review</button></span>
+</div>

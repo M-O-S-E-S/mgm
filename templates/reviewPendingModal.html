@@ -1,0 +1,16 @@
+<div class="modal-header">
+    <h3>Pending User Review</h3>
+</div>
+<div class="modal-body">
+    <div id="ReviewPending">
+        <p>{{user.current.name}}</p>
+        <p>{{user.current.email}}</p>
+        <label>Summary:</label><p class="alertify-text" style="height:200px; width: 500px; overflow: auto;">{{user.current.summary}}</p>
+        <p>Explanation to user if denied:</p><textarea class="alertify-text" rrows="4" cols="70" ng-model="excuses"></textarea>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-danger" ng-click="user.deny(excuses)">Deny</button>
+    <button class="btn btn-primary" ng-click="user.modal.close()">Cancel</button>
+    <button class="btn btn-success" ng-click="user.approve()">Approve</button>
+</div>

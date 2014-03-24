@@ -71,7 +71,7 @@ angular.module('mgmApp')
         remove: function(host){
             alertify.confirm("Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.", function(confirmed){
                 if(confirmed){
-                    hostService.remove(host);
+                    hostService.remove(host).then(function(item){ console.log(item); });
                 }
             });
         },
@@ -83,7 +83,7 @@ angular.module('mgmApp')
                         alertify.error('Add Host Error: Invalid ip entered');
                         return;
                     }
-                    hostService.add(address);
+                    hostService.add(address).then(function(item){ console.log(item); });
                 }
             });
         }

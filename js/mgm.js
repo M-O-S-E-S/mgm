@@ -99,19 +99,22 @@ mgmApp.service('estateService', function($rootScope, $http){
     $rootScope.$on("mgmUpdate", this.updateEstates);
 });
 
-mgmApp.service('hostService', function($rootScope, $http){
+mgmApp.service('hostService', function($rootScope, $http, $q){
     var hosts = [];
     this.getHosts = function(){ return hosts; };
     this.add = function(address) {
+        var defer = new $q.defer();
         $http.post("/server/host/add", {'host': address})
         .success(function(data, status, headers, config){
             if(data.Success){
                 hosts.push({address:address,regions:[]});
                 $rootScope.$broadcast("hostService");
+                defer.resolve(true);
             } else {
-                alertify.error("Error adding new host: " + result["Message"]);
+                defer.reject(data.Message);
             }
         });
+        return defer.promise;
     };
     this.updateHosts = function(){
         $http.get("/server/host").success(function(data, status, headers, config){
@@ -122,17 +125,19 @@ mgmApp.service('hostService', function($rootScope, $http){
         });
     };
     this.remove = function(host){
+        var defer = new $q.defer();
         $http.post("/server/host/remove", {'host': host.address})
             .success(function(data, status, headers, config){
                 if(data.Success){
                     var index = hosts.indexOf(host);
                     hosts.splice(index,1);
-                    alertify.success("Host: " + host.address + " removed Successfully");
                     $rootScope.$broadcast("hostService");
+                    defer.resolve(true);
                 } else {
-                    alertify.error(data.Message);
+                    defer.reject(data.Message);
                 }
             });
+        return defer.promise;
     };
     $rootScope.$on("mgmUpdate", this.updateHosts);
 });
@@ -165,6 +170,22 @@ mgmApp.service('userService', function($rootScope, $http){
                     alertify.error(data.Message);
                 }
             });
+    };
+    this.approvePending = function(user){
+        $http.post("/server/user/approve", {"email": user.email})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                var index = pending.indexOf(user);
+                pending.splice(index,1);
+                users.push(user);
+                $rootScope.$broadcast("userService");
+                return true;
+            }
+            return data.Message;
+        });
+    };
+    this.denyPending = function(user){
+        
     };
     $rootScope.$on("mgmUpdate", this.updateUsers);
 });

@@ -236,6 +236,37 @@ mgmApp.service('userService', function($rootScope, $http, $q){
         });
         return defer.promise;
     };
+    this.setEmail = function(user, email){
+        var defer = new $q.defer();       
+        $http.post("/server/user/email",{ 'id': user.uuid, 'email': email })
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+                user.email = email;
+            } else {
+                defer.reject("Error changing email for " + self.name + ": " + data.Message);
+            }
+        }).error(function(data, status, headers, config){
+            defer.reject("Error connecting to MGM");
+        });
+        return defer.promise;
+    };
+    this.setPassword = function(user, password){
+        var defer = new $q.defer();
+        if(password == ""){
+            alertify.error('Error changing password for ' + self.Name() + ': password cannot be blank');
+            return;
+        }
+        $http.post("/server/user/password", {'id': user.uuid, 'password': password })
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject("Error changing password for " + user.name + ": " + data.Message);
+            }
+        });
+        return defer.promise;
+    };
     $rootScope.$on("mgmUpdate", this.updateUsers);
 });
 

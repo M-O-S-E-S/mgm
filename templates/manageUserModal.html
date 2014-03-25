@@ -3,9 +3,9 @@
 </div>
 <div class="modal-body">
     <div id="ReviewPending">
-        <p>{{user.current.name}}</p>
-        <label>Change Email:</label><input ng-model="user.current.email"  /><button>Set</button><br>
-        <label>New Password:</label><input ng-model="password" ng-options="user.name for user in users track by user.uuid" /><button>Set</button><br>
+        <p>{{user.current.name}} {{user.current.email}}</p>
+        <label>New Email:</label><input ng-model="email" /><button ng-click="user.setEmail(email)">Set</button><br>
+        <label>New Password:</label><input ng-model="password" /><button ng-click="user.setPassword(password)">Set</button><br>
         <label>Suspend Account:</label>
         <button ng-if="!user.isSuspended(user.current)" ng-click="user.suspend()" class="btn btn-danger">Suspend</button>
         <button ng-if="user.isSuspended(user.current)" ng-click="user.restore()" class="btn btn-success">Restore</button>

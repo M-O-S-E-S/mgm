@@ -41,6 +41,32 @@ angular.module('mgmApp')
                 function(){ alertify.success("User " + $scope.user.current.name + " restored") },
                 function(msg){ alertify.error(msg); }
             );
+        },
+        setEmail: function(email){
+            if(email.trim == this.current.email.trim()){
+                alertify.log('No Change in Email');
+                return;
+            }
+            if( ! /(.+)@(.+){2,}\.(.+){2,}/.test(email) ){
+                alertify.error('Invalid email entered');
+                return;
+            }
+            for(var i = 0; i < $scope.users.length; i++){
+                if($scope.users[i].email == email){
+                    alertify.error("Error changing email for " + this.current.name + ", email already in use by " + $scope.users[i].name);
+                    return;
+                }
+            }
+            userService.setEmail(this.current, email).then(
+                function(){ alertify.success("Email for " + $scope.user.current.name + " changed successfully"); },
+                function(msg){ alertify.error(msg); }
+            );
+        },
+        setPassword: function(password){
+            userService.setPassword(this.current, password).then(
+                function(){ alertify.success("Password for " + $scope.user.current.name + " changed successfully"); },
+                function(msg){ alertify.error(msg); }
+            );
         }
     }
 

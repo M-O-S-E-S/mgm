@@ -183,8 +183,9 @@ class User extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         session_write_close();
-        $uuid = $this->input->post('id');
-        $email = $this->input->post('email');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $uuid = $input_data['id'];
+        $email = $input_data['email'];
         session_write_close();
         $user = $this->simiangrid->getUserByID($uuid);
         if( $user === false){
@@ -232,9 +233,9 @@ class User extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         session_write_close();
-        $plainPass = $this->input->post('password');
-        $uuid = $this->input->post('id');
-        session_write_close();
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $uuid = $input_data['id'];
+        $plainPass = $input_data['password'];
         $user = $this->simiangrid->getUserByID($uuid);
         if( $user === false){
             die(json_encode(array('Success' => false, 'Message' => "Could not find user on grid")));

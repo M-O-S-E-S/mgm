@@ -67,6 +67,16 @@ angular.module('mgmApp')
                 function(){ alertify.success("Password for " + $scope.user.current.name + " changed successfully"); },
                 function(msg){ alertify.error(msg); }
             );
+        },
+        remove: function(user){
+            alertify.confirm("Are you sure? This purges the user and their avatar from the grid", function(confirmed){
+                if(confirmed){
+                    userService.remove(user).then(
+                        function(){ alertify.success("User " + user.name + " has been deleted"); },
+                        function(msg){ alertify.error(msg); }
+                    );
+                }
+            });
         }
     }
 

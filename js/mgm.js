@@ -160,16 +160,20 @@ mgmApp.service('userService', function($rootScope, $http, $q){
             }
         });
     };
-    this.remove = function(id){
-        $http.post("/server/user/delete/" + id)
-            .success(function(data, status, headers, config){
-                if(data.Success){
-                    delete users[id];
-                    $rootScope.$broadcast("userService");
-                } else {
-                    alertify.error(data.Message);
-                }
-            });
+    this.remove = function(user){
+        var defer = new $q.defer();
+        $http.post("/server/user/destroy/" + user.uuid)
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                var index = users.indexOf(user);
+                users.splice(index,1);
+                defer.resolve();
+                $rootScope.$broadcast("userService");
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
     };
     this.approvePending = function(user){
         var defer = new $q.defer();
@@ -387,7 +391,6 @@ mgmApp.config(function($routeProvider, $locationProvider){
 var strings = {
     "saveOar": "Saving an oar file may take in excess of 30 minutes.<br>MGM will process this offline, and send you an email when it is ready for download.<br>You do not need to stay logged in during this process.<br>Please press Save below to begin.",
     "destroyRegion": "Are you sure? Deleting a region is irreversable without a separate backup or oar file",
-    "destroyUser": "Are you sure? This purges the user and their avatar from the grid",
     "startListed": "Are you sure? This starts all regions currently displayed.  Regions already running are not affected",
     "stopListed": "Are you sure? This starts all regions currently displayed.  Regions already stopped are not affected",
     "dumpLogs": "Are you sure? This will download all logs available from this region, and can be large if MGM is  configured to retain logs for an extended amount of time, or if the region has logged excessively",
@@ -405,185 +408,6 @@ function downloadUrl(url){
     }
     iframe.src = url;
 }
-
-function User(name, uuid, email, accessLevel, identities){
-    var self = this;
- 
-    this.name = name;
-    this.email = email;
-    this.accessLevel = accessLevel;
-    this.uuid = uuid;
-    this.identities = identities;
-    
-    this.Enabled = function(){
-        var enabled = false;
-        $.each(self.identities, function(index, identity){
-            if(identity.enabled){
-                enabled = true;
-            }
-        });
-        return enabled;
-    };
-    
-    this.suspend = function(){
-        if(!self.Enabled()){
-            return;
-        }
-        $http({
-            method: 'POST',
-            url: "user/suspend", 
-            data: $.param({ 'id': self.uuid }),
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-        }).success(function(data, status, headers, config){
-            if(data.Success){
-                alertify.success(self.name + " has been suspended");
-                $.each(self.identities, function(index, identity){
-                    identity.enabled = false;
-                });
-            } else {
-                alertify.error("Error suspending " + self.name + ": " + data.Message);
-            }
-        }).error(function(data, status, headers, config){
-            alertify.error("Error connecting to MGM");
-        });
-    }
-    
-    this.restore = function(){
-        if(self.Enabled()){
-            return;
-        }
-        $http({
-            method: 'POST',
-            url: "user/restore", 
-            data: $.param({ 'id': self.uuid }),
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-        }).success(function(data, status, headers, config){
-            if(data.Success){
-                alertify.success(self.name + " has been restored");
-                $.each(self.identities, function(index, identity){
-                    identity.enabled = true;
-                });
-            } else {
-                alertify.error("Error restoring " + self.name + ": " + data.Message);
-            }
-        }).error(function(data, status, headers, config){
-            alertify.error("Error connecting to MGM");
-        });
-    }
-    
-    this.manage = function(){
-        self.candidateEmail = self.email;
-        self.candidatePassword = "";
-        self.candidateAccessLevel = self.accessLevel;
-        alertify.prompt("");
-        $('.alertify-message').html('<div id="ManageUser"><p data-bind="text: Name"></p><hr><label>Change Email:</label><input type="text" class="alertify-text" data-bind="value: CandidateEmail"/><button class="alertify-button alertify-button-ok" data-bind="click: setEmail">set</button><hr><label>Set Password:</label><input class="alertify-text" data-bind="value: CandidatePassword"><button class="alertify-button alertify-button-ok" data-bind="click: setPassword">set</button><hr><label>Suspend Account:</label><button class="alertify-button alertify-button-cancel" data-bind="click: suspend, visible: Enabled()">Suspend</button><button class="alertify-button alertify-button-ok" data-bind="click: restore, visible: !Enabled()">Restore</button><hr></div>');
-        $('.alertify-text').css("width","auto");
-        $('#alertify-ok').html("Close");
-        $('.alertify-text-wrapper').hide();
-        $('.alertify-button-cancel').hide();
-        return;
-    };
-
-    this.candidateEmail = "";
-    this.setEmail = function(){
-        var email = self.candidateEmail.trim();
-        if(email == self.email){
-            alertify.log('No Change in Email');
-            return;
-        }
-        if(email == ""){
-            alertify.error("email cannot be blank");
-            return;
-        }
-        var dupe = false;
-        MGM.findUserByEmail(email);
-        if( dupe != null){
-            alertify.error("Error changing email for " + self.Name() + ", email already in use by " + dupe.Name());
-            return;
-        }
-        $http({
-            method: 'POST',
-            url: "user/email", 
-            data: $.param({ 'id': self.uuid, 'email': email }),
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-        }).success(function(data, status, headers, config){
-            if(data.Success){
-                alertify.success("Email for " + self.name + " changed successfully");
-                self.email = email;
-            } else {
-                alertify.error("Error changing email for " + self.name + ": " + result["Message"]);
-                self.candidateEmail = self.email;
-            }
-        }).error(function(data, status, headers, config){
-            alertify.error("Error connecting to MGM");
-        });
-    };
-    
-    this.CandidateAccessLevel = "";
-    this.setAccessLevel = function(){
-        var userLevel = parseInt(self.CandidateAccessLevel());
-        if(userLevel < 0) userLevel = 0;
-        if(userLevel > 254) userLevel = 254;
-        if(isNaN(userLevel)){
-            alertify.error("Error changing access level for " + self.Name() + " Invalid Access Level. Must be int 0 <= x < 255");
-            return;
-        }
-        if(userLevel == self.AccessLevel()){
-            alertify.log('Not changing access level for ' + self.Name() + 'No Change in Access Level');
-            return;
-        }
-        $.post("user/accessLevel", { 
-                    'id': self.UUID(), 
-                    'accessLevel': userLevel }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                alertify.success("Access Level for " + self.Name() + " changed successfully");
-                self.AccessLevel(self.CandidateAccessLevel());
-            } else {
-                alertify.error("Error changing access level for " + self.Name() + ": " + result["Message"]);
-                self.CandidateAccessLevel(self.AccessLevel());
-            }
-        });
-    };
-    
-    this.CandidatePassword = "";
-    this.setPassword = function(){
-        var password = self.CandidatePassword().trim();
-        if(password == ""){
-            alertify.error('Error changing password for ' + self.Name() + ': password cannot be blank');
-            return;
-        }
-        $.post("user/password", { 
-                    'id': self.UUID(), 
-                    'password': password }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                alertify.success("Password for " + self.Name() + " changed successfully");
-                self.CandidatePassword('');
-            } else {
-                alertify.error("Error changing password for " + self.Name() + ": " +result["Message"]);
-                self.CandidatePassword('');
-            }
-        });
-    };
-
-    this.destroy = function(){
-        alertify.confirm(strings["destroyUser"], function(confirmed){
-            if(confirmed){
-                $.post("user/destroy/" + self.UUID()).done(function(msg){
-                    var result = $.parseJSON(msg);
-                    if(result["Success"]){
-                        delete MGM.usersModel[self.UUID()];
-                        MGM.userUpdateDummy(Math.random());
-                        alertify.success("User: " + self.Name() + " removed Successfully");
-                    } else {
-                        alertify.error(result["Message"]);
-                    }
-                });
-            }
-        });
-    };
-};
 
 function Task(id, timestamp, type, user, data){
     var self = this;

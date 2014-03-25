@@ -47,7 +47,7 @@ angular.module('mgmApp')
             $http.get("/server/auth").success(function(data, status, headers, config){
                 if(data.Success){
                     console.log("session resume successfull");
-                    $scope.auth.activeUser = new User(data.username, data.uuid, data.email, data.accessLevel, []);
+                    $scope.auth.activeUser = { name:data.username, uuid:data.uuid, email:data.email, accessLevel: data.accessLevel, identities: [{Enabled: true}]};
                     $scope.auth.loggedIn = true;
                     $scope.auth.userName = "";
                     $scope.auth.password = "";

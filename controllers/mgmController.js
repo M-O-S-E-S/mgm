@@ -1,8 +1,5 @@
 angular.module('mgmApp')
 .controller('mgmController', function($rootScope,$scope,$http,$location, $interval){
-    $scope.currentTab = "None";
-    $scope.users = [];
-    
     $scope.location = {
         sections: [
             { name: 'Account', link: '/account' },
@@ -10,12 +7,7 @@ angular.module('mgmApp')
             { name: 'Grid', link: '/grid'},
             { name: 'Map', link: '/map'},
             { name: 'Users', link: '/users'},
-            { name: 'Pending Users', link: '/pending'} ],
-        current: $location.path(),
-        goto: function(path){
-            $location.path(path);
-            $scope.location.current = $location.path();
-        }
+            { name: 'Pending Users', link: '/pending'} ]
     };
     
     $scope.auth = {

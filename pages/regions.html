@@ -26,62 +26,42 @@
         </div>
     </div>
     
-    <div style="width:100%; overflow: auto;">
-        <span style="float: left; width: 10em">Name</span>
-        <span style="float: left; width: 10em">Estate</span>
-        <span style="float: left; width: 10em">Timestamp</span>
-        <div style="float: left; width: 52%">
-            <span style="float: left; width: 10em">CPU</span>
-            <span style="float: left; width: 15em">MEM</span>
-            <span style="float: left; width: 15em">Uptime</span>
-            <span style="float: left; width: 10em">Users</span>
-            <span style="float: left; width: 10em" ng-if="auth.activeUser.accessLevel > 249">Host</span>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-1">Name</div>
+            <div class="col-md-1">Estate</div>
+            <div class="col-md-1">Timestamp</div>
+            <div class="col-md-1">CPU</div>
+            <div class="col-md-1">MEM</div>
+            <div class="col-md-1">Uptime</div>
+            <div class="col-md-1">Users</div>
+            <div class="col-md-1"><span style="float: left; width: 10em" ng-if="auth.activeUser.accessLevel > 249">Host</span></div>
         </div>
-    </div>
-
-    <div style="width:100%;">
-        <div ng-repeat="region in regions | orderBy:['estateName','name'] | filter:search track by region.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
-            <div style="overflow: auto;">
-                <div style="float: left; width: 10em">
-                    <span>{{region.name}}</span>
-                    <button title="logbutton" data-bind="click: dumpLogs, tooltip: {content: 'Download available logs'}" style="float: right;">log</button>
-                </div>
-                <div style="float: left; width: 10em">
-                    <span>{{region.estateName.substring(0,15)}}</span>
-                </div>
-                <div ng-if="region.isRunning == true">
-                    <div style="float: left; width: 10em">
-                        <span>{{lastSeen(region.stat.timestamp)}}</span>
+        <div class="row" ng-repeat="r in regions | orderBy:['estateName','name'] | filter:search track by r.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
+            <div class="col-md-12">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-1"><button popover-trigger="mouseenter" popover-placement="right" popover="View logs for {{r.name}}" ng-click="region.viewLog(r)" class="btn btn-xs btn-default">{{r.name}}</button></div>
+                        <div class="col-md-1">{{r.estateName.substring(0,15)}}</div>
+                        <div ng-if="r.isRunning == true" class="col-md-1">{{lastSeen(r.stat.timestamp)}}</div>
+                        <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status["cpuPercent"].toFixed(2)}}%</div>
+                        <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status["memPercent"].toFixed(2)}} %</div>
+                        <div ng-if="r.isRunning == true" class="col-md-1">{{(r.stat.status["memKB"]/1024).toFixed(2)}} MB</div>
+                        <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status.simStats['Uptime'].split(".").slice(0,-1).join(" days ")}}</div>
+                        <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status.simStats['RootAg']}}</div>
+                        <div class="col-md-6" ng-if="r.isRunning != true">Is not running...</div>
+                        <div ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(region.node)}}</span>
+                        <button ng-disabled="region.isRunning" class="ui-button">Start</button>
+                        <button ng-disabled="!region.isRunning">Stop</button>
+                        <button ng-click="collapse.toggle(r.name+'Content')">Content</button>
+                        <button ng-click="collapse.toggle(r.name+'Manage')">Manage</button>
                     </div>
-                    <div style="float: left; width: 10em">
-                        <span>{{region.stat.status["cpuPercent"].toFixed(2)}}%</span>
+                    <div class="row" collapse="collapse.current != (r.name+'Manage')">
+                        <div class="col-md-2">manage</div>
                     </div>
-                    <div style="float: left; width: 7em">
-                        <span>{{region.stat.status["memPercent"].toFixed(2)}} %</span>
+                    <div class="row" collapse="collapse.current != (r.name+'Content')">
+                        <div class="col-md-2">content</div>
                     </div>
-                    <div style="float: left; width: 8em">
-                        <span>{{(region.stat.status["memKB"]/1024).toFixed(2)}} MB</span>
-                    </div>
-                    <div style="float: left; width: 15em">
-                        <span>{{region.stat.status.simStats['Uptime'].split(".").slice(0,-1).join(" days ")}}</span>
-                    </div>
-                    <div style="float: left; width: 10em">
-                        <span>{{region.stat.status.simStats['RootAg']}}</span>
-                    </div>
-                </div>
-                <div ng-if="region.isRunning != true">
-                    <div style="float: left; width: 60em">
-                        Is not running...
-                    </div> 
-                </div>
-                <div style="float: left; width: 10em">
-                        <span ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(region.node)}}</span>
-                    </div>
-                <div style="float: left; width: 20em">
-                    <button ng-disabled="region.isRunning" class="ui-button">Start</button>
-                    <button ng-disabled="!region.isRunning">Stop</button>
-                    <button>Content</button>
-                    <button>Manage</button>
                 </div>
             </div>
         </div>

@@ -40,12 +40,29 @@ angular.module('mgmApp')
         return node;
     }
     
+    $scope.collapse = {
+        current: "",
+        toggle: function(section){
+            if( section == this.current ){
+                this.current = "";
+            } else {
+                this.current = section;
+            }
+        }
+    }
+    
     $scope.search = {
         name: "",
         estateName: "",
         isRunning: "",
         node: ""
     };
+    
+    $scope.region = {
+        viewLog: function(region){
+            alertify.log(region.name);
+        }
+    }
     
     regionService.updateRegions();
     estateService.updateEstates();

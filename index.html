@@ -57,8 +57,7 @@
                 <td><h1>MGM</h1></td>
                 <td>
                     <div class="btn-group">
-                            <button class="btn btn-success" ng-repeat="section in location.sections" 
-                            ng-click="location.goto(section.link)" ng-class="{active: (location.current==section.link)}">{{ section.name }}</button>
+                            <a class="btn btn-success" href="{{section.link}}" ng-repeat="section in location.sections" >{{ section.name }}</a>
                     </div>
 
                 </td>

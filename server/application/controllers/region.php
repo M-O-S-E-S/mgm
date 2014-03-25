@@ -52,17 +52,18 @@ class Region extends CI_Controller {
 		$logs = $this->regions->logs($region);
 		
 		//look up region name for log file name
-		$regObj = $this->regions->getRegion($region);
-		header("Content-disposition: attachment; filename=" . $regObj->name . "-" . date("Y-m-d") . "-logs.txt");
-		header("Content-type: text/plain");
+		//$regObj = $this->regions->getRegion($region);
+		//header("Content-disposition: attachment; filename=" . $regObj->name . "-" . date("Y-m-d") . "-logs.txt");
+		//header("Content-type: text/plain");
 		
 		//generate log file
-		$text = "";
-		foreach($logs as $log){
-			$text .= $log->timestamp . " - " . $log->message . "\n";
-		}
+		//$text = "";
+		//foreach($logs as $log){
+		//	$text .= $log->timestamp . " - " . $log->message . "\n";
+		//}
 		
-		die($text);
+		//die($text);
+        die(json_encode($logs));
 	}
     
     public function stats($region){

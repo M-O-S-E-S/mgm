@@ -1,5 +1,5 @@
 angular.module('mgmApp')
-.controller('RegionController', function($scope, regionService, estateService){
+.controller('RegionController', function($scope, $modal, regionService, estateService){
     $scope.regions = regionService.getRegions();
     $scope.$on("regionService", function(){
         $scope.regions = regionService.getRegions();
@@ -59,8 +59,20 @@ angular.module('mgmApp')
     };
     
     $scope.region = {
+        modal: undefined,
+        log: "",
+        current: undefined,
         viewLog: function(region){
-            alertify.log(region.name);
+            this.current = region;
+            this.modal = $modal.open({
+                templateUrl: '/templates/regionLogModal.html',
+                keyboard: false,
+                scope: $scope,
+                windowClass: 'log-dialog'
+            });
+            regionService.getLog(region).then(
+                function(logs){ $scope.region.log = logs;}
+            );
         }
     }
     

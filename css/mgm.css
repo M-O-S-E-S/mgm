@@ -54,6 +54,11 @@ html, body { width:100%; height:100%; }
 }
 canvas { display:block;  }
 
+.log-dialog .modal-dialog{
+    width:90%;
+    min-width: 800px;
+}
+
 .accountBlock {
     padding: 5px 10px 5px 10px;
     float: left;

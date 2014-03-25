@@ -1,32 +1,26 @@
 <div id="regions">
-    <div style="width:100%; overflow: auto;">
-        <div style="float: left; width: 10em">
-            <input placeholder="Name Search" type="search" ng-model="search.name" style="width: 10em">
-        </div>
-        <div style="float: left; width: 10em">
-            <input placeholder="Estate Search" type="search" ng-model="search.estateName" style="width: 10em" typeahead="estate.name for estate in estates">
-        </div>
-        <div style="float: left; width: 10em">
-            <select ng-model="search.isRunning">
-                <option value="">All Regions</option>
-                <option value="true">Running</option>
-                <option value="false">Stopped</option>
-            </select>
-        </div>
-        <div style="float: left; width: 50em">
-            Showing {{(regions|filter:search).length}} of {{regions.length}} Region(s)
-        </div>
-        <div style="float: left; width: 10em" style="width: 10em">
-            <input ng-if="auth.activeUser.accessLevel > 249" placeholder="host search" ng-model="search.node"></input>
-        </div>
-        <div style="float: left; width: 20em">
-            <button data-bind="click: $root.startListedRegions">Start Listed</button>
-            <button data-bind="click: $root.stopListedRegions">Stop Listed</button>
-            <button data-bind="click: $root.createNewRegion">Add Region</button>
-        </div>
-    </div>
     
     <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-1"><input placeholder="Name Search" type="search" ng-model="search.name" style="width: 10em"></div>
+            <div class="col-md-1"><input placeholder="Estate Search" type="search" ng-model="search.estateName" style="width: 10em" typeahead="estate.name for estate in estates"></div>
+            <div class="col-md-1">
+                <select ng-model="search.isRunning">
+                    <option value="">All Regions</option>
+                    <option value="true">Running</option>
+                    <option value="false">Stopped</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                Showing {{(regions|filter:search).length}} of {{regions.length}} Region(s)
+            </div>
+            <div class="col-md-1"><input ng-if="auth.activeUser.accessLevel > 249" placeholder="host search" ng-model="search.node"></input></div>
+            <div class="col-md-4">
+                <button data-bind="click: $root.startListedRegions">Start Listed</button>
+                <button data-bind="click: $root.stopListedRegions">Stop Listed</button>
+                <button data-bind="click: $root.createNewRegion">Add Region</button>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-1">Name</div>
             <div class="col-md-1">Estate</div>
@@ -39,29 +33,33 @@
         </div>
         <div class="row" ng-repeat="r in regions | orderBy:['estateName','name'] | filter:search track by r.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
             <div class="col-md-12">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-1"><button popover-trigger="mouseenter" popover-placement="right" popover="View logs for {{r.name}}" ng-click="region.viewLog(r)" class="btn btn-xs btn-default">{{r.name}}</button></div>
-                        <div class="col-md-1">{{r.estateName.substring(0,15)}}</div>
-                        <div ng-if="r.isRunning == true" class="col-md-1">{{lastSeen(r.stat.timestamp)}}</div>
-                        <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status["cpuPercent"].toFixed(2)}}%</div>
-                        <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status["memPercent"].toFixed(2)}} %</div>
-                        <div ng-if="r.isRunning == true" class="col-md-1">{{(r.stat.status["memKB"]/1024).toFixed(2)}} MB</div>
-                        <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status.simStats['Uptime'].split(".").slice(0,-1).join(" days ")}}</div>
-                        <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status.simStats['RootAg']}}</div>
-                        <div class="col-md-6" ng-if="r.isRunning != true">Is not running...</div>
-                        <div ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(region.node)}}</span>
-                        <button ng-disabled="region.isRunning" class="ui-button">Start</button>
-                        <button ng-disabled="!region.isRunning">Stop</button>
-                        <button ng-click="collapse.toggle(r.name+'Content')">Content</button>
-                        <button ng-click="collapse.toggle(r.name+'Manage')">Manage</button>
-                    </div>
-                    <div class="row" collapse="collapse.current != (r.name+'Manage')">
-                        <div class="col-md-2">manage</div>
-                    </div>
-                    <div class="row" collapse="collapse.current != (r.name+'Content')">
-                        <div class="col-md-2">content</div>
-                    </div>
+                <div class="row">
+                    <div class="col-md-1"><button popover-trigger="mouseenter" popover-placement="right" popover="View logs for {{r.name}}" ng-click="region.viewLog(r)" class="btn btn-xs btn-default">{{r.name}}</button></div>
+                    <div class="col-md-1">{{r.estateName.substring(0,15)}}</div>
+                    <div ng-if="r.isRunning == true" class="col-md-1">{{lastSeen(r.stat.timestamp)}}</div>
+                    <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status["cpuPercent"].toFixed(2)}}%</div>
+                    <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status["memPercent"].toFixed(2)}} %</div>
+                    <div ng-if="r.isRunning == true" class="col-md-1">{{(r.stat.status["memKB"]/1024).toFixed(2)}} MB</div>
+                    <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status.simStats['Uptime'].split(".").slice(0,-1).join(" days ")}}</div>
+                    <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status.simStats['RootAg']}}</div>
+                    <div class="col-md-6" ng-if="r.isRunning != true">Is not running...</div>
+                    <div ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(region.node)}}</span>
+                    <button ng-disabled="region.isRunning" class="ui-button">Start</button>
+                    <button ng-disabled="!region.isRunning">Stop</button>
+                    <button ng-click="collapse.toggle(r.name+'Content')">Content</button>
+                    <button ng-click="collapse.toggle(r.name+'Manage')">Manage</button>
+                </div>
+                <div class="row" collapse="collapse.current != (r.name+'Manage')">
+                    <div class="col-md-2">&nbsp</div>
+                    <div class="col-md-2">manage</div>
+                    <!-- offline:   delete region, change host, change estate
+                         online:    rest console
+                    -->
+                </div>
+                <div class="row" collapse="collapse.current != (r.name+'Content')">
+                    <div class="col-md-2">&nbsp</div>
+                    <div class="col-md-2">content</div>
+                    <!-- running ony -->
                 </div>
             </div>
         </div>

@@ -30,7 +30,7 @@ mgmApp.service('taskService', function($rootScope, $http){
     $rootScope.$on("mgmUpdate", this.updateTasks);
 });
 
-mgmApp.service('regionService', function($rootScope, $http){
+mgmApp.service('regionService', function($rootScope, $http, $q){
     var regions = [];
     this.getRegions = function(){
         return regions;
@@ -58,6 +58,14 @@ mgmApp.service('regionService', function($rootScope, $http){
                 }
             });
     };
+    this.getLog = function(region){
+        var defer = new $q.defer();
+        $http.get("/server/region/logs/" + region.uuid)
+        .success(function(data, status, headers, config){
+            defer.resolve(data);
+        });
+        return defer.promise;
+    }
     $rootScope.$on("mgmUpdate", this.updateRegions);
 });
 
@@ -803,59 +811,6 @@ function Region(name, x, y, uuid, host, isRunning){
             location.hash = MGM.sectionId();
 		});
     };
-};
-
-function Estate(name, id, owner, managers, regions){
-	var self = this;
-	this.Name = ko.observable(name);
-	this.ID = ko.observable(id);
-    this._managers = ko.observableArray(managers);
-    this._owner = ko.observable(owner);
-    
-	this.Owner = ko.computed({
-        read: function(){
-            MGM.userUpdateDummy();
-            if(self._owner() in MGM.usersModel){
-                return MGM.usersModel[self._owner()];
-            }
-            return {"Name": "loading..."};
-        },
-        write: self._owner
-    });
-    
-    this.Managers = ko.computed({
-        read: function(){
-            MGM.userUpdateDummy();
-            var man = [];
-            $.each(self._managers(), function(index, ger){
-                if(ger in MGM.usersModel){
-                    man.push(MGM.usersModel[ger].Name());
-                }
-            });
-            return man;
-        },
-        write: self._managers
-    });
-    
-    this.destroy = function(){
-        alertify.confirm(strings["destroyEstate"], function(confirmed){
-            if(confirmed){
-                $.post("estate/destroy/" + self.ID()).done(function(msg){
-                    console.log("completed:  " + msg);
-                    var result = $.parseJSON(msg);
-                    if(result["Success"]){
-                        delete MGM.estatesModel[self.ID()];
-                        MGM.estateUpdateDummy(Math.random());
-                        alertify.success("Estate: " + self.Name() + " removed Successfully");
-                    } else {
-                        alertify.error(result["Message"]);
-                    }
-                });
-            }
-        });
-    };
-    
-    this.Regions = ko.observableArray(regions);
 };
 
 function Host(name, address, lastSeen, system, capacity){

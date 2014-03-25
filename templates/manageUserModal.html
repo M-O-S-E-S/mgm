@@ -7,10 +7,10 @@
         <label>Change Email:</label><input ng-model="user.current.email"  /><button>Set</button><br>
         <label>New Password:</label><input ng-model="password" ng-options="user.name for user in users track by user.uuid" /><button>Set</button><br>
         <label>Suspend Account:</label>
-        <button ng-if="!user.isSuspended(user.current)" ng-click="user.suspend()" class="btn">Suspend</button>
-        <button ng-if="user.isSuspended(user.current)" ng-click="user.restore()" class="btn">Restore</button>
+        <button ng-if="!user.isSuspended(user.current)" ng-click="user.suspend()" class="btn btn-danger">Suspend</button>
+        <button ng-if="user.isSuspended(user.current)" ng-click="user.restore()" class="btn btn-success">Restore</button>
     </div>
 </div>
 <div class="modal-footer">
-    <button class="btn btn-primary" ng-click="user.modal.close()">Cancel</button>
+    <button class="btn btn-primary" ng-click="user.modal.close()">Close</button>
 </div>

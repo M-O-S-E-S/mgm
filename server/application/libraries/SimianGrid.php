@@ -144,7 +144,7 @@ class SimianGrid
     function getIdentities($userId){
         $query = array('RequestMethod' => 'GetIdentities','UserID' => $userId);
         $result = json_curl($this->user_service, $query);
-        if( $result->Success ){
+        if( isset($result->Success) && $result->Success ){
 			return $result->Identities;
 		} else {
 			log_message('error',"Unknown response to GetIdentities. Returning 0.");

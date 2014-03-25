@@ -5,6 +5,10 @@ angular.module('mgmApp')
         $scope.users = userService.getUsers();
     });
     
+    $scope.search = {
+        name:"",
+        email:""
+    }
     
     $scope.user = {
         current: undefined,
@@ -17,24 +21,29 @@ angular.module('mgmApp')
                 scope: $scope
             });
         },
-        isSuspended: function(user){
+        isSuspended: function(u){
             var enabled = false;
-            for(var i = 0; i < user.identities.length, i++){
-                if(user.identities[i].enabled){
+            for(var i = 0; i < u.identities.length; i++){
+                if(u.identities[i].Enabled){
                     enabled = true;
                 }
-            });
-            return enabled;
+            };
+            return !enabled;
         },
         suspend: function(){
-            
+            userService.suspend(this.current).then(
+                function(){ alertify.success("User " + $scope.user.current.name + " suspended") },
+                function(msg){ alertify.error(msg); }
+            );
         },
         restore: function(){
-            
+            userService.restore(this.current).then(
+                function(){ alertify.success("User " + $scope.user.current.name + " restored") },
+                function(msg){ alertify.error(msg); }
+            );
         }
     }
-    
-    
+
     
     
     userService.updateUsers();

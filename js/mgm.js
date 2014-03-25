@@ -202,6 +202,40 @@ mgmApp.service('userService', function($rootScope, $http, $q){
         });
         return defer.promise;
     };
+    this.restore = function(user){
+        var defer = new $q.defer();
+        $http.post("/server/user/restore", { 'id': user.uuid })
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                for(var i = 0; i < user.identities.length; i++){
+                    user.identities[i].Enabled = true;
+                }
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        }).error(function(data, status, headers, config){
+            defer.reject("Error connecting to MGM");
+        });
+        return defer.promise;
+    };
+    this.suspend = function(user){
+        var defer = new $q.defer();
+        $http.post("/server/user/suspend", { 'id': user.uuid })
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                for(var i = 0; i < user.identities.length; i++){
+                    user.identities[i].Enabled = false;
+                }
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        }).error(function(data, status, headers, config){
+            defer.reject("Error connecting to MGM");
+        });
+        return defer.promise;
+    };
     $rootScope.$on("mgmUpdate", this.updateUsers);
 });
 

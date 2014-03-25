@@ -138,9 +138,13 @@ class User extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         session_write_close();
-        $uuid = $this->input->post('id');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $uuid = $input_data['id'];
         
         $identities = $this->simiangrid->getIdentities($uuid);
+        if($identities == false){
+            die(json_encode(array('Success' => false, 'Message' => 'Error looking up account information')));
+        }
         foreach($identities as $i){
             if($i->Enabled){
                 $this->simiangrid->disableIdentity($i);
@@ -158,7 +162,8 @@ class User extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         session_write_close();
-        $uuid = $this->input->post('id');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $uuid = $input_data['id'];
         
         $identities = $this->simiangrid->getIdentities($uuid);
         foreach($identities as $i){

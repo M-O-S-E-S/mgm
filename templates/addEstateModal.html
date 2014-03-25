@@ -5,12 +5,12 @@
     <div id="LoadIar">
         <p class="alertify-message">Please select the Owner and Name for the new estate.</p>
         <div class="alertify-text-wrapper">
-            <label>Owner:</label><select ng-model="estate.owner" ng-options="user.name for user in users track by user.uuid" class="alertify-text" />
-            <label>Name:</label><input ng-model="estate.name" class="alertify-text" />
+            <label>Owner:</label><select ng-model="owner" ng-options="user.name for user in users track by user.uuid" class="alertify-text" />
+            <label>Name:</label><input ng-model="name" class="alertify-text" />
         </div>
     </div>
 </div>
 <div class="modal-footer">
     <button class="btn btn-warning" ng-click="estate.cancel()">Cancel</button>
-    <button class="btn btn-primary" ng-click="estate.add()">Create</button>
+    <button class="btn btn-primary" ng-click="estate.add(owner, name)">Create</button>
 </div>

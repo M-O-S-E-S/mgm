@@ -61,19 +61,22 @@ mgmApp.service('regionService', function($rootScope, $http){
     $rootScope.$on("mgmUpdate", this.updateRegions);
 });
 
-mgmApp.service('estateService', function($rootScope, $http){
+mgmApp.service('estateService', function($rootScope, $http, $q){
     var estates = [];
     this.getEstates = function(){ return estates; };
-    this.add = function(owner, name) { 
-        $http.post("/server/estate/create", {'name': name, 'owner': owner})
+    this.add = function(owner, name) {
+        var defer = new $q.defer();
+        $http.post("/server/estate/create", {'name': name, 'owner': owner.uuid})
         .success(function(data, status, headers, config){
             if(data.Success){
-                estates.push({name:name, owner:owner, managers:[]});
+                estates.push({name:name, owner:owner.uuid, managers:[], regions:[]});
+                defer.resolve();
                 $rootScope.$broadcast("estateService");
             } else {
-                alertify.error("Error adding new estate: " + data.Message);
+                defer.reject("Error adding new estate: " + data.Message);
             }
         });
+        return defer.promise;
     };
     this.updateEstates = function(){
         $http.get("/server/estate").success(function(data, status, headers, config){
@@ -84,17 +87,19 @@ mgmApp.service('estateService', function($rootScope, $http){
         });
     };
     this.remove = function(est){
+        var defer = new $q.defer();
         $http.post("/server/estate/destroy/" + est.id)
             .success(function(data, status, headers, config){
                 if(data.Success){
                     var index = estates.indexOf(est);
                     estates.splice(index,1);
-                    alertify.success("Estate: " + name + " removed Successfully");
+                    defer.resolve();
                     $rootScope.$broadcast("estateService");
                 } else {
-                    alertify.error(data.Message);
+                    defer.reject(data.Message);
                 }
             });
+        return defer.promise;
     };
     $rootScope.$on("mgmUpdate", this.updateEstates);
 });
@@ -104,7 +109,7 @@ mgmApp.service('hostService', function($rootScope, $http, $q){
     this.getHosts = function(){ return hosts; };
     this.add = function(address) {
         var defer = new $q.defer();
-        $http.post("/server/host/add", {'host': address})
+        $http.post("/server/host/add", {'name': null, 'host': address})
         .success(function(data, status, headers, config){
             if(data.Success){
                 hosts.push({address:address,regions:[]});

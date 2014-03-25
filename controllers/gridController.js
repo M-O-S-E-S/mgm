@@ -71,7 +71,10 @@ angular.module('mgmApp')
         remove: function(host){
             alertify.confirm("Are you sure you want to delete this host?  Any processes still running may need to be manually shut down.", function(confirmed){
                 if(confirmed){
-                    hostService.remove(host);//.then(function(){ console.log("success"); },function(msg){console.log(msg);});
+                    hostService.remove(host).then(
+                        function(){ alertify.success("Host " + host.address + " removed"); },
+                        function(msg){ alertify.error(msg);}
+                    );
                 }
             });
         },
@@ -83,7 +86,10 @@ angular.module('mgmApp')
                         alertify.error('Add Host Error: Invalid ip entered');
                         return;
                     }
-                    hostService.add(address);//.then(function(){ console.log("success"); },function(msg){console.log(msg);});
+                    hostService.add(address).then(
+                        function(){ alertify.success("Host " + address + " created"); },
+                        function(msg){console.log(msg);}
+                    );
                 }
             });
         }
@@ -92,12 +98,13 @@ angular.module('mgmApp')
     
     $scope.estate = {
         modal: undefined,
-        name: "",
-        owner: "",
         remove: function(est){
             alertify.confirm("Are you sure you want to delete this estate?  Any running processes in this estate will need to be restarted", function(confirmed){
                 if(confirmed){
-                    estateService.remove(est);
+                    estateService.remove(est).then(
+                        function(){ alertify.success("Estate " + est.name + " removed"); },
+                        function(msg){ alertify.error(msg); }
+                    );
                 }
             });
         },
@@ -108,10 +115,14 @@ angular.module('mgmApp')
                 scope: $scope
             });
         },
-        add: function(){
+        add: function(owner, name){
             //check for empty name
-            if(this.name == ""){
+            if(name == "" || name==undefined){
                 alertify.error("Estate name cannot be empty");
+                return;
+            }
+            if(owner == undefined){
+                alertify.error("Estate owner cannot be empty");
                 return;
             }
             //check for duplicate estate name
@@ -121,8 +132,11 @@ angular.module('mgmApp')
                     return;
                 }
             }
-            estateService.add(this.owner.uuid, this.name);
-            this.modal.close();
+            console.log(owner);
+            estateService.add(owner, name).then(
+                function(){ $scope.estate.modal.close();  alertify.success("Estate " + name + " created"); },
+                function(msg){ alertify.error(msg); }
+            );
         },
         cancel: function(){
             this.modal.close();

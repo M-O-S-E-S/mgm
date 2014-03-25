@@ -1,5 +1,5 @@
 angular.module('mgmApp')
-.controller('RegionController', function($scope, $modal, regionService, estateService){
+.controller('RegionController', function($scope, $modal, regionService, estateService, hostService){
     $scope.regions = regionService.getRegions();
     $scope.$on("regionService", function(){
         $scope.regions = regionService.getRegions();
@@ -7,6 +7,10 @@ angular.module('mgmApp')
     $scope.estates = estateService.getEstates();
     $scope.$on("estateService", function(){
         $scope.estates = estateService.getEstates();
+    });
+    $scope.hosts = hostService.getHosts();
+    $scope.$on("hostService", function(){
+        $scope.hosts = hostService.getHosts();
     });
     
     $scope.delete = function(id){
@@ -73,9 +77,13 @@ angular.module('mgmApp')
             regionService.getLog(region).then(
                 function(logs){ $scope.region.log = logs;}
             );
+        },
+        setHost: function(region, host){
+            console.log(region.name + " " + host.name);
         }
     }
     
     regionService.updateRegions();
+    hostService.updateHosts();
     estateService.updateEstates();
 });

@@ -36,22 +36,33 @@
                 <div class="row">
                     <div class="col-md-1"><button popover-trigger="mouseenter" popover-placement="right" popover="View logs for {{r.name}}" ng-click="region.viewLog(r)" class="btn btn-xs btn-default">{{r.name}}</button></div>
                     <div class="col-md-1">{{r.estateName.substring(0,15)}}</div>
-                    <div ng-if="r.isRunning == true" class="col-md-1">{{lastSeen(r.stat.timestamp)}}</div>
-                    <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status["cpuPercent"].toFixed(2)}}%</div>
-                    <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status["memPercent"].toFixed(2)}} %</div>
-                    <div ng-if="r.isRunning == true" class="col-md-1">{{(r.stat.status["memKB"]/1024).toFixed(2)}} MB</div>
-                    <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status.simStats['Uptime'].split(".").slice(0,-1).join(" days ")}}</div>
-                    <div ng-if="r.isRunning == true" class="col-md-1">{{r.stat.status.simStats['RootAg']}}</div>
-                    <div class="col-md-6" ng-if="r.isRunning != true">Is not running...</div>
-                    <div ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(region.node)}}</span>
-                    <button ng-disabled="region.isRunning" class="ui-button">Start</button>
-                    <button ng-disabled="!region.isRunning">Stop</button>
-                    <button ng-click="collapse.toggle(r.name+'Content')">Content</button>
-                    <button ng-click="collapse.toggle(r.name+'Manage')">Manage</button>
+                    <div ng-if="r.isRunning" class="col-md-1">{{lastSeen(r.stat.timestamp)}}</div>
+                    <div ng-if="r.isRunning" class="col-md-1">{{r.stat.status["cpuPercent"].toFixed(2)}}%</div>
+                    <div ng-if="r.isRunning" class="col-md-1">{{r.stat.status["memPercent"].toFixed(2)}} % [{{(r.stat.status["memKB"]/1024).toFixed(2)}} MB]</div>
+                    <div ng-if="r.isRunning" class="col-md-1">{{r.stat.status.simStats['Uptime'].split(".").slice(0,-1).join(" days ")}}</div>
+                    <div ng-if="r.isRunning" class="col-md-1">{{r.stat.status.simStats['RootAg']}}</div>
+                    <div class="col-md-5" ng-if="!r.isRunning">Is not running...</div>
+                    <div class="col-md-1"><span ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(r.node)}}</span>&nbsp</div>
+                    <div class="col-md-4">
+                        <button ng-disabled="region.isRunning" class="ui-button">Start</button>
+                        <button ng-disabled="!region.isRunning">Stop</button>
+                        <button ng-click="collapse.toggle(r.name+'Content')" ng-disabled="!region.isRunning">Content</button>
+                        <button ng-click="collapse.toggle(r.name+'Manage')" ng-disabled="auth.activeUser.accessLevel < 250">Manage</button>
+                    </span>
                 </div>
                 <div class="row" collapse="collapse.current != (r.name+'Manage')">
                     <div class="col-md-2">&nbsp</div>
-                    <div class="col-md-2">manage</div>
+                    <div class="col-md-8" ng-if="r.isRunning">
+                        manage Online
+                    </div>
+                    <div class="col-md-8" ng-if="!r.isRunning">
+                        <div class="row">
+                            <div class ="col-md-3"><button><strike>Delete Region</strike></button></div>
+                            <div class ="col-md-3"><select ng-model="newEstate" ng-options="e.name for e in estates | orderBy: 'name' track by e.name"></select><button>Set Estate</button></div>
+                            <div class ="col-md-3"><select ng-model="newHost" ng-options="h.name+'|'+h.address for h in hosts | orderBy: 'name' track by h.address"></select>
+                            <button ng-click="region.setHost(r, newHost)">Set Host</button></div>
+                        </div>
+                    </div>
                     <!-- offline:   delete region, change host, change estate
                          online:    rest console
                     -->

@@ -1,5 +1,6 @@
 angular.module('mgmApp')
 .controller('mgmController', function($rootScope,$scope,$http,$location, $interval){
+    
     $scope.location = {
         sections: [
             { name: 'Account', link: '/account' },
@@ -7,7 +8,8 @@ angular.module('mgmApp')
             { name: 'Grid', link: '/grid'},
             { name: 'Map', link: '/map'},
             { name: 'Users', link: '/users'},
-            { name: 'Pending Users', link: '/pending'} ]
+            { name: 'Pending Users', link: '/pending'} ],
+        isActive: function(path){ return $location.path() == path; }
     };
     
     $scope.auth = {

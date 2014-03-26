@@ -79,7 +79,10 @@ angular.module('mgmApp')
             );
         },
         setHost: function(region, host){
-            console.log(region.name + " " + host.name);
+            regionService.setHost(region, host).then(
+                function(){ alertify.success("Region " + region.name + " moved to Host " + host.address); },
+                function(msg){ alertify.error(msg); }
+            );
         },
         setEstate: function(region, estate){
             regionService.setEstate(region, estate).then(

@@ -65,7 +65,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
             defer.resolve(data);
         });
         return defer.promise;
-    }
+    };
     this.setEstate = function(region, estate){
         var defer = new $q.defer();
         $http.post("/server/region/estate/" + region.uuid, {'estate': estate.id})
@@ -78,7 +78,20 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
             }
         });
         return defer.promise;
-    }
+    };
+    this.setHost = function(region, host){
+        var defer = new $q.defer();
+        $http.post("/server/region/host/" + region.uuid, {'host': host? host.address : 'none'})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                region.node = host.address;
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
     $rootScope.$on("mgmUpdate", this.updateRegions);
 });
 

@@ -165,7 +165,9 @@ class Region extends CI_Controller {
         }
         session_write_close();
         
-        $host = $this->input->post('host');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $host = $input_data['host'];
+
         $this->regions->host($region, $host);
         die(json_encode(array('Success' => true)));
     }

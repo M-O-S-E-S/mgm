@@ -1,3 +1,3 @@
-application/config/database.php
-application/config/mgm.php
-application/logs/*.php
+server/application/config/database.php
+server/application/config/mgm.php
+server/application/logs/*.php

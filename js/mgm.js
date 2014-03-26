@@ -106,7 +106,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     };
     this.stop = function(region){
         var defer = new $q.defer();
-        $http.post("/server/region/start/" + region.uuid)
+        $http.post("/server/region/stop/" + region.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();

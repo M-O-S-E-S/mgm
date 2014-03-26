@@ -89,6 +89,18 @@ angular.module('mgmApp')
                 function(){ alertify.success("Region " + region.name + " moved to Estate " + estate.name); },
                 function(msg){ alertify.error(msg); }
             );
+        },
+        start: function(region){
+            regionService.start(region).then(
+                function(){ alertify.success("Region " + region.name + " signalled to start"); },
+                function(msg){ alertify.error(msg); }
+            );
+        },
+        stop: function(region){
+            regionService.stop(region).then(
+                function(){ alertify.success("Region " + region.name + " signalled to stop"); },
+                function(msg){ alertify.error(msg); }
+            );
         }
     }
     

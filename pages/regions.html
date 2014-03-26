@@ -44,8 +44,8 @@
                     <div class="col-md-5" ng-if="!r.isRunning">Is not running...</div>
                     <div class="col-md-1"><span ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(r.node)}}</span>&nbsp</div>
                     <div class="col-md-4">
-                        <button ng-disabled="region.isRunning" class="ui-button">Start</button>
-                        <button ng-disabled="!region.isRunning">Stop</button>
+                        <button ng-disabled="region.isRunning" class="ui-button" ng-click="region.start(r)">Start</button>
+                        <button ng-disabled="!region.isRunning" ng-click="region.stop(r)">Stop</button>
                         <button ng-click="collapse.toggle(r.name+'Content')" ng-disabled="!region.isRunning">Content</button>
                         <button ng-click="collapse.toggle(r.name+'Manage')" ng-disabled="auth.activeUser.accessLevel < 250">Manage</button>
                     </span>

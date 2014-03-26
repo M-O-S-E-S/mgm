@@ -92,6 +92,30 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
         });
         return defer.promise;
     };
+    this.start = function(region){
+        var defer = new $q.defer();
+        $http.post("/server/region/start/" + region.uuid)
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
+    this.stop = function(region){
+        var defer = new $q.defer();
+        $http.post("/server/region/start/" + region.uuid)
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
     $rootScope.$on("mgmUpdate", this.updateRegions);
 });
 

@@ -1,5 +1,5 @@
 angular.module('mgmApp')
-.controller('RegionController', function($scope, $modal, regionService, estateService, hostService){
+.controller('RegionController', function($scope, $modal, regionService, estateService, hostService, consoleService){
     $scope.regions = regionService.getRegions();
     $scope.$on("regionService", function(){
         $scope.regions = regionService.getRegions();
@@ -45,12 +45,23 @@ angular.module('mgmApp')
     }
     
     $scope.collapse = {
-        current: "",
-        toggle: function(section){
-            if( section == this.current ){
-                this.current = "";
+        content: "",
+        manage: "",
+        showManage: function(region){
+            if( region.uuid == this.manage ){
+                this.manage = "";
+                consoleService.close();
             } else {
-                this.current = section;
+                this.manage = region.uuid;
+                this.content = "";
+                consoleService.open(region);
+            }
+        },
+        showContent: function(region){
+            if(region == this.content){
+                this.content = "";
+            } else {
+                this.content = region.uuid;
             }
         }
     }

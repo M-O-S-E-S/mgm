@@ -69,7 +69,10 @@ class Console extends CI_Controller {
         $session = $_SESSION['console'];
         session_write_close();
         
-        $this->consoles->write($session, $this->input->post('command'));
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $command = $input_data['command'];
+        
+        $this->consoles->write($session, $command);
         
         die(json_encode(array('Success' => true)));
     }

@@ -46,14 +46,14 @@
                     <div class="col-md-4">
                         <button ng-disabled="r.isRunning" class="ui-button" ng-click="region.start(r)">Start</button>
                         <button ng-disabled="!r.isRunning" ng-click="region.stop(r)">Stop</button>
-                        <button ng-click="collapse.toggle(r.name+'Content')" ng-disabled="!region.isRunning">Content</button>
-                        <button ng-click="collapse.toggle(r.name+'Manage')" ng-disabled="auth.activeUser.accessLevel < 250">Manage</button>
+                        <button ng-click="collapse.showContent(r)" ng-disabled="!region.isRunning">Content</button>
+                        <button ng-click="collapse.showManage(r)" ng-disabled="auth.activeUser.accessLevel < 250">Manage</button>
                     </span>
                 </div>
-                <div class="row" collapse="collapse.current != (r.name+'Manage')">
+                <div class="row" collapse="collapse.manage != r.uuid">
                     <div class="col-md-1"></div>
                     <div class="col-md-8" ng-if="r.isRunning">
-                        manage Online
+                        <div id="{{r.uuid}}-Term" style="width:100%; height: 600px"></div>
                     </div>
                     <div class="col-md-8" ng-if="!r.isRunning">
                         <div class="row">
@@ -71,7 +71,7 @@
                          online:    rest console
                     -->
                 </div>
-                <div class="row" collapse="collapse.current != (r.name+'Content')">
+                <div class="row" collapse="collapse.content != r.uuid">
                     <div class="col-md-2">&nbsp</div>
                     <div class="col-md-2">content</div>
                     <!-- running ony -->

@@ -1,6 +1,93 @@
 
 var mgmApp = angular.module('mgmApp',['ngRoute','ui.bootstrap']);
 
+mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
+    var uuid = "";
+    var interval = null;
+    var self = this;
+    
+    self.close = function(){
+        var defer = new $q.defer();
+        if(uuid == ""){
+            console.log("console not connected, exiting before network call");
+            defer.resolve();
+        } else {
+            console.log("closing console");
+            $http.post("/server/console/close/" + uuid)
+            .success(function(data, status, headers, config){
+                defer.resolve();
+            });
+            $('#' + uuid + "-Term").replaceWith($('<div>').attr('id',uuid+"-Term"));
+            uuid = "";
+        }
+        return defer.promise;
+    }
+    
+    self.write = function(cmd, term){
+        console.log("console writing: " + cmd);
+        var defer = new $q.defer();
+        if(uuid == ""){
+            defer.reject("Console cannot write, console is not connected");
+        } else {
+            $http.post("/server/console/write/" + uuid, {"command": cmd})
+            .success(function(data, status, headers, config){
+                defer.resolve();
+            });
+        }
+        //return defer.promise;
+    }
+    
+    self.read = function(){
+        var defer = new $q.defer();
+        if(uuid == ""){
+            defer.reject("Console cannot read, console is not connected");
+        } else {
+            $http.post("/server/console/read/" + uuid)
+            .success(function(data, status, headers, config){
+                if(data.Success){
+                    self.term.echo(data.Lines.join('\n'));
+                    $timeout(self.read, 1000);
+                }
+            });
+        }
+    }
+    
+    self.open = function(r){
+        console.log("Opening console for region " + r.name);
+        if(uuid != ""){
+            console.log("Console already open, closing first");
+            this.close().then(
+                function(){ this.open(r); }
+            );
+        }
+        var defer = new $q.defer();
+        $http.post("/server/console/open/" + r.uuid)
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                if(data.Prompt){
+                    uuid = r.uuid;
+                    $('#' + uuid + "-Term").terminal(self.write,{
+                        prompt:data.Prompt.trim() + ">",
+                        greetings: null,
+                        onInit: function(term){
+                            self.term = term;
+                            self.term.resize(1000, 600);
+                            $timeout(self.read, 1000);
+                        }
+                    });
+                    defer.resolve(data.Prompt);
+                } else {
+                    defer.reject("Could not connect to console");
+                }
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    }
+    
+});
+
 mgmApp.service('taskService', function($rootScope, $http){
     var tasks = [];
     this.getTasks = function(){ return tasks; };
@@ -519,70 +606,6 @@ function ResetPasswordTask(id, timestamp, type, user, data){
     });
 
 }
-
-function Console(region){
-	var self = this;
-    this.region = region;
-	this.connected = false;
-	this.consoleInterval = null;
-	this.isUpdating = false;
-    this.terminal = region.Name()+"Console";
-	
-	this.close = function(){
-		clearInterval(self.consoleInterval);
-		if(self.connected){
-			$.post( "console/close/" + self.region.UUID());
-		}
-        self.connected = false;
-		$('#' + self.terminal).replaceWith($('<div>').attr('id',self.terminal));
-	}
-	this.sendCommand = function(cmd, term){
-		$.post("console/write/" + self.region.UUID(), {"command": cmd});
-	};
-	this.updateConsoleTask = function(){
-		if(self.isUpdating)
-			return;
-		self.isUpdating = true;
-		$.post("console/read/" + self.region.UUID()).done(function(data){
-            var result = JSON.parse(data);
-            if( result['Success'] ){
-                self.term.echo(result['Lines'].join('\n'));
-            }
-			self.isUpdating = false;
-		});
-	};
-	this.open = function(){
-        if(self.connected){
-            self._disconnect();
-        }
-		$.post("console/open/" + self.region.UUID()).done(function(data){
-			var result = JSON.parse(data);
-            if(! result['Success'] ){
-                alertify.error(result['Message']);
-                return;
-            }
-            
-            if(!result["Prompt"]){
-                alertify.error("Problem connecting to console...");
-                self.connected = false;
-                return;
-            }
-
-            $('#' + self.terminal).terminal(self.sendCommand,{
-                prompt:result["Prompt"] + ">",
-                greetings: null,
-                onInit: function(term){
-                    self.term = term;
-                    self.term.resize(1000, 600);
-                    $(window).resize(self.resizeConsole);
-                }
-            });
-            self.connected = true;
-            self.updateConsoleTask();
-            self.consoleInterval =  setInterval(self.updateConsoleTask, 1000);
-		});
-	}
-};
 
 function Region(name, x, y, uuid, host, isRunning){
 	var self = this;

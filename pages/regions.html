@@ -51,16 +51,20 @@
                     </span>
                 </div>
                 <div class="row" collapse="collapse.current != (r.name+'Manage')">
-                    <div class="col-md-2">&nbsp</div>
+                    <div class="col-md-1"></div>
                     <div class="col-md-8" ng-if="r.isRunning">
                         manage Online
                     </div>
                     <div class="col-md-8" ng-if="!r.isRunning">
                         <div class="row">
-                            <div class ="col-md-3"><button><strike>Delete Region</strike></button></div>
-                            <div class ="col-md-3"><select ng-model="newEstate" ng-options="e.name for e in estates | orderBy: 'name' track by e.name"></select><button>Set Estate</button></div>
-                            <div class ="col-md-3"><select ng-model="newHost" ng-options="h.name+'|'+h.address for h in hosts | orderBy: 'name' track by h.address"></select>
-                            <button ng-click="region.setHost(r, newHost)">Set Host</button></div>
+                            <div class ="col-md-2"><button><strike>Delete {{r.name}}</strike></button></div>
+                            <div class ="col-md-5">
+                                Change Estate
+                                <select ng-model="newEstate" ng-options="e.name for e in estates | orderBy: 'name' track by e.name"></select>
+                                <button ng-click="region.setEstate(r, newEstate)">Set</button>
+                            </div>
+                            <div class ="col-md-5">Change Host<select ng-model="newHost" ng-options="h.name+'|'+h.address for h in hosts | orderBy: 'name' track by h.address"></select>
+                            <button ng-click="region.setHost(r, newHost)">Set</button></div>
                         </div>
                     </div>
                     <!-- offline:   delete region, change host, change estate

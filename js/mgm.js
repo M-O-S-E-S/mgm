@@ -66,6 +66,19 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
         });
         return defer.promise;
     }
+    this.setEstate = function(region, estate){
+        var defer = new $q.defer();
+        $http.post("/server/region/estate/" + region.uuid, {'estate': estate.id})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                region.estateName = estate.name;
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    }
     $rootScope.$on("mgmUpdate", this.updateRegions);
 });
 

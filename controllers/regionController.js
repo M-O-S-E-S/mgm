@@ -80,6 +80,12 @@ angular.module('mgmApp')
         },
         setHost: function(region, host){
             console.log(region.name + " " + host.name);
+        },
+        setEstate: function(region, estate){
+            regionService.setEstate(region, estate).then(
+                function(){ alertify.success("Region " + region.name + " moved to Estate " + estate.name); },
+                function(msg){ alertify.error(msg); }
+            );
         }
     }
     

@@ -179,7 +179,8 @@ class Region extends CI_Controller {
         }
         session_write_close();
         
-        $estate = $this->input->post('estate');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $estate = $input_data['estate'];
         
         $this->regions->estate($region, $estate);
         die(json_encode(array('Success' => true)));

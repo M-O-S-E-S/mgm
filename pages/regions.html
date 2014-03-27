@@ -16,8 +16,8 @@
             </div>
             <div class="col-md-1"><input ng-if="auth.activeUser.accessLevel > 249" placeholder="host search" ng-model="search.node"></input></div>
             <div class="col-md-4">
-                <button data-bind="click: $root.startListedRegions">Start Listed</button>
-                <button data-bind="click: $root.stopListedRegions">Stop Listed</button>
+                <button ng-click="region.startListed()">Start Listed</button>
+                <button ng-click="region.stopListed()">Stop Listed</button>
                 <button ng-click="region.showAdd()">Add Region</button>
             </div>
         </div>

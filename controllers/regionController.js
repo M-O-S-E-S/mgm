@@ -1,5 +1,5 @@
 angular.module('mgmApp')
-.controller('RegionController', function($scope, $modal, regionService, estateService, hostService, consoleService){
+.controller('RegionController', function($scope, $modal, $filter, regionService, estateService, hostService, consoleService){
     $scope.regions = regionService.getRegions();
     $scope.$on("regionService", function(){
         $scope.regions = regionService.getRegions();
@@ -159,6 +159,18 @@ angular.module('mgmApp')
                 function(){ alertify.success("Region " + name + " created");  $scope.region.modal.close(); },
                 function(msg){ alertify.error(msg); }
             );
+        },
+        startListed: function(){
+            var listed = $filter('filter')($scope.regions, $scope.search);
+            for(var i = 0; i < listed.length; i++){
+                $scope.region.start(listed[i]);
+            }
+        },
+        stopListed: function(){
+            var listed = $filter('filter')($scope.regions, $scope.search);
+            for(var i = 0; i < listed.length; i++){
+                $scope.region.stop(listed[i]);
+            }
         }
     }
 });

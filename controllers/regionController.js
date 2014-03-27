@@ -149,6 +149,12 @@ angular.module('mgmApp')
                 alertify.error("estate is required");
                 return;
             }
+            for(var i = 0; i < $scope.regions.length; i++){
+                if( $scope.regions[i].x == x && $scope.regions[i].y == y ){
+                    alertify.error("Error, region " + $scope.regions[i].name + " is already at those coordinates");
+                    return;
+                }
+            }
             regionService.add(name,x,y,estate).then(
                 function(){ alertify.success("Region " + name + " created");  $scope.region.modal.close(); },
                 function(msg){ alertify.error(msg); }

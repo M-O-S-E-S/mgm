@@ -109,10 +109,6 @@ mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
 mgmApp.service('taskService', function($rootScope, $http, $q){
     var tasks = [];
     this.getTasks = function(){ return tasks; };
-    this.addTask = function(task) { 
-        tasks.push(task);
-        $rootScope.$broadcast("taskService", "update");
-    };
     this.updateTasks = function(){
         $http.get("/server/task").success(function(data, status, headers, config){
             if(data.Success){
@@ -147,19 +143,20 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
                 //upload file
                 $http.post("/server/task/upload/" + data.ID, form, {
                     transformRequest: angular.identity,
-                    headers: {'Content-Type': undefined}})
-                    .success(function(data, status, headers, config){
-                        if(data.Success){
-                            defer.resolve();
-                        } else {
-                            defer.reject(data.Message);
-                            newTask.data.Status = data.Message;
-                        }
-                    });
-                } else {
-                    defer.reject(data.Message);
-                };
-            });
+                    headers: {'Content-Type': undefined}
+                })
+                .success(function(data, status, headers, config){
+                    if(data.Success){
+                        defer.resolve();
+                    } else {
+                        defer.reject(data.Message);
+                        newTask.data.Status = data.Message;
+                    }
+                });
+            } else {
+                defer.reject(data.Message);
+            };
+        });
         return defer.promise;
     };
     this.saveIar = function(password){
@@ -167,11 +164,69 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
         //create job
         $http.post("/server/task/saveIar",{ 'password':password }).success(function(data, status, headers, config){
             if( data.Success ){
+                var newTask = { id: data.ID, timestamp: "", type: "save_iar", data: {"Status":"Initializing"}};
+                tasks.push(newTask);
                 defer.resolve();
             } else {
                 defer.reject(data.Message);
             }
         });
+        return defer.promise;
+    };
+    this.nukeRegion = function(region){
+        var defer = new $q.defer();
+        $http.post("/server/task/nukeContent/" + region.uuid)
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                var newTask = { id: data.ID, timestamp: "", type: "nuke_content", data: {"Status":"Initializing"}};
+                tasks.push(newTask);
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
+    this.saveOar = function(region){
+        var defer = new $q.defer();
+        $http.post("/server/task/saveOar/" + region.uuid)
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                var newTask = { id: data.ID, timestamp: "", type: "save_oar", data: {"Status":"Initializing"}};
+                tasks.push(newTask);
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
+    this.loadOar = function(region, form){
+        var defer = new $q.defer();
+        $http.post("/server/task/loadOar/" + region.uuid)
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                var newTask = { id: data.ID, timestamp: "", type: "load_oar", data: {"Status":"Initializing"}};
+                tasks.push(newTask);
+                $rootScope.$broadcast("taskService", "update");
+                //upload file
+                $http.post("/server/task/upload/" + data.ID, form, {
+                    transformRequest: angular.identity,
+                    headers: {'Content-Type': undefined}
+                })
+                .success(function(data, status, headers, config){
+                    if(data.Success){
+                        defer.resolve();
+                    } else {
+                        defer.reject(data.Message);
+                        newTask.data.Status = data.Message;
+                    }
+                });
+            } else {
+                defer.reject(data.Message);
+            };
+        });
+        
         return defer.promise;
     };
     this.updateTasks();
@@ -623,7 +678,6 @@ var strings = {
     "startListed": "Are you sure? This starts all regions currently displayed.  Regions already running are not affected",
     "stopListed": "Are you sure? This starts all regions currently displayed.  Regions already stopped are not affected",
     "dumpLogs": "Are you sure? This will download all logs available from this region, and can be large if MGM is  configured to retain logs for an extended amount of time, or if the region has logged excessively",
-    "nukeContent": "Are you sure? This will irreversably wipe out any content you have in your region.",
 }
 */
 

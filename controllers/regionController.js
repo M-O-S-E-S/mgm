@@ -1,5 +1,5 @@
 angular.module('mgmApp')
-.controller('RegionController', function($scope, $modal, $filter, regionService, estateService, hostService, consoleService){
+.controller('RegionController', function($scope, $modal, $filter, regionService, estateService, hostService, consoleService, taskService){
     $scope.regions = regionService.getRegions();
     $scope.$on("regionService", function(){
         $scope.regions = regionService.getRegions();
@@ -64,6 +64,7 @@ angular.module('mgmApp')
                 this.content = "";
             } else {
                 this.content = region.uuid;
+                this.manage = "";
             }
         }
     }
@@ -71,13 +72,33 @@ angular.module('mgmApp')
     $scope.oar = {
         file: "",
         save: function(region){
-            
+            alertify.confirm("Saving an oar file may take in excess of 30 minutes.<br>MGM will process this offline, and send you an email when it is ready for download.<br>You do not need to stay logged in during this process.<br>Please press Save below to begin.", function(confirmed){
+            if(confirmed){
+                taskService.saveOar(region).then(
+                    function(){ alertify.success("Save oar initiated for region " + region.name);  },
+                    function(msg){ alertify.error(msg);  }
+                );
+            }
+        });
         },
         nuke: function(region){
-            
+            alertify.confirm("Are you sure? This will irreversably wipe out any content you have in your region.", function(confirmed){
+                if(confirmed){
+                    taskService.nukeRegion(region).then(
+                        function(){ alertify.success("Nuke initiated for region " + region.name);  },
+                        function(msg){ alertify.error(msg);  }
+                    );
+                };
+            });
         },
         load: function(region){
+            var data = new FormData();
+            data.append('file', $scope.oar.file[0]);
             
+            taskService.loadOar(region, data).then(
+                function(){ alertify.success("Load oar initiated for region " + region.name);  },
+                function(msg){ alertify.error(msg);  }
+            );
         }
     };
     

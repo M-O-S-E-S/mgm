@@ -46,7 +46,7 @@
                     <div class="col-md-4">
                         <button ng-disabled="r.isRunning" ng-click="region.start(r)" class="btn btn-xs btn-default">Start</button>
                         <button ng-disabled="!r.isRunning" ng-click="region.stop(r)" class="btn btn-xs btn-default">Stop</button>
-                        <button ng-click="collapse.showContent(r)" ng-disabled="!region.isRunning" class="btn btn-xs btn-default">Content</button>
+                        <button ng-click="collapse.showContent(r)" ng-disabled="!r.isRunning" class="btn btn-xs btn-default">Content</button>
                         <button ng-click="collapse.showManage(r)" ng-disabled="auth.activeUser.accessLevel < 250" class="btn btn-xs btn-default">Manage</button>
                         <button ng-click="region.viewLog(r)" class="btn btn-xs btn-default">log</button>
                     </span>
@@ -68,14 +68,16 @@
                             <button ng-click="region.setHost(r, newHost)">Set</button></div>
                         </div>
                     </div>
-                    <!-- offline:   delete region, change host, change estate
-                         online:    rest console
-                    -->
                 </div>
                 <div class="row" collapse="collapse.content != r.uuid">
-                    <div class="col-md-2">&nbsp</div>
-                    <div class="col-md-2">content</div>
-                    <!-- running ony -->
+                    <div class="col-md-1"></div>
+                    <div class="col-md-2">
+                        Oar load
+                        <input type="file" onchange="angular.element(this).scope().oar.file = this.files" />
+                        <button ng-click="oar.load(r)">Load</button>
+                    </div>
+                    <div class="col-md-2">Oar Save <button ng-click="oar.save(r)">Initiate Save</button></div>
+                    <div class="col-md-2">Load blank oar, wiping content <button ng-click="oar.nuke(r)">Nuke</button></div>
                 </div>
             </div>
         </div>

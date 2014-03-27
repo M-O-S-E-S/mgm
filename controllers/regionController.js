@@ -60,13 +60,26 @@ angular.module('mgmApp')
             }
         },
         showContent: function(region){
-            if(region == this.content){
+            if(region.uuid == this.content){
                 this.content = "";
             } else {
                 this.content = region.uuid;
             }
         }
     }
+    
+    $scope.oar = {
+        file: "",
+        save: function(region){
+            
+        },
+        nuke: function(region){
+            
+        },
+        load: function(region){
+            
+        }
+    };
     
     $scope.search = {
         name: "",

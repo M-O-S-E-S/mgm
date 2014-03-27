@@ -58,6 +58,4 @@ angular.module('mgmApp')
             );
         }
     }
-    
-    userService.updateUsers();
 });

@@ -47,6 +47,7 @@ angular.module('mgmApp')
                     $scope.auth.password = "";
                     $scope.updater = $interval(function(){ $rootScope.$broadcast('mgmUpdate','trigger'); }, 10*1000);
                     $rootScope.$broadcast('mgmUpdate','trigger'); 
+                    $location.path('/account');
                 } else {
                     console.log("session resume failed");
                     $location.path('/');
@@ -58,7 +59,7 @@ angular.module('mgmApp')
             this.loggedIn = false;
             this.userName = "";
             this.password = "";
-            $scope.location.goto('/');
+            $location.path('/');
             $interval.cancel($scope.updater);
         }
     };

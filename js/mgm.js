@@ -1,6 +1,28 @@
 
 var mgmApp = angular.module('mgmApp',['ngRoute','ui.bootstrap']);
 
+mgmApp.directive('fileDownload', function ($compile) {
+    var fd = {
+        restrict: 'A',
+        link: function (scope, iElement, iAttrs) {
+
+            scope.$on("downloadFile", function (e, url) {
+                var iFrame = iElement.find("iframe");
+                if (!(iFrame && iFrame.length > 0)) {
+                    iFrame = $("<iframe style='position:fixed;display:none;top:-1px;left:-1px;'/>");
+                    iElement.append(iFrame);
+                }
+
+                iFrame.attr("src", url);
+
+
+            });
+        }
+    };
+
+    return fd;
+});
+
 mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
     var uuid = "";
     var interval = null;
@@ -88,7 +110,7 @@ mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
     
 });
 
-mgmApp.service('taskService', function($rootScope, $http){
+mgmApp.service('taskService', function($rootScope, $http, $q){
     var tasks = [];
     this.getTasks = function(){ return tasks; };
     this.addTask = function(task) { 
@@ -103,17 +125,60 @@ mgmApp.service('taskService', function($rootScope, $http){
             }
         });
     };
-    this.remove = function(id){
-        $http.post("/server/task/delete/" + id)
-            .success(function(data, status, headers, config){
-                if(data.Success){
-                    delete tasks[id];
-                    $rootScope.$broadcast("taskService", "update");
-                } else {
-                    alertify.error(data.Message);
-                }
-            });
+    this.remove = function(task){
+        var defer = new $q.defer();
+        $http.post("/server/task/delete/" + task.id)
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                var index = tasks.indexOf(task);
+                tasks.splice(index,1);
+                defer.resolve();
+                $rootScope.$broadcast("taskService", "update");
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
     };
+    this.loadIar = function(password, form){
+        var defer = new $q.defer();
+        //create job ticket
+        $http.post("/server/task/loadIar",{ 'password':password }).success(function(data, status, headers, config){
+            if(data.Success){
+                var newTask = { id: data.ID, timestamp: "", type: "load_iar", data: {"Status":"Initializing"}};
+                tasks.push(newTask);
+                $rootScope.$broadcast("taskService", "update");
+                //upload file
+                $http.post("/server/task/upload/" + data.ID, form, {
+                    transformRequest: angular.identity,
+                    headers: {'Content-Type': undefined}})
+                    .success(function(data, status, headers, config){
+                        if(data.Success){
+                            defer.resolve();
+                        } else {
+                            defer.reject(data.Message);
+                            newTask.data.Status = data.Message;
+                        }
+                    });
+                } else {
+                    defer.reject(data.Message);
+                };
+            });
+        return defer.promise;
+    };
+    this.saveIar = function(password){
+        var defer = new $q.defer();
+        //create job
+        $http.post("/server/task/saveIar",{ 'password':password }).success(function(data, status, headers, config){
+            if( data.Success ){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
+    this.updateTasks();
     $rootScope.$on("mgmUpdate", this.updateTasks);
 });
 
@@ -203,6 +268,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
         });
         return defer.promise;
     };
+    this.updateRegions();
     $rootScope.$on("mgmUpdate", this.updateRegions);
 });
 
@@ -246,6 +312,7 @@ mgmApp.service('estateService', function($rootScope, $http, $q){
             });
         return defer.promise;
     };
+    this.updateEstates();
     $rootScope.$on("mgmUpdate", this.updateEstates);
 });
 
@@ -289,6 +356,7 @@ mgmApp.service('hostService', function($rootScope, $http, $q){
             });
         return defer.promise;
     };
+    this.updateHosts();
     $rootScope.$on("mgmUpdate", this.updateHosts);
 });
 
@@ -421,6 +489,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
         });
         return defer.promise;
     };
+    this.updateUsers();
     $rootScope.$on("mgmUpdate", this.updateUsers);
 });
 
@@ -522,9 +591,9 @@ mgmApp.config(function($routeProvider, $locationProvider){
             templateUrl : '/pages/pendingUsers.html',
             controller  :  'PendingUserController'
         })
-        .otherwise({
-            templateUrl : '/pages/account.html'
-        });
+        //.otherwise({
+        //    templateUrl : '/pages/account.html'
+        //});
     $locationProvider.html5Mode(true);
 });
 

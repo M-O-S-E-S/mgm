@@ -34,7 +34,7 @@
         <div class="row" ng-repeat="r in regions | orderBy:['estateName','name'] | filter:search track by r.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
             <div class="col-md-12">
                 <div class="row">
-                    <div class="col-md-1"><button popover-trigger="mouseenter" popover-placement="right" popover="View logs for {{r.name}}" ng-click="region.viewLog(r)" class="btn btn-xs btn-default">{{r.name}}</button></div>
+                    <div class="col-md-1">{{r.name}}</div>
                     <div class="col-md-1">{{r.estateName.substring(0,15)}}</div>
                     <div ng-if="r.isRunning" class="col-md-1">{{lastSeen(r.stat.timestamp)}}</div>
                     <div ng-if="r.isRunning" class="col-md-1">{{r.stat.status["cpuPercent"].toFixed(2)}}%</div>
@@ -44,10 +44,11 @@
                     <div class="col-md-5" ng-if="!r.isRunning">Is not running...</div>
                     <div class="col-md-1"><span ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(r.node)}}</span>&nbsp</div>
                     <div class="col-md-4">
-                        <button ng-disabled="r.isRunning" class="ui-button" ng-click="region.start(r)">Start</button>
-                        <button ng-disabled="!r.isRunning" ng-click="region.stop(r)">Stop</button>
-                        <button ng-click="collapse.showContent(r)" ng-disabled="!region.isRunning">Content</button>
-                        <button ng-click="collapse.showManage(r)" ng-disabled="auth.activeUser.accessLevel < 250">Manage</button>
+                        <button ng-disabled="r.isRunning" ng-click="region.start(r)" class="btn btn-xs btn-default">Start</button>
+                        <button ng-disabled="!r.isRunning" ng-click="region.stop(r)" class="btn btn-xs btn-default">Stop</button>
+                        <button ng-click="collapse.showContent(r)" ng-disabled="!region.isRunning" class="btn btn-xs btn-default">Content</button>
+                        <button ng-click="collapse.showManage(r)" ng-disabled="auth.activeUser.accessLevel < 250" class="btn btn-xs btn-default">Manage</button>
+                        <button ng-click="region.viewLog(r)" class="btn btn-xs btn-default">log</button>
                     </span>
                 </div>
                 <div class="row" collapse="collapse.manage != r.uuid">

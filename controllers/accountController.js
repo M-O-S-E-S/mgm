@@ -1,5 +1,5 @@
 angular.module('mgmApp')
-.controller('AccountController', function($scope, $http, $modal, taskService){
+.controller('AccountController', function($scope, $modal, taskService){
     $scope.account = {
         password: "",
         passwordConfirm: "",
@@ -45,11 +45,6 @@ angular.module('mgmApp')
                 scope: $scope
             });
         },
-        cancel: function(){
-            if(this.modal != undefined){
-                this.modal.close();
-            }
-        },
         load: function(){
             if(this.password == ""){
                 alertify.error('Password cannot be blank');
@@ -59,48 +54,30 @@ angular.module('mgmApp')
                 alertify.error('No file selected');
                 return;
             }
-                    
-            //create job ticket
-            $http.post("/server/task/loadIar",{ 'password':this.password }).success(function(data, status, headers, config){
-                if(data.Success){
-                    taskService.addTask({ id: data.ID, timestamp: "", type: "load_iar", data: {"Status":"Initializing"}});
-                    
-                    //upload file
-                    var fd = new FormData();
-                    console.log($scope.iar.file[0]);
-                    fd.append("file",$scope.iar.file[0]);
-                    $http.post("/server/task/upload/" + data.ID, fd, {
-                        transformRequest: angular.identity,
-                        headers: {'Content-Type': undefined}})
-                        .success(function(data, status, headers, config){
-                            if(data.Success){
-                                console.log("file uploaded");
-                                this.modal.close();
-                            } else {
-                                alertify.error(data.Message);
-                            }
-                        });
-                } else {
-                    alertify.error(data.Message);
-                };
-            });
+            
+            //generate form
+            var fd = new FormData();
+            fd.append("file",$scope.iar.file[0]);
+            taskService.loadIar(this.password, fd).then(
+                function(){ 
+                    alertify.success("Iar file loading"); 
+                    $scope.iar.modal.close();
+                },
+                function(msg){ alertify.error(msg);  }
+            );
         },
         save: function(){
             if(this.password == ""){
                 alertify.error('Password cannot be blank');
                 return;
             }
-            
-            //create job
-            $http.post("/server/task/saveIar",{ 'password':this.password }).success(function(data, status, headers, config){
-                if( data.Success ){
-                    alertify.success("Save Iar task scheduled");
-                    this.modal.close();
-                } else {
-                    alertify.error(data.Message);
-                }
-                this.password = "";
-            });
+            taskService.saveIar(this.password).then(
+                function(){ 
+                    alertify.success("Save Iar task scheduled"); 
+                    $scope.iar.modal.close();
+                },
+                function(msg){ alertify.error(msg);  }
+            );
         }
     }
 });

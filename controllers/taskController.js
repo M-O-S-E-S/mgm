@@ -4,11 +4,13 @@ angular.module('mgmApp')
     $scope.$on("taskService", function(){
         $scope.tasks = taskService.getTasks();
     });
-    $scope.delete = function(id){
-        console.log("delete job " + id);
-        taskService.remove(id);
+    $scope.delete = function(task){
+        taskService.remove(task).then(
+            function(){ alertify.success("Task deleted"); },
+            function(msg){ alertify.error(msg);  }
+        );
     };
-    $scope.download = function(id){
-        alertify.error("file download not implemented yet");
+    $scope.download = function(task){
+        $scope.$broadcast("downloadFile", '/server/task/ready/' + task.id);
     };
 });

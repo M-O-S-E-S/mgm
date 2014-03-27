@@ -142,9 +142,4 @@ angular.module('mgmApp')
             this.modal.close();
         }
     }
-    
-    estateService.updateEstates();
-    hostService.updateHosts();
-    userService.updateUsers();
-    regionService.updateRegions();
 });

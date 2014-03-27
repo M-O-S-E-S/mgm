@@ -54,7 +54,9 @@ angular.module('mgmApp')
             } else {
                 this.manage = region.uuid;
                 this.content = "";
-                consoleService.open(region);
+                if(region.isRunning){
+                    consoleService.open(region);
+                }
             }
         },
         showContent: function(region){
@@ -114,8 +116,4 @@ angular.module('mgmApp')
             );
         }
     }
-    
-    regionService.updateRegions();
-    hostService.updateHosts();
-    estateService.updateEstates();
 });

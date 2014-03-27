@@ -66,7 +66,8 @@ class Task extends CI_Controller {
         }
         
         $name = $user->Name;
-        $password = $this->input->post('password');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $password = $input_data['password'];
         $path = "/";
         
         $job = array();
@@ -126,7 +127,8 @@ class Task extends CI_Controller {
         }
         
         $name = $user->Name;
-        $password = $this->input->post('password');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $password = $input_data['password'];
         $path = "/";
         
         $job = array();
@@ -223,7 +225,8 @@ class Task extends CI_Controller {
     }
     
     public function resetCode(){
-        $email = $this->input->post('email');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $email = $input_data['email'];
         $user = $this->simiangrid->getUserByEmail($email);
         if($user){
             // do not reset password for suspended accounts
@@ -247,9 +250,12 @@ class Task extends CI_Controller {
     }
     
     public function resetPassword(){
-        $user = $this->simiangrid->getUserByName($this->input->post('name'));
-        $pass = md5($this->input->post('token'));
-        $password = $this->input->post('password');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $name = $input_data['name'];
+        $password = $input_data['password'];
+        $token = $input_data['token'];
+        $user = $this->simiangrid->getUserByName($name);
+        $pass = md5($token);
         
         if( !$password || $password == ""){
             die(json_encode(array('Success' => false, 'Message' => "Invalid Password")));

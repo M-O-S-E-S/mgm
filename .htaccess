@@ -1,5 +1,8 @@
 RewriteEngine on
 
+#get_grid_info
+RewriteRule ^get_grid_info$ server/index.php$2
+
 # Don't rewrite files or directories
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d

@@ -205,8 +205,9 @@ class User extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         session_write_close();
-        $uuid = $this->input->post('id');
-        $accessLevel = $this->input->post('accessLevel');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $uuid = $input_data['uuid'];
+        $accessLevel = $input_data['accessLevel'];
         if( $accessLevel < 0){
             $accessLevel = 0;
         } elseif( $accessLevel > 250 ){

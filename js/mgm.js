@@ -554,9 +554,21 @@ mgmApp.service('userService', function($rootScope, $http, $q){
         });
         return defer.promise;
     };
+    this.setAccessLevel = function(user, level){
+        var defer = new $q.defer();
+        $http.post("/server/user/accessLevel", {"uuid": user.uuid, "accessLevel": level})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                user.userLevel = level;
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
     this.register = function(username, email, gender, password, summary){
         var defer = new $q.defer();
-        
         $http.post("/server/register/submit", {"name": username, "email": email, "gender": gender, 'password': password, 'summary': summary})
         .success(function(data, status, headers, config){
             if(data.Success){

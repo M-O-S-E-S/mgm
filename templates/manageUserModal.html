@@ -3,7 +3,10 @@
 </div>
 <div class="modal-body">
     <div id="ReviewPending">
-        <p>{{user.current.name}} {{user.current.email}}</p>
+        <p>{{user.current.name}}</p>
+        <p>{{user.current.email}}</p>
+        <p>Access Level: {{user.current.userLevel}}</p>
+        <label>New Access Level:</label><input ng-model="level" /><button ng-click="user.setAccessLevel(level)">Set</button><br>
         <label>New Email:</label><input ng-model="email" /><button ng-click="user.setEmail(email)">Set</button><br>
         <label>New Password:</label><input ng-model="password" /><button ng-click="user.setPassword(password)">Set</button><br>
         <label>Suspend Account:</label>

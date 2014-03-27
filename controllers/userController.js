@@ -68,6 +68,24 @@ angular.module('mgmApp')
                 function(msg){ alertify.error(msg); }
             );
         },
+        setAccessLevel: function(level){
+            if(level == undefined || level == ""){
+                alertify.error("invalid user level");
+                return;
+            }
+            if( Math.floor(level) != level){
+                alertify.error("user level is an integert value between 0 and 250");
+                return;
+            }
+            if( level < 0 || level > 250){
+                alertify.error("user level is an integert value between 0 and 250");
+                return;
+            }
+            userService.setAccessLevel(this.current, level).then(
+                function(){ alertify.success("User level for " + $scope.user.current.name + " has been changed to " + level); },
+                function(msg){ alertify.error(msg); }
+            );
+        },
         remove: function(user){
             alertify.confirm("Are you sure? This purges the user and their avatar from the grid", function(confirmed){
                 if(confirmed){

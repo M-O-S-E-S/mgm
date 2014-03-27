@@ -6,6 +6,13 @@
         <p>{{user.current.name}}</p>
         <p>{{user.current.email}}</p>
         <p>Access Level: {{user.current.userLevel}}</p>
+        Important user levels:
+        <ul>
+            <li>0: normal user</li>
+            <li>50: able to administer groups</li>
+            <li>200: grid god powers</li>
+            <li>250: MGM administrator</li>
+        </ul>
         <label>New Access Level:</label><input ng-model="level" /><button ng-click="user.setAccessLevel(level)">Set</button><br>
         <label>New Email:</label><input ng-model="email" /><button ng-click="user.setEmail(email)">Set</button><br>
         <label>New Password:</label><input ng-model="password" /><button ng-click="user.setPassword(password)">Set</button><br>

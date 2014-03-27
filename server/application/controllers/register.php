@@ -6,7 +6,8 @@ class Register extends CI_Controller {
     }
     
     public function submit(){
-        $name = $this->input->post('name');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $name = $input_data['name'];
 
         if( $name == "" ){
                 die(json_encode(array('Success'=>false,'Message'=>'User name cannot be blank')));
@@ -14,8 +15,7 @@ class Register extends CI_Controller {
         if( sizeof(explode(" ",$name)) != 2){
             die(json_encode(array('Success'=>false,'Message'=>'First and Last name please')));
         }
-        
-        $email = $this->input->post('email');
+        $email = $input_data['email'];
         if( $email == "" ){
             die(json_encode(array('Success'=>false,'Message'=>'Email cannot be blank')));
         }
@@ -23,15 +23,15 @@ class Register extends CI_Controller {
             die(json_encode(array('Success'=>false,'Message'=>'Invalid email entered')));
         }
 
-        $gender = $this->input->post('gender');
+        $gender = $input_data['gender'];
         if( $gender != 'M' && $gender != 'F' ){
             die(json_encode(array('Success'=>false,'Message'=>'Gender must be M or F')));
         }
-        $password = $this->input->post('password');
+        $password = $input_data['password'];
         if( $password == "" ){
        	    die(json_encode(array('Success'=>false,'Message'=>'Password cannot be blank')));
         }
-        $summary = $this->input->post('summary');
+        $summary = $input_data['summary'];
 
         $credential = '$1$'. md5($password);
 

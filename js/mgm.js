@@ -554,6 +554,19 @@ mgmApp.service('userService', function($rootScope, $http, $q){
         });
         return defer.promise;
     };
+    this.register = function(username, email, gender, password, summary){
+        var defer = new $q.defer();
+        
+        $http.post("/server/register/submit", {"name": username, "email": email, "gender": gender, 'password': password, 'summary': summary})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
     this.updateUsers();
     $rootScope.$on("mgmUpdate", this.updateUsers);
 });
@@ -655,6 +668,10 @@ mgmApp.config(function($routeProvider, $locationProvider){
         .when('/pending', {
             templateUrl : '/pages/pendingUsers.html',
             controller  :  'PendingUserController'
+        })
+        .when('/register', {
+            templateUrl : '/pages/register.html',
+            controller  : 'RegisterController'
         })
         //.otherwise({
         //    templateUrl : '/pages/account.html'

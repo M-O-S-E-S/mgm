@@ -1,9 +1,26 @@
 
 var viewModel = {
-    titlePageConfirmed: ko.observable(false),
-    registrationSuccessful: ko.observable(false),
+    currentPage: ko.observable(""),
 
-    confirmTitlePage: function(){ this.titlePageConfirmed(true); },
+
+
+
+    checkInstall: function(){
+        $.get("/server/install/test").done(function(data){
+            var result = JSON.parse(data);
+            if(result['Success']){
+                if(result['Installed'] == true){
+                    viewModel.currentPage('Complete');
+                } else {
+                    viewModel.currentPage('Title');
+                }
+            }
+        });
+    },
+    
+    confirmTitlePage: function(){
+        viewModel.currentPage("Account");
+    },
 
     userName: ko.observable(''),
     nameError: ko.observable(''),
@@ -40,19 +57,19 @@ var viewModel = {
         }
         this.passwordError('');
 
-        $.post("install/submit", {"name": uname, "email": email, 'password': password}).done(function(data){
+        $.post("/server/install/submit", {"name": uname, "email": email, 'password': password}).done(function(data){
             var result = JSON.parse(data);
             if( result['Success'] ){
-                viewModel.registrationSuccessful(true);
+                viewModel.currentPage("Success");
             } else {
                 alert(result['Message']);
             }
         });
-        
     }
 };
 
 $(document).ready(function(){
     ko.applyBindings(viewModel);
+    viewModel.checkInstall();
 });
 

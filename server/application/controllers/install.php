@@ -9,10 +9,18 @@ class Install extends CI_Controller {
         die(file_get_contents(FCPATH . 'html/installComplete.html'));
     }
     
+    public function test(){
+        $users = $this->simiangrid->allUsers();
+        if(count($users) > 0){
+                die(json_encode(array('Success' => true, 'Installed' => false)));
+        }
+        die(json_encode(array('Success' => true, 'Installed' => false)));
+    }
+    
     public function submit(){
         $users = $this->simiangrid->allUsers();
         if(count($users) > 0){
-                die(file_get_contents(FCPATH . 'html/installComplete.html'));
+                die(json_encode(array('Success' => false, 'Message' => 'Installation already Complete')));
         }
 
         $name = $this->input->post('name');

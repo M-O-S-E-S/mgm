@@ -11,7 +11,7 @@
 	</head>
 	<body >
 <!--++++++++++++++++++++++++++++++++++++ TITLE +++++++++++++++++++++++++++++++++++++++++++++++-->
-		<div id="title_page" data-bind="visible: !titlePageConfirmed()">
+		<div id="title_page" data-bind="visible: currentPage() == 'Title'">
 			<div align="center">
   				<div style="width: 400px; height: 470px; overflow: hidden">
   					<img border="0" src="images/splash.png" alt="MOSES" style="width: 100%; height: 100%">
@@ -21,7 +21,7 @@
 			</div>
 		</div>
 <!--++++++++++++++++++++++++++++++++++++ INITIAL ACCOUNT +++++++++++++++++++++++++++++++++++++-->
-		<div id="registration_page" data-bind="visible: titlePageConfirmed() && !registrationSuccessful()">
+		<div id="registration_page" data-bind="visible: currentPage() == 'Account'">
 			<div align="center">
 				<h3>Initial Administration Account</h3>
 				<div style="width: 800px; text-align: left">
@@ -52,10 +52,16 @@
 			</div>
 		</div>
 <!--++++++++++++++++++++++++++++++++++++ Registration Successfull ++++++++++++++++++++++++++++++-->
-		<div id="success_page" data-bind="visible: titlePageConfirmed() && registrationSuccessful()">
+		<div id="success_page" data-bind="visible: currentPage() == 'Success'">
 			<div align="center">
 				<h3>Inital Avatar Created</h3>
 				<p>Congratulations on creating your first admin avatar.  This avatar can now be used to log into mgm and administer your grid.</p>
+			</div>
+		</div>
+        <div id="complete_page" data-bind="visible: currentPage() == 'Complete'">
+			<div align="center">
+				<h3>Installation Complete</h3>
+				<p>MGM has already been installed.</p>
 			</div>
 		</div>
 	</body>

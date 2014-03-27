@@ -5,17 +5,13 @@ mgmApp.directive('fileDownload', function ($compile) {
     var fd = {
         restrict: 'A',
         link: function (scope, iElement, iAttrs) {
-
             scope.$on("downloadFile", function (e, url) {
                 var iFrame = iElement.find("iframe");
                 if (!(iFrame && iFrame.length > 0)) {
                     iFrame = $("<iframe style='position:fixed;display:none;top:-1px;left:-1px;'/>");
                     iElement.append(iFrame);
                 }
-
                 iFrame.attr("src", url);
-
-
             });
         }
     };
@@ -187,9 +183,19 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     this.getRegions = function(){
         return regions;
     };
-    this.addRegion = function(region) { 
-        regions.push(region);
-        $rootScope.$broadcast("regionService");
+    this.add = function(name,x, y, estate) {
+        var defer = new $q.defer();
+        $http.post("/server/region/create", {"name": name, "x":x, "y":y, "estate":estate.id})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                regions.push({"uuid":data.id,"name":name,"x":x,"y":y,"estateName":estate.name,"node":"","isRunning":false,"stat":[]});
+                $rootScope.$broadcast("regionService");
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
     };
     this.updateRegions = function(){
         $http.get("/server/region").success(function(data, status, headers, config){
@@ -199,16 +205,20 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
             }
         });
     };
-    this.remove = function(id){
-        $http.post("/server/region/delete/" + id)
-            .success(function(data, status, headers, config){
-                if(data.Success){
-                    delete regions[id];
-                    $rootScope.$broadcast("regionService");
-                } else {
-                    alertify.error(data.Message);
-                }
-            });
+    this.remove = function(region){
+        var defer = new $q.defer();
+        $http.post("/server/region/destroy/" + region.uuid)
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                var index = regions.indexOf(region);
+                regions.splice(index,1);
+                defer.resolve();
+                $rootScope.$broadcast("regionService");
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
     };
     this.getLog = function(region){
         var defer = new $q.defer();

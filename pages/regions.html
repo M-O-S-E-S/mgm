@@ -18,7 +18,7 @@
             <div class="col-md-4">
                 <button data-bind="click: $root.startListedRegions">Start Listed</button>
                 <button data-bind="click: $root.stopListedRegions">Stop Listed</button>
-                <button data-bind="click: $root.createNewRegion">Add Region</button>
+                <button ng-click="region.showAdd()">Add Region</button>
             </div>
         </div>
         <div class="row">
@@ -58,7 +58,7 @@
                     </div>
                     <div class="col-md-8" ng-if="!r.isRunning">
                         <div class="row">
-                            <div class ="col-md-2"><button><strike>Delete {{r.name}}</strike></button></div>
+                            <div class ="col-md-2"><button ng-click="region.remove(r)">Delete {{r.name}}</button></div>
                             <div class ="col-md-5">
                                 Change Estate
                                 <select ng-model="newEstate" ng-options="e.name for e in estates | orderBy: 'name' track by e.name"></select>

@@ -5,7 +5,7 @@
     <div id="LoadIar">
         <p class="alertify-message">Please select the Owner and Name for the new estate.</p>
         <div class="alertify-text-wrapper">
-            <label>Owner:</label><select ng-model="owner" ng-options="user.name for user in users track by user.uuid" class="alertify-text" />
+            <label>Owner:</label><select ng-model="owner" ng-options="u.name for u in users | orderBy: 'name' track by u.uuid" class="alertify-text" />
             <label>Name:</label><input ng-model="name" class="alertify-text" />
         </div>
     </div>

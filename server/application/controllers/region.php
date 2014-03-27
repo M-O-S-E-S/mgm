@@ -27,7 +27,7 @@ class Region extends CI_Controller {
             $region['y'] = $r->locY;
             $region['estateName'] = $r->EstateName;
             if($level >= 250){
-                $region['node'] = $r->slaveAddress;
+                $region['node'] = $r->slaveAddress ? $r->slaveAddress : "";
             } else {
                 $region['node'] = "omitted";
             }
@@ -119,11 +119,11 @@ class Region extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         session_write_close();
-        
-        $name = $this->input->post('name');
-        $x = $this->input->post('x');
-        $y = $this->input->post('y');
-        $estate = $this->input->post('estate');
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $name = $input_data['name'];
+        $x = $input_data['x'];
+        $y = $input_data['y'];
+        $estate = $input_data['estate'];
                                 
         if( $name == ""){
             die(json_encode(array('Success' => false, 'Message' => "Region Name cannot be blank")));

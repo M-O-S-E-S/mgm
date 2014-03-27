@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <h3>Create a new region</h3>
+</div>
+<div class="modal-body">
+    <div id="LoadIar">
+        <p class="alertify-message">Please enter your password to save an IAR file.  This file will include your entire inventory.</p>
+        <div class="alertify-text-wrapper">
+            <label>Name:</label><input class="alertify-text" ng-model="name" />
+            <label>X:</label><input class="alertify-text" ng-model="x" />
+            <label>Y:</label><input class="alertify-text" ng-model="y" />
+            <label>Estate:</label><select ng-model="estate" ng-options="e.name for e in estates | orderBy: 'name' track by e.name" class="alertify-text" />
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="region.add(name, x, y, estate)">Create</button>
+    <button class="btn btn-warning" ng-click="region.modal.close()">Cancel</button>
+</div>

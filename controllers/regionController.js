@@ -114,6 +114,45 @@ angular.module('mgmApp')
                 function(){ alertify.success("Region " + region.name + " signalled to stop"); },
                 function(msg){ alertify.error(msg); }
             );
+        },
+        remove: function(region){
+            regionService.remove(region).then(
+                function(){ alertify.success("Region " + region.name + " has been deleted"); },
+                function(msg){ alertify.error(msg); }
+            );
+        },
+        showAdd: function(){
+            this.modal = $modal.open({
+                templateUrl: '/templates/createRegionModal.html',
+                keyboard: false,
+                scope: $scope
+            });
+        },
+        add: function(name, x, y, estate){
+            if(name == undefined || name == ""){
+                alertify.error("Name is required");
+                return;
+            }
+            if(x == undefined || x == ""){
+                alertify.error("position x is required");
+                return;
+            }
+            if(y == undefined || y == ""){
+                alertify.error("position y is required");
+                return;
+            }
+            if( Math.floor(x) != x || Math.floor(y) != y){
+                alertify.error("X and Y must be integer coordinates");
+                return;
+            }
+            if(estate == null || estate == undefined){
+                alertify.error("estate is required");
+                return;
+            }
+            regionService.add(name,x,y,estate).then(
+                function(){ alertify.success("Region " + name + " created");  $scope.region.modal.close(); },
+                function(msg){ alertify.error(msg); }
+            );
         }
     }
 });

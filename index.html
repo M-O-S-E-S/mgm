@@ -89,7 +89,7 @@
                                 <td width="140">{{task.timestamp}}</td>
                                 <td width="200">{{task.type}}</td>
                                 <td>{{task.data.Status}}</td>
-                                <td><button ng-if="task.data.File" ng-click="download(task)">Download</button></td>
+                                <td><button ng-if="(task.data.Status == 'Done') && task.data.File" ng-click="download(task)">Download</button></td>
                             </tr>
                         </tbody>
                     </table>

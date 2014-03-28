@@ -17,13 +17,13 @@ php php-common php-gd php-mcrypt php-pear php-pecl-memcache php-mhash php-mysql 
 1. Create directory /var/www/maps
 1. Create directory /var/www/archives
 1. Create mysql database credentials for mgm, and opensim accounts
-1. Copy /var/www/mgm/application/config/database.php.example to /var/www/mgm/application/contif/database.php
+1. Copy /var/www/mgm/server/application/config/database.php.example to /var/www/mgm/server/application/contif/database.php
 1. Update database.php config file with mgm and opensim credentials
 1. Load /var/www/mgm/mgm.sql into the mgm database
 ```bash
 mysql -u mgmUname -pmgmPword mgmTable < mgm.sql
 ```
-1. Copy /var/www/mgm/application/config/mgm.php.example to /var/www/mgm/application/config/mgm.php
+1. Copy /var/www/mgm/server/application/config/mgm.php.example to /var/www/mgm/server/application/config/mgm.php
 1. Update mgm.php with your deployment-specifics, such as simiangrid url, email credentials, etc
 1. Modify your apache file, making the following changes:
     1. Change your DocumentRoot to /var/www/mgm
@@ -64,13 +64,13 @@ rpm -ivh http://mirror.pnl.gov/epel/6/i386/epel-release-6-8.noarch.rpm
 1. Modify /etc/my.conf, add `max_allowed_packet=16M` under `[mysqld]`
 1. Restart mysql
 1. Create mysql database credentials for mgm, and opensim accounts
-1. Copy /var/www/mgm/application/config/database.php.example to /var/www/mgm/application/contif/database.php
+1. Copy /var/www/mgm/server/application/config/database.php.example to /var/www/mgm/server/application/contif/database.php
 1. Update database.php config file with mgm and opensim credentials
 1. Load /var/www/mgm/mgm.sql into the mgm database
 ```bash
 mysql -u mgmUname -pmgmPword mgmTable < mgm.sql
 ```
-1. Copy /var/www/mgm/application/config/mgm.php.example to /var/www/mgm/application/config/mgm.php
+1. Copy /var/www/mgm/server/application/config/mgm.php.example to /var/www/mgm/server/application/config/mgm.php
 1. Update mgm.php with your deployment-specifics, such as simiangrid url, email credentials, etc
 1. Modify your apache file, making the following changes:
     1. Change your DocumentRoot to /var/www/html/mgm

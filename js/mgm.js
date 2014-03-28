@@ -229,6 +229,30 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
         
         return defer.promise;
     };
+    this.passwordResetToken = function(email){
+        var defer = new $q.defer();
+        $http.post("/server/task/resetCode", {"email": email})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
+    this.passwordReset = function(username, token, password){
+        var defer = new $q.defer();
+        $http.post("/server/task/resetPassword", {"name": username, "token": token, "password": password})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
     this.updateTasks();
     $rootScope.$on("mgmUpdate", this.updateTasks);
 });
@@ -582,75 +606,6 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     this.updateUsers();
     $rootScope.$on("mgmUpdate", this.updateUsers);
 });
-
-/*
-function TaskHandler(){
-    
-    this.resetPasswordName = ko.observable('');
-    this.resetPasswordToken = ko.observable('');
-    this.resetPasswordEmail = ko.observable('');
-    this.resetPasswordPass1 = ko.observable('');
-    this.resetPasswordPass2 = ko.observable('');
-    this.resetPasswordCode = ko.observable('');
-    this.showPasswordResetForm = function(){
-        $( "#forgotPasswordWindow" ).dialog({
-            width: "600px",
-            height: "auto",
-            closeOnEscape: false,
-            close: self.close,
-            modal: true
-        });
-    }
-    this.sendPasswordResetCode = function(){
-        if(self.resetPasswordEmail() == ""){
-            alertify.error('Email cannot be blank');
-            return;
-        }
-        $.post("task/resetCode", { 
-                    'email': self.resetPasswordEmail() }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                alertify.success("Email submitted Sucessfully");
-            } else {
-                alertify.error("Error submitting email for password reset: " + result["Message"]);
-            }
-        });
-    }
-    this.resetPassword= function(){
-        if(self.resetPasswordName() == ""){
-            alertify.error('Name cannot be blank');
-            return;
-        }
-        if(self.resetPasswordName().trim().split(" ").length != 2){
-            alertify.error('First and Last name are required');
-            return;
-        }
-        if(self.resetPasswordToken() == ""){
-            alertify.error('Token cannot be blank');
-            return;
-        }
-        if(self.resetPasswordPass1() == ""){
-            alertify.error('Password cannot be blank');
-            return;
-        }
-        if(self.resetPasswordPass1() != self.resetPasswordPass2()){
-            alertify.error('Passwords must match');
-            return;
-        }
-        $.post("task/resetPassword", { 
-                    'name': self.resetPasswordName(),
-                    'token': self.resetPasswordToken(),
-                    'password': self.resetPasswordPass1() }).done(function(msg){
-            var result = $.parseJSON(msg);
-            if(result["Success"]){
-                alertify.success("Password changed successfully");
-            } else {
-                alertify.error(result["Message"]);
-            }
-        });
-    }
-}
-*/
 
 mgmApp.config(function($routeProvider, $locationProvider){
     $routeProvider

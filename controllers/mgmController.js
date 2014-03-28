@@ -1,9 +1,57 @@
 angular.module('mgmApp')
-.controller('mgmController', function($rootScope,$scope,$http,$location, $interval){
+.controller('mgmController', function($rootScope,$scope,$http,$location,$interval,$modal, taskService){
     
     $scope.location = {
         isActive: function(path){ return $location.path() == path; },
         goto: function(path){ $location.path(path); }
+    };
+    
+    $scope.password = {
+        modal: null,
+        show: function(){
+            this.modal = $modal.open({
+                templateUrl: '/templates/forgotPasswordModal.html',
+                keyboard: false,
+                scope: $scope
+            });
+        },
+        getReset: function(email){
+            if(email == undefined || email.trim() == ""){
+                alertify.error('Email cannot be blank');
+                return;
+            }
+            taskService.passwordResetToken(email.trim()).then(
+                function(){ alertify.success("Password reset token requested for " + email); },
+                function(msg){ alertify.error(msg); }
+            );
+        },
+        reset: function(username, token, password, confirm){
+            if(username == undefined || username.trim() == ""){
+                alertify.error('Name cannot be blank');
+                return;
+            }
+            if(username.trim().split(" ").length != 2){
+                alertify.error('First and Last name are required');
+                return;
+            }
+            if(token == undefined || token.trim() == ""){
+                alertify.error('Token cannot be blank');
+                return;
+            }
+            if(password == undefined || password.trim() == ""){
+                alertify.error('Password cannot be blank');
+                return;
+            }
+            if(password != confirm){
+                alertify.error('Passwords must match');
+                return;
+            }
+            
+            taskService.passwordReset(username, token, password).then(
+                function(){ alertify.success("Password successfully reset for " + username); },
+                function(msg){ alertify.error(msg); }
+            );
+        }
     };
     
     $scope.auth = {

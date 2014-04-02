@@ -8,7 +8,7 @@ class Get_Grid_Info extends CI_Controller {
 		$xml = new SimpleXMLElement('<gridinfo></gridinfo>');
 		$xml->addChild('login', "http://$ip/GridLogin/");
 		$xml->addChild('register', "http://$ip/");
-		$xml->addChild('welcome', "http://$ip/welcome/");
+		$xml->addChild('welcome', "http://$ip/welcome.html");
 		$xml->addChild('password', "http://$ip/");
 		$xml->addChild('gridname', "$name");
 		$xml->addChild('gridnick', "$nick");

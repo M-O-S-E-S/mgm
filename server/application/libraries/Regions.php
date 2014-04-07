@@ -392,7 +392,7 @@ class Regions {
         $sections['SimianGridMaptiles']['MaptileURL'] = $simianUrl;
         $sections['SimianGridMaptiles']['RefreshTime'] = "7200";
         $sections['FreeSwitchVoice'] = array();
-        $sections['FreeSwitchVoice']['FreeswitchServiceURL'] = $mgmUrl . "/fsapi";
+        $sections['FreeSwitchVoice']['FreeswitchServiceURL'] = $mgmUrl . "/server/fsapi";
                 
         $q = $ci->db->get_where("iniConfig", array("region"=>"default"));
         foreach($q->result() as $r){

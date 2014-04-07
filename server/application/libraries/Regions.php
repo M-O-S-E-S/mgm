@@ -343,14 +343,14 @@ class Regions {
         $sections['Network']['http_listener_port'] = $httpPort;
         $sections['Messaging'] = array();
         $sections['Messaging']['Gatekeeper'] = $simianUrl;
-        $sections['Messaging']['OfflineMessageURL'] = $mgmUrl . "/messages";
+        $sections['Messaging']['OfflineMessageURL'] = $mgmUrl . "server/messages";
         $sections['Messaging']['MuteListURL'] = $simianUrl;
         $sections['Groups'] = array();
         $sections['Groups']['GroupsServerURI'] = $simianUrl;
         $sections['Groups']['XmlRpcServiceReadKey'] = $groupsRead;
         $sections['Groups']['XmlRpcServiceWriteKey'] = $groupsWrite;
         $sections['Profile'] = array();
-        $sections['Profile']['ProfileURL'] = $mgmUrl . "/os_services/profile.php";
+        /*$sections['Profile']['ProfileURL'] = $mgmUrl . "/os_services/profile.php";*/
         $sections['GridService'] = array();
         $sections['GridService']['GridServerURI'] = $simianUrl;
         $sections['GridService']['Gatekeeper'] = "http://mygridserver.com:8002";
@@ -392,7 +392,7 @@ class Regions {
         $sections['SimianGridMaptiles']['MaptileURL'] = $simianUrl;
         $sections['SimianGridMaptiles']['RefreshTime'] = "7200";
         $sections['FreeSwitchVoice'] = array();
-        $sections['FreeSwitchVoice']['FreeswitchServiceURL'] = $mgmUrl . "/server/fsapi";
+        $sections['FreeSwitchVoice']['FreeswitchServiceURL'] = $mgmUrl . "server/fsapi";
                 
         $q = $ci->db->get_where("iniConfig", array("region"=>"default"));
         foreach($q->result() as $r){

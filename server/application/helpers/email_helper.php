@@ -63,7 +63,7 @@ function sendEmail($to, $subject, $body){
 function sendEmailAccountApproved($name, $email){
     $body = 'Congratulations ' . $name . ', Your MOSES account has been approved.<br><br>';
     $body.= 'You can now log into the MOSES Grid using the name and password you registered with.<br>';
-    $body.= 'You can connect using the MOSES client, which is for Windows only.  Download it from <a href="https://cloud.militarymetaverse.org/public.php?service=files&t=7d883d2108341ba859eae3ecd45a98c3">https://cloud.militarymetaverse.org/public.php?service=files&t=7d883d2108341ba859eae3ecd45a98c3</a><br>';
+    $body.= 'You can connect using the MOSES client, which is for Windows only.  Download it from <a href="http://cloud.militarymetaverse.org/MOSES_4-4-2-34167_Setup.exe">http://cloud.militarymetaverse.org/MOSES_4-4-2-34167_Setup.exe</a><br>';
     $body.= "If you are on a different platform, or wish to use another viewer, the login uri for the MOSES Grid is:<br>";
     $body.= "moses.militarymetaverse.org <br><br>";
     $body.= "We look forward to seeing you in world.";
@@ -87,7 +87,7 @@ function sendEmailAccountDenied($email, $reason){
 }
 
 function sendPasswordReset($email, $token){
-    $body = "Your password reset request has been processed.  Please visit militarymetaverse.org, and using the forgot password button, complete the second form using the following token:<br>";
+    $body = "Your password reset request has been processed.  Please visit moses.militarymetaverse.org, and using the forgot password button, complete the second form using the following token:<br>";
     $body.= $token;
     sendEmail($email, "MOSES Password Recovery", $body);
 }

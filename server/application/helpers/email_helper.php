@@ -62,6 +62,7 @@ function sendEmail($to, $subject, $body){
 
 function sendEmailAccountApproved($name, $email){
     $body = 'Congratulations ' . $name . ', Your MOSES account has been approved.<br><br>';
+    $body = 'Your account, and avatar, name is ' . $name . '<br><br>';
     $body.= 'You can now log into the MOSES Grid using the name and password you registered with.<br>';
     $body.= 'You can connect using the MOSES client, which is for Windows only.  Download it from <a href="http://cloud.militarymetaverse.org/MOSES_4-4-2-34167_Setup.exe">http://cloud.militarymetaverse.org/MOSES_4-4-2-34167_Setup.exe</a><br>';
     $body.= "If you are on a different platform, or wish to use another viewer, the login uri for the MOSES Grid is:<br>";

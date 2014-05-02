@@ -2,13 +2,13 @@
 
 MOSES Grid Manager (mgm) is a php/javascript application that is used to manage users and regions on a MOSES Opensimulator grid.  Mgm is designed to work together with an installation of Simiangrid, mgmNode, and Opensimulator to create an easy to manage virtual environment.  Simiangrid and MGM should be on the same host, while the database and mgmNode may be located on other hosts.
 
-## Ubuntu
+## Ubuntu 14.04 LTS
 
 Mgm and mgmNode have been built and tested on Ubuntu server instances.  Please note that if you are installing mgmNode on the same host, mgmNode requires the latest Ubuntu version to pick up newer packages.
 
 ### Required packages
 
-php php-common php-gd php-mcrypt php-pear php-pecl-memcache php-mhash php-mysql php-xml php-pear-Mail php-bcmath php-xmlrpc
+php5 php5-common php5-gd php5-mcrypt php-pear php-mail php5-mysql php5-xmlrpc
 
 ### Installation
 1. Install required packages

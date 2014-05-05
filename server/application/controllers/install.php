@@ -12,7 +12,7 @@ class Install extends CI_Controller {
     public function test(){
         $users = $this->simiangrid->allUsers();
         if(count($users) > 0){
-                die(json_encode(array('Success' => true, 'Installed' => false)));
+                die(json_encode(array('Success' => true, 'Installed' => true)));
         }
         die(json_encode(array('Success' => true, 'Installed' => false)));
     }

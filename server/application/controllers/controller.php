@@ -3,7 +3,7 @@
 class Controller extends CI_Controller {
     
     public function index(){
-        die(file_get_contents(FCPATH . 'html/index.html'));
+        die('MGM');
     }
 }
 

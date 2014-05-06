@@ -13,12 +13,16 @@
             <li>200: grid god powers</li>
             <li>250: MGM administrator</li>
         </ul>
-        <label>New Access Level:</label><input ng-model="level" /><button ng-click="user.setAccessLevel(level)">Set</button><br>
-        <label>New Email:</label><input ng-model="email" /><button ng-click="user.setEmail(email)">Set</button><br>
-        <label>New Password:</label><input ng-model="password" /><button ng-click="user.setPassword(password)">Set</button><br>
+        <table>
+        <tr><td><label>New Access Level:</label></td><td><input ng-model="level" /></td><td><button ng-click="user.setAccessLevel(level)">Set</button></td></tr>
+        <tr><td><label>New Email:</label></td><td><input ng-model="email" /></td><td><button ng-click="user.setEmail(email)">Set</button></td></tr>
+        <tr><td><label>New Password:</label></td><td><input ng-model="newpass" /></td><td><button ng-click="user.setPassword(newpass)">Set</button></td></tr>
+        <tr></tr>
+        <tr></tr>
+        </table>
         <label>Suspend Account:</label>
-        <button ng-if="!user.isSuspended(user.current)" ng-click="user.suspend()" class="btn btn-danger">Suspend</button>
-        <button ng-if="user.isSuspended(user.current)" ng-click="user.restore()" class="btn btn-success">Restore</button>
+        <button ng-if="!user.isSuspended(user.current)" ng-click="user.suspend()" class="btn btn-xs btn-danger">Suspend</button>
+        <button ng-if="user.isSuspended(user.current)" ng-click="user.restore()" class="btn btn-sx btn-success">Restore</button>
     </div>
 </div>
 <div class="modal-footer">

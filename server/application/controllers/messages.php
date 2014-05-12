@@ -9,13 +9,12 @@ class Messages extends CI_Controller {
     public function SaveMessage(){
         $data = file_get_contents('php://input');
         
+        $endOfHeader = strpos($data, "?>");
+        $data = substr($data, $endOfHeader + 2);
+        
         $toAgent = $this->pullXml($data, 'toAgentID');
 
         $this->db->insert("offlineMessages", array("uuid" => $toAgent, "message" => $data));
-        $msg = $this->db->insert_id();
-        if(!$msg){
-            die('<?xml version="1.0" encoding="utf-8"?><boolean>false</boolean>');
-        }
         die('<?xml version="1.0" encoding="utf-8"?><boolean>true</boolean>'); // Offline message stored.
 
     }

@@ -50,19 +50,7 @@ class Region extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
         }
 		$logs = $this->regions->logs($region);
-		
-		//look up region name for log file name
-		//$regObj = $this->regions->getRegion($region);
-		//header("Content-disposition: attachment; filename=" . $regObj->name . "-" . date("Y-m-d") . "-logs.txt");
-		//header("Content-type: text/plain");
-		
-		//generate log file
-		//$text = "";
-		//foreach($logs as $log){
-		//	$text .= $log->timestamp . " - " . $log->message . "\n";
-		//}
-		
-		//die($text);
+
         die(json_encode($logs));
 	}
     

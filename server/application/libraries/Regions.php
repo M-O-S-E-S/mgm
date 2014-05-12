@@ -349,8 +349,6 @@ class Regions {
         $sections['Groups']['GroupsServerURI'] = $simianUrl;
         $sections['Groups']['XmlRpcServiceReadKey'] = $groupsRead;
         $sections['Groups']['XmlRpcServiceWriteKey'] = $groupsWrite;
-        $sections['Profile'] = array();
-        /*$sections['Profile']['ProfileURL'] = $mgmUrl . "/os_services/profile.php";*/
         $sections['GridService'] = array();
         $sections['GridService']['GridServerURI'] = $simianUrl;
         $sections['GridService']['Gatekeeper'] = "http://mygridserver.com:8002";

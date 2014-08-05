@@ -1,5 +1,5 @@
 angular.module('mgmApp')
-.controller('AccountController', function($scope, $modal, taskService){
+.controller('AccountController', function($scope, $modal, $http, taskService){
     $scope.account = {
         password: "",
         passwordConfirm: "",

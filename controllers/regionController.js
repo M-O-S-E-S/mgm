@@ -71,15 +71,29 @@ angular.module('mgmApp')
     
     $scope.oar = {
         file: "",
-        save: function(region){
-            alertify.confirm("Saving an oar file may take in excess of 30 minutes.<br>MGM will process this offline, and send you an email when it is ready for download.<br>You do not need to stay logged in during this process.<br>Please press Save below to begin.", function(confirmed){
-            if(confirmed){
-                taskService.saveOar(region).then(
-                    function(){ alertify.success("Save oar initiated for region " + region.name);  },
-                    function(msg){ alertify.error(msg);  }
-                );
-            }
-        });
+        modal: undefined,
+        current: undefined,
+        showLoad: function(region){
+			this.current = region;
+			this.modal = $modal.open({
+                templateUrl: 'templates/loadOarModal.html',
+                keyboard: false,
+                scope: $scope
+            });
+		},
+        showSave: function(region){
+			this.current = region;
+			this.modal = $modal.open({
+                templateUrl: 'templates/saveOarModal.html',
+                keyboard: false,
+                scope: $scope
+            });
+		},
+        save: function(){
+			taskService.saveOar(this.current).then(
+				function(){ alertify.success("Save oar initiated for region " + $scope.oar.current.name);  $scope.oar.modal.close();  },
+				function(msg){ alertify.error(msg);  }
+			);
         },
         nuke: function(region){
             alertify.confirm("Are you sure? This will irreversably wipe out any content you have in your region.", function(confirmed){
@@ -91,12 +105,12 @@ angular.module('mgmApp')
                 };
             });
         },
-        load: function(region){
+        load: function(){
             var data = new FormData();
             data.append('file', $scope.oar.file[0]);
             
-            taskService.loadOar(region, data).then(
-                function(){ alertify.success("Load oar initiated for region " + region.name);  },
+            taskService.loadOar($scope.oar.current, data).then(
+                function(){ alertify.success("Load oar initiated for region " + $scope.oar.current.name); $scope.oar.modal.close(); },
                 function(msg){ alertify.error(msg);  }
             );
         }
@@ -116,7 +130,7 @@ angular.module('mgmApp')
         viewLog: function(region){
             this.current = region;
             this.modal = $modal.open({
-                templateUrl: '/templates/regionLogModal.html',
+                templateUrl: 'templates/regionLogModal.html',
                 keyboard: false,
                 scope: $scope,
                 windowClass: 'log-dialog'
@@ -161,7 +175,7 @@ angular.module('mgmApp')
         },
         showAdd: function(){
             this.modal = $modal.open({
-                templateUrl: '/templates/createRegionModal.html',
+                templateUrl: 'templates/createRegionModal.html',
                 keyboard: false,
                 scope: $scope
             });

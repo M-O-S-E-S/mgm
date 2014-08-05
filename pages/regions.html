@@ -78,12 +78,9 @@
                 </div>
                 <div class="row" ng-if="collapse.content == r.uuid">
                     <div class="col-md-1"></div>
-                    <div class="col-md-2">
-                        Oar load
-                        <input type="file" onchange="angular.element(this).scope().oar.file = this.files" />
-                        <button ng-click="oar.load(r)">Load</button>
+                    <div class="col-md-2">Oar load <button ng-click="oar.showLoad(r)">Load</button>
                     </div>
-                    <div class="col-md-2">Oar Save <button ng-click="oar.save(r)">Initiate Save</button></div>
+                    <div class="col-md-2">Oar Save <button ng-click="oar.showSave(r)">Save</button></div>
                     <div class="col-md-2">Load blank oar, wiping content <button ng-click="oar.nuke(r)">Nuke</button></div>
                 </div>
             </div>

@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <h3>Save Oar File</h3>
+</div>
+<div class="modal-body">
+    <div id="SaveOar">
+		<p class="alertify-message">
+			Request an OAR archive from {{oar.current.name}}.  
+			This is a long-running asynchronous task.  
+			You will be sent an email when it completes.  
+			The file will be listed in your taskbar at the bottom of this window, which is where you will download it from.
+		</p>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="oar.save()">OK</button>
+    <button class="btn btn-warning" ng-click="oar.modal.close()">Cancel</button>
+</div>

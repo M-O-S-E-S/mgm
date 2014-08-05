@@ -21,20 +21,22 @@
                 <button ng-click="region.showAdd()">Add Region</button>
             </div>
         </div>
-        <div class="row">
+        <div class="row-fluid">
             <div class="col-md-1">Name</div>
+            <div class="col-md-1">Position: size</div>
             <div class="col-md-1">Estate</div>
             <div class="col-md-1">Timestamp</div>
             <div class="col-md-1">CPU</div>
             <div class="col-md-1">MEM</div>
             <div class="col-md-1">Uptime</div>
             <div class="col-md-1">Users</div>
-            <div class="col-md-1"><span style="float: left; width: 10em" ng-if="auth.activeUser.accessLevel > 249">Host</span></div>
+            <div class="col-md-4"><span style="float: left; width: 10em" ng-if="auth.activeUser.accessLevel > 249">Host</span></div>
         </div>
         <div class="row" ng-repeat="r in regions | orderBy:['estateName','name'] | filter:search track by r.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
             <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-1">{{r.name}}</div>
+                    <div class="col-md-1">{{r.x}},{{r.y}}: {{r.size}}</div>
                     <div ng-if="r.estateName.length > 10">
 						<div class="col-md-1">{{r.estateName.substring(0,10)}}...</div>
                     </div>
@@ -48,7 +50,7 @@
                     <div ng-if="r.isRunning" class="col-md-1">{{r.stat.status.simStats['RootAg']}}</div>
                     <div class="col-md-5" ng-if="!r.isRunning">Is not running...</div>
                     <div class="col-md-1"><span ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(r.node)}}</span>&nbsp </div>
-                    <div class="col-md-4">
+                    <div class="col-md-2">
                         <button ng-disabled="r.isRunning" ng-click="region.start(r)" class="btn btn-xs btn-default">Start</button>
                         <button ng-disabled="!r.isRunning" ng-click="region.stop(r)" class="btn btn-xs btn-default">Stop</button>
                         <button ng-click="collapse.showContent(r)" ng-disabled="!r.isRunning" class="btn btn-xs btn-default">Content</button>

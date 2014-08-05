@@ -25,6 +25,7 @@ class Region extends CI_Controller {
             $region['name'] = $r->name;
             $region['x'] = $r->locX;
             $region['y'] = $r->locY;
+            $region['size'] = $r->size;
             $region['estateName'] = $r->EstateName;
             if($level >= 250){
                 $region['node'] = $r->slaveAddress ? $r->slaveAddress : "";
@@ -111,21 +112,25 @@ class Region extends CI_Controller {
         $name = $input_data['name'];
         $x = $input_data['x'];
         $y = $input_data['y'];
+        $size = $input_data['size'];
         $estate = $input_data['estate'];
                                 
         if( $name == ""){
             die(json_encode(array('Success' => false, 'Message' => "Region Name cannot be blank")));
         }
-        if( $x == "" || $y == "" || ! is_numeric($x) || ! is_numeric($y)){
+        if( $x == "" || $y == "" || ! is_numeric($x) ||  $x < 0 || ! is_numeric($y) || $y < 0){
             die(json_encode(array('Success' => false, 'Message' => "Invalid coordinates submitted")));
         }
+        if( $size == "" || ! is_numeric($size) || $size < 1 || $size > 32){
+			die(json_encode(array('Success' => false, 'Message' => "Invalid size submitted")));
+		}
         if($estate == "" || ! is_numeric($estate)){
             die(json_encode(array('Success' => false, 'Message' => "Invalid estate assignment")));
         }
         
         $regionId = UUID::v4();
         
-        $this->regions->create($regionId, $name, $x, $y);
+        $this->regions->create($regionId, $name, $x, $y, $size);
         $this->regions->estate($regionId, $estate);
 
         die(json_encode(array('Success' => true, 'id'=>$regionId)));

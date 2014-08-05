@@ -34,7 +34,7 @@ class Regions {
     
     function forUser($user){
         $db = &get_instance()->db;
-        $sql = "Select name, uuid, locX, locY, slaveAddress, isRunning, EstateName from regions, estate_map, estate_settings ";
+        $sql = "Select name, uuid, locX, locY, size, slaveAddress, isRunning, EstateName from regions, estate_map, estate_settings ";
         $sql.= "where estate_map.RegionID = regions.uuid AND estate_map.EstateID = estate_settings.EstateID AND uuid in ";
         $sql.= "(SELECT RegionID FROM estate_map WHERE ";
         $sql.= "EstateID in (SELECT EstateID FROM estate_settings WHERE EstateOwner=". $db->escape($user) .") OR ";
@@ -48,7 +48,7 @@ class Regions {
     
     function allRegions(){
         $db = &get_instance()->db;
-        $sql = "Select name, uuid, locX, locY, slaveAddress, isRunning, EstateName from ";
+        $sql = "Select name, uuid, locX, locY, size, slaveAddress, isRunning, EstateName from ";
         $sql.= "regions, estate_map, estate_settings where estate_map.RegionID = regions.uuid AND estate_map.EstateID = estate_settings.EstateID";
         $q = $db->query($sql);
         if(! $q ){
@@ -182,13 +182,14 @@ class Regions {
         die(json_encode(array('Success' => false, 'Message' => "Error finding region")));
     }
     
-    function create($regionId, $name, $x, $y){
-         $ci = &get_instance();
+    function create($regionId, $name, $x, $y, $size){
+		$ci = &get_instance();
         $data = array(
             "uuid" => $regionId,
             "name" => $name,
             "locX" => $x,
-            "locY" => $y);
+            "locY" => $y,
+            "size" => $size);
         $ci->db->insert("regions", $data);
         return true;
     }
@@ -389,6 +390,8 @@ class Regions {
         $sections['SimianGridMaptiles']['Enabled'] = "true";
         $sections['SimianGridMaptiles']['MaptileURL'] = $simianUrl;
         $sections['SimianGridMaptiles']['RefreshTime'] = "7200";
+        $sections['Terrain'] = array();
+        $sections['Terrain']['SendTerrainUpdatesByViewDistance'] = true;
         $sections['FreeSwitchVoice'] = array();
         $sections['FreeSwitchVoice']['FreeswitchServiceURL'] = $mgmUrl . "server/fsapi";
                 

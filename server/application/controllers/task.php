@@ -194,13 +194,40 @@ class Task extends CI_Controller {
         $uuid = $_SESSION['uuid'];
         $level = $_SESSION['userLevel'];
         session_write_close();
+        
+        #validate input
+
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        if( ! isset($input_data['merge']) ){
+			die(json_encode(array('Success' => false, 'Message' => "merge argument is required")));
+		}
+        $merge = $input_data['merge'] ? 1 : 0;
+        if( ! isset($input_data['x']) || ! is_numeric($input_data['x']) || $input_data['x'] < 0){
+			die(json_encode(array('Success' => false, 'Message' => "invalid x offset")));
+		}
+        $x = $input_data['x'];
+        if( ! isset($input_data['y']) || ! is_numeric($input_data['y']) || $input_data['y'] < 0){
+			die(json_encode(array('Success' => false, 'Message' => "invalid y offset")));
+		}
+        $y = $input_data['y'];
+        if( ! isset($input_data['z']) || ! is_numeric($input_data['z']) || $input_data['z'] < 0){
+			die(json_encode(array('Success' => false, 'Message' => "invalid z offset")));
+		}
+        $z = $input_data['z'];
 
         #test user permissions over this region
         if( $level < 250 && !$this->regions->isOwner($uuid, $region) && ! $this->regions->isManager($uuid,$region)){
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
-        
-        $this->db->insert("jobs", array("type" => "load_oar", "user" => $uuid, "data" => json_encode(array('Status' => "Pending...", "Region" => $region))));
+        $data = array();
+        $data['Status'] = "Pending...";
+        $data['Region'] = $region;
+        $data['merge'] = $merge;
+        $data['x'] = $x;
+        $data['y'] = $y;
+        $data['z'] = $z;
+             
+        $this->db->insert("jobs", array("type" => "load_oar", "user" => $uuid, "data" => json_encode($data)));
         $job = $this->db->insert_id();
         if($job){
             die(json_encode(array('Success' => true, 'ID' => $job)));
@@ -422,9 +449,12 @@ class Task extends CI_Controller {
                     'uname' => $region->consoleUname, 
                     'password' => $region->consolePass,
                     'job' => $job->id,
-                    'action' => "load"
+                    'merge' => $data->merge,
+                    'x' => $data->x,
+                    'y' => $data->y,
+                    'z' => $data->z
                 );
-                $result = simple_curl($url . "/oar", $args);
+                $result = simple_curl($url . "/loadOar", $args);
                 $result = json_decode($result);
                 #if failed, update job
                 if(!$result){

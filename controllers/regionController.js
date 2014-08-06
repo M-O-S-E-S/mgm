@@ -105,11 +105,12 @@ angular.module('mgmApp')
                 };
             });
         },
-        load: function(){
+        load: function(merge, x, y ,z){
+			if(merge == undefined) merge = false;
             var data = new FormData();
             data.append('file', $scope.oar.file[0]);
             
-            taskService.loadOar($scope.oar.current, data).then(
+            taskService.loadOar($scope.oar.current, data, merge, x, y, z).then(
                 function(){ alertify.success("Load oar initiated for region " + $scope.oar.current.name); $scope.oar.modal.close(); },
                 function(msg){ alertify.error(msg);  }
             );

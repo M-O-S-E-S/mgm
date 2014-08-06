@@ -9,6 +9,10 @@
 			You will be sent an email when it completes.  
 			The file will be listed in your taskbar at the bottom of this window, which is where you will download it from.
 		</p>
+		<div class="alertify-message" ng-if="oar.current.size > 1">
+			<p>This is a Var Region, there is not currently a mechanism to save out portions of a var-region.
+			This oar file may cause problems if you load it onto a normal region, or onto a smaller var region.</p>
+			</div>
         </div>
     </div>
 </div>

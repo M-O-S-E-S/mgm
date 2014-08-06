@@ -201,9 +201,9 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
         });
         return defer.promise;
     };
-    this.loadOar = function(region, form){
+    this.loadOar = function(region, form, merge, x, y, z){
         var defer = new $q.defer();
-        $http.post("/server/task/loadOar/" + region.uuid)
+        $http.post("/server/task/loadOar/" + region.uuid, {"merge":merge,"x":x,"y":y,"z":z})
         .success(function(data, status, headers, config){
             if(data.Success){
                 var newTask = { id: data.ID, timestamp: "", type: "load_oar", data: {"Status":"Initializing"}};

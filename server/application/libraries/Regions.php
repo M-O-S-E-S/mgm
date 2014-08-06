@@ -104,10 +104,9 @@ class Regions {
             'name' => $region->name, 
             'uname' => $region->consoleUname, 
             'password' => $region->consolePass,
-            'job' => $job,
-            'action' => "save"
+            'job' => $job
         );
-        $result = simple_curl($url . "/oar", $args);
+        $result = simple_curl($url . "/saveOar", $args);
 
         $result = json_decode($result);
         #if failed, update job

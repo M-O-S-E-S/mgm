@@ -40,7 +40,7 @@ date.timezone = "America/New_York
 ```php
 $config["map_path"] = "/var/www/maps/";
 ```
-1. install mgm by visiting (ip)/install using your web-browser
+1. install mgm by visiting (ip)/install.html using your web-browser
 1. Follow directions to create initial, and administrative avatar account
 
 From this point, you should set up your mgmNode instances

@@ -68,12 +68,15 @@
                             <div class ="col-md-2"><button ng-click="region.remove(r)">Delete {{r.name}}</button></div>
                             <div class ="col-md-5">
                                 Change Estate
-                                <select ng-model="newEstate" ng-options="e.name for e in estates | orderBy: 'name' track by e.name"></select>
+                                <select ng-model="newEstate" ng-init="newEstate=estateFromName(r.estateName)" ng-options="e.name for e in estates | orderBy: 'name' track by e.name"></select>
                                 <button ng-click="region.setEstate(r, newEstate)">Set</button>
                             </div>
-                            <div class ="col-md-5">Change Host<select ng-model="newHost" ng-options="h.name+'|'+h.address for h in hosts | orderBy: 'name' track by h.address"></select>
-                            <button ng-click="region.setHost(r, newHost)">Set</button></div>
-                        </div>
+                            <div class ="col-md-5">
+								Change Host
+								<select ng-model="newHost" ng-init="newHost=hostFromAddress(r.node)" ng-options="h.name+'|'+h.address for h in hosts | orderBy: 'name' track by h.address"></select>
+								<button ng-click="region.setHost(r, newHost)">Set</button></div>
+							</div>
+						</div>
                     </div>
                 </div>
                 <div class="row" ng-if="collapse.content == r.uuid">

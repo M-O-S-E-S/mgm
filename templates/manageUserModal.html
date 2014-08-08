@@ -14,8 +14,8 @@
             <li>250: MGM administrator</li>
         </ul>
         <table>
-        <tr><td><label>New Access Level:</label></td><td><input ng-model="level" /></td><td><button ng-click="user.setAccessLevel(level)">Set</button></td></tr>
-        <tr><td><label>New Email:</label></td><td><input ng-model="email" /></td><td><button ng-click="user.setEmail(email)">Set</button></td></tr>
+        <tr><td><label>New Access Level:</label></td><td><input ng-model="level" ng-init="level=user.current.userLevel"/></td><td><button ng-click="user.setAccessLevel(level)">Set</button></td></tr>
+        <tr><td><label>New Email:</label></td><td><input ng-model="email" ng-init="email=user.current.email"/></td><td><button ng-click="user.setEmail(email)">Set</button></td></tr>
         <tr><td><label>New Password:</label></td><td><input ng-model="newpass" /></td><td><button ng-click="user.setPassword(newpass)">Set</button></td></tr>
         <tr></tr>
         <tr></tr>

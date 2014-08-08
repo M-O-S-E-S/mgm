@@ -8,7 +8,7 @@
             <label>Name:</label><input class="alertify-text" ng-model="name" />
             <label>X:</label><input class="alertify-text" ng-model="x" />
             <label>Y:</label><input class="alertify-text" ng-model="y" />
-            <label>Var-Region size (1 for normal region, 2 for 2x2 var region, up to 32):</label><input class="alertify-text" ng-model="size"/>
+            <label>Var-Region size (1 for normal region, 2 for 2x2 var region, up to 32):</label><input class="alertify-text" ng-model="size" ng-init="size=1"/>
             <label>Estate:</label><select ng-model="estate" ng-options="e.name for e in estates | orderBy: 'name' track by e.name" class="alertify-text" />
         </div>
     </div>

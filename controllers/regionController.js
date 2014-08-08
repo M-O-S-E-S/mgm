@@ -124,6 +124,24 @@ angular.module('mgmApp')
         node: ""
     };
     
+    $scope.estateFromName = function(name){
+		for(var i = 0; i < $scope.estates.length; i++){
+			if($scope.estates[i].name == name){
+				return $scope.estates[i];
+			}
+		}
+		return null;
+	};
+	
+	$scope.hostFromAddress = function(address){
+		for(var i = 0; i < $scope.hosts.length; i++){
+			if($scope.hosts[i].address == address){
+				return $scope.hosts[i];
+			}
+		}
+		return null;
+	};
+    
     $scope.region = {
         modal: undefined,
         log: "",

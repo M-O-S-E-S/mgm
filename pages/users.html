@@ -10,5 +10,5 @@
 <div style="width: 100%;" ng-repeat="u in users | orderBy:'name' | filter:search track by u.email" ng-class-odd="'odd'" ng-class-even="'even'">
     <span style="display:inline-block; width: 20em">{{u.name}} <span ng-if="user.isSuspended(u)" style="color:red">suspended</span>
     <button style="float:right" ng-click="user.remove(u)">Remove</button></span>
-    <span style="display:inline-block; width: 40em">{{u.email}} <button style="float:right" ng-click="user.manage(u)">Manage</button></span>
+    <span style="display:inline-block; width: 40em">{{u.email}} <button ng-if="auth.activeUser.accessLevel > 249" style="float:right" ng-click="user.manage(u)">Manage</button></span>
 </div>

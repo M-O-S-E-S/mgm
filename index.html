@@ -70,7 +70,7 @@
                             <a class="btn btn-success" href="/grid" ng-class="{ active: location.isActive('/grid') }">Grid</a>
                             <a class="btn btn-success" href="/map" ng-class="{ active: location.isActive('/map') }">Map</a>
                             <a class="btn btn-success" href="/users" ng-class="{ active: location.isActive('/users') }">Users</a>
-                            <a class="btn btn-success" href="/pending" ng-class="{ active: location.isActive('/pending') }">Pending Users</a>
+                            <a ng-if="auth.activeUser.accessLevel > 249" class="btn btn-success" href="/pending" ng-class="{ active: location.isActive('/pending') }">Pending Users</a>
                         </div>
                     </td>
                     <td>

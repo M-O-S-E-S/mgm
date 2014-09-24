@@ -178,7 +178,6 @@ class Task extends CI_Controller {
             $result = json_decode($result);
             #if failed, update job
             if(!$result){
-                unlink($archivePath);
                 $this->db->delete("jobs", array("id" => $job));
                 die(json_encode(array('Success' => false, 'Message' => "Error contacting Host")));
             }

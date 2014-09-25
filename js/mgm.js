@@ -325,7 +325,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
         $http.post("/server/region/host/" + region.uuid, {'host': host? host.address : 'none'})
         .success(function(data, status, headers, config){
             if(data.Success){
-                region.node = host.address;
+                region.node = host ? host.address : host;
                 defer.resolve();
             } else {
                 defer.reject(data.Message);

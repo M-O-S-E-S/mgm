@@ -139,7 +139,7 @@ angular.module('mgmApp')
 				return $scope.hosts[i];
 			}
 		}
-		return null;
+		return {'name':'none'};
 	};
     
     $scope.region = {
@@ -159,8 +159,12 @@ angular.module('mgmApp')
             );
         },
         setHost: function(region, host){
+			var hostName = "None";
+			if( host && host.name != "none"){
+				hostName = host.name;
+			}
             regionService.setHost(region, host).then(
-                function(){ alertify.success("Region " + region.name + " moved to Host " + host.address); },
+                function(){ alertify.success("Region " + region.name + " moved to Host " + hostName ); },
                 function(msg){ alertify.error(msg); }
             );
         },

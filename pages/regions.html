@@ -73,7 +73,7 @@
                             </div>
                             <div class ="col-md-5">
 								Change Host
-								<select ng-model="newHost" ng-init="newHost=hostFromAddress(r.node)" ng-options="h.name+'|'+h.address for h in hosts | orderBy: 'name' track by h.address"></select>
+								<select ng-model="newHost" ng-init="newHost=hostFromAddress(r.node)" ng-options="h.name+'|'+h.address for h in hosts.concat([{'name':'none'}]) | orderBy: 'name' track by h.address"></select>
 								<button ng-click="region.setHost(r, newHost)">Set</button></div>
 							</div>
 						</div>

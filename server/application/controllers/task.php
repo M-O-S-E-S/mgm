@@ -89,15 +89,14 @@ class Task extends CI_Controller {
 
         $args = array(
             'name' => $region->name, 
-            'uname' => $region->consoleUname, 
-            'password' => $region->consolePass,
+            //'uname' => $region->consoleUname, 
+            //'password' => $region->consolePass,
             'avatarName' => $name,
             'avatarPassword' => $password,
             'inventoryPath' => $path,
-            'job' => $job,
-            'action' => "save"
+            'job' => $job
         );
-        $result = simple_curl($url . "/iar", $args);
+        $result = simple_curl($url . "/saveIar", $args);
         $result = json_decode($result);
         #if failed, update job
         if(!$result){
@@ -169,8 +168,8 @@ class Task extends CI_Controller {
 
             $args = array(
                 'name' => $r->name, 
-                'uname' => $r->consoleUname, 
-                'password' => $r->consolePass,
+                //'uname' => $r->consoleUname, 
+                //'password' => $r->consolePass,
                 'job' => $job,
                 'action' => "load"
             );
@@ -389,15 +388,14 @@ class Task extends CI_Controller {
 
                 $args = array(
                     'name' => $region->name, 
-                    'uname' => $region->consoleUname, 
-                    'password' => $region->consolePass,
+                    //'uname' => $region->consoleUname, 
+                    //'password' => $region->consolePass,
                     'avatarName' => $avatarName,
                     'avatarPassword' => $avatarPassword,
                     'inventoryPath' => $inventoryPath,
-                    'job' => $job->id,
-                    'action' => "load"
+                    'job' => $job->id
                 );
-                $result = simple_curl($url . "/iar", $args);
+                $result = simple_curl($url . "/loadIar", $args);
                 $result = json_decode($result);
                 #if failed, update job
                 if(!$result){
@@ -445,8 +443,8 @@ class Task extends CI_Controller {
 
                 $args = array(
                     'name' => $region->name, 
-                    'uname' => $region->consoleUname, 
-                    'password' => $region->consolePass,
+                    //'uname' => $region->consoleUname, 
+                    //'password' => $region->consolePass,
                     'job' => $job->id,
                     'merge' => $data->merge,
                     'x' => $data->x,

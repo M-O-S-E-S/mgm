@@ -11,7 +11,7 @@ class Dispatch extends CI_Controller {
         }
         
         $this->regions->serveRegionConfig($name);
-        //die(json_encode(array('Success' => false, 'Message' => "Unknown Error")));
+        //if previous line failed
         show_404();
     }
     
@@ -55,6 +55,7 @@ class Dispatch extends CI_Controller {
         $this->db->update("hosts",array("port"=>$port,"cmd_key"=>$key,"slots"=>$slots,"name"=>$host));
         
         $regions = array();
+        $this->db->select('locY, uuid, name, locX, size');
         $q = $this->db->get_where("regions", array("slaveAddress"=>$this->input->ip_address()));
         foreach($q->result() as $r){
             array_push($regions, $r);
@@ -76,8 +77,8 @@ class Dispatch extends CI_Controller {
         $stats = json_decode($stats);
         
 
-        $this->db->where("address", $ip);
-        $this->db->update("hosts", array("name"=> $host, "slots"=> $stats->slots));
+        //$this->db->where("address", $ip);
+        //$this->db->update("hosts", array("name"=> $host, "slots"=> $stats->slots));
 
 
         $sql = "INSERT INTO hostStats (host, status) VALUES ((SELECT id FROM hosts WHERE address=".$this->db->escape($ip)."), ".$this->db->escape(json_encode($stats->host)).")";

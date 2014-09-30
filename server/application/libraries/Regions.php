@@ -102,8 +102,8 @@ class Regions {
         
         $args = array(
             'name' => $region->name, 
-            'uname' => $region->consoleUname, 
-            'password' => $region->consolePass,
+            //'uname' => $region->consoleUname, 
+            //'password' => $region->consolePass,
             'job' => $job
         );
         $result = simple_curl($url . "/saveOar", $args);

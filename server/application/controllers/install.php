@@ -1,6 +1,11 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Install extends CI_Controller {
+    
+    private function install(){
+        FCPATH . 'files/000-mgm.sql';
+    }
+    
     public function index(){
         $users = $this->simiangrid->allUsers();
         if(count($users) == 0){
@@ -10,6 +15,9 @@ class Install extends CI_Controller {
     }
     
     public function test(){
+        if( ! $this->install() ){
+            die(json_encode(array('Success' => false, 'Installed' => false, 'Message' => 'Database installation/migration failed')));
+        }
         $users = $this->simiangrid->allUsers();
         if(count($users) > 0){
                 die(json_encode(array('Success' => true, 'Installed' => true)));

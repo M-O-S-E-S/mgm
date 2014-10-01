@@ -2,9 +2,6 @@
 var viewModel = {
     currentPage: ko.observable(""),
 
-
-
-
     checkInstall: function(){
         $.get("/server/install/test").done(function(data){
             var result = JSON.parse(data);

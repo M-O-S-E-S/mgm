@@ -1,5 +1,12 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
+CREATE TABLE IF NOT EXISTS `migration` (
+  `version` int(10) unsigned NOT NULL,
+  `description` varchar(100) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY `migration_version` (`version`)
+)  ENGINE=INNODB DEFAULT CHARSET=latin1;
+
 CREATE TABLE IF NOT EXISTS `estateban` (
   `EstateID` int(10) unsigned NOT NULL,
   `bannedUUID` varchar(36) NOT NULL,

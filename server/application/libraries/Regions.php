@@ -393,6 +393,9 @@ class Regions {
         $sections['Terrain']['SendTerrainUpdatesByViewDistance'] = true;
         $sections['FreeSwitchVoice'] = array();
         $sections['FreeSwitchVoice']['FreeswitchServiceURL'] = $mgmUrl . "server/fsapi";
+        $sections['ClientStack.LindenCaps'] = array();
+        $sections['ClientStack.LindenCaps']['Cap_GetTexture'] = $mgmUrl . "GridPublic/GetTexture/";
+        $sections['ClientStack.LindenCaps']['Cap_GetMesh'] = $mgmUrl . "GridPublic/GetMesh/";
                 
         $q = $ci->db->get_where("iniConfig", array("region"=>"default"));
         foreach($q->result() as $r){

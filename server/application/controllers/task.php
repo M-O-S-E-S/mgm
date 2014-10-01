@@ -171,9 +171,12 @@ class Task extends CI_Controller {
                 //'uname' => $r->consoleUname, 
                 //'password' => $r->consolePass,
                 'job' => $job,
-                'action' => "load"
+                'merge' => 0,
+                'x' => 0,
+                'y' => 0,
+                'z' => 0
             );
-            $result = simple_curl($url . "/oar", $args);
+            $result = simple_curl($url . "/loadOar", $args);
             $result = json_decode($result);
             #if failed, update job
             if(!$result){

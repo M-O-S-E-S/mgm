@@ -16,9 +16,11 @@ class Install extends CI_Controller {
     
     public function checkDatabase(){
         $mysqlFiles = array(
-            '0' => '000-mgm.sql'
+            0 => '000-mgm.sql',
+            1 => '001-mgm.sql'
         );
- 
+        $currentVersion = '1';
+
         if(! $this->db->table_exists("mgmDb")){
             //versioning table does not exist, this is either a hard-migration, or a fresh install
             if( $this->db->table_exists("regions") ){
@@ -26,7 +28,9 @@ class Install extends CI_Controller {
                 die(json_encode(array('Success' => false, 'Installed' => false, 'Message' => 'Database too old to migrate...')));
             } else {
                 //fresh install, execute scripts
-                $this->loadSqlFile(FCPATH.'files/'.$mysqlFiles['0']);
+                for($x = 0; $x <= $currentVersion; $x++){
+                    $this->loadSqlFile(FCPATH.'files/'.$mysqlFiles[$x]);
+                }
             }
         } else {
             $query = $this->db->query("SELECT * FROM mgmDb ORDER BY version");
@@ -34,12 +38,18 @@ class Install extends CI_Controller {
                 //we are on a migration database, but the version has not been inserted
                 die(json_encode(array('Success' => false, 'Installed' => false, 'Message' => 'Tables are present, but data is missing...')));
             } else {
-                //we have a migratable database, but there is only one version for now, so we must be done
+                //we have a migratable database
                 //for future migrations, we would check installed versions and update where necessary
                 //but for expediency, I am skipping this for now
-                //foreach($query->result() as $row){
-                //    print "<p>" . $row->version . "</p>";
-                //}
+                $installedVersion = 0;
+                foreach($query->result() as $row){
+                    if($row->version > $installedVersion){
+                        $installedVersion = $row->version;
+                    }
+                    for($x = $installedVersion+1; $x <= $currentVersion; $x++){
+                        $this->loadSqlFile(FCPATH.'files/'.$mysqlFiles[$x]);
+                    }
+                }
             }
         }
     }

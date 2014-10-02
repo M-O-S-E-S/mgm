@@ -17,6 +17,8 @@ class Regions {
         //check stat file deletion
         //open stat file for append
         //TODO
+        $filename = FCPATH.'perfStats/'.$host.'.log';
+        file_put_contents($filename, $status."\n", FILE_APPEND | LOCK_EX);
     }
     
     function regionStat($region,$status){
@@ -24,6 +26,8 @@ class Regions {
         //check stat file deletion
         //open stat file for append
         //TODO
+        $filename = FCPATH.'perfStats/'.$region.'.log';
+        file_put_contents($filename, $status."\n", FILE_APPEND | LOCK_EX);
     }
     
     function log($region, $logs){

@@ -2,22 +2,52 @@
 
 class Install extends CI_Controller {
     
-    private function install(){
-        FCPATH . 'files/000-mgm.sql';
+    private function loadSqlFile($filename){
+        $sql=file_get_contents($filename);
+        foreach (explode(";\n", $sql) as $sql) 
+        {
+            $sql = trim($sql);
+            if($sql) 
+            {
+                $this->db->query($sql);
+            } 
+        } 
+    }
+    
+    public function checkDatabase(){
+        $mysqlFile = '000-mgm.sql';
+ 
+        if(! $this->db->table_exists("mgmDb")){
+            //versioning table does not exist, this is either a hard-migration, or a fresh install
+            if( $this->db->table_exists("regions") ){
+                //old db, cannot migrate automatically
+                die(json_encode(array('Success' => false, 'Installed' => false, 'Message' => 'Database too old to migrate...')));
+            } else {
+                //fresh install, execute scripts
+                $this->loadSqlFile(FCPATH.'files/'.$mysqlFile);
+            }
+        } else {
+            $query = $this->db->query("SELECT * FROM mgmDb ORDER BY version");
+            if($query->num_rows() == 0){
+                //we are on a migration database, but the version has not been inserted
+                die(json_encode(array('Success' => false, 'Installed' => false, 'Message' => 'Tables are present, but data is missing...')));
+            } else {
+                //we have a migratable database, but there is only one version for now, so we must be done
+                //for future migrations, we would check installed versions and update where necessary
+                //but for expediency, I am skipping this for now
+                //foreach($query->result() as $row){
+                //    print "<p>" . $row->version . "</p>";
+                //}
+            }
+        }
     }
     
     public function index(){
-        $users = $this->simiangrid->allUsers();
-        if(count($users) == 0){
-                die(file_get_contents(FCPATH . 'html/install.html'));
-        }
-        die(file_get_contents(FCPATH . 'html/installComplete.html'));
+        print "MGM";
     }
     
     public function test(){
-        if( ! $this->install() ){
-            die(json_encode(array('Success' => false, 'Installed' => false, 'Message' => 'Database installation/migration failed')));
-        }
+        $this->checkDatabase();
         $users = $this->simiangrid->allUsers();
         if(count($users) > 0){
                 die(json_encode(array('Success' => true, 'Installed' => true)));

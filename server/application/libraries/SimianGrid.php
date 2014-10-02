@@ -133,7 +133,7 @@ class SimianGrid
     function allUsers(){
 		$query = array('RequestMethod' => 'GetUsers','NameQuery' => '');
 		$result = json_curl($this->user_service, $query);
-		if( $result->Success ){
+		if( isset($result->Success) && $result->Success ){
 			return $result->Users;
 		} else {
 			log_message('error',"Unknown response to GetUsers. Returning 0.");

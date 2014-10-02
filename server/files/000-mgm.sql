@@ -1,6 +1,6 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
-CREATE TABLE IF NOT EXISTS `migration` (
+CREATE TABLE IF NOT EXISTS `mgmDb` (
   `version` int(10) unsigned NOT NULL,
   `description` varchar(100) NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -184,6 +184,8 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
   
 SET FOREIGN_KEY_CHECKS = 1;
+
+INSERT IGNORE INTO `mgmDb` (`version`, `description`) VALUES (0, '000-mgm.sql');
 
 INSERT IGNORE INTO `iniConfig` (`region`, `section`, `item`, `content`) VALUES
 ('default', 'Startup', 'allow_regionless', 'False'),

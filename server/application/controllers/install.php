@@ -14,7 +14,7 @@ class Install extends CI_Controller {
         } 
     }
     
-    public function checkDatabase(){
+    private function checkDatabase(){
         $mysqlFiles = array(
             0 => '000-mgm.sql',
             1 => '001-mgm.sql'

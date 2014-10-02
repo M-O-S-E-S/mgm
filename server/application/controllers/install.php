@@ -4,7 +4,7 @@ class Install extends CI_Controller {
     
     private function loadSqlFile($filename){
         $sql=file_get_contents($filename);
-        foreach (explode(";\n", $sql) as $sql) 
+        foreach (explode(";", $sql) as $sql) 
         {
             $sql = trim($sql);
             if($sql) 

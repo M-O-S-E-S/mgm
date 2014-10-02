@@ -76,12 +76,9 @@ class Dispatch extends CI_Controller {
         $stats = $this->input->post('json');
         $stats = json_decode($stats);
         
-
-        //$this->db->where("address", $ip);
-        //$this->db->update("hosts", array("name"=> $host, "slots"=> $stats->slots));
-
-
-        $sql = "INSERT INTO hostStats (host, status) VALUES ((SELECT id FROM hosts WHERE address=".$this->db->escape($ip)."), ".$this->db->escape(json_encode($stats->host)).")";
+        $this->regions->hostStat($ip, json_encode($stats->host));
+        //update hosts table with current stats
+        $sql = 'UPDATE hosts SET status='.$this->db->escape(json_encode($stats->host)).' WHERE address="'.$ip.'"';
         $this->db->query($sql);
         
         $halted = 0;
@@ -94,19 +91,15 @@ class Dispatch extends CI_Controller {
             }
             $this->db->where("name", $proc->name);
             if($proc->running == "True"){
-                $this->db->update("regions", array("isRunning"=>1));
+                $this->db->update("regions", array("isRunning"=>1,"status"=>json_encode($proc->stats)));
                 $running+=1;
             } else {
                 $this->db->update("regions", array("isRunning"=>0));
                 $halted+=1;
             }
-            $sql = "INSERT INTO regionStats (region, status) VALUES ((SELECT uuid FROM regions WHERE name=".$this->db->escape($proc->name)."), ".$this->db->escape(json_encode($proc->stats)).")";
-            $this->db->query($sql);
+            $this->regions->regionStat($proc->name, json_encode($proc->stats));
         }
-        
-        $days = $this->config->item('mgm_performanceDataRetentionDays');
-        $this->db->query("DELETE FROM regionStats WHERE timestamp < DATE_SUB(NOW(), INTERVAL ".$this->db->escape($days)." DAY)");
-        $this->db->query("DELETE FROM regionStats WHERE timestamp < DATE_SUB(NOW(), INTERVAL ".$this->db->escape($days)." DAY)");
+
         die("Stats recieved: $running running processes, and $halted halted processes");
     }
     
@@ -130,13 +123,7 @@ class Dispatch extends CI_Controller {
         //pull out rows
         $logs = json_decode($logs);
         
-        //push into database
-        foreach($logs as $line){
-			$this->db->insert("regionLogs", array("timestamp"=> $line->timestamp,"region"=>$r->uuid,"message"=> $line->message));
-		}
-        
-        $days = $this->config->item('mgm_performanceDataRetentionDays');
-        $this->db->query("DELETE FROM regionLogs WHERE timestamp < DATE_SUB(NOW(), INTERVAL ".$this->db->escape($days)." DAY)");
+        $this->regions->log($region, $logs);
     }
 }
 

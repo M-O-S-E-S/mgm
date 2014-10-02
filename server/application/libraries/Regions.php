@@ -12,29 +12,39 @@ class Regions {
 		return $q->row();
 	}
     
-    function logs($region){
-		$db = &get_instance()->db;
-		$sql = "SELECT timestamp, message FROM regionLogs WHERE region=" . $db->escape($region) . " ORDER BY timestamp ASC";
-		$q = $db->query($sql);
-		if(!$q){
-			return null;
-		}
-		return $q->result();
-	}
-    
-    function lastStat($region){
-        $db = &get_instance()->db;
-        $sql = "SELECT timestamp, status FROM regionStats WHERE region=". $db->escape($region) ." ORDER BY timestamp DESC LIMIT 1";
-        $q = $db->query($sql);
-        if(!$q){
-            return null;
-        }
-        return $q->row();
+    function hostStat($host,$status){
+        //check stat file rotation
+        //check stat file deletion
+        //open stat file for append
+        //TODO
     }
     
+    function regionStat($region,$status){
+        //check stat file rotation
+        //check stat file deletion
+        //open stat file for append
+        //TODO
+    }
+    
+    function log($region, $logs){
+        //open log file for appending
+        $filename = FCPATH.'regionLogs/'.$region.'.log';
+        foreach($logs as $log){
+			//append to the log file
+            $line = $log->timestamp . " ~ " . $log->message . "\n";
+            file_put_contents($filename, $line, FILE_APPEND | LOCK_EX);
+		}
+    }
+    
+    function logs($region){
+        //get content from region log file
+        $filename = FCPATH.'regionLogs/'.$region.'.log';
+        readfile($filename);
+	}
+        
     function forUser($user){
         $db = &get_instance()->db;
-        $sql = "Select name, uuid, locX, locY, size, slaveAddress, isRunning, EstateName from regions, estate_map, estate_settings ";
+        $sql = "Select name, uuid, locX, locY, size, slaveAddress, isRunning, EstateName, status from regions, estate_map, estate_settings ";
         $sql.= "where estate_map.RegionID = regions.uuid AND estate_map.EstateID = estate_settings.EstateID AND uuid in ";
         $sql.= "(SELECT RegionID FROM estate_map WHERE ";
         $sql.= "EstateID in (SELECT EstateID FROM estate_settings WHERE EstateOwner=". $db->escape($user) .") OR ";
@@ -48,7 +58,7 @@ class Regions {
     
     function allRegions(){
         $db = &get_instance()->db;
-        $sql = "Select name, uuid, locX, locY, size, slaveAddress, isRunning, EstateName from ";
+        $sql = "Select name, uuid, locX, locY, size, slaveAddress, isRunning, EstateName, status from ";
         $sql.= "regions, estate_map, estate_settings where estate_map.RegionID = regions.uuid AND estate_map.EstateID = estate_settings.EstateID";
         $q = $db->query($sql);
         if(! $q ){
@@ -102,8 +112,6 @@ class Regions {
         
         $args = array(
             'name' => $region->name, 
-            //'uname' => $region->consoleUname, 
-            //'password' => $region->consolePass,
             'job' => $job
         );
         $result = simple_curl($url . "/saveOar", $args);
@@ -150,6 +158,8 @@ class Regions {
             if(!$response || $response == ""){
                 die(json_encode(array('Success' => false, 'Message' => "Error communicating with region host")));
             }
+            //wipe region console logs to start fresh
+            unlink(FCPATH.'regionLogs/'.$name.'.log');
             die($response);
         }
         die(json_encode(array('Success' => false, 'Message' => "Error finding region")));

@@ -27,19 +27,13 @@ class Region extends CI_Controller {
             $region['y'] = $r->locY;
             $region['size'] = $r->size;
             $region['estateName'] = $r->EstateName;
+            $region['status'] = $r->status;
             if($level >= 250){
                 $region['node'] = $r->slaveAddress ? $r->slaveAddress : "";
             } else {
                 $region['node'] = "omitted";
             }
             $region['isRunning'] = $r->isRunning == true;
-    
-            $region['stat'] = array();
-            $rStat = $this->regions->lastStat($r->uuid);
-            if($rStat){
-                $region['stat']['timestamp'] = $rStat->timestamp;
-                $region['stat']['status'] = json_decode($rStat->status, true);
-            }
 
             array_push($regions, $region);
         } 
@@ -50,26 +44,10 @@ class Region extends CI_Controller {
 		if(!$this->client->validate()){
             die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
         }
-		$logs = $this->regions->logs($region);
-
-        die(json_encode($logs));
+        $r = $this->regions->getRegion($region);
+        $this->regions->logs($r->name);
 	}
-    
-    public function stats($region){
-		if(!$this->client->validate()){
-            die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
-        }
-        //stats request
-        $stat = array();
-        $rStat = $this->regions->lastStat($region);
-        if($rStat){
-            $stat['timestamp'] = $rStat->timestamp;
-            $stat['status'] = json_decode($rStat->status, true);
-            die(json_encode(array('Success' => true, 'status' => $stat)));
-        }
-        die(json_encode(array('Success' => false, 'Message' => "No status found for region")));
-    }
-        
+            
     public function start($region){
         if(!$this->client->validate()){
             die(json_encode(array('Success' => false, 'Message' => "Access Denied")));

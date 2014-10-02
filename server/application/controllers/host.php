@@ -17,14 +17,7 @@ class Host extends CI_Controller {
             $host = array();
             $host['address'] = $h->address;
             $host['name'] = $h->name;
-            
-            $sql = "SELECT timestamp, status FROM hostStats WHERE host=". $h->id ." ORDER BY timestamp DESC LIMIT 1";
-            $iq =  $this->db->query($sql);
-            $stat = $iq->row();
-            if($stat){
-                $host['lastSeen'] = $stat->timestamp;
-                $host['system'] = json_decode($stat->status, true);
-            }
+            $host['status'] = $h->status;
             $host['capacity'] = $h->slots;
             array_push($hosts, $host);
         }

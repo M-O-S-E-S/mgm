@@ -15,7 +15,9 @@ class Install extends CI_Controller {
     }
     
     public function checkDatabase(){
-        $mysqlFile = '000-mgm.sql';
+        $mysqlFiles = array(
+            '0' => '000-mgm.sql'
+        );
  
         if(! $this->db->table_exists("mgmDb")){
             //versioning table does not exist, this is either a hard-migration, or a fresh install
@@ -24,7 +26,7 @@ class Install extends CI_Controller {
                 die(json_encode(array('Success' => false, 'Installed' => false, 'Message' => 'Database too old to migrate...')));
             } else {
                 //fresh install, execute scripts
-                $this->loadSqlFile(FCPATH.'files/'.$mysqlFile);
+                $this->loadSqlFile(FCPATH.'files/'.$mysqlFiles['0']);
             }
         } else {
             $query = $this->db->query("SELECT * FROM mgmDb ORDER BY version");

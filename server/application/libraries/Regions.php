@@ -13,9 +13,9 @@ class Regions {
 	}
     
     function hostStat($host,$status){
-        # log to file format: host.hostip.date.log
-        $filename = FCPATH.'perfStats/'.$host.'-'.date('Ymd').'.log';
-        file_put_contents($filename, $status."\n", FILE_APPEND | LOCK_EX);
+        # log to file format: host.hostip.date.gz
+        $filename = FCPATH.'perfStats/'.$host.'-'.date('Ymd').'.gz';
+        file_put_contents("compress.zlib://$filename", $status."\n", FILE_APPEND);
         # expire old logs for any host and any region
         $days = config_item("mgm_performanceDataRetentionDays");
         $daysPastDate = date('Ymd',strtotime('-'.$days.' days', strtotime(date('Y-m-d'))));
@@ -23,7 +23,7 @@ class Regions {
         foreach( new DirectoryIterator(FCPATH.'perfStats/') as $info){
             if($info->isDot() || !$info->isFile()) continue;
             $filename = $info->getFilename();
-            if (preg_match('/^'.$host.'.+?([0-9]*)\.log$/',$filename, $matches) ) {
+            if (preg_match('/^'.$host.'.+?([0-9]*)\.gz$/',$filename, $matches) ) {
                 $fileDate = $matches[1];
                 if($fileDate < $daysPastDate)
                     array_push($deletable,FCPATH.'perfStats/'.$filename);
@@ -35,26 +35,26 @@ class Regions {
     }
     
     function regionStat($host, $region,$status){
-        # log to file format region-host-ip-regionName-date.log
-        $filename = FCPATH.'perfStats/'.$host.'-'.$region.'-'.date('Ymd').'.log';
-        file_put_contents($filename, $status."\n", FILE_APPEND | LOCK_EX);
+        # log to file format region-host-ip-regionName-date.gz
+        $filename = FCPATH.'perfStats/'.$host.'-'.$region.'-'.date('Ymd').'.gz';
+        file_put_contents("compress.zlib://$filename", $status."\n", FILE_APPEND);
         # dont expire old logs, we will expire them in the host logger
     }
     
     function log($region, $logs){
         //open log file for appending
-        $filename = FCPATH.'regionLogs/'.$region.'.log';
+        $filename = FCPATH.'regionLogs/'.$region.'.gz';
         foreach($logs as $log){
 			//append to the log file
             $line = $log->timestamp . " ~ " . $log->message . "\n";
-            file_put_contents($filename, $line, FILE_APPEND | LOCK_EX);
+            file_put_contents("compress.zlib://$filename", $line, FILE_APPEND);
 		}
     }
     
     function logs($region){
         //get content from region log file
-        $filename = FCPATH.'regionLogs/'.$region.'.log';
-        readfile($filename);
+        $filename = FCPATH.'regionLogs/'.$region.'.gz';
+        readfile("compress.zlib://$filename");
 	}
         
     function forUser($user){
@@ -174,7 +174,8 @@ class Regions {
                 die(json_encode(array('Success' => false, 'Message' => "Error communicating with region host")));
             }
             //wipe region console logs to start fresh
-            unlink(FCPATH.'regionLogs/'.$name.'.log');
+            if(file_exists(FCPATH.'regionLogs/'.$name.'.gz'))
+                unlink(FCPATH.'regionLogs/'.$name.'.gz');
             die($response);
         }
         die(json_encode(array('Success' => false, 'Message' => "Error finding region")));

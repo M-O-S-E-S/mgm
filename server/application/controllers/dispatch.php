@@ -97,7 +97,7 @@ class Dispatch extends CI_Controller {
                 $this->db->update("regions", array("isRunning"=>0));
                 $halted+=1;
             }
-            $this->regions->regionStat($proc->name, json_encode($proc->stats));
+            $this->regions->regionStat($ip, $proc->name, json_encode($proc->stats));
         }
 
         die("Stats recieved: $running running processes, and $halted halted processes");

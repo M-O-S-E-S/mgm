@@ -12,53 +12,33 @@ class Regions {
 		return $q->row();
 	}
     
-    private function rotate($filename){
-        $days = config_item('mgm_performanceDataRetentionDays');
-        print "rotate called: ". (time()-filectime($filename)) . "\r\n";
-        //if(file_exists($filename) && filemtime($filename) < (time()-86400)){
-        if(file_exists($filename)){
-            //rotate after 1 day
-            print "rotating";
-            $path_info = pathinfo($filename); 
-            $base_directory = $path_info['dirname']; 
-            $base_name = $path_info['basename']; 
-            $number_map = array();
-            foreach( new DirectoryIterator($base_directory) as $info) {
-                //skip dots and folders
-                if($info->isDot() || ! $info->isFile()) continue;
-                //if the file matches
-                if (preg_match('/^'.$base_name.'\.?([0-9]*)$/',$info->getFilename(), $matches) ) { 
-                    $number = $matches[1]; 
-                    $file2move = $info->getFilename();
-                    if ($number == '') $number = -1; 
-                    if(filectime($base_directory.DIRECTORY_SEPARATOR.$file2move) < (time()-($days*86400))){
-                        //delete after configured days
-                        print "purging";
-                        unlink($base_directory.DIRECTORY_SEPARATOR.$file2move);
-                    } else {
-                        //add it to the number map
-                        $number_map[$number] = $file2move; 
-                    }
-                }
-            }
-            krsort($number_map);
-            foreach($number_map as $num => $file2move) { 
-                $targetN = $num+1; 
-                rename($base_directory.DIRECTORY_SEPARATOR.$file2move,$filename.'.'.$targetN); 
+    function hostStat($host,$status){
+        # log to file format: host.hostip.date.log
+        $filename = FCPATH.'perfStats/'.$host.'-'.date('Ymd').'.log';
+        file_put_contents($filename, $status."\n", FILE_APPEND | LOCK_EX);
+        # expire old logs for any host and any region
+        $days = config_item("mgm_performanceDataRetentionDays");
+        $daysPastDate = date('Ymd',strtotime('-'.$days.' days', strtotime(date('Y-m-d'))));
+        $deletable = array();
+        foreach( new DirectoryIterator(FCPATH.'perfStats/') as $info){
+            if($info->isDot() || !$info->isFile()) continue;
+            $filename = $info->getFilename();
+            if (preg_match('/^'.$host.'.+?([0-9]*)\.log$/',$filename, $matches) ) {
+                $fileDate = $matches[1];
+                if($fileDate < $daysPastDate)
+                    array_push($deletable,FCPATH.'perfStats/'.$filename);
             } 
+        }
+        foreach( $deletable as $filename){
+            unlink($filename);
         }
     }
     
-    function hostStat($host,$status){
-        $filename = FCPATH.'perfStats/'.$host.'.log';
-        $this->rotate($filename);
+    function regionStat($host, $region,$status){
+        # log to file format region-host-ip-regionName-date.log
+        $filename = FCPATH.'perfStats/'.$host.'-'.$region.'-'.date('Ymd').'.log';
         file_put_contents($filename, $status."\n", FILE_APPEND | LOCK_EX);
-    }
-    
-    function regionStat($region,$status){
-        $filename = FCPATH.'perfStats/'.$region.'.log';
-        $this->rotate($filename);
-        file_put_contents($filename, $status."\n", FILE_APPEND | LOCK_EX);
+        # dont expire old logs, we will expire them in the host logger
     }
     
     function log($region, $logs){

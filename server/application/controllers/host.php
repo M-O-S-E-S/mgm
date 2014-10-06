@@ -17,7 +17,7 @@ class Host extends CI_Controller {
             $host = array();
             $host['address'] = $h->address;
             $host['name'] = $h->name;
-            $host['status'] = $h->status;
+            $host['status'] = json_decode($h->status);
             $host['capacity'] = $h->slots;
             array_push($hosts, $host);
         }

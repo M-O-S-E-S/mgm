@@ -27,7 +27,7 @@ class Region extends CI_Controller {
             $region['y'] = $r->locY;
             $region['size'] = $r->size;
             $region['estateName'] = $r->EstateName;
-            $region['status'] = $r->status;
+            $region['status'] = json_decode($r->status);
             if($level >= 250){
                 $region['node'] = $r->slaveAddress ? $r->slaveAddress : "";
             } else {

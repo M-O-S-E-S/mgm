@@ -40,10 +40,6 @@ angular.module('mgmApp')
         return numminutes + " minutes ago";
     }
     
-    $scope.hostInfo = function(node){
-        return node;
-    }
-    
     $scope.collapse = {
         content: "",
         manage: "",

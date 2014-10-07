@@ -1,3 +1,5 @@
 server/application/config/database.php
 server/application/config/mgm.php
 server/application/logs/*.php
+server/regionLogs/*.gz
+server/perfStats/*.gz

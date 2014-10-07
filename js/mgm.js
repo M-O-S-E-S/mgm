@@ -304,6 +304,9 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
         $http.get("/server/region/logs/" + region.uuid)
         .success(function(data, status, headers, config){
             defer.resolve(data);
+        })
+        .error(function(data, status, headers, config){
+            defer.reject();
         });
         return defer.promise;
     };

@@ -31,7 +31,7 @@ angular.module('mgmApp')
         if(timestamp == undefined || timestamp == ""){
             return "~";
         }
-        var last = new Date(timestamp);
+        var last = new Date(timestamp*1000);
         var seconds = Math.floor(((new Date()).getTime() - last.getTime())/1000);
         
         var numdays = Math.floor(seconds / 86400);

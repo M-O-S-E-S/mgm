@@ -22,11 +22,11 @@
     <div style="width: 100%; overflow: auto;" ng-repeat="h in hosts | orderBy:'name' track by h.address" ng-class-odd="'odd'" ng-class-even="'even'">
         <span style="float: left; width: 15em">{{h.name}} <button ng-click="host.remove(h)" style="float: right;">Remove</button></span>
         <span style="float: left; width: 10em">{{h.address}}</span>
-        <span style="float: left; width: 10em">{{lastSeen(h.lastSeen)}}</span>
+        <span style="float: left; width: 10em">{{lastSeen(h.status.timestamp)}}</span>
         <span style="float: left; width: 5em">{{regionCount(h.address)}}/{{h.capacity}}</span>
-        <span style="float: left; width: 25em">{{h.system.cpuPercent}}</span>
-        <span style="float: left; width: 10em">{{h.system.memPercent}}% {{(h.system.memKB/1024).toFixed(2)}}MB</span>
-        <span style="float: left; width: 10em">{{(h.system.netSentPer/1024).toFixed(2)}} / {{(h.system.netRecvPer/1024).toFixed(2)}} KBps</span>
+        <span style="float: left; width: 25em">{{h.status.cpuPercent}}</span>
+        <span style="float: left; width: 10em">{{h.status.memPercent}}% {{(h.status.memKB/1024).toFixed(2)}}MB</span>
+        <span style="float: left; width: 10em">{{(h.status.netSentPer/1024).toFixed(2)}} / {{(h.status.netRecvPer/1024).toFixed(2)}} KBps</span>
     </div>
     &nbsp
 </div>

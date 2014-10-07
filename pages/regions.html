@@ -43,11 +43,11 @@
                     <div ng-if="r.estateName.length < 11">
 						<div class="col-md-1">{{r.estateName}}</div>
                     </div>
-                    <div ng-if="r.isRunning" class="col-md-1">{{lastSeen(r.stat.timestamp)}}</div>
-                    <div ng-if="r.isRunning" class="col-md-1">{{r.stat.status["cpuPercent"].toFixed(2)}}%</div>
-                    <div ng-if="r.isRunning" class="col-md-1">{{r.stat.status["memPercent"].toFixed(2)}} % [{{(r.stat.status["memKB"]/1024).toFixed(2)}} MB]</div>
-                    <div ng-if="r.isRunning" class="col-md-1">{{r.stat.status.simStats['Uptime'].split(".").slice(0,-1).join(" days ")}}</div>
-                    <div ng-if="r.isRunning" class="col-md-1">{{r.stat.status.simStats['RootAg']}}</div>
+                    <div ng-if="r.isRunning" class="col-md-1">{{lastSeen(r.status.timestamp)}}</div>
+                    <div ng-if="r.isRunning" class="col-md-1">{{r.status.cpuPercent.toFixed(2)}}%</div>
+                    <div ng-if="r.isRunning" class="col-md-1">{{r.status.memPercent.toFixed(2)}} % [{{(r.status.memKB/1024).toFixed(2)}} MB]</div>
+                    <div ng-if="r.isRunning" class="col-md-1">{{r.status.simStats['Uptime'].split(".").slice(0,-1).join(" days ")}}</div>
+                    <div ng-if="r.isRunning" class="col-md-1">{{r.status.simStats['RootAg']}}</div>
                     <div class="col-md-5" ng-if="!r.isRunning">Is not running...</div>
                     <div class="col-md-1"><span ng-if="auth.activeUser.accessLevel > 249">{{hostInfo(r.node)}}</span>&nbsp </div>
                     <div class="col-md-2">

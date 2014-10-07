@@ -25,7 +25,7 @@ angular.module('mgmApp')
         if(timestamp == undefined || timestamp == ""){
             return "~";
         }
-        var last = new Date(timestamp);
+        var last = new Date(timestamp*1000);
         var seconds = Math.floor(((new Date()).getTime() - last.getTime())/1000);
         
         var numdays = Math.floor(seconds / 86400);
@@ -148,14 +148,19 @@ angular.module('mgmApp')
         current: undefined,
         viewLog: function(region){
             this.current = region;
-            this.modal = $modal.open({
-                templateUrl: 'templates/regionLogModal.html',
-                keyboard: false,
-                scope: $scope,
-                windowClass: 'log-dialog'
-            });
             regionService.getLog(region).then(
-                function(logs){ $scope.region.log = logs;}
+                function(logs){ 
+                    $scope.region.log = logs.split("\n");
+                    $scope.region.modal = $modal.open({
+                        templateUrl: 'templates/regionLogModal.html',
+                        keyboard: false,
+                        scope: $scope,
+                        windowClass: 'log-dialog'
+                    });
+                },
+                function(){
+                    alertify.error("Logs not found for region " + region.name);
+                }
             );
         },
         setHost: function(region, host){

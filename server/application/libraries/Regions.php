@@ -12,29 +12,57 @@ class Regions {
 		return $q->row();
 	}
     
-    function logs($region){
-		$db = &get_instance()->db;
-		$sql = "SELECT timestamp, message FROM regionLogs WHERE region=" . $db->escape($region) . " ORDER BY timestamp ASC";
-		$q = $db->query($sql);
-		if(!$q){
-			return null;
-		}
-		return $q->result();
-	}
-    
-    function lastStat($region){
-        $db = &get_instance()->db;
-        $sql = "SELECT timestamp, status FROM regionStats WHERE region=". $db->escape($region) ." ORDER BY timestamp DESC LIMIT 1";
-        $q = $db->query($sql);
-        if(!$q){
-            return null;
+    function hostStat($host,$status){
+        # log to file format: host.hostip.date.gz
+        $filename = FCPATH.'perfStats/'.$host.'-'.date('Ymd').'.gz';
+        file_put_contents("compress.zlib://$filename", $status."\n", FILE_APPEND);
+        # expire old logs for any host and any region
+        $days = config_item("mgm_performanceDataRetentionDays");
+        $daysPastDate = date('Ymd',strtotime('-'.$days.' days', strtotime(date('Y-m-d'))));
+        $deletable = array();
+        foreach( new DirectoryIterator(FCPATH.'perfStats/') as $info){
+            if($info->isDot() || !$info->isFile()) continue;
+            $filename = $info->getFilename();
+            if (preg_match('/^'.$host.'.+?([0-9]*)\.gz$/',$filename, $matches) ) {
+                $fileDate = $matches[1];
+                if($fileDate < $daysPastDate)
+                    array_push($deletable,FCPATH.'perfStats/'.$filename);
+            } 
         }
-        return $q->row();
+        foreach( $deletable as $filename){
+            unlink($filename);
+        }
     }
     
+    function regionStat($host, $region,$status){
+        # log to file format region-host-ip-regionName-date.gz
+        $filename = FCPATH.'perfStats/'.$host.'-'.$region.'-'.date('Ymd').'.gz';
+        file_put_contents("compress.zlib://$filename", $status."\n", FILE_APPEND);
+        # dont expire old logs, we will expire them in the host logger
+    }
+    
+    function log($region, $logs){
+        //open log file for appending
+        $filename = FCPATH.'regionLogs/'.$region.'.gz';
+        foreach($logs as $log){
+			//append to the log file
+            $line = $log->timestamp . " ~ " . $log->message . "\n";
+            file_put_contents("compress.zlib://$filename", $line, FILE_APPEND);
+		}
+    }
+    
+    function logs($region){
+        //get content from region log file
+        $filename = FCPATH.'regionLogs/'.$region.'.gz';
+        if(file_exists($filename))
+            readfile("compress.zlib://$filename");
+        else
+            header('HTTP/1.0 404 Not Found');
+	}
+        
     function forUser($user){
         $db = &get_instance()->db;
-        $sql = "Select name, uuid, locX, locY, size, slaveAddress, isRunning, EstateName from regions, estate_map, estate_settings ";
+        $sql = "Select name, uuid, locX, locY, size, slaveAddress, isRunning, EstateName, status from regions, estate_map, estate_settings ";
         $sql.= "where estate_map.RegionID = regions.uuid AND estate_map.EstateID = estate_settings.EstateID AND uuid in ";
         $sql.= "(SELECT RegionID FROM estate_map WHERE ";
         $sql.= "EstateID in (SELECT EstateID FROM estate_settings WHERE EstateOwner=". $db->escape($user) .") OR ";
@@ -48,7 +76,7 @@ class Regions {
     
     function allRegions(){
         $db = &get_instance()->db;
-        $sql = "Select name, uuid, locX, locY, size, slaveAddress, isRunning, EstateName from ";
+        $sql = "Select name, uuid, locX, locY, size, slaveAddress, isRunning, EstateName, status from ";
         $sql.= "regions, estate_map, estate_settings where estate_map.RegionID = regions.uuid AND estate_map.EstateID = estate_settings.EstateID";
         $q = $db->query($sql);
         if(! $q ){
@@ -102,8 +130,6 @@ class Regions {
         
         $args = array(
             'name' => $region->name, 
-            //'uname' => $region->consoleUname, 
-            //'password' => $region->consolePass,
             'job' => $job
         );
         $result = simple_curl($url . "/saveOar", $args);
@@ -150,6 +176,9 @@ class Regions {
             if(!$response || $response == ""){
                 die(json_encode(array('Success' => false, 'Message' => "Error communicating with region host")));
             }
+            //wipe region console logs to start fresh
+            if(file_exists(FCPATH.'regionLogs/'.$name.'.gz'))
+                unlink(FCPATH.'regionLogs/'.$name.'.gz');
             die($response);
         }
         die(json_encode(array('Success' => false, 'Message' => "Error finding region")));

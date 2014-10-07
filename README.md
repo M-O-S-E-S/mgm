@@ -12,33 +12,37 @@ php5 php5-common php5-gd php5-mcrypt php-pear php-mail php5-mysql php5-xmlrpc
 
 ### Installation
 1. Install required packages
-1. Clone mgm into /var/www
+1. Clone mgm into /var/www/html
 1. Enable apache-mod-rewrite `a2enmod rewrite`
-1. Create directory /var/www/maps
-1. Create directory /var/www/archives
+1. Create directory /var/www/html/maps
+1. Create directory /var/www/html/archives
 1. Create mysql database credentials for mgm, and opensim accounts
-1. Copy /var/www/mgm/server/application/config/database.php.example to /var/www/mgm/server/application/contif/database.php
+1. Copy /var/www/html/mgm/server/application/config/database.php.example to /var/www/html/mgm/server/application/contif/database.php
 1. Update database.php config file with mgm and opensim credentials
-1. Load /var/www/mgm/mgm.sql into the mgm database
-```bash
-mysql -u mgmUname -pmgmPword mgmTable < mgm.sql
-```
-1. Copy /var/www/mgm/server/application/config/mgm.php.example to /var/www/mgm/server/application/config/mgm.php
+1. Copy /var/www/html/mgm/server/application/config/mgm.php.example to /var/www/html/mgm/server/application/config/mgm.php
 1. Update mgm.php with your deployment-specifics, such as simiangrid url, email credentials, etc
 1. Modify your apache file, making the following changes:
-    1. Change your DocumentRoot to /var/www/mgm
-    1. Add Alias `Alias /maps /var/www/maps`
-    1. Add Alias `Alias /Grid /var/www/simiangridGrid`
-    1. Add Alias `Alias /GridLogin /var/www/simiangrid/GridLogin`
-1. Chown /var/www/ content to www-data, and ensure proper apache permissions
+    1. Change your DocumentRoot to /var/www/html/mgm
+    1. Add Alias `Alias /maps /var/www/htmlmaps`
+    1. Add Alias `Alias /Grid /var/www/html/simiangrid/Grid`
+    1. Add Alias `Alias /GridLogin /var/www/html/simiangrid/GridLogin`
+    1. Add Alias `Alias /GridPublic /var/www/html/simiangrid/GridPublic`
+1. Chown /var/www/html content to www-data, and ensure proper apache permissions
 1. Update /etc/php.ini, setting timezone
 ```php
 date.timezone = "America/New_York
 ```
 1. Install Simiangrid
-1. Edit simiagrid confi Grid/config.config.php
+    1. Visit [ip address]/Grid/install.php in a web browser
+    1. Ensure proper packages are installed, and correct database credentials are inserted
+    1. Repeat for [ip address]/GridLogin/install.php and [ip address]/GridPublic/install.php
+1. Edit simiangrid config Grid/config/config.php
 ```php
-$config["map_path"] = "/var/www/maps/";
+$config["map_path"] = "/var/www/html/maps/";
+```
+1. Edit simiangrid config GridLogin/config/config.php
+```php
+$config['map_service'] = "[ip of webserver]/maps";
 ```
 1. install mgm by visiting (ip)/install.html using your web-browser
 1. Follow directions to create initial, and administrative avatar account
@@ -77,6 +81,7 @@ mysql -u mgmUname -pmgmPword mgmTable < mgm.sql
     1. Add Alias `Alias /maps /var/www/html/maps`
     1. Add Alias `Alias /maps /var/www/html/simiangrid/Grid`
     1. Add Alias `Alias /GridLogin /var/www/simiangrid/GridLogin`
+    1. Add Alias `Alias /GridPublic /var/www/simiangrid/GridPublic`
 1. Chown /var/www/html content to apache, and ensure proper permissions and selinux labelling for webcontent
 1. Start apache, and allow ports 80 and 443 tcp through iptables
 1. Update /etc/php.ini, setting timezone
@@ -84,10 +89,19 @@ mysql -u mgmUname -pmgmPword mgmTable < mgm.sql
 date.timezone = "America/New_York
 ```
 1. Install Simiangrid
+    1. Visit [ip address]/Grid/install.php in a web browser
+    1. Ensure proper packages are installed, and correct database credentials are inserted
+    1. Repeat for [ip address]/GridLogin/install.php and [ip address]/GridPublic/install.php
 1. Edit simiagrid confi Grid/config.config.php
 ```php
 $config["map_path"] = "/var/www/html/maps/";
 ```
+1. Edit simiangrid config GridLogin/config/config.php
+```php
+$config['map_service'] = "[ip of webserver]/maps";
+```
+1. install mgm by visiting (ip)/install.html using your web-browser
+1. Follow directions to create initial, and administrative avatar account
 
 ## Windows Server
 Mgm and mgmNode have been deployed on Windows with IIS, but instructions are not included here

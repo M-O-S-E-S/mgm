@@ -54,7 +54,10 @@ class Regions {
     function logs($region){
         //get content from region log file
         $filename = FCPATH.'regionLogs/'.$region.'.gz';
-        readfile("compress.zlib://$filename");
+        if(file_exists($filename))
+            readfile("compress.zlib://$filename");
+        else
+            header('HTTP/1.0 404 Not Found');
 	}
         
     function forUser($user){

@@ -148,14 +148,19 @@ angular.module('mgmApp')
         current: undefined,
         viewLog: function(region){
             this.current = region;
-            this.modal = $modal.open({
-                templateUrl: 'templates/regionLogModal.html',
-                keyboard: false,
-                scope: $scope,
-                windowClass: 'log-dialog'
-            });
             regionService.getLog(region).then(
-                function(logs){ $scope.region.log = logs;}
+                function(logs){ 
+                    $scope.region.log = logs.split("\n");
+                    $scope.region.modal = $modal.open({
+                        templateUrl: 'templates/regionLogModal.html',
+                        keyboard: false,
+                        scope: $scope,
+                        windowClass: 'log-dialog'
+                    });
+                },
+                function(){
+                    alertify.error("Logs not found for region " + region.name);
+                }
             );
         },
         setHost: function(region, host){

@@ -1,14 +1,16 @@
-<div style="width:100%; overflow: auto;">
-    <div style="float: left; width: 20em"><input placeholder="Name Search" type=search ng-model="search.name"></div>
-    <div style="float: left; width: 40em"><input placeholder="Email Search" type="search" name="q" ng-model="search.email" autocomplete="off"></div>
-    <div style="float: left; width: 10%">Showing {{(users|filter:search).length}} of {{users.length}} User(s)</div>
-</div>
-<div style="width: 100%; overflow: auto;" >
-    <span style="float: left; width: 20em">Name</span>
-    <span style="float: left; width: 20em">Address</span>
-</div>
-<div style="width: 100%;" ng-repeat="u in users | orderBy:'name' | filter:search track by u.email" ng-class-odd="'odd'" ng-class-even="'even'">
-    <span style="display:inline-block; width: 20em">{{u.name}} <span ng-if="user.isSuspended(u)" style="color:red">suspended</span>
-    <button style="float:right" ng-click="user.remove(u)">Remove</button></span>
-    <span style="display:inline-block; width: 40em">{{u.email}} <button ng-if="auth.activeUser.accessLevel > 249" style="float:right" ng-click="user.manage(u)">Manage</button></span>
+<div id="users" style="height: 100%; width: 100%; overflow-y: auto;">
+    <div style="width:100%; overflow: auto;">
+        <div style="float: left; width: 20em"><input placeholder="Name Search" type=search ng-model="search.name"></div>
+        <div style="float: left; width: 40em"><input placeholder="Email Search" type="search" name="q" ng-model="search.email" autocomplete="off"></div>
+        <div style="float: left; width: 10%">Showing {{(users|filter:search).length}} of {{users.length}} User(s)</div>
+    </div>
+    <div style="width: 100%; overflow: auto;" >
+        <span style="float: left; width: 20em">Name</span>
+        <span style="float: left; width: 20em">Address</span>
+    </div>
+    <div style="width: 100%;" ng-repeat="u in users | orderBy:'name' | filter:search track by u.email" ng-class-odd="'odd'" ng-class-even="'even'">
+        <span style="display:inline-block; width: 20em">{{u.name}} <span ng-if="user.isSuspended(u)" style="color:red">suspended</span>
+        <button style="float:right" ng-click="user.remove(u)">Remove</button></span>
+        <span style="display:inline-block; width: 40em">{{u.email}} <button ng-if="auth.activeUser.accessLevel > 249" style="float:right" ng-click="user.manage(u)">Manage</button></span>
+    </div>
 </div>

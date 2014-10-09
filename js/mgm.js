@@ -643,6 +643,10 @@ mgmApp.config(function($routeProvider, $locationProvider){
             templateUrl : '/pages/register.html',
             controller  : 'RegisterController'
         })
+        .when('/config', {
+            templateUrl : '/pages/iniEdit.html',
+            controller  : 'IniEditController'
+        })
         //.otherwise({
         //    templateUrl : '/pages/account.html'
         //});

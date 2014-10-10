@@ -1,86 +1,25 @@
-<div id="iniEdit">
-    <div id="regionsList" style="float:left; height: 100%">
-        <h1>Regions list</h1>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-1"><input placeholder="Name Search" type="search" ng-model="search.name" style="width: 10em"></div>
-            </div>
-            <div style="top: 100px; height: 100%; position: absolute">
-                <div class="row" ng-repeat="r in regions | orderBy:['estateName','name'] | filter:search track by r.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
-                    <div class="col-md-2">{{r.name}}</div>    
+<div class="container-fluid" style="top: 0; bottom: 0px; position: absolute; width: 200em; margin: 0 auto;">
+    <h1>Regions list</h1>
+    <div class="row" style="display: inline-block;>
+        <div class="col-md-1"><label>Filter Names:</label><input placeholder="Name Search" type="search" ng-model="search.name" style="width: 10em"></input></div>
+    </div>
+    <div id="regionSelect" style="top: 7em; bottom: 0px; position: absolute; width: 30em; margin: 0 auto; overflow-y: scroll;">
+        <div id="regionsList">
+            <div  style="height: 100%; position: relative;">
+                
+                <div style="height: 100%; width: 100%;">
+                    <div class="row" ng-repeat="r in regions | orderBy:['estateName','name'] | filter:search track by r.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
+                        <div class="col-md-2">{{r.name}}</div>    
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div id="configView" style="float:left; overflow:auto, height:100%">
-        <h1>Configuration List</h1>
-        <div class="container-fluid" style="height: 10em; overflow: auto;">
-            <p>gabagabda</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-            <p>gabagaba</p>
-        </div>
+</div>
+<div id="iniEdit" style="top: 0; bottom: 0px; left: 31em; position: absolute; width: 100%; margin: 0 auto;">
+    <h1>Configuration List</h1>
+    <div class="container-fluid" id="configView" style="top: 7em; bottom: 0px; position: absolute; width: 200em; margin: 0 auto; overflow-y: scroll;">
+        <div class="row">Current configuration goes here...</div>
     </div>
 </div>
+

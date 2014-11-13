@@ -6,9 +6,8 @@
     <div id="regionSelect" style="top: 7em; bottom: 0px; position: absolute; width: 30em; margin: 0 auto; overflow-y: scroll;">
         <div id="regionsList">
             <div  style="height: 100%; position: relative;">
-                
                 <div style="height: 100%; width: 100%;">
-                    <div class="row" ng-repeat="r in regions | orderBy:['estateName','name'] | filter:search track by r.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
+                    <div class="row" ng-repeat="r in regions | orderBy:['estateName','name'] | filter:search track by r.uuid" ng-class-odd="'odd'" ng-class-even="'even'" ng-click="select(r)">
                         <div class="col-md-2">{{r.name}}</div>    
                     </div>
                 </div>
@@ -19,7 +18,7 @@
 <div id="iniEdit" style="top: 0; bottom: 0px; left: 31em; position: absolute; width: 100%; margin: 0 auto;">
     <h1>Configuration List</h1>
     <div class="container-fluid" id="configView" style="top: 7em; bottom: 0px; position: absolute; width: 200em; margin: 0 auto; overflow-y: scroll;">
-        <div class="row">Current configuration goes here...</div>
+        <div class="row">Select a region on the left to view the configuration.</div>
     </div>
 </div>
 

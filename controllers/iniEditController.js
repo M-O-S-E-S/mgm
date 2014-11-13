@@ -12,4 +12,11 @@ angular.module('mgmApp')
         isRunning: "",
         node: ""
     };
+    
+    $scope.currentRegion = null;
+    
+    $scope.select = function(region){
+        alertify.success(region.name);
+        $scope.currentRegion = region;
+    }
 });

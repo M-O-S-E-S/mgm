@@ -46,9 +46,9 @@ class Install extends CI_Controller {
                     if($row->version > $installedVersion){
                         $installedVersion = $row->version;
                     }
-                    for($x = $installedVersion+1; $x <= $currentVersion; $x++){
-                        $this->loadSqlFile(FCPATH.'files/'.$mysqlFiles[$x]);
-                    }
+                }
+                for($x = $installedVersion+1; $x <= $currentVersion; $x++){
+                    $this->loadSqlFile(FCPATH.'files/'.$mysqlFiles[$x]);
                 }
             }
         }

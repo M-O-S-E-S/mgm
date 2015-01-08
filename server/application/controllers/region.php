@@ -159,7 +159,7 @@ class Region extends CI_Controller {
         die(json_encode(array('Success' => true)));
     }
     
-    public function config($region){
+    public function config($uuid){
         if(!$this->client->validate()){
             die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
         }
@@ -167,12 +167,15 @@ class Region extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         session_write_close();
+        if($uuid == "-"){
+            $defaultConfig = $this->regions->getDefaultConfig();
+            die(json_encode(array('Success' => true, 'Config' => $defaultConfig)));
+        }
         
-        $region = $this->regions->getRegion($region);
+        $name = $this->regions->getRegionName($uuid);
+        $regionConfig = $this->regions->getRegionConfig($uuid);
         
-        die(json_encode(array('Success' => false, 'Message' => "Something Awful happened to " . $region->name)));
-        
-        die(json_encode(array('Success' => false, 'Default' => null, 'Config' => null)));
+        die(json_encode(array('Success' => true, 'Config' => $regionConfig)));
     }
 }
 

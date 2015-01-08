@@ -21,9 +21,13 @@ mgmApp.directive('fileDownload', function ($compile) {
 
 mgmApp.service('configService', function($http, $q){
     
-    this.read = function(region){
+    this.getDefaultConfig = function(){
+        return this.getConfig({"uuid": "-"});
+    }
+    
+    this.getConfig = function(r){
         var defer = new $q.defer();
-        $http.get("/server/region/config/"+region)
+        $http.get("/server/region/config/"+r.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve(data);

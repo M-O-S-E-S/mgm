@@ -1,14 +1,14 @@
 <div class="container-fluid" style="top: 0; bottom: 0px; position: absolute; width: 200em; margin: 0 auto;">
     <h1>Regions list</h1>
-    <div class="row" style="display: inline-block;">
-        <div class="col-md-1"><label>Filter Names:</label><input placeholder="Name Search" type="search" ng-model="search.name" style="width: 10em"></input></div>
+    <div class="row" style="top: 5em; bottom: 0px; position: absolute; width: 30em; margin: 0 auto;">
+        <label>Filter Names:</label><input placeholder="Name Search" type="search" ng-model="search.name" style="width: 10em"></input>
     </div>
-    <div id="regionSelect" style="top: 7em; bottom: 0px; position: absolute; width: 30em; margin: 0 auto; overflow-y: scroll;">
+    <div class="row" id="regionSelect" style="top: 7em; bottom: 0px; position: absolute; width: 30em; margin: 0 auto; overflow-y: scroll;">
         <div id="regionsList">
             <div  style="height: 100%; position: relative;">
                 <div style="height: 100%; width: 100%;">
                     <div class="row" ng-repeat="r in regions | orderBy:['estateName','name'] | filter:search track by r.uuid" ng-class-odd="'odd'" ng-class-even="'even'" ng-click="select(r)">
-                        <div class="col-md-2">{{r.name}}</div>    
+                        <div style="padding-left: 2em; padding-right: 10px">{{r.estateName}}-{{r.name}}</div>    
                     </div>
                 </div>
             </div>
@@ -22,6 +22,7 @@
     </div>
     <div ng-if="currentRegion" class="container-fluid" id="configView" style="top: 7em; bottom: 0px; position: absolute; width: 200em; margin: 0 auto; overflow-y: scroll;">
         <h3 class="row">{{currentRegion.name}}</h3>
+        {{configEdit()}}
     </div>
 </div>
 

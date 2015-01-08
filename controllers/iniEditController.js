@@ -1,5 +1,5 @@
 angular.module('mgmApp')
-.controller('IniEditController', function($scope, $modal, regionService){
+.controller('IniEditController', function($scope, $modal, regionService, configService){
     
     $scope.regions = regionService.getRegions();
     $scope.$on("regionService", function(){
@@ -16,7 +16,11 @@ angular.module('mgmApp')
     $scope.currentRegion = null;
     
     $scope.select = function(region){
-        alertify.success(region.name);
+        alertify.success("loading config options for " + region.name);
+        configService.read(region.uuid).then(
+            function(data) {},
+            function(error) { alertify.error(error); }
+        );
         $scope.currentRegion = region;
     }
 });

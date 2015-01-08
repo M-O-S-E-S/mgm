@@ -1,6 +1,6 @@
 <div class="container-fluid" style="top: 0; bottom: 0px; position: absolute; width: 200em; margin: 0 auto;">
     <h1>Regions list</h1>
-    <div class="row" style="display: inline-block;>
+    <div class="row" style="display: inline-block;">
         <div class="col-md-1"><label>Filter Names:</label><input placeholder="Name Search" type="search" ng-model="search.name" style="width: 10em"></input></div>
     </div>
     <div id="regionSelect" style="top: 7em; bottom: 0px; position: absolute; width: 30em; margin: 0 auto; overflow-y: scroll;">
@@ -17,8 +17,11 @@
 </div>
 <div id="iniEdit" style="top: 0; bottom: 0px; left: 31em; position: absolute; width: 100%; margin: 0 auto;">
     <h1>Configuration List</h1>
-    <div class="container-fluid" id="configView" style="top: 7em; bottom: 0px; position: absolute; width: 200em; margin: 0 auto; overflow-y: scroll;">
+    <div ng-if="!currentRegion" class="container-fluid" id="configView" style="top: 7em; bottom: 0px; position: absolute; width: 200em; margin: 0 auto; overflow-y: scroll;">
         <div class="row">Select a region on the left to view the configuration.</div>
+    </div>
+    <div ng-if="currentRegion" class="container-fluid" id="configView" style="top: 7em; bottom: 0px; position: absolute; width: 200em; margin: 0 auto; overflow-y: scroll;">
+        <h3 class="row">{{currentRegion.name}}</h3>
     </div>
 </div>
 

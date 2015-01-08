@@ -19,9 +19,31 @@ mgmApp.directive('fileDownload', function ($compile) {
     return fd;
 });
 
+mgmApp.service('configService', function($http, $q){
+    
+    this.read = function(region){
+        var defer = new $q.defer();
+        $http.get("/server/region/config/"+region)
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve(data);
+            } else {
+                defer.reject(data.Message);
+            }
+        })
+        .error(function(data, status, headers, config){
+            defer.reject("Error reading config for region " + region + ": " + data);
+        })
+        return defer.promise;
+    }
+    
+});
+
 mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
     var uuid = "";
     var interval = null;
+    
+    //use self instead of this, we self-reference inside ng operations
     var self = this;
     
     self.close = function(){
@@ -74,8 +96,8 @@ mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
         console.log("Opening console for region " + r.name);
         if(uuid != ""){
             console.log("Console already open, closing first");
-            this.close().then(
-                function(){ this.open(r); }
+            self.close().then(
+                function(){ self.open(r); }
             );
         }
         var defer = new $q.defer();

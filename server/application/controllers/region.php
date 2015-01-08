@@ -158,6 +158,22 @@ class Region extends CI_Controller {
         $this->regions->estate($region, $estate);
         die(json_encode(array('Success' => true)));
     }
+    
+    public function config($region){
+        if(!$this->client->validate()){
+            die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
+        }
+        if($_SESSION['userLevel'] < 250){
+            die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
+        }
+        session_write_close();
+        
+        $region = $this->regions->getRegion($region);
+        
+        die(json_encode(array('Success' => false, 'Message' => "Something Awful happened to " . $region->name)));
+        
+        die(json_encode(array('Success' => false, 'Default' => null, 'Config' => null)));
+    }
 }
 
 ?>

@@ -21,10 +21,15 @@
         <div class="row">Select a region on the left to view the configuration.</div>
     </div>
     <div ng-if="currentRegion" class="container-fluid" id="configView" style="top: 7em; bottom: 0px; position: absolute; width: 200em; margin: 0 auto; overflow-y: scroll;">
-        <h3 class="row">{{currentRegion.name}}</h3>
-        <div ng-repeat="(section,values) in configEdit()">{{section}}</div>
-        
-        {{configEdit()}}
+        <h3 >{{currentRegion.name}}</h3>
+        <table>
+            <tbody ng-repeat="(section,row) in editConfig">
+                <tr><td>[{{section}}]</td></tr>
+                <tr ng-repeat="(key,data) in row">
+                    <td style="padding-left: 10px">-</td><td style="padding-left: 10px">{{key}}</td><td style="padding-left: 10px">{{data.value}}</td> <td>{{data.source}}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 

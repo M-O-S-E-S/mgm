@@ -1,17 +1,17 @@
 angular.module('mgmApp')
-.controller('IniEditController', function($scope, $modal, $routeParams, regionService, configService){
+.controller('IniEditController', function($scope, $modal, $routeParams, $location, regionService, configService){
     
     var defaultSettingsStub = {"uuid":"0","name":"default settings","estateName":"MGM","node":"","isRunning":false};
+    var routeRegion = decodeURI($routeParams.regionUuid);
     
     $scope.regions = regionService.getRegions();
     $scope.$on("regionService", function(){
         $scope.regions = regionService.getRegions();
         $scope.regions.push(defaultSettingsStub);
-        var routeRegion = $routeParams.regionUuid;
         if(routeRegion && !$scope.currentRegion){
             var result = $.grep($scope.regions, function(e){ return e['name'] == routeRegion; });
             if(result.length > 0){
-                $scope.currentRegion = result[0];
+                $scope.select(result[0]);
             }
         }
     });
@@ -26,27 +26,51 @@ angular.module('mgmApp')
     $scope.currentRegion = null;
     $scope.defaultConfig = null;
     $scope.regionConfig = null;
+    $scope.editConfig = null;
     
-    $scope.configEdit = function(){
-        var config = [];
-        config = $scope.defaultConfig;
-        return config;
+    var generateEditConfig = function(){
+        $scope.editConfig = {};
+        //populate default options
+        angular.forEach($scope.defaultConfig, function(row, section){
+            if($scope.editConfig[section] == undefined){
+                $scope.editConfig[section] = {};
+            }
+            angular.forEach(row, function(value, key){
+                $scope.editConfig[section][key] = {"value":value, "source":"default"};
+            });
+        });
+        //insert region specific options, overwriting is by design
+        angular.forEach($scope.regionConfig, function(row, section){
+            if($scope.editConfig[section] == undefined){
+                $scope.editConfig[section] = {};
+            }
+            angular.forEach(row, function(value, key){
+                $scope.editConfig[section][key] = {"value":value, "source":"default"};
+            });
+        });
     }
     
     //we clicked on a region in the left panel
     $scope.select = function(region){
-        if(region.uuid == "0"){
-            $scope.currentRegion = defaultSettingsStub;
+        if(region.name != routeRegion){
+            $location.path("/config/"+encodeURI(region.name));
             return;
         }
-        alertify.success("loading config options for " + region.name);
-        configService.getConfig(region).then(
-            function(data) {},
-            function(error) { alertify.error(error); }
-        );
-        $scope.currentRegion = region;
+        
+        $scope.regionConfig = null;
+        
+        if(region.uuid == "0"){
+            $scope.currentRegion = defaultSettingsStub;
+            generateEditConfig();
+        } else {
+            $scope.currentRegion = region;
+            alertify.success("loading config options for " + region.name);
+            configService.getConfig(region).then(
+                function(data) { generateEditConfig(); },
+                function(error) { alertify.error(error); }
+            );
+        }
     }
-    
     
     configService.getDefaultConfig().then(
         function(config){

@@ -22,6 +22,8 @@
     </div>
     <div ng-if="currentRegion" class="container-fluid" id="configView" style="top: 7em; bottom: 0px; position: absolute; width: 200em; margin: 0 auto; overflow-y: scroll;">
         <h3 class="row">{{currentRegion.name}}</h3>
+        <div ng-repeat="(section,values) in configEdit()">{{section}}</div>
+        
         {{configEdit()}}
     </div>
 </div>

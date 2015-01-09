@@ -669,7 +669,7 @@ mgmApp.config(function($routeProvider, $locationProvider){
             templateUrl : '/pages/register.html',
             controller  : 'RegisterController'
         })
-        .when('/config', {
+        .when('/config/:regionUuid?', {
             templateUrl : '/pages/iniEdit.html',
             controller  : 'IniEditController'
         })

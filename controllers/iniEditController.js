@@ -1,13 +1,19 @@
 angular.module('mgmApp')
-.controller('IniEditController', function($scope, $modal, regionService, configService){
+.controller('IniEditController', function($scope, $modal, $routeParams, regionService, configService){
     
     var defaultSettingsStub = {"uuid":"0","name":"default settings","estateName":"MGM","node":"","isRunning":false};
     
     $scope.regions = regionService.getRegions();
-    console.log($scope.regions);
     $scope.$on("regionService", function(){
         $scope.regions = regionService.getRegions();
         $scope.regions.push(defaultSettingsStub);
+        var routeRegion = $routeParams.regionUuid;
+        if(routeRegion && !$scope.currentRegion){
+            var result = $.grep($scope.regions, function(e){ return e['name'] == routeRegion; });
+            if(result.length > 0){
+                $scope.currentRegion = result[0];
+            }
+        }
     });
     
     $scope.search = {

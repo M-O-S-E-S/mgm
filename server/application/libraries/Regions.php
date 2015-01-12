@@ -392,12 +392,16 @@ class Regions {
     
     function deleteRegionConfig($regionUUID, $section, $key){
         $db = &get_instance()->db;
-        
-        $sql = "DELETE FROM iniConfig WHERE 
-            (region = ". $db->escape($regionUUID) ."AND 
-            section = ". $db->escape($section) ."AND 
-            item = ". $db->escape($key) .")"; 
+        if($regionUUID)
+            $sql = "DELETE FROM iniConfig WHERE region = ". $db->escape($regionUUID) ." AND section = ". $db->escape($section) ." AND item = ". $db->escape($key) .""; 
+        else
+            $sql = "DELETE FROM iniConfig WHERE region is NULL AND section = ". $db->escape($section) ." AND item = ". $db->escape($key) ."";
         $query = $db->query($sql);
+        
+        //$db->delete('iniConfig', array('region' => $regionUUID, 'section' => $section, 'item' => $item));
+        if($db->affected_rows() == 0){
+            die(json_encode(array('Success' => false, 'Message' => "This query affected 0 rows: " . $sql)));
+        }
         return true;
     }
     

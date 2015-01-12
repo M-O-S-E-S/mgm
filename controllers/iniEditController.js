@@ -26,6 +26,15 @@ angular.module('mgmApp')
                 scope: $scope
             });
         },
+        create: function(){
+            this.current = {section:"", key: "", value: ""};
+            this.candidate = {section:"", key: "", value: ""};
+            this.modal = $modal.open({
+                templateUrl: '/templates/configModal.html',
+                keyboard: false,
+                scope: $scope
+            });
+        },
         default: function(sec, k){
             //remove an overriding config from a region
             alertify.confirm("Do you really want to revert " + sec + " -> " + k + " to default?", function(confirmed){
@@ -71,15 +80,36 @@ angular.module('mgmApp')
                 function(){
                     alertify.success("Config updated");
                     $scope.config.modal.close();
-                    $scope.editConfig[$scope.config.candidate.section][$scope.config.candidate.key].value = $scope.config.candidate.value;
-                    $scope.editConfig[$scope.config.candidate.section][$scope.config.candidate.key].source = "region";
+                    if($scope.currentRegion){
+                        if(!$scope.regionConfig[$scope.config.candidate.section])
+                            $scope.regionConfig[$scope.config.candidate.section] = {};
+                        $scope.regionConfig[$scope.config.candidate.section][$scope.config.candidate.key] = $scope.config.candidate.value;
+                    } else {
+                        if(!$scope.defaultConfig[$scope.config.candidate.section])
+                            $scope.defaultConfig[$scope.config.candidate.section] = {};
+                        $scope.defaultConfig[$scope.config.candidate.section][$scope.config.candidate.key] = $scope.config.candidate.value;
+                    }
+                    generateEditConfig();
                 },
                 function(reason){   alertify.error("Error updating config: " + reason); }
             );
         },
-        delete: function(){
+        delete: function(sec, k){
             //this is for default options only, delete option....
-            alertify.error("not implemented");
+             alertify.confirm("Do you really want to delete the MGM default value for " + sec + " -> " + k + "?  This can have averse affects if Opensim requires it", function(confirmed){
+				if(confirmed){
+                    configService.deleteConfig(null, sec, k).then(
+                        function(){
+                            alertify.success("The default value has been deleted");
+                            delete $scope.defaultConfig[sec][k];
+                            generateEditConfig();
+                        },
+                        function(reason){
+                            alertify.error(reason);
+                        }
+                    );
+                }
+             });
         }
     };
     

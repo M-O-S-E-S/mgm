@@ -19,18 +19,23 @@ mgmApp.directive('fileDownload', function ($compile) {
     return fd;
 });
 
-mgmApp.service('configService', function($http, $q){
+mgmApp.service('configService', function($http, $q, $rootScope){
+    var defaultConfig = [];
+    var self = this;
     
-    this.getDefaultConfig = function(){
-        return this.getConfig({"uuid": "-"});
+    self.getDefaultConfig = function(){
+        return defaultConfig;
     }
     
-    this.getConfig = function(r){
+    self.getConfig = function(r){
         var defer = new $q.defer();
-        $http.get("/server/region/config/"+r.uuid)
+        var url = "/server/region/config";
+        if(r)
+            url += "/" + r.uuid;
+        $http.get(url)
         .success(function(data, status, headers, config){
             if(data.Success){
-                defer.resolve(data);
+                defer.resolve(data.Config);
             } else {
                 defer.reject(data.Message);
             }
@@ -41,6 +46,18 @@ mgmApp.service('configService', function($http, $q){
         return defer.promise;
     }
     
+    self.updateConfig = function(){
+        self.getConfig().then(
+            function(config){ //success callback
+                defaultConfig = config;
+                $rootScope.$broadcast("configService", "update");
+            }
+        );
+    }
+    //initialize data
+    self.updateConfig();
+    //schedule updates
+    $rootScope.$on("mgmUpdate", self.updateConfig);
 });
 
 mgmApp.service('consoleService', function($http, $q, $interval, $timeout){

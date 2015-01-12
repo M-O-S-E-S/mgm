@@ -177,6 +177,76 @@ class Region extends CI_Controller {
         
         die(json_encode(array('Success' => true, 'Config' => $regionConfig)));
     }
+    
+    public function deleteConfig($region = null){
+        if(!$this->client->validate()){
+            die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
+        }
+        if($_SESSION['userLevel'] < 250){
+            die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
+        }
+        session_write_close();
+        
+        
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $section = $input_data['section'];
+        $key = $input_data['key'];
+        
+        if($section == null || $section == ""){
+            die(json_encode(array('Success' => false, 'Message' => "Section requred to write config")));
+        }
+        if($key == null || $key == ""){
+            die(json_encode(array('Success' => false, 'Message' => "Key required to write config")));
+        }
+        
+        if($region != null){
+            //check for valid region
+            if(!$this->regions->getRegionName($region)){
+                die(json_encode(array('Success' => false, 'Message' => "Invalid configuration")));
+            }
+        }
+        
+        $this->regions->deleteRegionConfig($region, $section, $key);
+        
+        die(json_encode(array('Success' => true)));
+    }
+    
+    public function setConfig($region = null){
+        if(!$this->client->validate()){
+            die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
+        }
+        if($_SESSION['userLevel'] < 250){
+            die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
+        }
+        session_write_close();
+        
+        
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $section = $input_data['section'];
+        $key = $input_data['key'];
+        $value = $input_data['value'];
+        
+        if($section == null || $section == ""){
+            die(json_encode(array('Success' => false, 'Message' => "Section requred to write config")));
+        }
+        if($key == null || $key == ""){
+            die(json_encode(array('Success' => false, 'Message' => "Key required to write config")));
+        }
+        if($value == null || $value == ""){
+            die(json_encode(array('Success' => false, 'Message' => "Value required to write config")));
+        }
+        
+        if($region != null){
+            //check for valid region
+            if(!$this->regions->getRegionName($region)){
+                die(json_encode(array('Success' => false, 'Message' => "Invalid configuration")));
+            }
+        }
+        
+        $this->regions->setRegionConfig($region, $section, $key, $value);
+        
+        die(json_encode(array('Success' => true)));
+    }
 }
 
 ?>

@@ -44,20 +44,50 @@ mgmApp.service('configService', function($http, $q, $rootScope){
             defer.reject("Error reading config for region " + region + ": " + data);
         })
         return defer.promise;
-    }
+    };
     
-    self.updateConfig = function(){
+    self.setConfig = function(region, section, key, value){
+        var defer = new $q.defer();
+        var url = "/server/region/setConfig"
+        if(region)
+            url += "/" + region.uuid;
+        $http.post(url,{ 'section': section, 'key': key, 'value':value }).success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
+    
+    self.deleteConfig = function(region, section, key){
+        var defer = new $q.defer();
+        var url = "/server/region/deleteConfig"
+        if(region)
+            url += "/" + region.uuid;
+        $http.post(url,{ 'section': section, 'key': key }).success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
+    
+    var updateConfig = function(){
         self.getConfig().then(
             function(config){ //success callback
                 defaultConfig = config;
                 $rootScope.$broadcast("configService", "update");
             }
         );
-    }
+    };
     //initialize data
-    self.updateConfig();
+    updateConfig();
     //schedule updates
-    $rootScope.$on("mgmUpdate", self.updateConfig);
+    $rootScope.$on("mgmUpdate", updateConfig);
 });
 
 mgmApp.service('consoleService', function($http, $q, $interval, $timeout){

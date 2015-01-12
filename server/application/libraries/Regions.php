@@ -362,7 +362,6 @@ class Regions {
         die(json_encode(array('Success' => true, 'Region' => $region)));
     }
     
-    
     function getDefaultConfig(){
         $sections = array();
         $ci = &get_instance();
@@ -374,6 +373,32 @@ class Regions {
             $sections[$r->section][$r->item] = $r->content;
         }
         return $sections;
+    }
+    
+    function setRegionConfig($regionUUID, $section, $key, $value){
+        $db = &get_instance()->db;
+        
+        $sql = "REPLACE INTO iniConfig (region, section, item, content) VALUES (". 
+            $db->escape($regionUUID) .",". 
+            $db->escape($section) . "," . 
+            $db->escape($key) . "," . 
+            $db->escape($value) . ")";
+        $query = $db->query($sql);
+        if($db->affected_rows() == 0){
+            die(json_encode(array('Success' => false, 'Message' => "could not insert configuration option")));
+        }
+        return true;
+    }
+    
+    function deleteRegionConfig($regionUUID, $section, $key){
+        $db = &get_instance()->db;
+        
+        $sql = "DELETE FROM iniConfig WHERE 
+            (region = ". $db->escape($regionUUID) ."AND 
+            section = ". $db->escape($section) ."AND 
+            item = ". $db->escape($key) .")"; 
+        $query = $db->query($sql);
+        return true;
     }
     
     function getRegionConfig($regionUUID, $sections = NULL){

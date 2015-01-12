@@ -1,10 +1,10 @@
 angular.module('mgmApp')
-.controller('mgmController', function($rootScope,$scope,$http,$location,$interval,$modal, taskService){
+.controller('mgmController', function($rootScope,$scope,$http,$state,$interval,$modal, taskService){
     
-    $scope.location = {
-        isActive: function(path){ return $location.path() == path; },
-        goto: function(path){ $location.path(path); }
-    };
+    //$scope.location = {
+    //    isActive: function(path){ return $location.path() == path; },
+    //    goto: function(path){ $location.path(path); }
+    //};
     
     $scope.password = {
         modal: null,
@@ -69,7 +69,7 @@ angular.module('mgmApp')
                     $scope.auth.password = "";
                     $scope.updater = $interval(function(){ $rootScope.$broadcast('mgmUpdate','trigger'); }, 10*1000);
                     $rootScope.$broadcast('mgmUpdate','trigger');
-                    $location.path('/account');
+                    $state.go('mgm.account');
                 } else {
                     console.log(data.Message);
                     alertify.error(data.Message);
@@ -88,10 +88,12 @@ angular.module('mgmApp')
                     $scope.auth.userName = "";
                     $scope.auth.password = "";
                     $scope.updater = $interval(function(){ $rootScope.$broadcast('mgmUpdate','trigger'); }, 10*1000);
-                    $rootScope.$broadcast('mgmUpdate','trigger'); 
+                    $rootScope.$broadcast('mgmUpdate','trigger');
+                    //do not redirect, they may be reloading a page, or following a link
+                    //$state.go('mgm.account');
                 } else {
                     console.log("session resume failed");
-                    $location.path('/');
+                    $state.go('default');
                 };
             });
         },
@@ -100,7 +102,7 @@ angular.module('mgmApp')
             this.loggedIn = false;
             this.userName = "";
             this.password = "";
-            $location.path('/');
+            $state.go('default');
             $interval.cancel($scope.updater);
         }
     };

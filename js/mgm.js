@@ -1,5 +1,5 @@
 
-var mgmApp = angular.module('mgmApp',['ngRoute','ui.bootstrap']);
+var mgmApp = angular.module('mgmApp',['ui.router','ui.bootstrap']);
 
 mgmApp.directive('fileDownload', function ($compile) {
     var fd = {
@@ -636,45 +636,24 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     $rootScope.$on("mgmUpdate", this.updateUsers);
 });
 
-mgmApp.config(function($routeProvider, $locationProvider){
-    $routeProvider
-        .when('/', {
-            templateUrl : '/pages/splash.html'
-        })
-        .when('/account', {
-            templateUrl : '/pages/account.html',
-            controller  : 'AccountController'
-        })
-        .when('/regions', {
-            templateUrl : '/pages/regions.html',
-            controller  : 'RegionController'
-        })
-        .when('/grid', {
-            templateUrl : '/pages/grid.html',
-            controller  : 'GridController'
-        })
-        .when('/map', {
-            templateUrl : '/pages/map.html',
-            controller  : 'MapController'
-        })
-        .when('/users', {
-            templateUrl : '/pages/users.html',
-            controller  : 'UserController'
-        })
-        .when('/pending', {
-            templateUrl : '/pages/pendingUsers.html',
-            controller  :  'PendingUserController'
-        })
-        .when('/register', {
-            templateUrl : '/pages/register.html',
-            controller  : 'RegisterController'
-        })
-        .when('/config/:regionUuid?', {
-            templateUrl : '/pages/iniEdit.html',
-            controller  : 'IniEditController'
-        })
-        //.otherwise({
-        //    templateUrl : '/pages/account.html'
-        //});
+mgmApp.config(function($stateProvider, $locationProvider, $urlRouterProvider){
+    $stateProvider
+        .state('default',       {   url: "/",                   templateUrl: '/pages/splash.html'                                           })
+        .state('mgm',           {   url: "/",                   template: "<ui-view></ui-view"                                              })
+        .state('mgm.account',   {   url: "account",             templateUrl: '/pages/account.html',     controller: 'AccountController'     })
+        .state('mgm.regions',   {   url: "regions",             templateUrl: '/pages/regions.html',     controller: 'RegionController'      })
+        .state('mgm.grid',      {   url: "grid",                templateUrl: '/pages/grid.html',        controller: 'GridController'        })
+        .state('mgm.map',       {   url: "map",                 templateUrl: '/pages/map.html',         controller: 'MapController'         })
+        .state('mgm.users',     {   url: "users",               templateUrl: '/pages/users.html',       controller: 'UserController'        })
+        .state('mgm.pending',   {   url: "pending",             templateUrl: '/pages/pendingUsers.html',controller: 'PendingUserController' })
+        .state('mgm.config',    {   url: "config/:regionName",  templateUrl: '/pages/iniEdit.html',     controller: 'IniEditController'     })
+        .state('register',      {   url: "register",            templateUrl: '/pages/register.html',    controller: 'RegisterController'    })
+    ;
+    //config wants a trailing slash for its optional query parameter, redirect to appropriate url
+    $urlRouterProvider.when('/config','/config/');
+
     $locationProvider.html5Mode(true);
-});
+})
+.run(['$state', function($state){
+    $state.go('default');
+}]);

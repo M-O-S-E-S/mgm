@@ -1,8 +1,8 @@
 angular.module('mgmApp')
-.controller('IniEditController', function($scope, $modal, $routeParams, $location, regionService, configService){
+.controller('IniEditController', function($scope, $modal, $state, $stateParams, regionService, configService){
     
     var defaultSettingsStub = {"uuid":"0","name":"default settings","estateName":"MGM","node":"","isRunning":false};
-    var routeRegion = decodeURI($routeParams.regionUuid);
+    var routeRegion = decodeURI($stateParams.regionName);
     
     $scope.regions = regionService.getRegions();
     $scope.$on("regionService", function(){

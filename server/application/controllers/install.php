@@ -17,7 +17,8 @@ class Install extends CI_Controller {
     private function checkDatabase(){
         $mysqlFiles = array(
             0 => '000-mgm.sql',
-            1 => '001-mgm.sql'
+            1 => '001-mgm.sql',
+            1 => '002-mgm.sql'
         );
         $currentVersion = '1';
 

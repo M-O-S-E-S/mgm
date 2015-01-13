@@ -2,15 +2,25 @@
 
 class Regions {
     
-    function getRegion($region){
+    function getRegionName($uuid){
 		$db = &get_instance()->db;
-		$sql = "SELECT name FROM regions WHERE uuid=" . $db->escape($region);
+		$sql = "SELECT name FROM regions WHERE uuid=" . $db->escape($uuid);
 		$q = $db->query($sql);
 		if(!$q){
 			return null;
 		}
-		return $q->row();
+		return $q->row()->name;
 	}
+    
+    function getRegionUUID($name){
+        $db = &get_instance()->db;
+		$sql = "SELECT uuid FROM regions WHERE name=" . $db->escape($name);
+		$q = $db->query($sql);
+		if(!$q){
+			return null;
+		}
+		return $q->row()->uuid;
+    }
     
     function hostStat($host,$status){
         # log to file format: host.hostip.date.gz
@@ -352,7 +362,64 @@ class Regions {
         die(json_encode(array('Success' => true, 'Region' => $region)));
     }
     
-    function serveOpensimConfig($regionName, $consoleUser, $consolePass, $consolePort, $httpPort){
+    function getDefaultConfig(){
+        $sections = array();
+        $ci = &get_instance();
+        $q = $ci->db->get_where("iniConfig", array("region"=>NULL));
+        foreach($q->result() as $r){
+            if(! array_key_exists($r->section, $sections)){
+                $sections[$r->section] = array();
+            }
+            $sections[$r->section][$r->item] = $r->content;
+        }
+        return $sections;
+    }
+    
+    function setRegionConfig($regionUUID, $section, $key, $value){
+        $db = &get_instance()->db;
+        
+        $sql = "REPLACE INTO iniConfig (region, section, item, content) VALUES (". 
+            $db->escape($regionUUID) .",". 
+            $db->escape($section) . "," . 
+            $db->escape($key) . "," . 
+            $db->escape($value) . ")";
+        $query = $db->query($sql);
+        if($db->affected_rows() == 0){
+            die(json_encode(array('Success' => false, 'Message' => "could not insert configuration option")));
+        }
+        return true;
+    }
+    
+    function deleteRegionConfig($regionUUID, $section, $key){
+        $db = &get_instance()->db;
+        if($regionUUID)
+            $sql = "DELETE FROM iniConfig WHERE region = ". $db->escape($regionUUID) ." AND section = ". $db->escape($section) ." AND item = ". $db->escape($key) .""; 
+        else
+            $sql = "DELETE FROM iniConfig WHERE region is NULL AND section = ". $db->escape($section) ." AND item = ". $db->escape($key) ."";
+        $query = $db->query($sql);
+        
+        //$db->delete('iniConfig', array('region' => $regionUUID, 'section' => $section, 'item' => $item));
+        if($db->affected_rows() == 0){
+            die(json_encode(array('Success' => false, 'Message' => "This query affected 0 rows: " . $sql)));
+        }
+        return true;
+    }
+    
+    function getRegionConfig($regionUUID, $sections = NULL){
+        if(!$sections)
+            $sections = array();
+        $ci = &get_instance();
+        $q = $ci->db->get_where("iniConfig", array("region"=>$regionUUID));
+        foreach($q->result() as $r){
+            if(! array_key_exists($r->section, $sections)){
+                $sections[$r->section] = array();
+            }
+            $sections[$r->section][$r->item] = $r->content;
+        }
+        return $sections;
+    }
+    
+    function serveOpensimConfig($regionUUID, $consoleUser, $consolePass, $consolePort, $httpPort){
         $ci = &get_instance();
         $mgmConnectionString = "Data Source=".$ci->db->hostname.";Database=".$ci->db->database.";User ID=".$ci->db->username.";Password=".$ci->db->password.";Old Guids=true;";
         $odb = $ci->load->database('opensim', TRUE);
@@ -361,86 +428,101 @@ class Regions {
         $simianUrl = $ci->config->item('simian_gridUrl');
         $groupsRead = $ci->config->item('simian_groups_read_key');
         $groupsWrite = $ci->config->item('simian_groups_write_key');
-        $sections = array();
-        $sections['Startup'] = array();
+        
+        //load dynamic default values
+        $sections = $this->getDefaultConfig();
+        
+        //load region specific values that may override default
+        $sections = $this->getRegionConfig($regionUUID, $sections);
+        
+        //force grid specific values
+        if(!array_key_exists('Startup',$sections))
+            $sections['Startup'] = array();
         $sections['Startup']['region_info_source'] = "filesystem";
         $sections['Startup']['Stats_URI'] = "jsonSimStats";
-        $sections['Network'] = array();
+        if(!array_key_exists('Network',$sections))
+            $sections['Network'] = array();
         $sections['Network']['ConsoleUser'] = $consoleUser;
         $sections['Network']['ConsolePass'] = $consolePass;
         $sections['Network']['console_port'] = $consolePort;
         $sections['Network']['http_listener_port'] = $httpPort;
-        $sections['Messaging'] = array();
+        if(!array_key_exists('Messaging',$sections))
+            $sections['Messaging'] = array();
         $sections['Messaging']['Gatekeeper'] = $simianUrl;
         $sections['Messaging']['OfflineMessageURL'] = $mgmUrl . "server/messages";
         $sections['Messaging']['MuteListURL'] = $simianUrl;
-        $sections['Groups'] = array();
+        if(!array_key_exists('Groups',$sections))
+            $sections['Groups'] = array();
         $sections['Groups']['GroupsServerURI'] = $simianUrl;
         $sections['Groups']['XmlRpcServiceReadKey'] = $groupsRead;
         $sections['Groups']['XmlRpcServiceWriteKey'] = $groupsWrite;
-        $sections['GridService'] = array();
+        if(!array_key_exists('GridService',$sections))
+            $sections['GridService'] = array();
         $sections['GridService']['GridServerURI'] = $simianUrl;
         $sections['GridService']['Gatekeeper'] = "http://mygridserver.com:8002";
-        $sections['AssetService'] = array();
+        if(!array_key_exists('AssetService',$sections))
+            $sections['AssetService'] = array();
         $sections['AssetService']['AssetServerURI'] = $simianUrl;
-        $sections['DatabaseService'] = array();
+        if(!array_key_exists('DatabaseService',$sections))
+            $sections['DatabaseService'] = array();
         $sections['DatabaseService']['ConnectionString'] = $opensimConnectionString;
         $sections['DatabaseService']['EstateConnectionString'] = $mgmConnectionString;
-        $sections['InventoryService'] = array();
+        if(!array_key_exists('InventoryService',$sections))
+            $sections['InventoryService'] = array();
         $sections['InventoryService']['InventoryServerURI'] = $simianUrl;
-        $sections['GridInfo'] = array();
+        if(!array_key_exists('GridInfo',$sections))
+            $sections['GridInfo'] = array();
         $sections['GridInfo']['Gatekeeper'] = $simianUrl;
-        $sections['AvatarService'] = array();
+        if(!array_key_exists('AvatarService',$sections))
+            $sections['AvatarService'] = array();
         $sections['AvatarService']['AvatarServerURI'] = $simianUrl;
-        $sections['PresenceService'] = array();
+        if(!array_key_exists('PresenceService',$sections))
+            $sections['PresenceService'] = array();
         $sections['PresenceService']['PresenceServerURI'] = $simianUrl;
-        $sections['UserAccountService'] = array();
+        if(!array_key_exists('UserAccountService',$sections))
+            $sections['UserAccountService'] = array();
         $sections['UserAccountService']['UserAccountServerURI'] = $simianUrl;
-        $sections['GridUserService'] = array();
+        if(!array_key_exists('GridUserService',$sections))
+            $sections['GridUserService'] = array();
         $sections['GridUserService']['GridUserServerURI'] = $simianUrl;
-        $sections['AuthenticationService'] = array();
+        if(!array_key_exists('AuthenticationService',$sections))
+            $sections['AuthenticationService'] = array();
         $sections['AuthenticationService']['AuthenticationServerURI'] = $simianUrl;
-        $sections['FriendsService'] = array();
+        if(!array_key_exists('FriendsService',$sections))
+            $sections['FriendsService'] = array();
         $sections['FriendsService']['FriendsServerURI'] = $simianUrl;
-        $sections['HGInventoryAccessModule'] = array();
+        if(!array_key_exists('HGInventoryAccessModule',$sections))
+            $sections['HGInventoryAccessModule'] = array();
         $sections['HGInventoryAccessModule']['HomeURI'] = $simianUrl;
         $sections['HGInventoryAccessModule']['GateKeeper'] = $simianUrl;
-        $sections['HGAssetService'] = array();
+        if(!array_key_exists('HGAssetService',$sections))
+            $sections['HGAssetService'] = array();
         $sections['HGAssetService']['HomeURI'] = $simianUrl;
-        $sections['UserAgentService'] = array();
+        if(!array_key_exists('UserAgentService',$sections))
+            $sections['UserAgentService'] = array();
         $sections['UserAgentService']['UserAgentServiceURI'] = $simianUrl;
-        $sections['MapImageService'] = array();
+        if(!array_key_exists('MapImagService',$sections))
+            $sections['MapImageService'] = array();
         $sections['MapImageService']['MapImageServiceURI'] = $simianUrl;
-        $sections['SimianGrid'] = array();
+        if(!array_key_exists('SimianGrid',$sections))
+            $sections['SimianGrid'] = array();
         $sections['SimianGrid']['SimianServiceURL'] = $simianUrl;
         $sections['SimianGrid']['SimulatorCapability'] = "00000000-0000-0000-0000-000000000000";
-        $sections['SimianGridMaptiles'] = array();
+        if(!array_key_exists('SimianGridMaptiles',$sections))
+            $sections['SimianGridMaptiles'] = array();
         $sections['SimianGridMaptiles']['Enabled'] = "true";
         $sections['SimianGridMaptiles']['MaptileURL'] = $simianUrl;
         $sections['SimianGridMaptiles']['RefreshTime'] = "7200";
-        $sections['Terrain'] = array();
+        if(!array_key_exists('Terrain',$sections))
+            $sections['Terrain'] = array();
         $sections['Terrain']['SendTerrainUpdatesByViewDistance'] = true;
-        $sections['FreeSwitchVoice'] = array();
+        if(!array_key_exists('FreeSwitchVoice',$sections))
+            $sections['FreeSwitchVoice'] = array();
         $sections['FreeSwitchVoice']['FreeswitchServiceURL'] = $mgmUrl . "server/fsapi";
-        $sections['ClientStack.LindenCaps'] = array();
+        if(!array_key_exists('ClientStack.LindenCaps',$sections))
+            $sections['ClientStack.LindenCaps'] = array();
         $sections['ClientStack.LindenCaps']['Cap_GetTexture'] = $mgmUrl . "GridPublic/GetTexture/";
         $sections['ClientStack.LindenCaps']['Cap_GetMesh'] = $mgmUrl . "GridPublic/GetMesh/";
-                
-        $q = $ci->db->get_where("iniConfig", array("region"=>"default"));
-        foreach($q->result() as $r){
-            if(! array_key_exists($r->section, $sections)){
-                $sections[$r->section] = array();
-            }
-            $sections[$r->section][$r->item] = $r->content;
-        }
-        
-        $q = $ci->db->get_where("iniConfig", array("region"=>$regionName));
-        foreach($q->result() as $r){
-            if(! array_key_exists($r->section, $sections)){
-                $sections[$r->section] = array();
-            }
-            $sections[$r->section][$r->item] = $r->content;
-        }
         
         die(json_encode(array('Success' => true, 'Region' => $sections)));
     }

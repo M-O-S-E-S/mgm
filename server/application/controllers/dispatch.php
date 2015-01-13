@@ -27,6 +27,10 @@ class Dispatch extends CI_Controller {
         $consolePort = $this->input->get('consolePort');
         $externalAddress = $this->input->get('externalAddress');
         
+        $uuid = $this->regions->getRegionUUID($name);
+        if(!$uuid)
+            die(json_encode(array('Success' => false, 'Message' => "Region does not exist")));
+            
         $this->db->where("name", $name);
         $this->db->update("regions",
             array(
@@ -37,7 +41,7 @@ class Dispatch extends CI_Controller {
                 "externalAddress"=>$externalAddress)
         );
 
-        $this->regions->serveOpensimConfig($name, $consoleUser, $consolePass, $consolePort, $httpPort);
+        $this->regions->serveOpensimConfig($uuid, $consoleUser, $consolePass, $consolePort, $httpPort);
         die(json_encode(array('Success' => false, 'Message' => "Unknown Error")));
     }
     

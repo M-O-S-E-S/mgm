@@ -2,34 +2,35 @@
 <html ng-app="mgmApp" lang="en">
 	<head>
 		<title>Moses Grid Manager</title>
-		<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
-        <link rel="stylesheet" type="text/css" href="css/jquery.terminal.css" />
-        <link rel="stylesheet" type="text/css" href="css/alertify.core.css" />
-        <link rel="stylesheet" type="text/css" href="css/alertify.default.css" />
-        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
-        <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css" />
-        <link rel="stylesheet" type="text/css" href="css/mgm.css" />
+		<link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="/css/jquery.terminal.css" />
+        <link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
+        <link rel="stylesheet" type="text/css" href="/css/alertify.default.css" />
+        <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="/css/bootstrap-theme.min.css" />
+        <link rel="stylesheet" type="text/css" href="/css/mgm.css" />
         
-        <script src="js/alertify-0.3.11.min.js"></script>
-		<script src="js/jquery-1.11.0.min.js"></script>
-		<script src="js/jquery-ui.min.js"></script>
-        <script src="js/jquery.mousewheel.js"></script>
-        <script src="js/jquery.terminal-0.8.7.min.js"></script>
+        <script src="/js/alertify-0.3.11.min.js"></script>
+		<script src="/js/jquery-1.11.0.min.js"></script>
+		<script src="/js/jquery-ui.min.js"></script>
+        <script src="/js/jquery.mousewheel.js"></script>
+        <script src="/js/jquery.terminal-0.8.7.min.js"></script>
         
-		<script src="js/angular-1.2.14.min.js"></script>
-		<script src="js/angular-route-1.2.14.min.js"></script>
-		<script src="js/ui-bootstrap-tpls-0.10.0.min.js"></script>
-        <script src="js/jcanvas.min.js"></script>
-		<script type="text/javascript" src="js/mgm.js"></script>
-        <script type="text/javascript" src="controllers/mgmController.js"></script>
-        <script type="text/javascript" src="controllers/registerController.js"></script>
-        <script type="text/javascript" src="controllers/taskController.js"></script>
-        <script type="text/javascript" src="controllers/accountController.js"></script>
-		<script type="text/javascript" src="controllers/regionController.js"></script>
-		<script type="text/javascript" src="controllers/gridController.js"></script>
-		<script type="text/javascript" src="controllers/mapController.js"></script>
-		<script type="text/javascript" src="controllers/userController.js"></script>
-		<script type="text/javascript" src="controllers/pendingUserController.js"></script>
+		<script src="/js/angular-1.2.14.min.js"></script>
+		<script src="/js/angular-ui-router-0.2.13.min.js"></script>
+		<script src="/js/ui-bootstrap-tpls-0.10.0.min.js"></script>
+        <script src="/js/jcanvas.min.js"></script>
+		<script type="text/javascript" src="/js/mgm.js"></script>
+        <script type="text/javascript" src="/controllers/mgmController.js"></script>
+        <script type="text/javascript" src="/controllers/registerController.js"></script>
+        <script type="text/javascript" src="/controllers/taskController.js"></script>
+        <script type="text/javascript" src="/controllers/accountController.js"></script>
+		<script type="text/javascript" src="/controllers/regionController.js"></script>
+		<script type="text/javascript" src="/controllers/gridController.js"></script>
+		<script type="text/javascript" src="/controllers/mapController.js"></script>
+		<script type="text/javascript" src="/controllers/userController.js"></script>
+		<script type="text/javascript" src="/controllers/pendingUserController.js"></script>
+		<script type="text/javascript" src="/controllers/iniEditController.js"></script>
 	</head>
 	<body ng-controller="mgmController">
 <!--+++++++++++++++++++++++++++++++++++ HEADERS ++++++++++++++++++++++++++++++++++++++++++++++-->
@@ -53,7 +54,7 @@
                         <button class="btn btn-success" ng-click="password.show()">Forgot Password?</button>
                     </td>
                     <td>
-                        <a class="btn btn-success" href="/register">Register</a>
+                        <a class="btn btn-success" ui-sref="register">Register</a>
                     </td>
                 </tr>
                 </table>
@@ -65,12 +66,13 @@
                     <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
                     <td>
                         <div class="btn-group" textalign="center">
-                            <a class="btn btn-success" href="/account" ng-class="{ active: location.isActive('/account') }">Account</a>
-                            <a class="btn btn-success" href="/regions" ng-class="{ active: location.isActive('/regions') }">Regions</a>
-                            <a class="btn btn-success" href="/grid" ng-class="{ active: location.isActive('/grid') }">Grid</a>
-                            <a class="btn btn-success" href="/map" ng-class="{ active: location.isActive('/map') }">Map</a>
-                            <a class="btn btn-success" href="/users" ng-class="{ active: location.isActive('/users') }">Users</a>
-                            <a ng-if="auth.activeUser.accessLevel > 249" class="btn btn-success" href="/pending" ng-class="{ active: location.isActive('/pending') }">Pending Users</a>
+                            <a class="btn btn-success" ui-sref="mgm.account" ui-sref-active="active">Account</a>
+                            <a class="btn btn-success" ui-sref="mgm.regions" ui-sref-active="active">Regions</a>
+                            <a class="btn btn-success" ui-sref="mgm.grid" ui-sref-active="active">Grid</a>
+                            <a class="btn btn-success" ui-sref="mgm.map" ui-sref-active="active">Map</a>
+                            <a class="btn btn-success" ui-sref="mgm.users" ui-sref-active="active">Users</a>
+                            <a ng-if="auth.activeUser.accessLevel > 249" class="btn btn-success" ui-sref="mgm.pending" ui-sref-active="active">Pending Users</a>
+                            <a ng-if="auth.activeUser.accessLevel > 249" class="btn btn-success" ui-sref="mgm.config" ui-sref-active="active">ini Editor</a>
                         </div>
                     </td>
                     <td>
@@ -81,36 +83,8 @@
             </div>
         </div>
 <!--++++++++++++++++++++++++++++++++++++ BODY +++++++++++++++++++++++++++++++++++++++++++++++-->
-        <div id="body">
-            <div ng-view style="width: 100%; height: 100%;"> Loading...</div>
-        </div>
+        <div id="body" ui-view></div>
 <!--++++++++++++++++++++++++++++++++++ Footers +++++++++++++++++++++++++++++++++++++++++++++++-->
-        <div id="footer" ng-show="auth.loggedIn" ng-controller="TaskController">
-                <table style="width: 100%;" border="1">
-                    <thead>
-                        <tr>
-                            <th style="text-align: left" width="80"><span data-bind="text: task.tasks().length"></span> Task(s)</th>
-                            <th style="text-align: left" width="140">Timestamp</th>
-                            <th style="text-align: left" width="200">Type</th>
-                            <th style="text-align: left">Status</th>
-                          </tr>
-                    </thead>
-                </table>
-                <div id="jobs">
-                    <table style="width: 100%;" border="1">
-                        <tbody style="height: 9em; overflow: auto;">
-                            <tr ng-repeat="task in tasks track by task.id">
-                                <td width="80"><button ng-click="delete(task)">delete</button></td>
-                                <td width="140">{{task.timestamp}}</td>
-                                <td width="200">{{task.type}}</td>
-                                <td>{{task.data.Status}}</td>
-                                <td><button ng-if="(task.data.Status == 'Done') && task.data.File" ng-click="download(task)">Download</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div file-download></div>
-        </div>
         <div id="footer" ng-show="!auth.loggedIn">
             <p>YOU ARE ACCESSING A U.S. GOVERNMENT (USG) INFORMATION SYSTEM (IS) THAT IS PROVIDED FOR USG-AUTHORIZED USE ONLY. By using this IS (which includes any device attached to this IS), you consent to the following conditions: The USG routinely intercepts and monitors communications on this IS for purposes including, but not limited to, penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM), law enforcement (LE), and counterintelligence (CI) investigations. At any time, the USG may inspect and seize data stored on this IS. Communications using, or data stored on, this IS are not private, are subject to routine monitoring, interception, and search, and may be disclosed or used for any USG-authorized purpose.  This IS includes security measures (e.g., authentication and access controls) to protect USG interests--not for your personal benefit or privacy. Notwithstanding the above, using this IS does not constitute consent to PM, LE, or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.</p>
         </div>

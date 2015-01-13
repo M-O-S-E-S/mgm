@@ -40,12 +40,14 @@ class Region extends CI_Controller {
         die(json_encode(array('Success' => true, 'Regions' => $regions)));
     }
     
-    public function logs($region){
+    public function logs($regionUUID){
 		if(!$this->client->validate()){
             die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
         }
-        $r = $this->regions->getRegion($region);
-        $this->regions->logs($r->name);
+        $name = $this->regions->getRegionName($regionUUID);
+	if(!$name)
+            die(json_encode(array('Success' => false, 'Message' => "Region does not exist")));
+        $this->regions->logs($name);
 	}
             
     public function start($region){

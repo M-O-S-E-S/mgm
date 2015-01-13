@@ -14,12 +14,12 @@ class Regions {
     
     function getRegionUUID($name){
         $db = &get_instance()->db;
-		$sql = "SELECT uuid FROM regions WHERE name=" . $db->escape($name);
-		$q = $db->query($sql);
-		if(!$q){
-			return null;
-		}
-		return $q->row()->uuid;
+	$sql = "SELECT uuid FROM regions WHERE name=" . $db->escape($name);
+	$q = $db->query($sql);
+	if(!$q){
+		return null;
+	}
+	return $q->row()->uuid;
     }
     
     function hostStat($host,$status){

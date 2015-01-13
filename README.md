@@ -23,7 +23,7 @@ php5 php5-common php5-gd php5-mcrypt php-pear php-mail php5-mysql php5-xmlrpc
 1. Update mgm.php with your deployment-specifics, such as simiangrid url, email credentials, etc
 1. Modify your apache file, making the following changes:
     1. Change your DocumentRoot to /var/www/html/mgm
-    1. Add Alias `Alias /maps /var/www/htmlmaps`
+    1. Add Alias `Alias /maps /var/www/html/maps`
     1. Add Alias `Alias /Grid /var/www/html/simiangrid/Grid`
     1. Add Alias `Alias /GridLogin /var/www/html/simiangrid/GridLogin`
     1. Add Alias `Alias /GridPublic /var/www/html/simiangrid/GridPublic`

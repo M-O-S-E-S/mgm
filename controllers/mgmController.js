@@ -1,11 +1,6 @@
 angular.module('mgmApp')
 .controller('mgmController', function($rootScope,$scope,$http,$state,$interval,$modal, taskService){
     
-    //$scope.location = {
-    //    isActive: function(path){ return $location.path() == path; },
-    //    goto: function(path){ $location.path(path); }
-    //};
-    
     $scope.password = {
         modal: null,
         show: function(){

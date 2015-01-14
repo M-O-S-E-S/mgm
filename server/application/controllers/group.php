@@ -16,7 +16,7 @@ class Group extends CI_Controller {
             //the type Group is not only group definitions, but also active groups.  Filter those out
             if(!isset($group->FounderID))
                 continue;
-            $group->members = count($this->simiangrid->getGroupMembers($row->OwnerID));
+            $group->members = $this->simiangrid->getGroupMembers($row->OwnerID);
             $group->uuid = $row->OwnerID;
             $group->name = $row->Key;
             array_push($groups, $group);

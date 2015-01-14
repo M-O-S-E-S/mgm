@@ -1,5 +1,5 @@
 angular.module('mgmApp')
-.controller('UserController', function($scope, $modal, userService){
+.controller('UserController', function($scope, $modal, userService, groupService){
     $scope.users = userService.getUsers();
     $scope.$on("userService", function(){
         $scope.users = userService.getUsers();
@@ -10,13 +10,35 @@ angular.module('mgmApp')
         email:""
     }
     
+    $scope.groups = [];
+    
     $scope.user = {
         current: undefined,
         modal: undefined,
-        manage: function(selected){
+        showManage: function(selected){
             this.current = selected;
             this.modal = $modal.open({
                 templateUrl: '/templates/manageUserModal.html',
+                keyboard: false,
+                scope: $scope
+            });
+        },
+        groups: [],
+        showGroups: function(selected){
+            this.current = selected;
+            $scope.groups = groupService.getGroups();
+            $scope.user.groups = [];
+            $scope.groups.forEach(function(group){
+                group.members.forEach(function(user){
+                    if(user.OwnerID == selected.uuid){
+                        $scope.user.groups.push(group);
+                    }
+                });
+                
+                
+            });
+            this.modal = $modal.open({
+                templateUrl: '/templates/manageUserGroupsModal.html',
                 keyboard: false,
                 scope: $scope
             });

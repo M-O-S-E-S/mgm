@@ -1,0 +1,15 @@
+<div class="modal-header">
+    <h3>Groups: {{user.current.name}}</h3>
+</div>
+<div class="modal-body">
+    <div id="Groups Display">
+        
+        <div ng-repeat="g in user.groups | orderBy: 'name' track by g.uuid">
+            {{g.name}}
+        </div>
+
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="user.modal.close()">Close</button>
+</div>

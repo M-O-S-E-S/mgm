@@ -226,6 +226,17 @@ class SimianGrid
             return false;
         }
     }
+    
+    function getGroups(){
+        $query = array('RequestMethod' => 'GetGenerics', 'Type'=>'Group');
+        $result = json_curl($this->user_service, $query);
+        if( isset($result->Success) && $result->Success ){
+			return $result->Users;
+		} else {
+			log_message('error',"Unknown response to GetUsers. Returning 0.");
+			return false;
+		}
+    }
 	
     function gen_uuid() {
         return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),mt_rand( 0, 0xffff ),mt_rand( 0, 0x0fff ) | 0x4000,mt_rand( 0, 0x3fff ) | 0x8000,mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ));

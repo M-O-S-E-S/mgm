@@ -19,6 +19,27 @@ mgmApp.directive('fileDownload', function ($compile) {
     return fd;
 });
 
+mgmApp.service('groupService', function($http, $q, $rootScope){
+    var groups = [];
+    
+    this.getGroups = function(){
+        return groups;
+    }
+    
+    var updateGroups = function(){
+        $http.get("/server/group")
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                groups = dara.Groups;
+            } else {
+                console.log(data.Message);
+            }
+        })
+    }
+    updateGroups();
+    $rootScope.$on("mgmUpdate", updateGroups);
+});
+
 mgmApp.service('configService', function($http, $q, $rootScope){
     var defaultConfig = [];
     var self = this;

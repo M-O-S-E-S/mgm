@@ -231,9 +231,20 @@ class SimianGrid
         $query = array('RequestMethod' => 'GetGenerics', 'Type'=>'Group');
         $result = json_curl($this->user_service, $query);
         if( isset($result->Success) && $result->Success ){
-			return $result->Users;
+			return $result->Entries;
 		} else {
-			log_message('error',"Unknown response to GetUsers. Returning 0.");
+			log_message('error',"Unknown response to GetGroups. Returning 0.");
+			return false;
+		}
+    }
+    
+    function getGroupMembers($groupID){
+        $query = array('RequestMethod' => 'GetGenerics', 'Type' =>'GroupMember', 'Key' => $groupID);
+        $result = json_curl($this->user_service, $query);
+        if( isset($result->Success) && $result->Success ){
+			return $result->Entries;
+		} else {
+			log_message('error',"Unknown response to GetGroups. Returning 0.");
 			return false;
 		}
     }

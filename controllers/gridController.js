@@ -1,5 +1,12 @@
 angular.module('mgmApp')
-.controller('GridController', function($scope, $modal, estateService, hostService, userService, regionService){
+.controller('GridController', function($scope, $modal, $state, $stateParams, $location, estateService, hostService, userService, regionService, groupService){
+    
+    var routeSection = decodeURI($stateParams.regionName);
+    var sections = ["estates","groups","hosts"];
+    if(sections.indexOf(routeSection) == -1){
+        $location.path("/grid/estates");
+    }
+    
     $scope.estates = estateService.getEstates();
     $scope.$on("estateService", function(){
         $scope.estates = estateService.getEstates();
@@ -15,6 +22,10 @@ angular.module('mgmApp')
     $scope.regions = regionService.getRegions();
     $scope.$on("regionService", function(){
         $scope.regions = regionService.getRegions();
+    });
+    $scope.groups = groupService.getGroups();
+    $scope.$on("groupService", function(){
+        $scope.groups = groupService.getGroups();
     });
     
     $scope.regionCount = function(address){

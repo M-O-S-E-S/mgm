@@ -30,7 +30,11 @@ mgmApp.service('groupService', function($http, $q, $rootScope){
         $http.get("/server/group")
         .success(function(data, status, headers, config){
             if(data.Success){
-                groups = dara.Groups;
+                groups = data.Groups;
+                groups.forEach(function(item){
+                    item.Value = angular.fromJson(item.Value);
+                });
+                $rootScope.$broadcast("groupService", "update");
             } else {
                 console.log(data.Message);
             }
@@ -710,7 +714,7 @@ mgmApp.config(function($stateProvider, $locationProvider, $urlRouterProvider){
         .state('mgm',           {   url: "/",                   template: "<ui-view></ui-view"                                              })
         .state('mgm.account',   {   url: "account",             templateUrl: '/pages/account.html',     controller: 'AccountController'     })
         .state('mgm.regions',   {   url: "regions",             templateUrl: '/pages/regions.html',     controller: 'RegionController'      })
-        .state('mgm.grid',      {   url: "grid",                templateUrl: '/pages/grid.html',        controller: 'GridController'        })
+        .state('mgm.grid',      {   url: "grid/:section",       templateUrl: '/pages/grid.html',        controller: 'GridController'        })
         .state('mgm.map',       {   url: "map",                 templateUrl: '/pages/map.html',         controller: 'MapController'         })
         .state('mgm.users',     {   url: "users",               templateUrl: '/pages/users.html',       controller: 'UserController'        })
         .state('mgm.pending',   {   url: "pending",             templateUrl: '/pages/pendingUsers.html',controller: 'PendingUserController' })
@@ -719,6 +723,7 @@ mgmApp.config(function($stateProvider, $locationProvider, $urlRouterProvider){
     ;
     //config wants a trailing slash for its optional query parameter, redirect to appropriate url
     $urlRouterProvider.when('/config','/config/');
+    $urlRouterProvider.when('/grid','/grid/Estates');
 
     $locationProvider.html5Mode(true);
 })

@@ -1,6 +1,6 @@
 <div id="grid" style="padding: 0em 1em 0em 1em">
     <tabset>
-        <tab heading="Estates" select="selectTab('estates')">
+        <tab heading="Estates">
             <div class="row" style="width: 100%;">
                 <span style="float: left; width: 15em; padding-left: 1em;"><font size="4">Name</font></span>
                 <span style="float: left; width: 10em"><font size="4">Regions</font></span>
@@ -17,24 +17,25 @@
                 </div>
             </div>
         </tab>
-        <tab heading="Groups" select="selectTab('groups')">
+        <tab heading="Groups">
             <div class="row" style="width: 100%;">
                 <span style="float: left; width: 15em; padding-left: 1em;"><font size="4">Name</font></span>
                 <span style="float: left; width: 20em"><font size="4">Founder</font></span>
-                <span style="float: left; width: 20em"><font size="4">UUID</font></span>
+                <span style="float: left; width: 25em"><font size="4">UUID</font></span>
+                <span style="float: left; width: 20em"><font size="4"># Members</font></span>
             </div>
             
             <div style="top: 6em; bottom:0; position:absolute; width: 95%; overflow: auto;">
                 <div style="width: 100%; overflow: auto;" ng-repeat="g in groups | orderBy: 'name' track by g.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
                     <span style="float: left; width: 15em; padding-left: 1em;">{{g.name}}</span>
                     <span style="float: left; width: 20em">{{userName(g.FounderID)}}</span>
-                    <span style="float: left; width: 20em">{{g.uuid}}</span>
+                    <span style="float: left; width: 25em">{{g.uuid}}</span>
                     <span style="float: left; width: 20em">{{g.members}}</span>
                 </div>
             </div>
             
         </tab>
-        <tab heading="Hosts" ng-if="auth.activeUser.accessLevel > 249" select="selectTab('hosts')">
+        <tab heading="Hosts" ng-if="auth.activeUser.accessLevel > 249">
             <div style="width: 100%; overflow: auto;">
                 <span style="float: left; width: 15em"><font size="4">Name</font></span>
                 <span style="float: left; width: 10em"><font size="4">Address</font></span>

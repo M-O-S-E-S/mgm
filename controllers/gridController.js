@@ -1,12 +1,6 @@
 angular.module('mgmApp')
-.controller('GridController', function($scope, $modal, $state, $stateParams, $location, estateService, hostService, userService, regionService, groupService){
-    
-    var routeSection = decodeURI($stateParams.regionName);
-    var sections = ["estates","groups","hosts"];
-    if(sections.indexOf(routeSection) == -1){
-        $location.path("/grid/estates");
-    }
-    
+.controller('GridController', function($scope, $modal, estateService, hostService, userService, regionService, groupService){
+        
     $scope.estates = estateService.getEstates();
     $scope.$on("estateService", function(){
         $scope.estates = estateService.getEstates();

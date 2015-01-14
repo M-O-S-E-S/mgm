@@ -18,9 +18,9 @@ class Install extends CI_Controller {
         $mysqlFiles = array(
             0 => '000-mgm.sql',
             1 => '001-mgm.sql',
-            1 => '002-mgm.sql'
+            2 => '002-mgm.sql'
         );
-        $currentVersion = '1';
+        $currentVersion = '2';
 
         if(! $this->db->table_exists("mgmDb")){
             //versioning table does not exist, this is either a hard-migration, or a fresh install

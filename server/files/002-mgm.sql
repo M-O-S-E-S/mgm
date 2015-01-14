@@ -13,4 +13,7 @@ ALTER TABLE  `iniConfig` CHANGE  `region`  `region` CHAR( 36 ) CHARACTER SET lat
 #insert value so pid files are written to disk.
 INSERT INTO `iniConfig` (`region`, `section`, `item`, `content`) VALUES (NULL, 'Startup', 'PIDFile', 'moses.pid');
 
+#add index to version database
+ALTER TABLE  `mgmDb` ADD PRIMARY KEY (  `version` ) ;
+
 INSERT IGNORE INTO `mgmDb` (`version`, `description`) VALUES (2, '002-mgm.sql');

@@ -14,7 +14,7 @@ class User extends CI_Controller {
         $users = array();
         $pendingUsers = array();
         
-        $userDirectory = $this->simiangrid->allUsers();
+        $userDirectory = $this->simiangrid->getUsers();
         foreach($userDirectory as $i => $u){
             $user = array();
             $user['name'] = $u->Name;

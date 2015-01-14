@@ -130,7 +130,7 @@ class SimianGrid
 		return $md5result->Success;
     }
 	
-    function allUsers(){
+    function getUsers(){
 		$query = array('RequestMethod' => 'GetUsers','NameQuery' => '');
 		$result = json_curl($this->user_service, $query);
 		if( isset($result->Success) && $result->Success ){

@@ -9,7 +9,7 @@ function sendAdminEmail($subject, $body){
 
     if($adminEmail == ""){
         $sim = new SimianGrid();
-        $userList = $sim->allUsers();
+        $userList = $sim->getUsers();
         $addresses = array();
         foreach( $userList as $i => $u ){
             if($u->AccessLevel >= 250){

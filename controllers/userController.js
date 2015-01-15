@@ -24,6 +24,7 @@ angular.module('mgmApp')
             });
         },
         groups: [],
+        nonGroups: [],
         showGroups: function(selected){
             this.current = selected;
             $scope.groups = groupService.getGroups();
@@ -34,14 +35,41 @@ angular.module('mgmApp')
                         $scope.user.groups.push(group);
                     }
                 });
-                
-                
             });
+            $scope.user.nonGroups = $.grep($scope.groups, function(el){return $.inArray(el, $scope.user.groups) == -1});
             this.modal = $modal.open({
                 templateUrl: '/templates/manageUserGroupsModal.html',
                 keyboard: false,
                 scope: $scope
             });
+        },
+        addUserToGroup: function(group){
+            if(!group){
+                return;
+            }
+            groupService.addUserToGroup($scope.user.current, group).then(
+                function(){ //success
+                    alertify.success($scope.user.current.name + " added to " + group.name);
+                    var index = $scope.user.nonGroups.indexOf(group)
+                    $scope.user.nonGroups.splice(index, 1);
+                    $scope.user.groups.push(group);
+                },
+                function(reason) {alertify.error(reason);}
+            );
+        },
+        removeFromGroup: function(group){
+            if(!group){
+                return;
+            }
+            groupService.removeUserFromGroup($scope.user.current, group).then(
+                function(){ //success
+                    alertify.success($scope.user.current.name + " removed from " + group.name);
+                    var index = $scope.user.groups.indexOf(group)
+                    $scope.user.groups.splice(index, 1);
+                    $scope.user.nonGroups.push(group);
+                },
+                function(reason) {alertify.error(reason);}
+            );
         },
         isSuspended: function(u){
             var enabled = false;

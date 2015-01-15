@@ -248,6 +248,17 @@ class SimianGrid
 		}
     }
     
+    function getGroupByID($groupID){
+        $query = array('RequestMethod' => 'GetGenerics', 'Type' =>'Group', 'OwnerID' => $groupID);
+        $result = json_curl($this->user_service, $query);
+        if( isset($result->Success) && $result->Success ){
+			return $result->Entries[0];
+		} else {
+			log_message('error',"Unknown response to GetGroups. Returning 0.");
+			return false;
+		}
+    }
+    
     function getGroupMembers($groupID){
         $query = array('RequestMethod' => 'GetGenerics', 'Type' =>'GroupMember', 'Key' => $groupID);
         $result = json_curl($this->user_service, $query);
@@ -270,6 +281,92 @@ class SimianGrid
                 array_push($roles,$role);
             }
 			return $roles;
+		} else {
+			log_message('error',"Unknown response to GetGroups. Returning 0.");
+			return false;
+		}
+    }
+    
+    function removeUserFromGroup($userID, $groupID){
+        //clear role
+        $result = false;
+        $query = array('RequestMethod' => 'RemoveGeneric',
+                       'OwnerID' => $userID,
+                       'Type' =>'GroupRole' . $groupID, 
+                       'Key' => "00000000-0000-0000-0000-000000000000");
+        $result = json_curl($this->user_service, $query);
+        if( isset($result->Success) && $result->Success ){
+            //role record removed, remove from default role
+            $query = array('RequestMethod' => 'RemoveGeneric',
+                       'OwnerID' => $userID,
+                       'Type' =>'GroupMember', 
+                       'Key' => $groupID);
+            $result = json_curl($this->user_service, $query);
+            if( isset($result->Success) && $result->Success ){
+                $result = true;
+            } 
+            //purge active group record if itis this group
+            $activeGroup = $this->getActiveGroup($userID);
+            if($activeGroup && $activeGroup == $groupID){
+                $query = array('RequestMethod' => 'RemoveGeneric',
+                           'OwnerID' => $userID,
+                           'Type' =>'Group', 
+                           'Key' => 'ActiveGroup');
+                json_curl($this->user_service, $query);
+                //user cannot have missing row, isnert blank active group to fill
+                $query = array('RequestMethod' => 'AddGeneric',
+                       'OwnerID' => $userID,
+                       'Type' =>'Group', 
+                       'Key' => 'ActiveGroup',
+                       'Value' => '{}');
+                json_curl($this->user_service, $query);
+            }
+        }
+        return $result;
+    }
+    
+    function addUserToGroup($userID, $groupID){
+        //add membership record
+        $query = array('RequestMethod' => 'AddGeneric',
+                       'OwnerID' => $userID,
+                       'Type' =>'GroupMember', 
+                       'Key' => $groupID,
+                       'Value' => '{"AcceptNotices":true,"ListInProfile":false}');
+        $result = json_curl($this->user_service, $query);
+        if( isset($result->Success) && $result->Success ){
+            //membership record added, insert user into default role
+            $query = array('RequestMethod' => 'AddGeneric',
+                       'OwnerID' => $userID,
+                       'Type' =>'GroupRole' . $groupID, 
+                       'Key' => "00000000-0000-0000-0000-000000000000",
+                       'Value' => '{}');
+            $result = json_curl($this->user_service, $query);
+            if( isset($result->Success) && $result->Success ){
+                return true;
+            } else {
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    
+    function getRolesForUser($userID, $groupID){
+        $query = array('RequestMethod' => 'GetGenerics', 'Type' =>'GroupRole'.$groupID, 'OwnerID' => $userID);
+        $result = json_curl($this->user_service, $query);
+        if( isset($result->Success) && $result->Success ){
+			return $result->Entries;
+		} else {
+			log_message('error',"Unknown response to GetGroups. Returning 0.");
+			return false;
+		}
+    }
+    
+    function getGroupsForUser($userID){
+        $query = array('RequestMethod' => 'GetGenerics', 'Type' =>'GroupMember', 'OwnerID' => $userID);
+        $result = json_curl($this->user_service, $query);
+        if( isset($result->Success) && $result->Success ){
+			return $result->Entries;
 		} else {
 			log_message('error',"Unknown response to GetGroups. Returning 0.");
 			return false;

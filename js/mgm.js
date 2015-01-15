@@ -26,6 +26,34 @@ mgmApp.service('groupService', function($http, $q, $rootScope){
         return groups;
     }
     
+    this.removeUserFromGroup = function(user, group){
+        var defer = new $q.defer();
+        var url = "/server/group/removeUser/" + group.uuid;
+        $http.post(url,{ 'user': user.uuid}).success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        
+        return defer.promise;
+    }
+    
+    this.addUserToGroup = function(user, group){
+        var defer = new $q.defer();
+        var url = "/server/group/addUser/" + group.uuid;
+        $http.post(url,{ 'user': user.uuid}).success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        
+        return defer.promise;
+    };
+    
     var updateGroups = function(){
         $http.get("/server/group")
         .success(function(data, status, headers, config){

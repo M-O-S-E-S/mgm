@@ -20,17 +20,19 @@
         <tab heading="Groups">
             <div class="row" style="width: 100%;">
                 <span style="float: left; width: 15em; padding-left: 1em;"><font size="4">Name</font></span>
-                <span style="float: left; width: 20em"><font size="4">Founder</font></span>
+                <span style="float: left; width: 15em"><font size="4">Founder</font></span>
                 <span style="float: left; width: 25em"><font size="4">UUID</font></span>
-                <span style="float: left; width: 20em"><font size="4"># Members</font></span>
+                <span style="float: left; width: 10em"><font size="4"># Members</font></span>
+                <span style="float: left; width: 40em"><font size="4">Roles</font></span>
             </div>
             
             <div style="top: 6em; bottom:0; position:absolute; width: 95%; overflow: auto;">
                 <div style="width: 100%; overflow: auto;" ng-repeat="g in groups | orderBy: 'name' track by g.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
                     <span style="float: left; width: 15em; padding-left: 1em;">{{g.name}}</span>
-                    <span style="float: left; width: 20em">{{userName(g.FounderID)}}</span>
+                    <span style="float: left; width: 15em">{{userName(g.FounderID)}}</span>
                     <span style="float: left; width: 25em">{{g.uuid}}</span>
-                    <span style="float: left; width: 20em">{{g.members.length}}</span>
+                    <span style="float: left; width: 10em">{{g.members.length}}</span>
+                    <span style="float: left; width: 40em"><font style="font-weight: bold">{{g.roles.length}}:</font> <font ng-repeat="r in g.roles | orderBy: 'name'">{{r.Name}}{{$last ? '' : ', '}}</font></span>
                 </div>
             </div>
             

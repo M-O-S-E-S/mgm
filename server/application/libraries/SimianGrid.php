@@ -231,7 +231,17 @@ class SimianGrid
         $query = array('RequestMethod' => 'GetGenerics', 'Type'=>'Group');
         $result = json_curl($this->user_service, $query);
         if( isset($result->Success) && $result->Success ){
-			return $result->Entries;
+            $groups = array();
+            foreach($result->Entries as $row){
+                $group = json_decode($row->Value);
+                //the type Group is not only group definitions, but also active groups.  Filter those out
+                if(!isset($group->FounderID))
+                    continue;
+                $group->uuid = $row->OwnerID;
+                $group->name = $row->Key;
+                array_push($groups, $group);
+            }
+			return $groups;
 		} else {
 			log_message('error',"Unknown response to GetGroups. Returning 0.");
 			return false;
@@ -243,6 +253,40 @@ class SimianGrid
         $result = json_curl($this->user_service, $query);
         if( isset($result->Success) && $result->Success ){
 			return $result->Entries;
+		} else {
+			log_message('error',"Unknown response to GetGroups. Returning 0.");
+			return false;
+		}
+    }
+    
+    function getGroupRoles($groupID){
+        $query = array('RequestMethod' => 'GetGenerics', 'Type' =>'GroupRole', 'OwnerID' => $groupID);
+        $result = json_curl($this->user_service, $query);
+        if( isset($result->Success) && $result->Success ){
+            $roles = array();
+            foreach($result->Entries as $row){
+                $role = json_decode($row->Value);
+                $role->roleID = $row->Key;
+                array_push($roles,$role);
+            }
+			return $roles;
+		} else {
+			log_message('error',"Unknown response to GetGroups. Returning 0.");
+			return false;
+		}
+    }
+    
+    function getActiveGroup($userID){
+        $query = array('RequestMethod' => 'GetGenerics', 'Type' =>'Group', 'OwnerID' => $userID);
+        $result = json_curl($this->user_service, $query);
+        if( isset($result->Success) && $result->Success ){
+            if($result->Entries == [])
+                return false;
+            
+            $entry = json_decode($result->Entries[0]->Value);
+            if(isset($entry->GroupID))
+                return $entry->GroupID;
+            return false;
 		} else {
 			log_message('error',"Unknown response to GetGroups. Returning 0.");
 			return false;

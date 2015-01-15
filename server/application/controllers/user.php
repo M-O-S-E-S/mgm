@@ -29,7 +29,7 @@ class User extends CI_Controller {
                 $identity['Enabled'] = $i->Enabled;
                 array_push($user['identities'],$identity);
             }
-            $user['identities'] = 
+            $user['group'] = $this->simiangrid->getActiveGroup($u->UserID);
             array_push($users, $user);
         }
         

@@ -5,9 +5,9 @@
     <div id="Groups Display">
         
         <div ng-repeat="g in user.groups | orderBy: 'name' track by g.uuid">
-            {{g.name}}
+            {{g.name}}:{{g.uuid}}
         </div>
-
+        <p>active group: {{user.current.group}}</p>
     </div>
 </div>
 <div class="modal-footer">

@@ -19,6 +19,59 @@ mgmApp.directive('fileDownload', function ($compile) {
     return fd;
 });
 
+mgmApp.service('groupService', function($http, $q, $rootScope){
+    var groups = [];
+    
+    this.getGroups = function(){
+        return groups;
+    }
+    
+    this.removeUserFromGroup = function(user, group){
+        var defer = new $q.defer();
+        var url = "/server/group/removeUser/" + group.uuid;
+        $http.post(url,{ 'user': user.uuid}).success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        
+        return defer.promise;
+    }
+    
+    this.addUserToGroup = function(user, group){
+        var defer = new $q.defer();
+        var url = "/server/group/addUser/" + group.uuid;
+        $http.post(url,{ 'user': user.uuid}).success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        
+        return defer.promise;
+    };
+    
+    var updateGroups = function(){
+        $http.get("/server/group")
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                groups = data.Groups;
+                groups.forEach(function(item){
+                    item.Value = angular.fromJson(item.Value);
+                });
+                $rootScope.$broadcast("groupService", "update");
+            } else {
+                console.log(data.Message);
+            }
+        })
+    }
+    updateGroups();
+    $rootScope.$on("mgmUpdate", updateGroups);
+});
+
 mgmApp.service('configService', function($http, $q, $rootScope){
     var defaultConfig = [];
     var self = this;
@@ -689,7 +742,7 @@ mgmApp.config(function($stateProvider, $locationProvider, $urlRouterProvider){
         .state('mgm',           {   url: "/",                   template: "<ui-view></ui-view"                                              })
         .state('mgm.account',   {   url: "account",             templateUrl: '/pages/account.html',     controller: 'AccountController'     })
         .state('mgm.regions',   {   url: "regions",             templateUrl: '/pages/regions.html',     controller: 'RegionController'      })
-        .state('mgm.grid',      {   url: "grid",                templateUrl: '/pages/grid.html',        controller: 'GridController'        })
+        .state('mgm.grid',      {   url: "grid",       templateUrl: '/pages/grid.html',        controller: 'GridController'        })
         .state('mgm.map',       {   url: "map",                 templateUrl: '/pages/map.html',         controller: 'MapController'         })
         .state('mgm.users',     {   url: "users",               templateUrl: '/pages/users.html',       controller: 'UserController'        })
         .state('mgm.pending',   {   url: "pending",             templateUrl: '/pages/pendingUsers.html',controller: 'PendingUserController' })

@@ -14,7 +14,7 @@ class User extends CI_Controller {
         $users = array();
         $pendingUsers = array();
         
-        $userDirectory = $this->simiangrid->allUsers();
+        $userDirectory = $this->simiangrid->getUsers();
         foreach($userDirectory as $i => $u){
             $user = array();
             $user['name'] = $u->Name;
@@ -29,7 +29,7 @@ class User extends CI_Controller {
                 $identity['Enabled'] = $i->Enabled;
                 array_push($user['identities'],$identity);
             }
-            $user['identities'] = 
+            $user['group'] = $this->simiangrid->getActiveGroup($u->UserID);
             array_push($users, $user);
         }
         

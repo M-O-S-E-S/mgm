@@ -1,0 +1,23 @@
+<div class="modal-header">
+    <h3>Groups: {{user.current.name}}</h3>
+</div>
+<div class="modal-body">
+    <p>{{user.current.name}} is a member of these groups, the currently active group, if any, is bold.</p>
+    <div id="Groups Display" style="height: 10em; overflow-y: auto; border: 1px solid grey" class="alertify-text">
+        <div ng-repeat="g in user.groups | orderBy: 'name' track by g.uuid">
+            <div ng-if="g.uuid == user.current.group">
+                <span style="font-weight: bold">{{g.name}}</span><button style="btn btn-xs" ng-click="user.removeFromGroup(g)">Eject From Group</button>
+            </div>
+            <div ng-if="g.uuid != user.current.group">
+                {{g.name}}<button style="btn btn-xs" ng-click="user.removeFromGroup(g)">Eject From Group</button>
+            </div>
+        </div>
+    </div>
+    <div id="Add User to Group">
+        <label>Add {{user.current.name}} to group:</label><select ng-model="newGroup" ng-options="u.name for u in user.nonGroups | orderBy: 'name' track by u.uuid" class="alertify-text" />    
+        <button ng-click="user.addUserToGroup(newGroup)">Add</button>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="user.modal.close()">Close</button>
+</div>

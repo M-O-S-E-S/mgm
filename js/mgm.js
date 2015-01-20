@@ -304,7 +304,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
         $http.post("/server/task/nukeContent/" + region.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
-                var newTask = { id: data.ID, timestamp: "", type: "nuke_content", data: {"Status":"Initializing"}};
+                var newTask = { id: data.ID, timestamp: "", type: "nuke_content", data: {"Status":"Initializing","Region":region.uuid}};
                 tasks.push(newTask);
                 defer.resolve();
             } else {

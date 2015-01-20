@@ -127,7 +127,7 @@ class Regions {
         $db = &get_instance()->db;
       
         #add job & get number
-        $db->insert("jobs", array("type" => "save_oar", "user" => $userID, "data" => json_encode(array('Status' => "Pending..."))));
+        $db->insert("jobs", array("type" => "save_oar", "user" => $userID, "data" => json_encode(array('Status' => "Pending...", "Region" => $regionID))));
         $job = $db->insert_id();
         #contact mosesSlave to trigger oar save with job number
         $url = $this->getSlave($regionID);

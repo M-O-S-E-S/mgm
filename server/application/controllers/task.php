@@ -356,7 +356,7 @@ class Task extends CI_Controller {
                 move_uploaded_file($_FILES["file"]["tmp_name"],$archivePath);
     
                 $this->db->where('id', $job->id);
-                $this->db->update('jobs', array('data' => json_encode(array("Status" => "Done", "File" => $archivePath, "Name" => $fileName))));
+                $this->db->update('jobs', array('data' => json_encode(array("Status" => "Done", "File" => $archivePath, "FileName" => $fileName))));
 
                 $owner = $this->simiangrid->getUserByID($job->user);
                 sendSaveIarCompleteEmail($owner->Email, $fileName);
@@ -439,7 +439,7 @@ class Task extends CI_Controller {
                 if ($_FILES["file"]["error"] > 0){
                     die(json_encode(array('Success' => false, 'Message' => $_FILES["file"]["error"])));
                 }
-                $fileName = $_FILES["file"]["name"] . "-" . date("y.m.d") . ".oar";
+                $fileName = $_FILES["file"]["name"];
                 $archivePath = osJoin($this->config->item('mgm_uploadDownloadStorageArea'), UUID::v4());
                 move_uploaded_file($_FILES["file"]["tmp_name"],$archivePath);
                 
@@ -480,9 +480,14 @@ class Task extends CI_Controller {
                     $this->db->update('jobs', array('data' => json_encode(array("Status" => $result->Message, "Region" => $data->Region))));
                     die(json_encode($result));
                 }
+            
+                $data = json_decode($job->data);
+                $data->Status = "Loading";
+                $data->File = $archivePath;
+                $data->FileName = $fileName;
 
                 $this->db->where('id', $job->id);
-                $this->db->update('jobs', array('data' => json_encode(array("Status" => "Loading", "File" => $archivePath, "Name" => $fileName))));
+                $this->db->update('jobs', array('data' => json_encode($data)));
 
                 die(json_encode(array('Success' => true)));
         }
@@ -545,12 +550,15 @@ class Task extends CI_Controller {
                 if(!$this->client->isHost()){
                     die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
                 }
+                $data = json_decode($job->data);
                 if($this->input->post('Success')){
+                    $data->Status = "Done";
                     $this->db->where('id', $job->id);
-                    $this->db->update('jobs', array('data' => json_encode(array("Status" => "Done"))));
+                    $this->db->update('jobs', array('data' => json_encode($data)));
                 } else {
+                    $data->Status = $this->input->post('Message');
                     $this->db->where('id', $job->id);
-                    $this->db->update('jobs', array('data' => json_encode(array("Status" => $this->input->post('Message')))));
+                    $this->db->update('jobs', array('data' => json_encode($data)));
                 }
                 die(json_encode(array('Success' => true)));
             case "save_iar":
@@ -586,11 +594,13 @@ class Task extends CI_Controller {
                     unlink($data->File);
                 }
                 if($this->input->post('Success')){
+                    $data->Status = "Done";
                     $this->db->where('id', $job->id);
-                    $this->db->update('jobs', array('data' => json_encode(array("Status" => "Done"))));
+                    $this->db->update('jobs', array('data' => json_encode($data)));
                 } else {
+                    $data->Status = $this->input->post('Message');
                     $this->db->where('id', $job->id);
-                    $this->db->update('jobs', array('data' => json_encode(array("Status" => $this->input->post('Message')))));
+                    $this->db->update('jobs', array('data' => json_encode($data)));
                 }
                 die(json_encode(array('Success' => true)));
             case "nuke_content":

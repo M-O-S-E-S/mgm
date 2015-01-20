@@ -318,7 +318,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
         $http.post("/server/task/saveOar/" + region.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
-                var newTask = { id: data.ID, timestamp: "", type: "save_oar", data: {"Status":"Initializing"}};
+                var newTask = { id: data.ID, timestamp: "", type: "save_oar", data: {"Status":"Initializing","Region":region.uuid}};
                 tasks.push(newTask);
                 defer.resolve();
             } else {
@@ -332,7 +332,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
         $http.post("/server/task/loadOar/" + region.uuid, {"merge":merge,"x":x,"y":y,"z":z})
         .success(function(data, status, headers, config){
             if(data.Success){
-                var newTask = { id: data.ID, timestamp: "", type: "load_oar", data: {"Status":"Initializing"}};
+                var newTask = { id: data.ID, timestamp: "", type: "load_oar", data: {"Status":"Initializing","Region":region.uuid}};
                 tasks.push(newTask);
                 $rootScope.$broadcast("taskService", "update");
                 //upload file

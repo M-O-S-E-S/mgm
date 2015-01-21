@@ -65,6 +65,21 @@ class Region extends CI_Controller {
         die(json_encode(array('Success' => false, 'Message' => "unknown error")));
     }
     
+    public function kill($region){
+        if(!$this->client->validate()){
+            die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
+        }
+        $uuid = $_SESSION['uuid'];
+        $level = $_SESSION['userLevel'];
+        session_write_close();
+
+        if(! $this->regions->isOwner($uuid,$region) && !$this->regions->isManager($uuid, $region) && $level < 250){
+            die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
+        }
+        $this->regions->kill($region);
+        die(json_encode(array('Success' => false, 'Message' => "unknown error")));
+    }
+    
     public function stop($region){
         if(!$this->client->validate()){
             die(json_encode(array('Success' => false, 'Message' => "Access Denied")));

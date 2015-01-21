@@ -187,6 +187,12 @@ angular.module('mgmApp')
                 function(msg){ alertify.error(msg); }
             );
         },
+        kill: function(region){
+            regionService.kill(region).then(
+                function(){ alertify.success("Region " + region.name + " flagged for kill"); },
+                function(msg){ alertify.error(msg); }
+            );
+        },
         remove: function(region){
 			alertify.confirm("Do you really want to destroy " + region.name + " and all content?", function(confirmed){
 				if(confirmed){

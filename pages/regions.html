@@ -55,6 +55,7 @@
                     <div class="col-md-2">
                         <button ng-disabled="r.isRunning || !r.node" ng-click="region.start(r)" class="btn btn-xs btn-default">Start</button>
                         <button ng-disabled="!r.isRunning" ng-click="region.stop(r)" class="btn btn-xs btn-default">Stop</button>
+                        <button ng-disabled="!r.isRunning" ng-click="region.kill(r)" class="btn btn-xs btn-danger">Kill</button>
                         <button ng-click="collapse.showContent(r)" ng-disabled="!r.isRunning" class="btn btn-xs btn-default">Content</button>
                         <button ng-click="collapse.showManage(r)" ng-disabled="auth.activeUser.accessLevel < 250" class="btn btn-xs btn-default">Manage</button>
                         <button ng-click="region.viewLog(r)" class="btn btn-xs btn-default">log</button>

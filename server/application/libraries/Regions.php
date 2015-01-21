@@ -182,7 +182,6 @@ class Regions {
         if($q){
             $r = $q->row();
             $name = $r->name;
-            //$response = simple_curl($slaveUrl . "region/" . $name ."/start");
             $response = simple_curl($slaveUrl . "region", array('name' => $name, 'action' => 'start'));
             if(!$response || $response == ""){
                 die(json_encode(array('Success' => false, 'Message' => "Error communicating with region host")));
@@ -195,6 +194,7 @@ class Regions {
         die(json_encode(array('Success' => false, 'Message' => "Error finding region")));
     }
     
+    //requests the region to halt through it's console
     function stop($region){
 		$ig = &get_instance();
         
@@ -206,9 +206,19 @@ class Regions {
         $session = $ig->consoles->open($region);
         $ig->consoles->write($session, "quit");
         $ig->consoles->close($session);
+
+        die(json_encode(array('Success' => true)));
+    }
+    
+    //tells mgmNode to terminate the instance
+    function kill($region){
+        $db = &get_instance()->db;
         
-        //start kill timer
-        $q = $ig->db->get_where("regions", array("uuid" => $region));
+        $slaveUrl = $this->getSlave($region);
+        if(!$slaveUrl || $slaveUrl == ""){
+            die(json_encode(array('Success' => false, 'Message' => "Could not find host for region")));
+        }
+        $q = $db->get_where("regions", array("uuid" => $region));
         if($q){
             $r = $q->row();
             $name = $r->name;
@@ -216,6 +226,9 @@ class Regions {
             if(!$response || $response == ""){
                 die(json_encode(array('Success' => false, 'Message' => "Error communicating with region host")));
             }
+            //wipe region console logs to start fresh
+            if(file_exists(FCPATH.'regionLogs/'.$name.'.gz'))
+                unlink(FCPATH.'regionLogs/'.$name.'.gz');
             die($response);
         }
         die(json_encode(array('Success' => false, 'Message' => "Error finding region")));

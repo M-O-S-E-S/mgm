@@ -142,7 +142,7 @@ class Regions {
             'name' => $region->name, 
             'job' => $job
         );
-        $result = simple_curl($url . "/saveOar", $args);
+        $result = simple_curl($url . "saveOar", $args);
 
         $result = json_decode($result);
         #if failed, update job

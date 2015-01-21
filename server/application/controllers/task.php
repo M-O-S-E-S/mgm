@@ -510,7 +510,7 @@ class Task extends CI_Controller {
                 session_write_close();
                 $data = json_decode($job->data, true);
                 if(isset($data["File"]) && file_exists($data["File"])){
-                    serveFile($data["File"], $data["Name"]);
+                    serveFile($data["File"], $data["FileName"]);
                 } else {
                     header("HTTP/1.0 404 Not Found");
                     die();

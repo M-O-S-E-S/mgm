@@ -182,7 +182,8 @@ class Regions {
         if($q){
             $r = $q->row();
             $name = $r->name;
-            $response = simple_curl($slaveUrl . "region/" . $name ."/start");
+            //$response = simple_curl($slaveUrl . "region/" . $name ."/start");
+            $response = simple_curl($slaveUrl . "region", array('name' => $name, 'action' => 'start'));
             if(!$response || $response == ""){
                 die(json_encode(array('Success' => false, 'Message' => "Error communicating with region host")));
             }

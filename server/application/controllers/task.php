@@ -98,7 +98,7 @@ class Task extends CI_Controller {
             'inventoryPath' => $path,
             'job' => $job
         );
-        $result = simple_curl($url . "/saveIar", $args);
+        $result = simple_curl($url . "saveIar", $args);
         $result = json_decode($result);
         #if failed, update job
         if(!$result){

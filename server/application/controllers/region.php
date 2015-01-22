@@ -176,6 +176,26 @@ class Region extends CI_Controller {
         die(json_encode(array('Success' => true)));
     }
     
+    public function setXY($uuid){
+        if(!$this->client->validate()){
+            die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
+        }
+        if($_SESSION['userLevel'] < 250){
+            die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
+        }
+        session_write_close();
+        
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $x = $input_data['x'];
+        $y = $input_data['x'];
+        
+        if(! ctype_digit($x) || ! ctype_digit($y)){
+            die(json_encode(array('Success' => false, 'Message' => "Invalid input")));
+        }
+        
+        $this->regions->setRegionXY($uuid, $x, $y);
+    }
+    
     public function config($uuid = null){
         if(!$this->client->validate()){
             die(json_encode(array('Success' => false, 'Message' => "Access Denied")));

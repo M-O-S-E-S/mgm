@@ -246,6 +246,14 @@ class Regions {
         return true;
     }
     
+    function setRegionXY($regionId, $x, $y){
+        $db = &get_instance()->db;
+        
+        $db->where('uuid',$regionId);
+        $db->update('regions',array('locX'=>$x, 'locY'=>$y));
+        return true;
+    }
+    
     function destroy($uuid){
         $ci = &get_instance();
         

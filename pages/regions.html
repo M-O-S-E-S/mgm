@@ -61,7 +61,7 @@
                         <button ng-click="region.viewLog(r)" class="btn btn-xs btn-default">log</button>
                     </div>
                 </div>
-                <div class="row" ng-if="collapse.manage == r.uuid">
+                <div ng-if="collapse.manage == r.uuid">
                     <div class="col-md-1"></div>
                     <div class="col-md-8" ng-if="r.isRunning">
                         <div id="{{r.uuid}}-Term" style="width:100%; height: 600px"></div>
@@ -79,6 +79,10 @@
 								<select ng-model="newHost" ng-init="newHost=hostFromAddress(r.node)" ng-options="h.name+'|'+h.address for h in hosts.concat([{'name':'none'}]) | orderBy: 'name' track by h.address"></select>
 								<button ng-click="region.setHost(r, newHost)">Set</button></div>
 							</div>
+                            <div class="col-md-8">
+                                Change Position:  X:<input ng-model="locX" ng-init="locX=r.x">Y:<input ng-model="locY" ng-init="locY=r.y">
+                                <button ng-click="region.setXY(r,locX,locY)">Set</button>
+                            </div>
 						</div>
                     </div>
                 </div>

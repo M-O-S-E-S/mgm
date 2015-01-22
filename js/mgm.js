@@ -462,6 +462,20 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
         });
         return defer.promise;
     };
+    this.setXY = function(region, x, y){
+        var defer = new $q.defer();
+        $http.post("/server/region/setXY/" + region.uuid, {'x': x, 'y' : y})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                region.x = x;
+                region.y = y;
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
     this.start = function(region){
         var defer = new $q.defer();
         $http.post("/server/region/start/" + region.uuid)

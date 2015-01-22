@@ -251,7 +251,7 @@ class Regions {
         
         $db->where('uuid',$regionId);
         $db->update('regions',array('locX'=>$x, 'locY'=>$y));
-        return true;
+        die(json_encode(array('Success' => true)));
     }
     
     function destroy($uuid){

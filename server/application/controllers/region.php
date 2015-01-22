@@ -187,7 +187,7 @@ class Region extends CI_Controller {
         
         $input_data = json_decode(trim(file_get_contents('php://input')), true);
         $x = $input_data['x'];
-        $y = $input_data['x'];
+        $y = $input_data['y'];
         
         if(! ctype_digit($x) || ! ctype_digit($y)){
             die(json_encode(array('Success' => false, 'Message' => "Invalid input")));

@@ -210,6 +210,51 @@ angular.module('mgmApp')
                 scope: $scope
             });
         },
+        setXY: function(region, x, y){
+            if(region == undefined || region == ""){
+                alertify.error("Region is required");
+                return;
+            }
+            if(x == undefined || x == ""){
+                alertify.error("position x is required");
+                return;
+            }
+            if(y == undefined || y == ""){
+                alertify.error("position y is required");
+                return;
+            }
+            if( Math.floor(x) != x || Math.floor(y) != y){
+                alertify.error("X and Y must be integer coordinates");
+                return;
+            }
+            for(var i = 0; i < $scope.regions.length; i++){
+				if($scope.regions[i] == region){
+                    continue;
+                }
+				//check for existing region origin in new region space
+				var diff = $scope.regions[i].x - x;
+				if(diff >= 0 && diff < region.size){
+					diff = $scope.regions[i].y - y;
+					if(diff >= 0 && diff < region.size){
+						alertify.error("Error, region " + $scope.regions[i].name + " overlaps at those coordinates");
+						return;
+					}
+				}
+				//check for new region origin in existing region space
+				var diff = x - $scope.regions[i].x;
+				if(diff >= 0 && diff < $scope.regions[i].size){
+					diff = y - $scope.regions[i].y;
+					if(diff >= 0 && diff < $scope.regions[i].size){
+						alertify.error("Error, region " + $scope.regions[i].name + " overlaps at those coordinates");
+						return;
+					}
+				}
+            }
+            regionService.setXY(region,x,y).then(
+                function(){ alertify.success("position for region " + region.name + " changed successfully"); },
+                function(msg){ alertify.error(msg); }
+            )
+        },
         add: function(name, x, y, size, estate){
             if(name == undefined || name == ""){
                 alertify.error("Name is required");
@@ -244,7 +289,6 @@ angular.module('mgmApp')
                 return;
             }
             for(var i = 0; i < $scope.regions.length; i++){
-				console.log(size, $scope.regions[i].size);
 				//check for existing region origin in new region space
 				var diff = $scope.regions[i].x - x;
 				if(diff >= 0 && diff < size){

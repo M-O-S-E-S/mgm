@@ -98,7 +98,7 @@ class Task extends CI_Controller {
             'inventoryPath' => $path,
             'job' => $job
         );
-        $result = simple_curl($url . "/saveIar", $args);
+        $result = simple_curl($url . "saveIar", $args);
         $result = json_decode($result);
         #if failed, update job
         if(!$result){
@@ -178,7 +178,7 @@ class Task extends CI_Controller {
                 'y' => 0,
                 'z' => 0
             );
-            $result = simple_curl($url . "/loadOar", $args);
+            $result = simple_curl($url . "loadOar", $args);
             $result = json_decode($result);
             #if failed, update job
             if(!$result){
@@ -409,7 +409,7 @@ class Task extends CI_Controller {
                     'inventoryPath' => $inventoryPath,
                     'job' => $job->id
                 );
-                $result = simple_curl($url . "/loadIar", $args);
+                $result = simple_curl($url . "loadIar", $args);
                 $result = json_decode($result);
                 #if failed, update job
                 if(!$result){
@@ -465,7 +465,7 @@ class Task extends CI_Controller {
                     'y' => $data->y,
                     'z' => $data->z
                 );
-                $result = simple_curl($url . "/loadOar", $args);
+                $result = simple_curl($url . "loadOar", $args);
                 $result = json_decode($result);
                 #if failed, update job
                 if(!$result){

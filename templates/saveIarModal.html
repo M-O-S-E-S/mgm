@@ -3,7 +3,13 @@
 </div>
 <div class="modal-body">
     <div id="LoadIar">
-        <p class="alertify-message">Please enter your password to save an IAR file.  This file will include your entire inventory.</p>
+        <p class="alertify-message">
+            Please enter your password to save an IAR file.
+            This file will include your entire inventory.
+            This is a long-running asynchronous task.  
+			You will be sent an email when it completes.  
+			The file will be listed in your taskbar at the bottom of the Account tab, which is where you will download it from.
+        </p>
         <div class="alertify-text-wrapper">
             <label>Password:</label><input type="password" class="alertify-text" ng-model="iar.password" />
         </div>

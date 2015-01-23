@@ -451,6 +451,13 @@ class Regions {
         $groupsRead = $ci->config->item('simian_groups_read_key');
         $groupsWrite = $ci->config->item('simian_groups_write_key');
         
+        //Config options that may be overridden
+        $sections['FreeSwitchVoice']['FreeswitchServiceURL'] = $mgmUrl . "server/fsapi";
+        if(!array_key_exists('ClientStack.LindenCaps',$sections))
+            $sections['ClientStack.LindenCaps'] = array();
+        $sections['ClientStack.LindenCaps']['Cap_GetTexture'] = $mgmUrl . "GridPublic/GetTexture/";
+        $sections['ClientStack.LindenCaps']['Cap_GetMesh'] = $mgmUrl . "GridPublic/GetMesh/";
+        
         //load dynamic default values
         $sections = $this->getDefaultConfig();
         
@@ -540,11 +547,6 @@ class Regions {
         $sections['Terrain']['SendTerrainUpdatesByViewDistance'] = true;
         if(!array_key_exists('FreeSwitchVoice',$sections))
             $sections['FreeSwitchVoice'] = array();
-        $sections['FreeSwitchVoice']['FreeswitchServiceURL'] = $mgmUrl . "server/fsapi";
-        if(!array_key_exists('ClientStack.LindenCaps',$sections))
-            $sections['ClientStack.LindenCaps'] = array();
-        $sections['ClientStack.LindenCaps']['Cap_GetTexture'] = $mgmUrl . "GridPublic/GetTexture/";
-        $sections['ClientStack.LindenCaps']['Cap_GetMesh'] = $mgmUrl . "GridPublic/GetMesh/";
         
         die(json_encode(array('Success' => true, 'Region' => $sections)));
     }

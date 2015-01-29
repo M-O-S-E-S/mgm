@@ -451,7 +451,10 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     };
     this.setHost = function(region, host){
         var defer = new $q.defer();
-        $http.post("/server/region/host/" + region.uuid, {'host': host? host.address : 'none'})
+        var h = 'none';
+        if(host.address)
+            h = host.address;
+        $http.post("/server/region/host/" + region.uuid, {'host': h})
         .success(function(data, status, headers, config){
             if(data.Success){
                 region.node = host ? host.address : host;

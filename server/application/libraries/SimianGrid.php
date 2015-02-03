@@ -389,6 +389,33 @@ class SimianGrid
 			return false;
 		}
     }
+    
+    function clearMapXY($x, $y){
+        $data = array(
+            'X'=> 1000,
+            'Y'=>1000,
+            'Tile'=>'@' . FCPATH . 'files/Tile.jpg' . ';type=image/jpeg'
+        );
+        $args = array();
+        foreach($data as $key => $val){
+            $args[] = $key . '=' . $val;
+        }
+        
+        curl_setopt($ch, CURLOPT_URL, $this->grid_service);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array( 'Content-Type: multipart/form-data' ));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST,0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_exec($ch);
+        if(curl_errno($ch)){
+            $result = false;
+        } else {
+            $result = true;
+        }
+        return $result;
+    }
 	
     function gen_uuid() {
         return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),mt_rand( 0, 0xffff ),mt_rand( 0, 0x0fff ) | 0x4000,mt_rand( 0, 0x3fff ) | 0x8000,mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ));

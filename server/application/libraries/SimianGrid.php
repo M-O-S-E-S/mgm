@@ -391,16 +391,13 @@ class SimianGrid
     }
     
     function clearMapXY($x, $y){
+        $cfile = curl_file_create(FCPATH . 'files/Tile.jpg','image/jpeg');
         $data = array(
-            'X'=> 1000,
-            'Y'=>1000,
-            'Tile'=>'@' . FCPATH . 'files/Tile.jpg' . ';type=image/jpeg'
+            'X'=> $x,
+            'Y'=> $y,
+            'Tile'=>$cfile
         );
-        $args = array();
-        foreach($data as $key => $val){
-            $args[] = $key . '=' . $val;
-        }
-        
+        $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->grid_service);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array( 'Content-Type: multipart/form-data' ));
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,FALSE);

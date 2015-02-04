@@ -140,6 +140,8 @@ class Region extends CI_Controller {
         }
         session_write_close();
         
+        $this->clearMap($uuid);
+        
         $this->regions->destroy($region);
         die(json_encode(array('Success' => false, 'Message' => "unknown error")));
     }
@@ -193,6 +195,8 @@ class Region extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Invalid input")));
         }
         
+        $this->clearMap($uuid);
+
         $this->regions->setRegionXY($uuid, $x, $y);
     }
     
@@ -283,6 +287,15 @@ class Region extends CI_Controller {
         $this->regions->setRegionConfig($region, $section, $key, $value);
         
         die(json_encode(array('Success' => true)));
+    }
+    
+    private function clearMap($regionUUID){
+        $r = $this->regions->getRegion($regionUUID);
+        for($x = $r->locX; $x < $r->locX + $r->size; $x++){
+            for($y = $r->locY; $y < $r->locY + $r->size; $y++){
+                $this->simiangrid->ClearMapXY($x,$y);
+            }
+        }
     }
 }
 

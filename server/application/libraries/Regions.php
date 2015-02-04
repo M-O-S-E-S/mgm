@@ -90,9 +90,20 @@ class Regions {
         $sql.= "regions, estate_map, estate_settings where estate_map.RegionID = regions.uuid AND estate_map.EstateID = estate_settings.EstateID";
         $q = $db->query($sql);
         if(! $q ){
-            return array();
+            return false;
         }
         return $q->result();
+    }
+    
+    function getRegion($uuid){
+        $db = &get_instance()->db;
+        $sql = "Select name, uuid, locX, locY, size, slaveAddress, isRunning, status from ";
+        $sql.= "regions where uuid = " . $db->escape($uuid);
+        $q = $db->query($sql);
+        if(! $q ){
+            return array();
+        }
+        return $q->row();
     }
     
     function isOwner($user, $region){

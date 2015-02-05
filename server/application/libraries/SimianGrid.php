@@ -71,7 +71,7 @@ class SimianGrid
     function createUserAvatar($uuid, $templateAvatar="DefaultAvatar"){
         $query = array('RequestMethod' => 'AddInventory', 'OwnerID' => $uuid, 'AvatarType' => $templateAvatar);
 		$response = json_curl($this->user_service, $query);
-		if($response->Success)
+		if(isset($response->Success) && $response->Success)
 			return true;
 		return false;
     }

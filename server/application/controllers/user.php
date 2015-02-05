@@ -105,7 +105,9 @@ class User extends CI_Controller {
 
         sendEmailAccountApproved($user->name, $user->email);
 
-        $this->db->insert("summaries", array("name" => $user->name, "email" => $email, "summary" => $user->summary));
+        $query = $this->db->insert_string("summaries", array("name" => $user->name, "email" => $email, "summary" => $user->summary));
+        $query = str_replace('INSERT INTO','REPLACE INTO',$query);
+        $this->db->query($query);
         $this->db->delete('users', array('email' => $email)); 
 
         die(json_encode(array('Success' => true)));

@@ -22,6 +22,33 @@ class Regions {
 	return $q->row()->uuid;
     }
     
+    function getDefaultConfig(){
+        $sections = array();
+        $ci = &get_instance();
+        $q = $ci->db->get_where("iniConfig", array("region"=>NULL));
+        foreach($q->result() as $r){
+            if(! array_key_exists($r->section, $sections)){
+                $sections[$r->section] = array();
+            }
+            $sections[$r->section][$r->item] = $r->content;
+        }
+        return $sections;
+    }
+    
+    function getRegionConfig($regionUUID, $sections = NULL){
+        if(!$sections)
+            $sections = array();
+        $ci = &get_instance();
+        $q = $ci->db->get_where("iniConfig", array("region"=>$regionUUID));
+        foreach($q->result() as $r){
+            if(! array_key_exists($r->section, $sections)){
+                $sections[$r->section] = array();
+            }
+            $sections[$r->section][$r->item] = $r->content;
+        }
+        return $sections;
+    }
+    
     function hostStat($host,$status){
         # log to file format: host.hostip.date.gz
         $filename = FCPATH.'perfStats/'.$host.'-'.date('Ymd').'.gz';

@@ -10,7 +10,7 @@ class Dispatch extends CI_Controller {
             die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
         }
         
-        $this->regions->serveRegionConfig($name);
+        $this->regions->serveRegionConfig(urldecode($name));
         //if previous line failed
         show_404();
     }
@@ -27,11 +27,11 @@ class Dispatch extends CI_Controller {
         $consolePort = $this->input->get('consolePort');
         $externalAddress = $this->input->get('externalAddress');
         
-        $uuid = $this->regions->getRegionUUID($name);
+        $uuid = $this->regions->getRegionUUID(urldecode($name));
         if(!$uuid)
             die(json_encode(array('Success' => false, 'Message' => "Region does not exist")));
             
-        $this->db->where("name", $name);
+        $this->db->where("name", urldecode($name));
         $this->db->update("regions",
             array(
                 "httpPort"=>$httpPort,
@@ -118,7 +118,7 @@ class Dispatch extends CI_Controller {
         }
         
         //look up uuid from region name
-        $q = $this->db->get_where("regions",array("name" => $region));
+        $q = $this->db->get_where("regions",array("name" => urldecode($region)));
         if($q->num_rows() == 0){
             die(json_encode(array('Success' => false, 'Message' => "Invalid region")));
         }
@@ -127,7 +127,7 @@ class Dispatch extends CI_Controller {
         //pull out rows
         $logs = json_decode($logs);
         
-        $this->regions->log($region, $logs);
+        $this->regions->log(urldecode($region), $logs);
     }
 }
 

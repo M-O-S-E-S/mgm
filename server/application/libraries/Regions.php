@@ -416,7 +416,7 @@ class Regions {
         $q = $db->get_where("regions",array("name"=>$name));
         $region = $q->row();
         if(! $region){
-            die(json_encode(array('Success' => false, 'Message' => "region does not exist")));
+            die(json_encode(array('Success' => false, 'Message' => "region ". $name . " does not exist")));
         }
         
         die(json_encode(array('Success' => true, 'Region' => $region)));

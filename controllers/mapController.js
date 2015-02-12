@@ -9,6 +9,14 @@ angular.module('mgmApp')
     $scope.map.centerTile(1000,1000);
     $scope.map.redraw();
     
+    $scope.centerTile = function(x,y){
+        if(! /^\+?(0|[1-9]\d*)$/.test(x) || !/^\+?(0|[1-9]\d*)$/.test(y)){
+            alertify.error("Invalid input.  Map coordinates are whole numbers grater or equal to 0");
+            return;
+        }
+        $scope.map.centerTile(x,y);
+        $scope.map.redraw();
+    }
 });
 
 function MosesMap(mapUrl, canvas){

@@ -21,7 +21,7 @@ Mgm and mgmNode have been built and tested on Ubuntu server instances.  Please n
 
 ### Required packages
 
-php5 php5-common php5-gd php5-mcrypt php-pear php-mail php5-mysql php5-xmlrpc
+php5 php5-common php5-gd php5-mcrypt php-pear php-mail php5-mysql php5-xmlrpc php5-curl
 
 ### Installation
 1. Install required packages
@@ -40,6 +40,7 @@ php5 php5-common php5-gd php5-mcrypt php-pear php-mail php5-mysql php5-xmlrpc
     1. Add Alias `Alias /Grid /var/www/html/simiangrid/Grid`
     1. Add Alias `Alias /GridLogin /var/www/html/simiangrid/GridLogin`
     1. Add Alias `Alias /GridPublic /var/www/html/simiangrid/GridPublic`
+    1. Add Directive `<Directory /var/www/html/mgm>AllowOverride All </Directory>`
 1. Chown /var/www/html content to www-data, and ensure proper apache permissions
 1. Update /etc/php.ini, setting timezone
 ```php

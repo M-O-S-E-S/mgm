@@ -1,0 +1,40 @@
+<div class="modal-header">
+    <h3>Manually Create User</h3>
+</div>
+<div class="modal-body">
+    <form>
+        <table>
+            <tr>
+                <td><label>FirstName LastName:</label></td>
+                <td><input type="text" ng-model="name"/></td>
+                <td><strong style="color:red">{{error.name}}</strong>
+            </tr>
+            <tr>
+                 <td><label>Email:</label></td>
+                 <td><input type="text" ng-model="email"/></td>
+                 <td><strong style="color:red">{{error.email}}</strong>
+            </tr>
+            <tr>
+                 <td><label>Password:</label></td>
+                 <td><input type="password" ng-model="pword"/></td>
+                 <td><strong style="color:red">{{error.pword}}</strong>
+            </tr>
+            <tr>
+                 <td><label>Gender:</label></td>
+                 <td>
+                     <input type="radio" name="gender" value="M" ng-model="gender">Male</input>
+                     <input type="radio" name="gender" value="F" ng-model="gender">Female</input>
+                 </td>
+                 <td><strong style="color:red">{{error.gender}}</strong>
+            </tr>
+            <tr>
+                 <td colspan="2" align="center">
+                     <button type="submit" class="btn btn-success" ng-click="user.create(name, email, gender, pword)">Create</button>
+                 </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="user.modal.close()">Close</button>
+</div>

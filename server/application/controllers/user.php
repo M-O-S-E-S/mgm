@@ -250,6 +250,57 @@ class User extends CI_Controller {
         die(json_encode(array('Success' => false, 'Message' => "grid error setting password")));
     }
     
+    public function create(){
+        if(!$this->client->validate()){
+            die(json_encode(array('Success' => false, 'Message' => "Access Denied")));
+        }
+        if($_SESSION['userLevel'] < 250){
+            die(json_encode(array('Success' => false, 'Message' => "Permission Denied")));
+        }
+        session_write_close();
+        
+        $input_data = json_decode(trim(file_get_contents('php://input')), true);
+        $name = $input_data['name'];
+        $email = $input_data['email'];
+        $gender = $input_data['gender'];
+        $password = $input_data['password'];
+        $credential = '$1$'. md5($password);
+        
+        $query = $this->db->get_where("regions", array("name" => $this->config->item('mgm_hubRegion')));
+        $region = $query->row();
+
+        if(!$region){
+            die(json_encode(array('Success' => false, 'Message' => "Error: Could not find default region ")));
+        }
+
+        if($gender == 'M'){
+            $template = $this->config->item('registration_maleTemplate');
+        } else {
+            $template = $this->config->item('registration_femaleTemplate');
+        }
+        $uri = '{"SceneID":"'. $region->uuid  .'","Position":"<172, 187, 24>","LookAt":"<128, 25, 24>"}';
+
+        if($this->simiangrid->isEmailRegistered($email)){
+                die(json_encode(array('Success' => false, 'Message' => "Error: Conflicting pre-existing email")));
+        }
+        if($this->simiangrid->getUserByName($name === false)){
+                die(json_encode(array('Success' => false, 'Message' => "Error: Conflicting pre-existing user name")));
+        }
+        $uuid = $this->simiangrid->createUserEntry($name, $email);
+        if( ! $uuid ){
+                die(json_encode(array('Success' => false, 'Message' => "Error: Could not create user entry")));
+        }
+        if( ! $this->simiangrid->createUserAvatar($uuid, $template) ){
+                die(json_encode(array('Success' => false, 'Message' => "Error: Could not apply avatar template")));
+        }
+        if( ! $this->simiangrid->insertUserPassword($uuid, $name, $credential)){
+                die(json_encode(array('Success' => false, 'Message' => "Error: Could not apply password")));
+        }
+        $this->simiangrid->setUserHome($uuid, $uri);
+        $this->simiangrid->setUserLastLocation($uuid, $uri);
+        die(json_encode(array('Success' => true)));
+    }
+    
     public function destroy($user){
         if(!$this->client->validate()){
             die(json_encode(array('Success' => false, 'Message' => "Access Denied")));

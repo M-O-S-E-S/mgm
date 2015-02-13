@@ -10,6 +10,13 @@ angular.module('mgmApp')
         email:""
     }
     
+    $scope.error = {
+        name: "",
+        email: "",
+        pword: "",
+        gender: ""
+    }
+    
     $scope.groups = [];
     
     $scope.user = {
@@ -133,6 +140,67 @@ angular.module('mgmApp')
             }
             userService.setAccessLevel(this.current, level).then(
                 function(){ alertify.success("User level for " + $scope.user.current.name + " has been changed to " + level); },
+                function(msg){ alertify.error(msg); }
+            );
+        },
+        showAdd: function(){
+            this.modal = $modal.open({
+                templateUrl: '/templates/createUserModal.html',
+                keyboard: false,
+                scope: $scope
+            });
+        },
+        create: function(username, email, gender, password){
+            $scope.error.name = "";
+            $scope.error.email = "";
+            $scope.error.pword = "";
+            $scope.error.gender = "";
+            if(username === undefined){
+                $scope.error.name = '"FirstName LastName" required';
+                return;
+            }
+            if(email === undefined){
+                $scope.error.email = 'Invalid email entered';
+                return;
+            }
+            if( password === undefined){
+                $scope.error.pword = 'A password is required';
+                return;
+            }
+            username = username.trim();
+            email = email.trim();
+            password = password.trim();
+            if(username.split(" ").length != 2){
+                $scope.error.name = '"FirstName LastName" required';
+                return;
+            }
+            if(! /(.+)@(.+){2,}\.(.+){2,}/.test(email) ){
+                $scope.error.email = 'Invalid email entered';
+                return;
+            }
+            if(password == ""){
+                $scope.error.pword = 'A password is required';
+                return;
+            }
+            if( gender != "M" && gender != "F" ){
+                $scope.error.gender = 'Select your gender';
+                return;
+            }
+            
+            //check for conflicts in existing users
+            for(var i = 0; i < $scope.users.length; i++){
+                if($scope.users[i].email.toUpperCase() === email.toUpperCase()){
+                    $scope.error.email = "Email already in use by " + $scope.users[i].name;
+                    return;
+                }
+                if($scope.users[i].name.toUpperCase() === username.toUpperCase()){
+                    $scope.error.name = "Name already in use";
+                    return;
+                }
+            }
+
+            userService.create(username, email, gender, password).then(
+                function(){ alertify.success("Account created successfully") },
                 function(msg){ alertify.error(msg); }
             );
         },

@@ -625,6 +625,18 @@ mgmApp.service('userService', function($rootScope, $http, $q){
             }
         });
     };
+    this.create = function(username, email, gender, password){
+        var defer = new $q.defer();
+        $http.post("/server/user/create", {"name": username, "email": email, "gender": gender, 'password': password})
+        .success(function(data, status, headers, config){
+            if(data.Success){
+                defer.resolve();
+            } else {
+                defer.reject(data.Message);
+            }
+        });
+        return defer.promise;
+    };
     this.remove = function(user){
         var defer = new $q.defer();
         $http.post("/server/user/destroy/" + user.uuid)

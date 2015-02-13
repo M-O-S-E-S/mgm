@@ -3,6 +3,7 @@
         <div style="float: left; width: 20em"><input placeholder="Name Search" type=search ng-model="search.name"></div>
         <div style="float: left; width: 40em"><input placeholder="Email Search" type="search" name="q" ng-model="search.email" autocomplete="off"></div>
         <div style="float: left; width: 10%">Showing {{(users|filter:search).length}} of {{users.length}} User(s)</div>
+        <button ng-if="auth.activeUser.accessLevel > 249" ng-click="user.showAdd()">Admin Add User</button>
     </div>
     <div style="width: 100%; overflow: auto;" >
         <span style="float: left; width: 20em">Name</span>

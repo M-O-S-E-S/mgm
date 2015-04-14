@@ -140,7 +140,7 @@ class Region extends CI_Controller {
         }
         session_write_close();
         
-        $this->clearMap($uuid);
+        $this->clearMap($region);
         
         $this->regions->destroy($region);
         die(json_encode(array('Success' => false, 'Message' => "unknown error")));

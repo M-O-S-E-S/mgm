@@ -499,6 +499,7 @@ class Regions {
         $sections['Messaging']['OfflineMessageURL'] = $mgmUrl . "server/messages";
         $sections['Messaging']['MuteListURL'] = $simianUrl;
         $sections['Groups']['GroupsServerURI'] = $simianUrl;
+        $sections['Groups']['LocalService'] = "remote";
         $sections['Groups']['XmlRpcServiceReadKey'] = $groupsRead;
         $sections['Groups']['XmlRpcServiceWriteKey'] = $groupsWrite;
         $sections['GridService']['GridServerURI'] = $simianUrl;

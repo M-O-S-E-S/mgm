@@ -1,0 +1,17 @@
+{
+  "name": "halcyonUtil",
+  "dependencies": {
+    "request": "registry:npm/request#2.69.0+20160428223725"
+  },
+  "globalDependencies": {
+    "bluebird": "registry:dt/bluebird#2.0.0+20160319051630",
+    "body-parser": "registry:dt/body-parser#0.0.0+20160317120654",
+    "express": "registry:dt/express#4.0.0+20160317120654",
+    "express-serve-static-core": "registry:dt/express-serve-static-core#0.0.0+20160322035842",
+    "mime": "registry:dt/mime#0.0.0+20160316155526",
+    "mysql": "registry:dt/mysql#0.0.0+20160316155526",
+    "node": "registry:dt/node#6.0.0+20160514165920",
+    "serve-static": "registry:dt/serve-static#0.0.0+20160501131543",
+    "xml2js": "registry:dt/xml2js#0.0.0+20160317120654"
+  }
+}

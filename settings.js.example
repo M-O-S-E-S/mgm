@@ -1,0 +1,47 @@
+var settings = {};
+
+// MGM component settings
+settings.mgm = {};
+settings.mgm.db_host = "devsql";
+settings.mgm.db_user = "mgm";
+settings.mgm.db_pass = "mgm";
+settings.mgm.db_name = "mgm";
+
+settings.mgm.log_dir = "/opt/moses/mgm/logs";
+
+// Templates available for user creation
+settings.mgm.templates = [
+  {
+    "name": "male", // template name
+    "source": "00000000-0000-0000-0000-000000000000"    // template account uuid
+  },
+  {
+    "name": "female",
+    "source": "00000000-0000-0000-0000-000000000000"
+  }
+];
+
+// Settings for MGM to communicate with the Halcyon databases
+settings.halcyon = {};
+settings.halcyon.db_host = "devsql";
+settings.halcyon.db_user = "inworldz";
+settings.halcyon.db_pass = "inworldz";
+settings.halcyon.db_name = "inworldz";
+settings.halcyon.grid_server = "http://yourfrontend:8001"
+settings.halcyon.user_server = "http://yourfrontend:8002"
+settings.halcyon.messaging_server = "http://yourfrontend:8006"
+settings.halcyon.whip = "whip://password@whipaddress:32700"
+
+// settings for the get_grid_info calls used by firestorm and other clients
+settings.grid_info = {};
+settings.grid_info.login = "http://yourpubliclogin:8002/";
+settings.grid_info.mgm = "http://yourpublicmgm/";
+settings.grid_info.gridName = "MOSES Halcyon Grid";
+settings.grid_info.gridNick = "MG";
+
+// halcyon requires system credentials for the remote console
+settings.console = {};
+settings.console.user = 'username';
+settings.console.pass = 'password';
+
+module.exports = settings;

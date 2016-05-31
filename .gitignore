@@ -1,5 +1,7 @@
-server/application/config/database.php
-server/application/config/mgm.php
-server/application/logs/*.php
-server/regionLogs/*.gz
-server/perfStats/*.gz
+node_modules
+typings
+dist
+.tmp
+.sass-cache
+settings.js
+log

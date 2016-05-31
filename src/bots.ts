@@ -1,12 +1,11 @@
 
 import { UUIDString } from './halcyon/UUID';
 import { SqlConnector } from './halcyon/sqlConnector';
-import { Sql } from './mysql/sql';
 import { User, Appearance, Credential } from './halcyon/User';
 
 var conf = require('../conf.json');
 
-let hal = new SqlConnector(new Sql(conf.halcyon));
+let hal = new SqlConnector(conf.halcyon);
 
 function createBots() {
   hal.getUser(new UUIDString('38ed49f0-986a-40e7-bb12-227ea40b8b7c')).then((t: User) => {

@@ -6,13 +6,13 @@ import { Host } from './host';
 import { Job } from './Job';
 import { Region } from './Region';
 
-import { mgmConfig } from './MGM';
+import { Config } from './MGM';
 
 export class SqlConnector {
   db: Sql
 
-  constructor(conf: mgmConfig) {
-    this.db = new Sql(conf);
+  constructor(conf: Config) {
+    this.db = new Sql(conf.mgm);
   }
 
   getHost(ip: string): Promise<Host> {

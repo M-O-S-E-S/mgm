@@ -10,11 +10,18 @@ import { UUIDString } from './UUID';
 import { Estate } from './estate';
 import { Group, GroupMembership, GroupRole } from './Group';
 
+export interface sqlConfig {
+  db_host: string
+  db_user: string
+  db_pass: string
+  db_name: string
+}
+
 export class SqlConnector {
   db: Sql
 
-  constructor(db: Sql) {
-    this.db = db;
+  constructor(c: sqlConfig) {
+    this.db = new Sql(c);
   }
 
   getAllUsers(): Promise< User[]> {

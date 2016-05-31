@@ -4,34 +4,72 @@ import { Job } from './Job';
 import { Region } from './Region';
 import { Host } from './host';
 import { UUIDString } from '../halcyon/UUID';
+import { SqlConnector as HAL } from '../halcyon/sqlConnector';
+import { AuthHandler } from './routes/AuthHandler';
+import { ConsoleHandler } from './routes/ConsoleHandler';
+import { TaskHandler } from './routes/TaskHandler';
+import { EstateHandler } from './routes/EstateHandler';
+import { HostHandler } from './routes/HostHandler';
+import { UserHandler } from './routes/UserHandler';
+import { RegionHandler } from './routes/RegionHandler';
+import { GroupHandler } from './routes/GroupHandler';
+
+import * as express from 'express';
 
 var urllib = require('urllib');
 
-export interface mgmConfig {
-  db_host: string
-  db_user: string
-  db_pass: string
-  db_name: string
+export interface Config {
+  mgm: {
+    db_host: string
+    db_user: string
+    db_pass: string
+    db_name: string
+  },
+  halcyon: {
+    db_host: string
+    db_user: string
+    db_pass: string
+    db_name: string
+    grid_server: string
+    user_server: string
+    messaging_server: string
+    whip: string
+  },
+  grid_info: {
+    login: string,
+    mgm: string,
+    gridName: string,
+    gridNick: string,
+  }
+  console: {
+    user: string,
+    pass: string
+  }
 }
 
-export interface halcyonConfig {
-  db_host: string
-  db_user: string
-  db_pass: string
-  db_name: string
-  grid_server: string
-  user_server: string
-  messaging_server: string
-  whip: string
-}
 
 export class MGM {
-  private conf: halcyonConfig
+  private conf: Config
   private sql: SqlConnector
+  private hal: HAL
 
-  constructor(c: mgmConfig, h: halcyonConfig) {
-    this.conf = h;
-    this.sql = new SqlConnector(c)
+  constructor(config: Config) {
+    this.conf = config;
+    this.sql = new SqlConnector(config)
+    this.hal = new HAL(config.halcyon);
+  }
+
+  getRouter(): express.Router {
+    let router = express.Router();
+    router.use('/auth', AuthHandler(this.hal));
+    router.use('/console', ConsoleHandler(this, this.conf.console));
+    router.use('/task', TaskHandler(this));
+    router.use('/estate', EstateHandler(this.hal));
+    router.use('/host', HostHandler(this));
+    router.use('/user', UserHandler(this.hal));
+    router.use('/region', RegionHandler(this, this.hal, this.conf.console));
+    router.use('/group', GroupHandler(this.hal));
+    return router;
   }
 
   getJobsFor(id: UUIDString): Promise<Job[]> {
@@ -199,7 +237,7 @@ export class MGM {
   }
 
   getRegionINI(r: Region): Promise<{ [key: string]: { [key: string]: string } }> {
-    let connString: string = 'Data Source=' + this.conf.db_host + ';Database=' + this.conf.db_name + ';User ID=' + this.conf.db_user + ';Password=' + this.conf.db_pass + ';';
+    let connString: string = 'Data Source=' + this.conf.halcyon.db_host + ';Database=' + this.conf.halcyon.db_name + ';User ID=' + this.conf.halcyon.db_user + ';Password=' + this.conf.halcyon.db_pass + ';';
 
     let config: { [key: string]: { [key: string]: string } } = {}
     config['Startup'] = {};
@@ -247,14 +285,14 @@ export class MGM {
     config['Network']['default_location_y'] = '' + r.locY;
     config['Network']['hostname'] = r.externalAddress;
     config['Network']['http_listener_ssl'] = 'false';
-    config['Network']['grid_server_url'] = this.conf.grid_server;
+    config['Network']['grid_server_url'] = this.conf.halcyon.grid_server;
     config['Network']['grid_send_key'] = 'null';
     config['Network']['grid_recv_key'] = 'null';
-    config['Network']['user_server_url'] = this.conf.user_server;
+    config['Network']['user_server_url'] = this.conf.halcyon.user_server;
     config['Network']['user_send_key'] = 'null';
     config['Network']['user_recv_key'] = 'null';
-    config['Network']['asset_server_url'] = this.conf.whip;
-    config['Network']['messaging_server_url'] = this.conf.messaging_server;
+    config['Network']['asset_server_url'] = this.conf.halcyon.whip;
+    config['Network']['messaging_server_url'] = this.conf.halcyon.messaging_server;
     config['Network']['shard'] = 'HalcyonHome';
     config['Network']['ConsoleUser'] = r.consoleUname.toString();
     config['Network']['ConsolePass'] = r.consolePass.toString();
@@ -310,8 +348,8 @@ export class MGM {
     config['Mesh']['AllowMeshUpload'] = 'true';
 
     config['SimulatorFeatures'] = {};
-    config['SimulatorFeatures']['MapImageServerURI'] = this.conf.user_server;
-    config['SimulatorFeatures']['SearchServerURI'] = this.conf.user_server;
+    config['SimulatorFeatures']['MapImageServerURI'] = this.conf.halcyon.user_server;
+    config['SimulatorFeatures']['SearchServerURI'] = this.conf.halcyon.user_server;
     config['SimulatorFeatures']['MeshEnabled'] = 'true';
     config['SimulatorFeatures']['PhysicsMaterialsEnabled'] = 'false';
 

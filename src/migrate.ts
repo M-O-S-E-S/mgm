@@ -15,7 +15,7 @@ import { Asset } from './whip/asset';
 var conf = require('../conf.json');
 
 let sim = new SimianConnector(new Sql(conf.simian));
-let hal = new SqlConnector(new Sql(conf.halcyon));
+let hal = new SqlConnector(conf.halcyon);
 let whip = new WhipServer(conf.whip);
 
 console.log('Starting...');

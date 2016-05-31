@@ -7,8 +7,8 @@
             <div class="col-md-1">
                 <select ng-model="search.isRunning">
                     <option value="">All Regions</option>
-                    <option value="true">Running</option>
-                    <option value="false">Stopped</option>
+                    <option value="1">Running</option>
+                    <option value="0">Stopped</option>
                 </select>
             </div>
             <div class="col-md-4">
@@ -23,20 +23,19 @@
         </div>
         <div class="row-fluid">
             <div class="col-md-1">Name</div>
-            <div class="col-md-1">Position: size</div>
+            <div class="col-md-1">Position</div>
             <div class="col-md-1">Estate</div>
             <div class="col-md-1">Timestamp</div>
             <div class="col-md-1">CPU</div>
             <div class="col-md-1">MEM</div>
             <div class="col-md-1">Uptime</div>
-            <div class="col-md-1">Users</div>
             <div class="col-md-4"><span style="float: left; width: 10em" ng-if="auth.activeUser.accessLevel > 249">Host</span></div>
         </div>
         <div class="row" ng-repeat="r in regions | orderBy:['estateName','name'] | filter:search track by r.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
             <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-1">{{r.name}}</div>
-                    <div class="col-md-1">{{r.x}},{{r.y}}: {{r.size}}</div>
+                    <div class="col-md-1">{{r.x}},{{r.y}}</div>
                     <div ng-if="r.estateName.length > 10">
 						<div class="col-md-1">{{r.estateName.substring(0,10)}}...</div>
                     </div>
@@ -48,7 +47,6 @@
                         <div class="col-md-1">{{r.status.cpuPercent.toFixed(2)}}%</div>
                         <div class="col-md-1">{{r.status.memPercent.toFixed(2)}} % [{{(r.status.memKB/1024).toFixed(2)}} MB]</div>
                         <div class="col-md-1">{{r.status.simStats['Uptime'].split(".").slice(0,-1).join(" days ")}}</div>
-                        <div class="col-md-1">{{r.status.simStats['RootAg']}}</div>
                     </div>
                     <div class="col-md-5" ng-if="!r.isRunning">Is not running...</div>
                     <div class="col-md-1"><span ng-if="auth.activeUser.accessLevel > 249">{{r.node}}</span>&nbsp </div>

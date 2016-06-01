@@ -49,17 +49,24 @@ export function AuthHandler(hal: Halcyon): express.Router{
     hal.getUserByName(username).then((u: User) => {
       if (u.passwordHash.compare(password)) {
 
-        res.cookie('name', u.username);
-        res.cookie('uuid', u.UUID.toString());
-        res.cookie('userLevel', u.godLevel);
-        res.cookie('email', u.email);
+        if(u.godLevel === 0){
+          res.send(JSON.stringify({
+            Success: false,
+            Message: 'Account Suspended'
+          }));
+        } else {
+          res.cookie('name', u.username);
+          res.cookie('uuid', u.UUID.toString());
+          res.cookie('userLevel', u.godLevel);
+          res.cookie('email', u.email);
 
-        res.send(JSON.stringify({
-          Success: true,
-          username: u.username,
-          accessLevel: u.godLevel,
-          email: u.email
-        }));
+          res.send(JSON.stringify({
+            Success: true,
+            username: u.username,
+            accessLevel: u.godLevel,
+            email: u.email
+          }));
+        }
 
       } else {
         //reject

@@ -255,6 +255,10 @@ export class MGM {
     });
   }
 
+  setRegionCoordinates(r: Region, x: number, y: number): Promise<void> {
+    return this.sql.setRegionCoordinates(r,x,y);
+  }
+
   removeRegionFromHost(r: Region, h: Host): Promise<void> {
     let client = urllib.create();
     return client.request('http://' + h.address + ':' + h.port + '/region/' + r.name + '/remove');

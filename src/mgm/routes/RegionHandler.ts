@@ -138,7 +138,38 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
   });
 
   router.post('/setXY/:uuid', (req, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    if (!req.cookies['uuid']) {
+      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+    }
+
+    if (req.cookies['userLevel'] < 250) {
+      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+    }
+
+    let regionID = new UUIDString(req.params.uuid);
+    let region: Region;
+    let x = parseInt(req.body.x);
+    let y = parseInt(req.body.y);
+
+    mgm.getRegion(regionID).then((r: Region) => {
+      if (r.isRunning) throw new Error('Cannot move a region while it is running');
+      if (r.locX === x && r.locY === y) throw new Error('Region is already at those coordinates');
+      region = r;
+      return mgm.getAllRegions();
+    }).then((regions: Region[]) => {
+      for (let r of regions) {
+        if (r.uuid === region.uuid) {
+          continue;
+        }
+        if (r.locX === x && r.locY === y) throw new Error('Region ' + r.name + ' is already at those coordinates');
+      }
+    }).then(() => {
+      return mgm.setRegionCoordinates(region, x, y);
+    }).then(() => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
   });
 
   router.post('/create', (req, res) => {

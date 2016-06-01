@@ -140,6 +140,15 @@ export class SqlConnector {
     });
   }
 
+  setRegionCoordinates(r: Region, x: number, y: number): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.db.pool.query('UPDATE regions SET locX=?, locY=? WHERE uuid=?', [x,y,r.uuid.toString()], err => {
+        if(err) return reject(err);
+        resolve();
+      })
+    });
+  }
+
   getRegionByName(name: string): Promise<Region> {
     return new Promise<Region>((resolve, reject) => {
       this.db.pool.query('SELECT * FROM regions WHERE name=?', name, (err, rows) => {
@@ -230,7 +239,7 @@ export class SqlConnector {
     }).then((rows: any[]) => {
       let ini: { [key: string]: { [key: string]: string } } = {}
       for (let r of rows) {
-        if( ! ini[r.section] )
+        if (!ini[r.section])
           ini[r.section] = {};
         ini[r.section][r.item] = r.content;
       }
@@ -239,9 +248,9 @@ export class SqlConnector {
   }
 
   destroyRegion(r: Region): Promise<void> {
-    return new Promise<void>( (resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.db.pool.query('DELETE FROM regions WHERE uuid=?', r.uuid.toString(), (err) => {
-        if(err)
+        if (err)
           return reject(err);
         resolve();
       })

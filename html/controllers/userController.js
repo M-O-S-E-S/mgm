@@ -125,12 +125,6 @@ angular.module('mgmApp')
           alertify.error('Invalid email entered');
           return;
         }
-        for (var i = 0; i < $scope.users.length; i++) {
-          if ($scope.users[i].email == email) {
-            alertify.error("Error changing email for " + this.current.name + ", email already in use by " + $scope.users[i].name);
-            return;
-          }
-        }
         userService.setEmail(this.current, email).then(
           function() {
             alertify.success("Email for " + $scope.user.current.name + " changed successfully");

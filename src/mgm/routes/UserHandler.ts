@@ -8,6 +8,7 @@ export interface Halcyon {
   getAllUsers(): Promise<User[]>
   getUser(UUIDString): Promise<User>
   setGodLevel(User, number): Promise<void>
+  setEmail(User, email): Promise<void>
 }
 
 export function UserHandler(hal: Halcyon): express.Router {
@@ -22,12 +23,11 @@ export function UserHandler(hal: Halcyon): express.Router {
     hal.getAllUsers().then((users: User[]) => {
       //map these to simina appearing users for current MGM front-end
       let result: any[] = [];
-      let counter = 0;
       for (let u of users) {
         result.push({
           name: u.username + ' ' + u.lastname,
           uuid: u.UUID.toString(),
-          email: u.email + counter,
+          email: u.email,
           userLevel: u.godLevel,
           identities: [{
             Identifier: u.username + ' ' + u.lastname,
@@ -35,7 +35,6 @@ export function UserHandler(hal: Halcyon): express.Router {
           }],
           group: ''
         });
-        counter++;
       }
       res.send(JSON.stringify({
         Success: true,
@@ -73,7 +72,28 @@ export function UserHandler(hal: Halcyon): express.Router {
   });
 
   router.post('/email', (req, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    if (!req.cookies['uuid']) {
+      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+    }
+
+    if (req.cookies['userLevel'] < 250) {
+      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+    }
+
+    let email = req.body.email;
+    let userID = new UUIDString(req.body.id);
+
+    if (!/(.+)@(.+){2,}\.(.+){2,}/.test(email)){
+      return res.send(JSON.stringify({ Success: false, Message: 'Invalid Email' }));
+    }
+
+    hal.getUser(userID).then( (u: User) => {
+      hal.setEmail(u, email);
+    }).then( () => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
   });
 
   router.post('/password', (req, res) => {

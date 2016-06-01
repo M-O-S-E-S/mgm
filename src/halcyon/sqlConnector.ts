@@ -301,6 +301,16 @@ export class SqlConnector {
     });
   }
 
+  setEmail(user: User, email: string): Promise<void> {
+    return new Promise<void>( (resolve, reject) => {
+      this.db.pool.query('UPDATE users SET email=? WHERE UUID=?', [email, user.UUID.toString()], err => {
+        if(err)
+          return reject(err);
+        resolve();
+      });
+    });
+  }
+
   addInventory(inventory: Inventory): Promise<void> {
     return new Promise<void>(resolve => {
       //push all of the inventory folders in first

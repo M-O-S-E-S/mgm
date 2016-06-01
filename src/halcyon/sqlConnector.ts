@@ -398,14 +398,15 @@ export class SqlConnector {
       e.id = r.EstateID;
       e.name = r.EstateName;
       e.owner = new UUIDString(r.EstateOwner);
-      console.log()
       workers.push(this.getManagersForEstate(e.id).then((managers: UUIDString[]) => {
         e.managers = managers;
       }));
       workers.push(this.getRegionsForEstate(e.id).then((regions: UUIDString[]) => {
         e.regions = regions;
       }));
-      return e;
+      return Promise.all(workers).then( () => {
+        return e;
+      });
     });
   }
 
@@ -416,6 +417,50 @@ export class SqlConnector {
         resolve();
       })
     });
+  }
+
+  destroyEstate(e: Estate): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.db.pool.query('DELETE FROM estateban WHERE EstateID=?', e.id, (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
+        this.db.pool.query('DELETE FROM estate_groups WHERE EstateID=?', e.id, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
+        this.db.pool.query('DELETE FROM estate_managers WHERE EstateID=?', e.id, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
+        this.db.pool.query('DELETE FROM estate_map WHERE EstateID=?', e.id, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
+        this.db.pool.query('DELETE FROM estate_settings WHERE EstateID=?', e.id, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
+        this.db.pool.query('DELETE FROM estate_users WHERE EstateID=?', e.id, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    })
   }
 
   getEstates(): Promise<Estate[]> {

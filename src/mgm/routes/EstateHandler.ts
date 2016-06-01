@@ -9,6 +9,8 @@ export interface Halcyon {
   getEstates(): Promise<Estate[]>
   getUser(UUIDString): Promise<User>
   insertEstate(Estate): Promise<void>
+  getEstate(number): Promise<Estate>
+  destroyEstate(Estate): Promise<void>
 }
 
 export function EstateHandler(hal: Halcyon): express.Router {
@@ -78,7 +80,24 @@ export function EstateHandler(hal: Halcyon): express.Router {
   });
 
   router.post('/destroy/:id', (req, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    if (!req.cookies['uuid']) {
+      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+    }
+
+    if (req.cookies['userLevel'] < 250) {
+      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+    }
+
+    let estateID = req.params.id;
+
+    hal.getEstate(estateID).then( (e: Estate) => {
+      if(e.regions.length !== 0) throw new Error('Estate ' + e.name + ' contains regions');
+      return hal.destroyEstate(e);
+    }).then( () => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
   });
 
   return router;

@@ -10,7 +10,7 @@
         <span style="float: left; width: 20em">Address</span>
     </div>
     <div style="width: 100%;" ng-repeat="u in users | orderBy:'name' | filter:search track by u.uuid" ng-class-odd="'odd'" ng-class-even="'even'">
-        <span style="display:inline-block; width: 20em">{{u.name}} <span ng-if="user.isSuspended(u)" style="color:red">suspended</span>
+        <span style="display:inline-block; width: 20em">{{u.name}} <span ng-if="u.userLevel === 0" style="color:red">suspended</span>
         <button style="float:right" ng-click="user.remove(u)">Remove</button></span>
         <span style="display:inline-block; width: 40em">
             {{u.email}}

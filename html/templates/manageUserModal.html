@@ -8,7 +8,8 @@
         <p>Access Level: {{user.current.userLevel}}</p>
         Important user levels:
         <ul>
-            <li>0: normal user</li>
+            <li>0: suspended user</li>
+            <li>1: normal user</li>
             <li>50: able to administer groups</li>
             <li>200: grid god powers</li>
             <li>250: MGM administrator</li>
@@ -20,9 +21,6 @@
         <tr></tr>
         <tr></tr>
         </table>
-        <label>Suspend Account:</label>
-        <button ng-if="!user.isSuspended(user.current)" ng-click="user.suspend()" class="btn btn-xs btn-danger">Suspend</button>
-        <button ng-if="user.isSuspended(user.current)" ng-click="user.restore()" class="btn btn-sx btn-success">Restore</button>
     </div>
 </div>
 <div class="modal-footer">

@@ -21,11 +21,11 @@ mgmApp.directive('fileDownload', function ($compile) {
 
 mgmApp.service('groupService', function($http, $q, $rootScope){
     var groups = [];
-    
+
     this.getGroups = function(){
         return groups;
     }
-    
+
     this.removeUserFromGroup = function(user, group){
         var defer = new $q.defer();
         var url = "/server/group/removeUser/" + group.uuid;
@@ -36,24 +36,24 @@ mgmApp.service('groupService', function($http, $q, $rootScope){
                 defer.reject(data.Message);
             }
         });
-        
+
         return defer.promise;
     }
-    
-    this.addUserToGroup = function(user, group){
+
+    this.addUserToGroup = function(user, group, role){
         var defer = new $q.defer();
         var url = "/server/group/addUser/" + group.uuid;
-        $http.post(url,{ 'user': user.uuid}).success(function(data, status, headers, config){
+        $http.post(url,{ 'user': user.uuid, 'role': role.roleID}).success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();
             } else {
                 defer.reject(data.Message);
             }
         });
-        
+
         return defer.promise;
     };
-    
+
     var updateGroups = function(){
         $http.get("/server/group")
         .success(function(data, status, headers, config){
@@ -75,11 +75,11 @@ mgmApp.service('groupService', function($http, $q, $rootScope){
 mgmApp.service('configService', function($http, $q, $rootScope){
     var defaultConfig = [];
     var self = this;
-    
+
     self.getDefaultConfig = function(){
         return defaultConfig;
     }
-    
+
     self.getConfig = function(r){
         var defer = new $q.defer();
         var url = "/server/region/config";
@@ -98,7 +98,7 @@ mgmApp.service('configService', function($http, $q, $rootScope){
         })
         return defer.promise;
     };
-    
+
     self.setConfig = function(region, section, key, value){
         var defer = new $q.defer();
         var url = "/server/region/setConfig"
@@ -113,7 +113,7 @@ mgmApp.service('configService', function($http, $q, $rootScope){
         });
         return defer.promise;
     };
-    
+
     self.deleteConfig = function(region, section, key){
         var defer = new $q.defer();
         var url = "/server/region/deleteConfig"
@@ -128,7 +128,7 @@ mgmApp.service('configService', function($http, $q, $rootScope){
         });
         return defer.promise;
     };
-    
+
     var updateConfig = function(){
         self.getConfig().then(
             function(config){ //success callback
@@ -146,10 +146,10 @@ mgmApp.service('configService', function($http, $q, $rootScope){
 mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
     var uuid = "";
     var interval = null;
-    
+
     //use self instead of this, we self-reference inside ng operations
     var self = this;
-    
+
     self.close = function(){
         var defer = new $q.defer();
         if(uuid == ""){
@@ -166,7 +166,7 @@ mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
         }
         return defer.promise;
     }
-    
+
     self.write = function(cmd, term){
         console.log("console writing: " + cmd);
         var defer = new $q.defer();
@@ -180,7 +180,7 @@ mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
         }
         //return defer.promise;
     }
-    
+
     self.read = function(){
         var defer = new $q.defer();
         if(uuid == ""){
@@ -195,7 +195,7 @@ mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
             });
         }
     }
-    
+
     self.open = function(r){
         console.log("Opening console for region " + r.name);
         if(uuid != ""){
@@ -229,7 +229,7 @@ mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
         });
         return defer.promise;
     }
-    
+
 });
 
 mgmApp.service('taskService', function($rootScope, $http, $q){
@@ -352,7 +352,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
                 defer.reject(data.Message);
             };
         });
-        
+
         return defer.promise;
     };
     this.passwordResetToken = function(email){
@@ -612,7 +612,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     var pending = [];
     this.getUsers = function(){ return users; };
     this.getPending = function(){ return pending; };
-    this.addUser = function(user) { 
+    this.addUser = function(user) {
         users.push(host);
         $rootScope.$broadcast("userService");
     };
@@ -718,7 +718,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
         return defer.promise;
     };
     this.setEmail = function(user, email){
-        var defer = new $q.defer();       
+        var defer = new $q.defer();
         $http.post("/server/user/email",{ 'id': user.uuid, 'email': email })
         .success(function(data, status, headers, config){
             if(data.Success){

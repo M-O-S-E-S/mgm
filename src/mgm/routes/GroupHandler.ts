@@ -2,9 +2,15 @@
 import * as express from 'express';
 
 import { Group } from '../../halcyon/group';
+import { User } from '../../halcyon/User';
+import { UUIDString } from '../../halcyon/UUID';
 
 export interface Halcyon {
   getGroups(): Promise<Group[]>
+  getUser(UUIDString): Promise<User>
+  getGroupByUUID(UUIDString): Promise<Group>
+  addMemberToGroup(Group, User, UUIDString): Promise<void>
+  removeMemberFromGroup(Group, User): Promise<void>
 }
 
 export function GroupHandler(hal: Halcyon): express.Router {
@@ -54,9 +60,76 @@ export function GroupHandler(hal: Halcyon): express.Router {
     })
   });
 
+  router.post('/removeUser/:id', (req,res) => {
+    if (!req.cookies['uuid']) {
+      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+    }
+
+    if (req.cookies['userLevel'] < 250) {
+      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+    }
+
+    let groupID = new UUIDString(req.params.id);
+    let userID = new UUIDString(req.body.user);
+    let user: User;
+
+    console.log('Removing user ' + userID + ' from group');
+
+    hal.getUser(userID).then( (u: User) => {
+      user = u;
+      return hal.getGroupByUUID(groupID);
+    }).then( (g: Group) => {
+      return hal.removeMemberFromGroup(g, user);
+    }).then( () => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    })
+  });
 
   router.post('/addUser/:id', (req, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    if (!req.cookies['uuid']) {
+      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+    }
+
+    if (req.cookies['userLevel'] < 250) {
+      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+    }
+
+    let groupID = new UUIDString(req.params.id);
+    let userID = new UUIDString(req.body.user);
+    let roleID = new UUIDString(req.body.role);
+
+    let user: User;
+
+    console.log('Placing user ' + userID + ' into group ' + groupID + ' with role ' + roleID);
+
+    hal.getUser(userID).then( (u: User) => {
+      user = u;
+      return hal.getGroupByUUID(groupID);
+    }).then( (g: Group) => {
+      for(let u of g.Members){
+        if( u.AgentID.toString() === userID.toString()){
+          throw new Error('User is already a member of that group');
+        }
+      }
+      let roleExists = false;
+      for( let r of g.Roles){
+        if(r.RoleID.toString() === roleID.toString()){
+          roleExists = true;
+        }
+      }
+      if(!roleExists){
+        throw new Error('That role does not exist on group ' + g.Name);
+      }
+      return g;
+    }).then( (g : Group) => {
+      return hal.addMemberToGroup(g, user, roleID);
+    }).then( () => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    })
   });
 
   return router;

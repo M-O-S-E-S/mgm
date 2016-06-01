@@ -404,7 +404,7 @@ export class SqlConnector {
       workers.push(this.getRegionsForEstate(e.id).then((regions: UUIDString[]) => {
         e.regions = regions;
       }));
-      return Promise.all(workers).then( () => {
+      return Promise.all(workers).then(() => {
         return e;
       });
     });
@@ -536,6 +536,71 @@ export class SqlConnector {
       }
       return members;
     })
+  }
+
+  addMemberToGroup(group: Group, user: User, roleID: UUIDString): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.db.pool.query(
+        'INSERT INTO osgroupmembership (GroupID, AgentID, SelectedRoleID, Contribution, ListInProfile, AcceptNotices) VALUES (?,?,?,0,1,1)',
+        [group.GroupID.toString(), user.UUID.toString(), roleID.toString()],
+        (err, rows: any[]) => {
+          if (err)
+            return reject(err);
+          resolve();
+        });
+    });
+  }
+
+  removeMemberFromGroup(group: Group, user: User): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.db.pool.query(
+        'DELETE FROM osgroupmembership WHERE GroupID=? AND AgentID=?',
+        [group.GroupID.toString(), user.UUID.toString()],
+        (err, rows: any[]) => {
+          if (err)
+            return reject(err);
+          resolve();
+        });
+    });
+  }
+
+  getGroupByUUID(id: UUIDString): Promise<Group> {
+    return new Promise<Group>((resolve, reject) => {
+      this.db.pool.query('SELECT * FROM osgroup WHERE GroupID=?', id.toString(), (err, rows: any[]) => {
+        if (err)
+          return reject(err);
+        if (!rows || rows.length != 1) {
+          return reject(new Error('Group does not exist'));
+        }
+        resolve(rows[0]);
+      });
+    }).then((r: any) => {
+      let g = new Group();
+      g.GroupID = new UUIDString(r.GroupID);
+      g.Name = r.Name;
+      g.Charter = r.Charter;
+      g.InsigniaID = new UUIDString(r.InsigniaID);
+      g.FounderID = new UUIDString(r.FounderID);
+      g.MembershipFee = r.MembershipFee;
+      g.OpenEnrollment = r.OpenEnrollment;
+      g.ShowInList = r.ShowInList;
+      g.AllowPublish = r.AllowPublish;
+      g.MaturePublish = r.MaturePublish;
+      g.OwnerRoleID = new UUIDString(r.OwnerRoleID);
+      return g;
+    }).then((group: Group) => {
+      return this.getRolesForGroup(group.GroupID).then((roles: GroupRole[]) => {
+        group.Roles = roles;
+      }).then(() => {
+        return group;
+      })
+    }).then((group: Group) => {
+      return this.getMembersForGroup(group.GroupID).then((members: GroupMembership[]) => {
+        group.Members = members;
+      }).then(() => {
+        return group;
+      })
+    });
   }
 
   getGroups(): Promise<Group[]> {

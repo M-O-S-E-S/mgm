@@ -1,7 +1,7 @@
 
 import * as express from 'express';
 
-import { User } from '../../halcyon/User';
+import { User, Credential } from '../../halcyon/User';
 import { UUIDString } from '../../halcyon/UUID';
 
 export interface Halcyon {
@@ -9,6 +9,7 @@ export interface Halcyon {
   getUser(UUIDString): Promise<User>
   setGodLevel(User, number): Promise<void>
   setEmail(User, email): Promise<void>
+  setUserPassword(User, Credential): Promise<void>
 }
 
 export function UserHandler(hal: Halcyon): express.Router {
@@ -97,7 +98,28 @@ export function UserHandler(hal: Halcyon): express.Router {
   });
 
   router.post('/password', (req, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    if (!req.cookies['uuid']) {
+      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+    }
+
+    if (req.cookies['userLevel'] < 250) {
+      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+    }
+
+    let password = req.body.password;
+    let userID = new UUIDString(req.body.id);
+
+    if(!password || password === ''){
+      return res.send(JSON.stringify({ Success: false, Message: 'Password cannot be blank' }));
+    }
+
+    hal.getUser(userID).then( (u: User) => {
+      hal.setUserPassword(u.UUID.toString(), Credential.fromPlaintext(password));
+    }).then( () => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
   });
 
   router.post('/suspend', (req, res) => {

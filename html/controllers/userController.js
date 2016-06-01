@@ -151,7 +151,7 @@ angular.module('mgmApp')
         );
       },
       setAccessLevel: function(level) {
-        if (level == undefined || level == "") {
+        if (level === undefined || level === "") {
           alertify.error("invalid user level");
           return;
         }

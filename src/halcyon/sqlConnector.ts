@@ -291,6 +291,16 @@ export class SqlConnector {
     });
   }
 
+  setGodLevel(user: User, level: number): Promise<void> {
+    return new Promise<void>( (resolve, reject) => {
+      this.db.pool.query('UPDATE users SET godLevel=? WHERE UUID=?', [level, user.UUID.toString()], err => {
+        if(err)
+          return reject(err);
+        resolve();
+      });
+    });
+  }
+
   addInventory(inventory: Inventory): Promise<void> {
     return new Promise<void>(resolve => {
       //push all of the inventory folders in first

@@ -245,6 +245,15 @@ export class SqlConnector {
     });
   }
 
+  setUserPassword(userID: string, cred: Credential): Promise<void> {
+    return new Promise<void>(resolve => {
+      this.db.pool.query('UPDATE users SET passwordHash=? WHERE UUID=?', [cred.hash, userID], (err) => {
+        if(err) throw err;
+        resolve();
+      });
+    });
+  }
+
   addUser(user: User): Promise<void> {
     return new Promise<void>(resolve => {
       let args = {

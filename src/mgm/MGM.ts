@@ -69,6 +69,55 @@ export class MGM {
     router.use('/user', UserHandler(this.hal));
     router.use('/region', RegionHandler(this, this.hal, this.conf.console));
     router.use('/group', GroupHandler(this.hal));
+
+    router.get('/', (req, res) => {
+      res.send('MGM');
+    });
+
+    router.get('/get_grid_info', (req, res) => {
+      res.send('<?xml version="1.0"?><gridinfo><login>' +
+        this.conf.grid_info.login +
+        '</login><register>' +
+        this.conf.grid_info.mgm +
+        '</register><welcome>' +
+        this.conf.grid_info.mgm + '\welcome.html' +
+        '</welcome><password>' +
+        this.conf.grid_info.mgm +
+        '</password><gridname>' +
+        this.conf.grid_info.gridName +
+        '</gridname><gridnick>' +
+        this.conf.grid_info.gridNick +
+        '</gridnick><about>' +
+        this.conf.grid_info.mgm +
+        '</about><economy>' +
+        this.conf.grid_info.mgm +
+        '</economy></gridinfo>');
+    });
+
+    router.get('/map/regions', (req, res) => {
+      if (!req.cookies['uuid']) {
+        res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+        return;
+      }
+
+      this.getAllRegions().then((regions: Region[]) => {
+        let result = [];
+        for (let r of regions) {
+          result.push({
+            Name: r.name,
+            x: r.locX,
+            y: r.locY
+          })
+        }
+        res.send(JSON.stringify(result));
+      }).catch((err: Error) => {
+        res.send(JSON.stringify({ Success: false, Message: err.message }));
+      });
+    });
+
+    router.post('/register/submit', (req, res) => {
+      res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    });
     return router;
   }
 

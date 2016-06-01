@@ -24,6 +24,10 @@ export class UUIDString {
     return this.id;
   }
 
+  toJSON(): string {
+    return this.id;
+  }
+
   static zero(): UUIDString {
     return new UUIDString('00000000-0000-0000-0000-000000000000');
   }

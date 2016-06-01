@@ -1,9 +1,10 @@
 
 import * as express from 'express';
-import { User } from '../../halcyon/User';
+import { User, Credential } from '../../halcyon/User';
 
 export interface Halcyon {
   getUserByName(string): Promise<User>
+  setUserPassword(string, Credential): Promise<void>
 }
 
 export function AuthHandler(hal: Halcyon): express.Router{
@@ -73,7 +74,25 @@ export function AuthHandler(hal: Halcyon): express.Router{
   });
 
   router.post('/changePassword', (req, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    if (!req.cookies['uuid']) {
+      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+    }
+
+    let password: string = req.body.password || '';
+
+    if(password === ''){
+      return res.send(JSON.stringify({ Success: false, Message: 'Password cannot be blank' }));
+    }
+
+    let credential = Credential.fromPlaintext(password);
+
+    console.log(credential.hash);
+
+    hal.setUserPassword(req.cookies['uuid'], credential).then( () => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
   });
 
   return router;

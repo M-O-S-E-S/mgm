@@ -61,7 +61,6 @@ export class User {
   }
 
   templateOnto(firstname: string, lastname: string, password: string, email: string, hal: SqlConnector): Promise<void> {
-    let user: User;
     let appearance: Appearance;
     let inventory: Inventory;
     let newUser: User;
@@ -76,15 +75,15 @@ export class User {
 
       /* create new inventory, etc from template account */
       newUser = new User(UUIDString.random(), firstname, lastname, email, Credential.fromPlaintext(password), 0, 1);
-      newUser.homeRegion = user.homeRegion;
-      newUser.homeLocationX = user.homeLocationX;
-      newUser.homeLocationY = user.homeLocationY;
-      newUser.homeLocationZ = user.homeLocationZ;
-      newUser.homeLookAtX = user.homeLookAtX;
-      newUser.homeLookAtY = user.homeLookAtY;
-      newUser.homeLookAtZ = user.homeLookAtZ;
-      newUser.godLevel = 0;
-      newUser.iz_level = 1;
+      newUser.homeRegion = this.homeRegion;
+      newUser.homeLocationX = this.homeLocationX;
+      newUser.homeLocationY = this.homeLocationY;
+      newUser.homeLocationZ = this.homeLocationZ;
+      newUser.homeLookAtX = this.homeLookAtX;
+      newUser.homeLookAtY = this.homeLookAtY;
+      newUser.homeLookAtZ = this.homeLookAtZ;
+      newUser.godLevel = 1;
+      newUser.iz_level = 0;
       newUser.created = Date.now();
       newUser.webLoginKey = UUIDString.zero();
       newUser.profileFirstImage = UUIDString.zero();

@@ -625,9 +625,9 @@ mgmApp.service('userService', function($rootScope, $http, $q){
             }
         });
     };
-    this.create = function(username, email, gender, password){
+    this.create = function(username, email, template, password){
         var defer = new $q.defer();
-        $http.post("/server/user/create", {"name": username, "email": email, "gender": gender, 'password': password})
+        $http.post("/server/user/create", {"name": username, "email": email, "template": template, 'password': password})
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();

@@ -14,7 +14,7 @@ angular.module('mgmApp')
       name: "",
       email: "",
       pword: "",
-      gender: ""
+      template: ""
     }
 
     $scope.groups = [];
@@ -173,11 +173,11 @@ angular.module('mgmApp')
           scope: $scope
         });
       },
-      create: function(username, email, gender, password) {
+      create: function(username, email, template, password) {
         $scope.error.name = "";
         $scope.error.email = "";
         $scope.error.pword = "";
-        $scope.error.gender = "";
+        $scope.error.template = "";
         if (username === undefined) {
           $scope.error.name = '"FirstName LastName" required';
           return;
@@ -205,24 +205,20 @@ angular.module('mgmApp')
           $scope.error.pword = 'A password is required';
           return;
         }
-        if (gender != "M" && gender != "F") {
-          $scope.error.gender = 'Select your gender';
+        if (template != "M" && template != "F") {
+          $scope.error.template = 'Select your template';
           return;
         }
 
         //check for conflicts in existing users
         for (var i = 0; i < $scope.users.length; i++) {
-          if ($scope.users[i].email.toUpperCase() === email.toUpperCase()) {
-            $scope.error.email = "Email already in use by " + $scope.users[i].name;
-            return;
-          }
           if ($scope.users[i].name.toUpperCase() === username.toUpperCase()) {
             $scope.error.name = "Name already in use";
             return;
           }
         }
 
-        userService.create(username, email, gender, password).then(
+        userService.create(username, email, template, password).then(
           function() {
             alertify.success("Account created successfully")
           },

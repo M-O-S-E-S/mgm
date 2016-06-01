@@ -25,6 +25,7 @@ export interface Config {
     db_user: string
     db_pass: string
     db_name: string
+    templates: { [key: string]: string }
   },
   halcyon: {
     db_host: string
@@ -49,6 +50,7 @@ export interface Config {
 }
 
 
+
 export class MGM {
   private conf: Config
   private sql: SqlConnector
@@ -67,7 +69,7 @@ export class MGM {
     router.use('/task', TaskHandler(this));
     router.use('/estate', EstateHandler(this.hal));
     router.use('/host', HostHandler(this));
-    router.use('/user', UserHandler(this.hal));
+    router.use('/user', UserHandler(this.hal, this.conf.mgm.templates));
     router.use('/region', RegionHandler(this, this.hal, this.conf.console));
     router.use('/group', GroupHandler(this.hal));
 
@@ -259,7 +261,7 @@ export class MGM {
   }
 
   setRegionCoordinates(r: Region, x: number, y: number): Promise<void> {
-    return this.sql.setRegionCoordinates(r,x,y);
+    return this.sql.setRegionCoordinates(r, x, y);
   }
 
   removeRegionFromHost(r: Region, h: Host): Promise<void> {

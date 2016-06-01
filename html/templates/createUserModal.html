@@ -20,16 +20,16 @@
                  <td><strong style="color:red">{{error.pword}}</strong>
             </tr>
             <tr>
-                 <td><label>Gender:</label></td>
+                 <td><label>Template:</label></td>
                  <td>
-                     <input type="radio" name="gender" value="M" ng-model="gender">Male</input>
-                     <input type="radio" name="gender" value="F" ng-model="gender">Female</input>
+                     <input type="radio" name="gender" value="M" ng-model="template">Male</input>
+                     <input type="radio" name="gender" value="F" ng-model="template">Female</input>
                  </td>
-                 <td><strong style="color:red">{{error.gender}}</strong>
+                 <td><strong style="color:red">{{error.template}}</strong>
             </tr>
             <tr>
                  <td colspan="2" align="center">
-                     <button type="submit" class="btn btn-success" ng-click="user.create(name, email, gender, pword)">Create</button>
+                     <button type="submit" class="btn btn-success" ng-click="user.create(name, email, template, pword)">Create</button>
                  </td>
             </tr>
         </table>

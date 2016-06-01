@@ -10,16 +10,10 @@ settings.mgm.db_name = "mgm";
 settings.mgm.log_dir = "/opt/moses/mgm/logs";
 
 // Templates available for user creation
-settings.mgm.templates = [
-  {
-    "name": "male", // template name
-    "source": "00000000-0000-0000-0000-000000000000"    // template account uuid
-  },
-  {
-    "name": "female",
-    "source": "00000000-0000-0000-0000-000000000000"
-  }
-];
+settings.mgm.templates = {
+  male: '',
+  female: ''
+};
 
 // Settings for MGM to communicate with the Halcyon databases
 settings.halcyon = {};

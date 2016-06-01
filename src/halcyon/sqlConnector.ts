@@ -24,10 +24,10 @@ export class SqlConnector {
     this.db = new Sql(c);
   }
 
-  getAllUsers(): Promise< User[]> {
+  getAllUsers(): Promise<User[]> {
     return new Promise<User[]>(resolve => {
       this.db.pool.query('SELECT * FROM users WHERE 1', (err, rows: any[]) => {
-        if(err)
+        if (err)
           throw err;
 
         resolve(rows)
@@ -248,7 +248,7 @@ export class SqlConnector {
   setUserPassword(userID: string, cred: Credential): Promise<void> {
     return new Promise<void>(resolve => {
       this.db.pool.query('UPDATE users SET passwordHash=? WHERE UUID=?', [cred.hash, userID], (err) => {
-        if(err) throw err;
+        if (err) throw err;
         resolve();
       });
     });
@@ -378,7 +378,7 @@ export class SqlConnector {
 
   setEstateForRegion(regionID: string, e: Estate): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.db.pool.query('INSERT INTO estate_map (RegionID, EstateID) VALUES (?,?) ON DUPLICATE KEY UPDATE EstateID=?', [regionID,e.id, e.id], (err, rows: any[]) => {
+      this.db.pool.query('INSERT INTO estate_map (RegionID, EstateID) VALUES (?,?) ON DUPLICATE KEY UPDATE EstateID=?', [regionID, e.id, e.id], (err, rows: any[]) => {
         if (err) return reject(err);
         resolve();
       });
@@ -389,10 +389,10 @@ export class SqlConnector {
     return new Promise<Estate[]>((resolve, reject) => {
       this.db.pool.query('SELECT EstateID, EstateName, EstateOwner FROM estate_settings WHERE EstateID=?', estateID, (err, rows: any[]) => {
         if (err) return reject(err);
-        if(!rows || rows.length !== 1) return reject(new Error('Estate does not exist'));
+        if (!rows || rows.length !== 1) return reject(new Error('Estate does not exist'));
         resolve(rows[0]);
       });
-    }).then( (r: any) => {
+    }).then((r: any) => {
       let workers = [];
       let e = new Estate();
       e.id = r.EstateID;
@@ -406,6 +406,15 @@ export class SqlConnector {
         e.regions = regions;
       }));
       return e;
+    });
+  }
+
+  insertEstate(e: Estate): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.db.pool.query('INSERT INTO estate_settings (EstateName, EstateOwner) VALUES (?,?)', [e.name, e.owner.toString()], err => {
+        if (err) return reject(err);
+        resolve();
+      })
     });
   }
 
@@ -439,15 +448,15 @@ export class SqlConnector {
   }
 
   private getRolesForGroup(groupID: UUIDString): Promise<GroupRole[]> {
-    return new Promise<GroupRole[]>( (resolve, reject) => {
-      this.db.pool.query('SELECT * FROM osrole WHERE GroupID=?', groupID.toString(), (err, rows: any[]) =>{
-        if(err)
+    return new Promise<GroupRole[]>((resolve, reject) => {
+      this.db.pool.query('SELECT * FROM osrole WHERE GroupID=?', groupID.toString(), (err, rows: any[]) => {
+        if (err)
           return reject(err);
         resolve(rows);
       });
-    }).then ( (rows: any[]) => {
+    }).then((rows: any[]) => {
       let roles: GroupRole[] = [];
-      for(let r of rows){
+      for (let r of rows) {
         let g = new GroupRole;
         g.GroupID = new UUIDString(r.GroupID);
         g.RoleID = new UUIDString(r.RoleID);
@@ -462,15 +471,15 @@ export class SqlConnector {
   }
 
   private getMembersForGroup(groupID: UUIDString): Promise<GroupMembership[]> {
-    return new Promise<GroupMembership[]>( (resolve, reject) => {
+    return new Promise<GroupMembership[]>((resolve, reject) => {
       this.db.pool.query('SELECT * FROM osgroupmembership WHERE GroupID=?', groupID.toString(), (err, rows: any[]) => {
-        if(err)
+        if (err)
           return reject(err);
         resolve(rows);
       });
-    }).then( (rows: any[]) => {
+    }).then((rows: any[]) => {
       let members: GroupMembership[] = [];
-      for(let r of rows){
+      for (let r of rows) {
         let m = new GroupMembership();
         m.GroupID = new UUIDString(r.GroupID);
         m.AgentID = new UUIDString(r.AgentID);
@@ -485,15 +494,15 @@ export class SqlConnector {
   }
 
   getGroups(): Promise<Group[]> {
-    return new Promise<Group[]>( (resolve,reject) => {
+    return new Promise<Group[]>((resolve, reject) => {
       this.db.pool.query('SELECT * FROM osgroup', (err, rows: any[]) => {
-        if(err)
+        if (err)
           return reject(err);
         resolve(rows);
       });
-    }).then( (rows: any[]) => {
+    }).then((rows: any[]) => {
       let groups: Group[] = [];
-      for(let r of rows){
+      for (let r of rows) {
         let g = new Group();
         g.GroupID = new UUIDString(r.GroupID);
         g.Name = r.Name;
@@ -509,147 +518,147 @@ export class SqlConnector {
         groups.push(g);
       }
       return groups;
-    }).then( (groups: Group[]) => {
-      return Promise.all(groups.map( (g: Group) => {
-        return this.getRolesForGroup(g.GroupID).then( (roles: GroupRole[]) => {
+    }).then((groups: Group[]) => {
+      return Promise.all(groups.map((g: Group) => {
+        return this.getRolesForGroup(g.GroupID).then((roles: GroupRole[]) => {
           g.Roles = roles;
         })
-      })).then( () => {
+      })).then(() => {
         return groups;
       })
-    }).then( (groups: Group[]) => {
-      return Promise.all(groups.map( (g: Group) => {
-        return this.getMembersForGroup(g.GroupID).then( (members: GroupMembership[]) => {
+    }).then((groups: Group[]) => {
+      return Promise.all(groups.map((g: Group) => {
+        return this.getMembersForGroup(g.GroupID).then((members: GroupMembership[]) => {
           g.Members = members;
         });
-      })).then( () => {
+      })).then(() => {
         return groups;
       })
     });
   }
 
   destroyRegion(uuid: string): Promise<void> {
-    return new Promise<void>( (resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.db.pool.query('DELETE FROM allparcels WHERE regionUUID=?', uuid, (err) => {
-        if(err) return reject(err);
+        if (err) return reject(err);
         resolve();
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM estate_map WHERE RegionID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM land WHERE RegionUUID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM landaccesslist WHERE LandUUID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM objects WHERE regionuuid=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM parcels WHERE regionUUID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM parcelsales WHERE regionUUID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM primitems WHERE primID in (SELECT UUID FROM prims WHERE RegionUUID=?)', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM primshapes WHERE UUID in (SELECT UUID FROM prims WHERE RegionUUID=?)', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM prims WHERE RegionUUID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM prims_copy_temps WHERE regionUUID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM regionenvironment WHERE regionUUID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM parcelsales WHERE regionUUID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM RegionRdbMapping WHERE region_id=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM regions WHERE uuid=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM regionsettings WHERE regionUUID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM telehubs WHERE RegionID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });
-    }).then( () => {
-      return new Promise<void>( (resolve, reject) => {
+    }).then(() => {
+      return new Promise<void>((resolve, reject) => {
         this.db.pool.query('DELETE FROM terrain WHERE RegionUUID=?', uuid, (err) => {
-          if(err) return reject(err);
+          if (err) return reject(err);
           resolve();
         });
       });

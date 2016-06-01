@@ -43,7 +43,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
       var minutes = Math.floor(delta / 60) % 60;
       delta -= minutes * 60;
       var seconds = delta % 60;
-      return days + '.' + hours + ':' + minutes + ':' + seconds;
+      return days + '.' + hours + ':' + ("0" + minutes).slice(-2) + ':' + ("0" + seconds).slice(-2);
     }
     w.then((rs: Region[]) => {
       regions = rs;

@@ -1,11 +1,14 @@
 import * as express from 'express';
 
-import { Estate } from '../../halcyon/Estate';
+import { Estate } from '../../halcyon/estate';
+import { User } from '../../halcyon/User';
 import { UUIDString } from '../../halcyon/UUID';
 
 
 export interface Halcyon {
   getEstates(): Promise<Estate[]>
+  getUser(UUIDString): Promise<User>
+  insertEstate(Estate): Promise<void>
 }
 
 export function EstateHandler(hal: Halcyon): express.Router {
@@ -19,13 +22,13 @@ export function EstateHandler(hal: Halcyon): express.Router {
 
     hal.getEstates().then((estates: Estate[]) => {
       let result: any[] = []
-      for(let r of estates){
+      for (let r of estates) {
         result.push({
           id: r.id,
           name: r.name,
           owner: r.owner.toString(),
-          managers: r.managers.map( (id: UUIDString) => { return id.toString(); }),
-          regions: r.regions.map( (id: UUIDString) => { return id.toString(); }),
+          managers: r.managers.map((id: UUIDString) => { return id.toString(); }),
+          regions: r.regions.map((id: UUIDString) => { return id.toString(); }),
         });
       }
       res.send(JSON.stringify({
@@ -33,16 +36,45 @@ export function EstateHandler(hal: Halcyon): express.Router {
         Estates: result
       }));
     }).catch((err: Error) => {
-      res.send(JSON.stringify({
-        Success: false,
-        Message: err.message
-      }));
-    })
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
 
   });
 
   router.post('/create', (req, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    if (!req.cookies['uuid']) {
+      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+    }
+
+    if (req.cookies['userLevel'] < 250) {
+      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+    }
+
+    let estateName = req.body.name;
+    let owner = new UUIDString(req.body.owner);
+
+    if (estateName === '') {
+      return res.send(JSON.stringify({ Success: false, Message: 'Estate name cannot be blank' }));
+    }
+
+    hal.getEstates().then((estates: Estate[]) => {
+      for (let e of estates) {
+        if (e.name === estateName) {
+          throw new Error('An estate with that name already exists');
+        }
+      }
+    }).then(() => {
+      return hal.getUser(owner);
+    }).then((u: User) => {
+      let e: Estate = new Estate();
+      e.name = estateName;
+      e.owner = owner;
+      return hal.insertEstate(e);
+    }).then( () => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
   });
 
   router.post('/destroy/:id', (req, res) => {

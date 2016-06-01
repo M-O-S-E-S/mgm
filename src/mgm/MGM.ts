@@ -13,6 +13,7 @@ import { HostHandler } from './routes/HostHandler';
 import { UserHandler } from './routes/UserHandler';
 import { RegionHandler } from './routes/RegionHandler';
 import { GroupHandler } from './routes/GroupHandler';
+import { DispatchHandler } from './routes/DispatchHandler';
 
 import * as express from 'express';
 
@@ -69,6 +70,8 @@ export class MGM {
     router.use('/user', UserHandler(this.hal));
     router.use('/region', RegionHandler(this, this.hal, this.conf.console));
     router.use('/group', GroupHandler(this.hal));
+
+    router.use('/server/dispatch', DispatchHandler(this));
 
     router.get('/', (req, res) => {
       res.send('MGM');

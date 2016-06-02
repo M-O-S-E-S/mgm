@@ -46,7 +46,7 @@
                         <div class="col-md-1">{{lastSeen(r.status.timestamp)}}</div>
                         <div class="col-md-1">{{r.status.cpuPercent.toFixed(2)}}%</div>
                         <div class="col-md-1">{{r.status.memPercent.toFixed(2)}} % [{{(r.status.memKB/1024).toFixed(2)}} MB]</div>
-                        <div class="col-md-1">{{r.status.simStats['Uptime'].split(".").slice(0,-1).join(" days ")}}</div>
+                        <div class="col-md-1">{{uptime(r.status.uptime)}}</div>
                     </div>
                     <div class="col-md-5" ng-if="!r.isRunning">Is not running...</div>
                     <div class="col-md-1"><span ng-if="auth.activeUser.accessLevel > 249">{{r.node}}</span>&nbsp </div>

@@ -21,6 +21,12 @@ angular.module('mgmApp')
       return estateService.getEstateNameForRegion(uuid);
     }
 
+    $scope.uptime = function(secs) {
+      var minutes = secs    / 60 ;  secs    = secs    % 60;
+      var hours   = minutes / 60 ;  minutes = minutes % 60;
+      return Math.floor(hours) + ' hours ' + Math.floor(minutes) + ' minutes';
+    }
+
     $scope.lastSeen = function(timestamp) {
       if (timestamp == undefined || timestamp == "") {
         return "~";

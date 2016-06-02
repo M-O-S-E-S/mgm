@@ -35,16 +35,6 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
     } else {
       w = mgm.getRegionsFor(new UUIDString(req.cookies['uuid']));
     }
-    function toMGMDate(delta: number): string {
-      var days = Math.floor(delta / 86400);
-      delta -= days * 86400;
-      var hours = Math.floor(delta / 3600) % 24;
-      delta -= hours * 3600;
-      var minutes = Math.floor(delta / 60) % 60;
-      delta -= minutes * 60;
-      var seconds = delta % 60;
-      return days + '.' + hours + ':' + ("0" + minutes).slice(-2) + ':' + ("0" + seconds).slice(-2);
-    }
     w.then((rs: Region[]) => {
       regions = rs;
       return hal.getEstates();
@@ -59,7 +49,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
             }
           }
         }
-        r.status['simStats'] = { 'Uptime': toMGMDate(r.status.uptime) };
+        r.status['simStats'] = { 'Uptime': r.status.uptime };
         result.push({
           uuid: r.uuid.toString(),
           name: r.name,

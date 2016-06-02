@@ -388,9 +388,9 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     this.getRegions = function(){
         return regions;
     };
-    this.add = function(name,x, y, size, estate) {
+    this.add = function(name,x, y, estate) {
         var defer = new $q.defer();
-        $http.post("/server/region/create", {"name": name, "x":x, "y":y, "size":size,"estate":estate.id})
+        $http.post("/server/region/create", {"name": name, "x":x, "y":y, "size":1,"estate":estate.id})
         .success(function(data, status, headers, config){
             if(data.Success){
                 regions.push({"uuid":data.id,"name":name,"x":x,"y":y,"estateName":estate.name,"node":"","isRunning":false,"stat":[]});

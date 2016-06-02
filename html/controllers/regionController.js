@@ -285,7 +285,7 @@ angular.module('mgmApp')
           }
         )
       },
-      add: function(name, x, y, size, estate) {
+      add: function(name, x, y, estate) {
         if (name == undefined || name == "") {
           alertify.error("Name is required");
           return;
@@ -298,20 +298,8 @@ angular.module('mgmApp')
           alertify.error("position y is required");
           return;
         }
-        if (size == undefined) {
-          alertify.error("size is required");
-          return;
-        }
         if (Math.floor(x) != x || Math.floor(y) != y) {
           alertify.error("X and Y must be integer coordinates");
-          return;
-        }
-        if (Math.floor(size) != size) {
-          alertify.error("Region Size must be an integer value");
-          return;
-        }
-        if (size <= 0 || size > 32) {
-          alertify.error("Region size must be a positive integer between 1 and 32");
           return;
         }
         if (estate == null || estate == undefined) {
@@ -319,26 +307,12 @@ angular.module('mgmApp')
           return;
         }
         for (var i = 0; i < $scope.regions.length; i++) {
-          //check for existing region origin in new region space
-          var diff = $scope.regions[i].x - x;
-          if (diff >= 0 && diff < size) {
-            diff = $scope.regions[i].y - y;
-            if (diff >= 0 && diff < size) {
-              alertify.error("Error, region " + $scope.regions[i].name + " overlaps at those coordinates");
-              return;
-            }
-          }
-          //check for new region origin in existing region space
-          var diff = x - $scope.regions[i].x;
-          if (diff >= 0 && diff < $scope.regions[i].size) {
-            diff = y - $scope.regions[i].y;
-            if (diff >= 0 && diff < $scope.regions[i].size) {
-              alertify.error("Error, region " + $scope.regions[i].name + " overlaps at those coordinates");
-              return;
-            }
+          if( $scope.regions[i].x === x && $scope.regions[i].y === y){
+            alertify.error("Error, region " + $scope.regions[i].name + " is at those coordinates");
+            return;
           }
         }
-        regionService.add(name, x, y, size, estate).then(
+        regionService.add(name, x, y, estate).then(
           function() {
             alertify.success("Region " + name + " created");
             $scope.region.modal.close();

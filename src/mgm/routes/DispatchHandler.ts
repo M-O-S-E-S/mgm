@@ -27,7 +27,7 @@ export function DispatchHandler(mgm: MGM, logDir: string): express.Router {
       return mgm.getRegionByName(regionName);
     }).then((r: Region) => {
       let logs: string[] = JSON.parse(req.body.log);
-      fs.appendFile(path.join(__dirname, 'log/' + r.name), logs.join('\n'));
+      fs.appendFile(path.join(logDir, r.name), logs.join('\n'));
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       console.log('Error serving logs for host ' + remoteIP + ': ' + err.message);

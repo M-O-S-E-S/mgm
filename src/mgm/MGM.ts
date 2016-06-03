@@ -25,6 +25,7 @@ export interface Config {
     db_user: string
     db_pass: string
     db_name: string
+    log_dir: string
     templates: { [key: string]: string }
   },
   halcyon: {
@@ -73,7 +74,7 @@ export class MGM {
     router.use('/region', RegionHandler(this, this.hal, this.conf.console));
     router.use('/group', GroupHandler(this.hal));
 
-    router.use('/server/dispatch', DispatchHandler(this));
+    router.use('/server/dispatch', DispatchHandler(this, this.conf.mgm.log_dir));
 
     router.get('/', (req, res) => {
       res.send('MGM');
@@ -281,7 +282,7 @@ export class MGM {
 
       let client = urllib.create();
       return new Promise<void>((resolve, reject) => {
-        client.request('http://' + h.address + ':' + h.port + '/region/' + r.name + '/add').then(() => {
+        client.request('http://' + h.address + ':' + h.port + '/region/' + r.name + '/add', {timeout: 10000}).then(() => {
           resolve();
         }).catch(() => {
           reject(new Error('Region assignment recorded, but could not contac tthe host'));
@@ -319,7 +320,7 @@ export class MGM {
     config['Startup']['permissionmodules'] = 'DefaultPermissionModule';
     config['Startup']['serverside_object_permissions'] = 'true';
     config['Startup']['allow_grid_gods'] = 'true';
-    config['Startup']['use_aperture_server'] = 'no';
+    config['Startup']['use_aperture_server'] = 'yes';
     config['Startup']['aperture_server_port'] = '8000';
     config['Startup']['aperture_server_caps_token'] = '2960079';
     config['Startup']['core_connection_string'] = connString + 'Pooling=True;Min Pool Size=0;';

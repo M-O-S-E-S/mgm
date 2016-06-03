@@ -8,15 +8,17 @@ import { Host } from '../host';
 import { UUIDString } from '../../halcyon/UUID';
 
 import fs = require("fs");
-if (!fs.exists(path.join(__dirname, 'log'))) {
-  fs.mkdir(path.join(__dirname, 'log'), (err) => {
-    if (err && err.code !== "EEXIST")
-      throw err
-  });
-}
 
-export function DispatchHandler(mgm: MGM): express.Router {
+export function DispatchHandler(mgm: MGM, logDir: string): express.Router {
   let router: express.Router = express.Router();
+
+  //ensure the directory for logs exists
+  if (!fs.exists(logDir)) {
+    fs.mkdir(path.join(logDir), (err) => {
+      if (err && err.code !== "EEXIST")
+        throw new Error('Cannot create region log directory at ' + logDir);
+    });
+  }
 
   router.post('/logs/:name', (req, res) => {
     let regionName = req.params.name;
@@ -26,7 +28,9 @@ export function DispatchHandler(mgm: MGM): express.Router {
     }).then((r: Region) => {
       let logs: string[] = JSON.parse(req.body.log);
       fs.appendFile(path.join(__dirname, 'log/' + r.name), logs.join('\n'));
+      res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
+      console.log('Error serving logs for host ' + remoteIP + ': ' + err.message);
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
   });

@@ -24,6 +24,9 @@ export class RestConsole {
         'PASS': password
       }
     }).then((body) => {
+      if(body.status === 401){
+        throw new Error('Console Access Denied');
+      }
       return new Promise<any>((resolve,reject) => {
         parseString(body.data, (err, result) => {
           if(err)

@@ -57,7 +57,10 @@ angular.module('mgmApp')
           this.manage = region.uuid;
           this.content = "";
           if (region.isRunning) {
-            consoleService.open(region);
+            consoleService.open(region).then(
+              function(){},
+              function(err){ alertify.error(err); }
+            );
           }
         }
       },

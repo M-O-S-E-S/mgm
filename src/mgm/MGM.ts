@@ -71,7 +71,7 @@ export class MGM {
     router.use('/estate', EstateHandler(this.hal));
     router.use('/host', HostHandler(this));
     router.use('/user', UserHandler(this.hal, this.conf.mgm.templates));
-    router.use('/region', RegionHandler(this, this.hal, this.conf.console));
+    router.use('/region', RegionHandler(this, this.hal, this.conf.console, this.conf.mgm.log_dir));
     router.use('/group', GroupHandler(this.hal));
 
     router.use('/server/dispatch', DispatchHandler(this, this.conf.mgm.log_dir));

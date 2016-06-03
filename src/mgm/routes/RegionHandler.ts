@@ -1,5 +1,6 @@
 
 import * as express from 'express';
+import * as path from "path";
 
 import { Region } from '../Region';
 import { Host } from '../Host';
@@ -20,7 +21,7 @@ export interface ConsoleSettings {
   pass: string
 }
 
-export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): express.Router {
+export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, logDir: string): express.Router {
   let router = express.Router();
 
   router.get('/', (req, res) => {
@@ -67,6 +68,24 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
         Success: true,
         Regions: result
       }));
+    });
+  });
+
+  router.get('/logs/:uuid', (req, res) => {
+    if (!req.cookies['uuid']) {
+      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+    }
+
+    if (req.cookies['userLevel'] < 250) {
+      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+    }
+
+    let regionID = new UUIDString(req.params.uuid);
+
+    mgm.getRegion(regionID).then((r: Region) => {
+      res.sendFile(path.join(logDir, r.name))
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
   });
 

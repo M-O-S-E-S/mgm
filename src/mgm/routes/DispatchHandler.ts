@@ -13,7 +13,7 @@ export function DispatchHandler(mgm: MGM, logDir: string): express.Router {
   let router: express.Router = express.Router();
 
   //ensure the directory for logs exists
-  if (!fs.exists(logDir)) {
+  if (!fs.existsSync(logDir)) {
     fs.mkdir(path.join(logDir), (err) => {
       if (err && err.code !== "EEXIST")
         throw new Error('Cannot create region log directory at ' + logDir);

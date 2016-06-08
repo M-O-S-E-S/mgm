@@ -1,6 +1,8 @@
 
 import { UUIDString } from './UUID';
 
+import fs = require("fs");
+
 export class Inventory {
   private root: Folder
   private folders: {[key:string]: Folder}
@@ -9,7 +11,7 @@ export class Inventory {
     //generate tree structure of folders
     this.folders = {};
     //locate root folder
-    for(var f of folders){
+    for(let f of folders){
       if(f.parentFolderID === null || f.parentFolderID.toString() === UUIDString.zero().toString()){
         this.root = f;
         this.folders[f.folderID.toString()] = f;
@@ -20,7 +22,7 @@ export class Inventory {
     //iterate repeatedly and build the inventory tree
     //if we are passed an invalid tree, this may never exit
     while(folders.length > 0){
-      for(var f of folders){
+      for(let f of folders){
         if(f.parentFolderID.toString() in this.folders){
           this.folders[f.parentFolderID.toString()].children.push(f)
           this.folders[f.folderID.toString()] = f;
@@ -30,11 +32,36 @@ export class Inventory {
     }
 
     //all folders are in the tree
-    for(var i of items){
+    for(let i of items){
       if(i.parentFolderID.toString() in this.folders){
         this.folders[i.parentFolderID.toString()].items.push(i);
       }
     }
+  }
+
+  changeOwner(u: UUIDString) {
+    for(let key in this.folders){
+      let f = this.folders[key];
+      f.agentID = u;
+      for( let ch of f.children){
+        ch.agentID = u;
+      }
+    }
+  }
+
+  static FromIar(fileName: string): Promise<Inventory>{
+    return new Promise<Inventory>( (resolve, reject) => {
+      if(!fs.existsSync(fileName)){
+        return reject(new Error('IAR file ' + fileName +  ' does not exist'));
+      }
+
+      return reject(new Error('Not Implemented'));
+      //console.log('file must exist...');
+      //resolve();
+    })//.then( () => {
+    //  throw new Error('Not Implemented');
+    //  return null;
+    //});
   }
 
   prettyPrint(){

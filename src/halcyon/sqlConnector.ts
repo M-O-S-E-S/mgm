@@ -311,6 +311,20 @@ export class SqlConnector {
     });
   }
 
+  deleteInventory(u: User): Promise<void> {
+    return new Promise<void>( (resolve, reject) => {
+      this.db.pool.query('DELETE FROM inventoryfolders WHERE agentID=?', u.UUID.toString(), (err) => {
+        if(err) return reject(err);
+
+        this.db.pool.query('DELETE FROM inventoryitems WHERE avatarID=?', u.UUID.toString(), (err) => {
+          if(err) reject(err);
+
+          resolve();
+        });
+      });
+    });
+  }
+
   addInventory(inventory: Inventory): Promise<void> {
     return new Promise<void>(resolve => {
       //push all of the inventory folders in first

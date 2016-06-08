@@ -3,22 +3,95 @@
 
 import * as Promise from 'bluebird';
 
-import { SimianConnector } from './simian/Connector';
 import { SqlConnector } from './halcyon/sqlConnector';
-import { Sql } from './mysql/sql';
 import { User, Appearance, Credential } from './halcyon/User';
 import { Inventory, Folder, Item } from './halcyon/Inventory';
 import { WhipServer } from './whip/Whip';
 import { UUIDString } from './halcyon/UUID';
 import { Asset } from './whip/asset';
+import { SimianConnector } from './simian/Connector';
 
-var conf = require('../conf.json');
+var conf = require('../settings.js');
 
-let sim = new SimianConnector(new Sql(conf.simian));
 let hal = new SqlConnector(conf.halcyon);
 let whip = new WhipServer(conf.whip);
+let sim = new SimianConnector(conf.simian);
 
-console.log('Starting...');
+let args = process.argv.slice(2);
+
+if (process.argv.length < 3) {
+  throw new Error('targetID and iarfile required');
+}
+
+let targetID = new UUIDString(args[1]);
+let sourceID = new UUIDString(args[0]);
+
+let targetUser: User;
+let sourceUser: User;
+let sourceInventory: Inventory;
+
+whip.connect().then(() => {
+  return hal.getUser(targetID);
+}).then((u: User) => {
+  console.log('loading inventory onto halcyon account ' + u.username + ' ' + u.lastname);
+  targetUser = u;
+  return sim.getUser(sourceID);
+}).then((u: User) => {
+  sourceUser = u;
+  console.log('copying inventory from simian user ' + u.username + ' ' + u.lastname + ' to halcyon user ' + targetUser.username + ' ' + targetUser.lastname);
+  return sim.getInventory(u.UUID.toString());
+}).then((i: Inventory) => {
+  sourceInventory = i;
+  return hal.getInventory(targetUser.UUID);
+}).then((i: Inventory) => {
+  //both users are in good shape and we have both inventories
+  console.log('Inventories retrieved.  Erasing current Halcyon inventory.');
+  return hal.deleteInventory(targetUser);
+}).then(() => {
+  //convert inventory for new owner
+  console.log('Inserting new Halcyon inventory.');
+  sourceInventory.changeOwner(targetUser.UUID);
+  return hal.addInventory(sourceInventory);
+}).then(() => {
+  //the target account contains all of the folder and item references, now to collect and upload assets
+  let items = sourceInventory.getItems();
+  console.log('Inventory switch complete.  Uploading ' + items.length + ' assets');
+  let workers = [];
+  for (let i of items) {
+    let w = sim.getAsset(i.assetID).then((a: Asset) => {
+      a.name = i.inventoryName;
+      a.description = i.inventoryDescription;
+      return whip.putAsset(a);
+    })
+  }
+  return Promise.all(workers);
+}).then(() => {
+  console.log('Complete');
+  process.exit();
+}).catch((err: Error) => {
+  console.log('An Error occurred: ' + err.message);
+  process.exit();
+});
+
+/********* LOAD IAR ***************
+let user: User;
+
+hal.getUser(targetID).then( (u: User) => {
+  console.log('loading iar onto user account ' + u.username + ' ' + u.lastname);
+  user = u;
+  return Inventory.FromIar(iarFile);
+}).then( (i: Inventory) => {
+
+
+  console.log('parsed inventory');
+}).catch((err: Error) => {
+  console.log('An Error occurred: ' + err.message);
+  process.exit();
+});
+
+console.log('Migrating iarfile ' + iarFile + ' merging inventory for ' + targetID);
+
+*/
 
 let totalAssets: number = 0;
 let assetMap: { [key: string]: number } = {}
@@ -104,7 +177,7 @@ function testLoadAsset() {
 }
 
 //incomplete, does not copy inventory or any other information, just username and password
-function migrateUser(id: UUIDString) {
+/*function migrateUser(id: UUIDString) {
   whip.connect().then(() => {
     return sim.getUser(id);
   }).then((user: User) => {
@@ -131,4 +204,4 @@ function migrateUsers() {
   console.log(owner.toString());
   let inv = Inventory.skeleton(owner);
   inv.prettyPrint();
-}
+}*/

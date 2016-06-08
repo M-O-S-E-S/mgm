@@ -7,6 +7,7 @@ import * as Promise from 'bluebird';
 import { Inventory, Folder, Item } from '../halcyon/Inventory';
 import { User, Credential} from '../halcyon/User';
 import { UUIDString } from '../halcyon/UUID';
+import { Asset } from '../whip/asset';
 
 let assetTypeMap: {[key:string]:number} = {
   'application/octet-stream': -1,
@@ -96,8 +97,30 @@ interface UserRow {
 export class SimianConnector {
   db: Sql
 
-  constructor(db: Sql) {
-    this.db = db;
+  constructor(conf) {
+    this.db = new Sql(conf);
+  }
+
+  getAsset(uuid: UUIDString): Promise<Asset> {
+    return new Promise<Asset>( (resolve, reject) => {
+      this.db.pool.query('SELECT Data, ContentType, CreatorID, UNIX_TIMESTAMP(CreationDate) AS Created, Temporary FROM AssetData WHERE ID=?', uuid.toString(), (err, rows: any[]) => {
+        if(err) return reject(err);
+        if(!rows || rows.length !== 1) return reject(new Error('Asset ' + uuid + ' Does not exist'));
+        resolve(rows[0]);
+      });
+    }).then( (row: any) => {
+      //constructor(id: UUIDString, type: number, local: boolean, temporary: boolean, created: number, name: string, description: string, data: Buffer) {
+      return new Asset(
+        new UUIDString(row.ID),
+        assetTypeMap[row.ContentType],
+        false,
+        row.Temporary,
+        row.Created,
+        '',
+        '',
+        row.Data
+      );
+    });
   }
 
   getInventory(uuid: string): Promise<Inventory> {
@@ -219,7 +242,7 @@ export class SimianConnector {
       r.Version,
       new UUIDString(r.ID),
       new UUIDString(r.OwnerID),
-      new UUIDString(r.ParentID)
+      r.ParentID ? new UUIDString(r.ParentID) : UUIDString.zero()
     );
   }
 

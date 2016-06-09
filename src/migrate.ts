@@ -56,8 +56,29 @@ whip.connect().then(() => {
   //the target account contains all of the folder and item references, now to collect and upload assets
   let items = sourceInventory.getItems();
   console.log('Inventory switch complete.  Uploading ' + items.length + ' assets');
-  let workers = [];
+
   let counter = 1;
+
+  let w = Promise.resolve();
+  for(let i of items){
+    w = w.then( () => {
+      return sim.getAsset(i.assetID);
+    }).then( (a: Asset) => {
+      if(a === null){
+        return 'Asset ' + i.assetID + ' Does not exist in simian';
+      }
+      a.name = i.inventoryName;
+      a.description = i.inventoryDescription;
+      return whip.putAsset(a);
+    }).then( (msg: string) => {
+      console.log( counter + '/' + items.length + ': ' + msg);
+      counter++;
+    });
+  }
+
+  return w;
+
+  /*let counter = 1;
   return Promise.all(items.map( (i: Item ) => {
     return sim.getAsset(i.assetID).then((a: Asset) => {
       if(a === null) return "Asset does not exist in simian";
@@ -72,7 +93,8 @@ whip.connect().then(() => {
     //  counter++;
     //  resolve();
     //});
-  }));
+
+  }));*/
 }).then(() => {
   console.log('Complete');
   process.exit();

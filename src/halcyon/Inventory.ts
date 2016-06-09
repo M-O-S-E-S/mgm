@@ -8,6 +8,10 @@ export class Inventory {
   private folders: {[key:string]: Folder}
 
   constructor(folders: Folder[], items: Item[]){
+    this.consumeFoldersAndItems(folders, items);
+  }
+
+  private consumeFoldersAndItems(folders: Folder[], items: Item[]){
     //generate tree structure of folders
     this.folders = {};
     //locate root folder
@@ -39,14 +43,65 @@ export class Inventory {
     }
   }
 
-  changeOwner(u: UUIDString) {
-    for(let key in this.folders){
-      let f = this.folders[key];
-      f.agentID = u;
-      for( let ch of f.children){
-        ch.agentID = u;
-      }
+  changeOwner(uuid: UUIDString) {
+    let uuidMap: { [key: string]: UUIDString } = {};
+    let folders: Folder[] = [];
+    let items: Item[] = [];
+    //generate new ids for folders
+    for (let folder of this.getFolders()) {
+      uuidMap[folder.folderID.toString()] = UUIDString.random();
     }
+    //map zero back to zero
+    uuidMap[UUIDString.zero().toString()] = UUIDString.zero();
+    //generate new ids for inventory items
+    for (let item of this.getItems()) {
+      uuidMap[item.inventoryID.toString()] = UUIDString.random();
+    }
+
+    //generate new folder list, translating ids
+    for (let folder of this.getFolders()) {
+      let f = new Folder(
+        folder.folderName,
+        folder.Type,
+        folder.version,
+        uuidMap[folder.folderID.toString()],
+        uuid,
+        uuidMap[folder.parentFolderID.toString()]
+        );
+      folders.push(f);
+    }
+
+    //generate new item list, translating ids
+    for (let item of this.getItems()) {
+      let i = new Item();
+      i.assetID = item.assetID;
+      i.assetType = item.assetType;
+      if (i.assetType === 24) {
+        //links do not have assets, assetID points to an inventory item
+        i.assetID = uuidMap[item.assetID.toString()];
+      }
+      i.inventoryName = item.inventoryName;
+      i.inventoryDescription = item.inventoryDescription;
+      i.inventoryNextPermissions = item.inventoryNextPermissions;
+      i.inventoryCurrentPermissions = item.inventoryCurrentPermissions;
+      i.invType = item.invType;
+      i.creatorID = item.creatorID;
+      i.inventoryBasePermissions = item.inventoryBasePermissions;
+      i.inventoryEveryOnePermissions = item.inventoryEveryOnePermissions;
+      i.salePrice = item.salePrice;
+      i.saleType = item.saleType;
+      i.creationDate = item.creationDate;
+      i.groupID = item.groupID;
+      i.groupOwned = item.groupOwned;
+      i.flags = item.flags;
+      i.inventoryID = uuidMap[item.inventoryID.toString()];
+      i.avatarID = uuid;
+      i.parentFolderID = uuidMap[item.parentFolderID.toString()];
+      i.inventoryGroupPermissions = item.inventoryGroupPermissions;
+      items.push(i);
+    }
+
+    this.consumeFoldersAndItems(folders, items);
   }
 
   static FromIar(fileName: string): Promise<Inventory>{

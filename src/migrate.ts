@@ -57,14 +57,22 @@ whip.connect().then(() => {
   let items = sourceInventory.getItems();
   console.log('Inventory switch complete.  Uploading ' + items.length + ' assets');
   let workers = [];
-  for (let i of items) {
-    let w = sim.getAsset(i.assetID).then((a: Asset) => {
+  let counter = 1;
+  return Promise.all(items.map( (i: Item ) => {
+    return sim.getAsset(i.assetID).then((a: Asset) => {
+      if(a === null) return "Asset does not exist in simian";
       a.name = i.inventoryName;
       a.description = i.inventoryDescription;
       return whip.putAsset(a);
-    })
-  }
-  return Promise.all(workers);
+    }).then((res: string) => {
+      console.log( counter + '/' + items.length + ': asset loaded: ' + res);
+      counter++;
+    })//.catch((err: Error) => {
+    //  console.log( counter + '/' + items.length + ': ' + err.message);
+    //  counter++;
+    //  resolve();
+    //});
+  }));
 }).then(() => {
   console.log('Complete');
   process.exit();

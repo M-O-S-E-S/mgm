@@ -105,16 +105,17 @@ export class SimianConnector {
     return new Promise<Asset>( (resolve, reject) => {
       this.db.pool.query('SELECT Data, ContentType, CreatorID, UNIX_TIMESTAMP(CreationDate) AS Created, Temporary FROM AssetData WHERE ID=?', uuid.toString(), (err, rows: any[]) => {
         if(err) return reject(err);
-        if(!rows || rows.length !== 1) return reject(new Error('Asset ' + uuid + ' Does not exist'));
+        if(!rows || rows.length < 1) return resolve(null);
         resolve(rows[0]);
       });
     }).then( (row: any) => {
+      if(row === null) return row;
       //constructor(id: UUIDString, type: number, local: boolean, temporary: boolean, created: number, name: string, description: string, data: Buffer) {
       return new Asset(
-        new UUIDString(row.ID),
+        uuid,
         assetTypeMap[row.ContentType],
         false,
-        row.Temporary,
+        row.Temporary === 1? true : false,
         row.Created,
         '',
         '',
@@ -247,19 +248,49 @@ export class SimianConnector {
   }
 
   private buildItem(r: InventoryRow): Item {
+    let extraData = {
+      Flags: 1,
+      SalePrice: 0,
+      LinkedItemType: null,
+      Permissions: {
+        BaseMask: 647168,
+        EveryoneMask: 581632,
+        NextOwnerMask: 647168,
+        OwnerMask: 647168,
+        GroupMask: 0,
+      }
+    };
+
+    if(r.ExtraData !== null && r.ExtraData !== '' && r.ExtraData !== '{}'){
+      try{
+        let readData = JSON.parse(r.ExtraData);
+        if(readData.Flags) extraData.Flags = readData.Flags;
+        if(readData.SalePrice) extraData.SalePrice = readData.SalePrice;
+        if(readData.Permissions && readData.Permissions.BaseMask) extraData.Permissions.BaseMask = readData.Permissions.BaseMask;
+        if(readData.Permissions && readData.Permissions.EveryoneMask) extraData.Permissions.EveryoneMask = readData.Permissions.EveryoneMask;
+        if(readData.Permissions && readData.Permissions.NextOwnerMask) extraData.Permissions.NextOwnerMask = readData.Permissions.NextOwnerMask;
+        if(readData.Permissions && readData.Permissions.OwnerMask) extraData.Permissions.OwnerMask = readData.Permissions.OwnerMask;
+        if(readData.Permissions && readData.Permissions.GroupMask) extraData.Permissions.GroupMask = readData.Permissions.GroupMask;
+      } catch(e){
+        //do nothing, ignore this extraData
+      }
+    }
+
     let i = new Item();
     i.assetID = new UUIDString(r.AssetID);
     i.assetType = assetTypeMap[r.ContentType] || -1;
     i.inventoryName = r.Name;
     i.inventoryDescription = r.Description;
-    //i.inventoryNextPermissions
-    //i.inventoryCurrentPermissions
     i.invType = invTypeMap[i.assetType];
     i.creatorID = new UUIDString(r.CreatorID);
-    //i.inventoryBasePermissions
-    //i.inventoryEveryOnePermissions
-    //i.salePrice
+
+    i.inventoryNextPermissions = extraData.Permissions.NextOwnerMask;
+    i.inventoryCurrentPermissions = extraData.Permissions.OwnerMask
+    i.inventoryBasePermissions = extraData.Permissions.BaseMask;
+    i.inventoryEveryOnePermissions = extraData.Permissions.EveryoneMask;
+    i.salePrice = extraData.SalePrice;
     //i.saleType
+
     i.creationDate = r.CreationDate;
     i.groupID = UUIDString.zero();
     i.groupOwned = 0;

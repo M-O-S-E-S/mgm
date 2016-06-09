@@ -112,14 +112,14 @@ export class WhipServer {
       case ServerResponseCodes.Found:
         return req.resolve(resp.data);
       case ServerResponseCodes.NotFound:
-        return req.reject('asset not found');
+        return req.reject(new Error('asset not found'));
       case ServerResponseCodes.Error:
-        return req.reject(resp.data.toString());
+        return req.resolve(resp.data.toString());
       case ServerResponseCodes.OK:
         return req.resolve(resp.data);
       default:
         console.log('unknown response code: ' + resp.code);
-        return req.reject('unknown response');
+        return req.reject(new Error('unknown response'));
     }
   }
 
@@ -129,8 +129,8 @@ export class WhipServer {
     }
   }
 
-  putAsset(asset: Asset): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+  putAsset(asset: Asset): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
       let req = new ClientRequest(RequestCodes.Put, asset.uuid, asset.serialize());
       this.requestQueue.push(new request(asset.uuid, resolve, reject));
       this.link.write(req.buf);

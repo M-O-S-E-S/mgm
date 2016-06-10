@@ -53,8 +53,6 @@ angular.module('mgmApp')
         });
       },
       addUserToGroup: function(group, role) {
-        console.log(group);
-        console.log(role);
         if (!group || !role) {
           console.log('role or group missing');
           return;

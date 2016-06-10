@@ -130,16 +130,13 @@ export function UserHandler(hal: SqlConnector, templates: {[key: string]: string
 
     let userID = new UUIDString(req.params.id);
 
-    /*
     hal.getUser(userID).then( (u: User) => {
-      return hal.destroyUser(u);
+      return hal.deleteUser(u.UUID);
     }).then( () => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
-    */
-    res.send(JSON.stringify({ Success: false, Message: 'Deleting users is not supported.  Suspend instead.' }));
   });
 
   router.post('/create', (req, res) => {

@@ -1,0 +1,78 @@
+# this is a sample nginx site config for mgm, the user server, and an aperture server
+
+server {
+        listen 443;
+
+        server_name sample.org;
+        server_tokens off;
+
+        proxy_set_header   Host $http_host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+
+        client_max_body_size 2g;
+        client_body_buffer_size 128k;
+
+        proxy_connect_timeout   90;
+        proxy_send_timeout      90;
+        proxy_read_timeout      90;
+
+        # serve html5 web client files
+        location / {
+                root /var/www/html/mgm/html;
+                try_files $uri $uri/ /index.html;
+        }
+
+        # this route is for MGM services
+        location /server/ {
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header Host $http_host;
+                proxy_set_header X-NginX-Proxy true;
+
+                proxy_pass http://127.0.0.1:3000/;
+                proxy_redirect off;
+        }
+
+        # this is for firestorm clients
+        location /get_grid_info {
+                proxy_pass http://127.0.0.1:3000/get_grid_info;
+        }
+
+        # proxy for user server
+        location /login {
+                proxy_pass http://127.0.0.1:8002;
+        }
+
+        # proxy for client aperture access
+        # Halcyon simulators currently do not request https correctly
+        # moved to http
+        #location /CAPS {
+        #        proxy_pass http://127.0.0.1:8000/CAPS;
+        #}
+
+        access_log /var/log/nginx/halcyon_access.log;
+        error_log  /var/log/nginx/halcyon_error.log;
+
+        #ssl on;
+        #ssl_certificate /etc/nginx/ssl/site.chained.crt;
+        #ssl_certificate_key /etc/nginx/ssl/site.key;
+}
+
+server {
+        listen 80;
+
+        server_name sample.org;
+        server_tokens off;
+
+        # proxy for client aperture access
+        location /CAPS {
+                proxy_pass http://127.0.0.1:8000/CAPS;
+        }
+
+        location / {
+                return 301 https://$host$request_uri;
+        }
+
+}

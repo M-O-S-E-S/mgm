@@ -321,7 +321,7 @@ export class MGM {
     config['Startup']['serverside_object_permissions'] = 'true';
     config['Startup']['allow_grid_gods'] = 'true';
     config['Startup']['use_aperture_server'] = 'yes';
-    config['Startup']['aperture_server_port'] = '8000';
+    config['Startup']['aperture_server_port'] = '80';
     config['Startup']['aperture_server_caps_token'] = '2960079';
     config['Startup']['core_connection_string'] = connString + 'Pooling=True;Min Pool Size=0;';
     config['Startup']['rdb_connection_string'] = connString + 'Pooling=True;Min Pool Size=0;';

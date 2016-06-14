@@ -26,6 +26,7 @@ export interface Config {
     db_pass: string
     db_name: string
     log_dir: string
+    upload_dir: string
     templates: { [key: string]: string }
   },
   halcyon: {
@@ -50,8 +51,6 @@ export interface Config {
   }
 }
 
-
-
 export class MGM {
   private conf: Config
   private sql: SqlConnector
@@ -63,14 +62,14 @@ export class MGM {
     this.hal = new HAL(config.halcyon);
   }
 
-  static isUser(req, res, next){
+  static isUser(req, res, next) {
     if (req.cookies['uuid']) {
       return next();
     }
     return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
   }
 
-  static isAdmin(req,res, next){
+  static isAdmin(req, res, next) {
     if (req.cookies['userLevel'] >= 250) {
       return next();
     }
@@ -81,7 +80,7 @@ export class MGM {
     let router = express.Router();
     router.use('/auth', AuthHandler(this.hal));
     router.use('/console', ConsoleHandler(this, this.conf.console));
-    router.use('/task', TaskHandler(this));
+    router.use('/task', TaskHandler(this, this.conf.mgm.upload_dir));
     router.use('/estate', EstateHandler(this.hal));
     router.use('/host', HostHandler(this));
     router.use('/user', UserHandler(this.hal, this.conf.mgm.templates));
@@ -136,24 +135,37 @@ export class MGM {
     });
 
     router.post('/register/submit', (req, res) => {
+      console.log('Received registration request.  Not Implemented');
       res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
     });
     return router;
+  }
+
+  deleteJob(j: Job): Promise<void> {
+    return this.sql.deleteJob(j.id);
+  }
+  updateJob(j: Job): Promise<Job> {
+    return this.sql.updateJob(j);
+  }
+
+  getJob(id: number): Promise<Job> {
+    return this.sql.getJob(id).then( (row: any) => {
+      return this.buildJob(row);
+    });
   }
 
   getJobsFor(id: UUIDString): Promise<Job[]> {
     return this.sql.getJobsFor(id).then((rows: any[]) => {
       let jobs: Job[] = [];
       for (let r of rows) {
-        let j = new Job()
-        j.timestamp = r.timestamp;
-        j.type = r.type;
-        j.user = new UUIDString(r.user);
-        j.data = r.data;
-        jobs.push(j);
+        jobs.push(this.buildJob(r));
       }
       return jobs;
     });
+  }
+
+  insertJob(j: Job): Promise<Job> {
+    return this.sql.insertJob(j);
   }
 
   getAllRegions(): Promise<Region[]> {
@@ -296,7 +308,7 @@ export class MGM {
 
       let client = urllib.create();
       return new Promise<void>((resolve, reject) => {
-        client.request('http://' + h.address + ':' + h.port + '/region/' + r.name + '/add', {timeout: 10000}).then(() => {
+        client.request('http://' + h.address + ':' + h.port + '/region/' + r.name + '/add', { timeout: 10000 }).then(() => {
           resolve();
         }).catch(() => {
           reject(new Error('Region assignment recorded, but could not contac tthe host'));
@@ -439,6 +451,17 @@ export class MGM {
     config['AvatarRemoteCommands']['Enabled'] = 'false';
 
     return Promise.resolve(config);
+  }
+
+  private buildJob(row: any): Job {
+    let j: Job = {
+      id: row.id,
+      timestamp: row.timestamp,
+      type: row.type,
+      user: new UUIDString(row.user),
+      data: row.data
+    }
+    return j;
   }
 
   private buildHost(row: any): Host {

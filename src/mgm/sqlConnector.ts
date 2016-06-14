@@ -89,12 +89,56 @@ export class SqlConnector {
     });
   }
 
+  deleteJob(id: number): Promise<void> {
+    return new Promise<void>( (resolve, reject) => {
+      this.db.pool.query('DELETE FROM jobs WHERE id=?', id, err => {
+        if(err) return reject(err);
+        resolve();
+      });
+    });
+  }
+
+  updateJob(j: Job): Promise<Job> {
+    return new Promise<Job>( (resolve, reject) => {
+      this.db.pool.query('UPDATE jobs SET data=? WHERE id=?',
+      [j.data, j.id],
+      (err) => {
+        if(err) return reject(err);
+        resolve(j);
+      })
+    });
+  }
+
+  getJob(id: number): Promise<Job> {
+    return new Promise<Job>((resolve, reject) => {
+      this.db.pool.query("SELECT * FROM jobs WHERE id=?", id, (err, rows: any[]) => {
+        if (err) return reject(err);
+        if(rows.length === 0)
+          return reject(new Error('Task does not exist'));
+        resolve(rows[0]);
+      });
+    });
+  }
+
   getJobsFor(id: UUIDString): Promise<Job[]> {
     return new Promise<Job[]>((resolve, reject) => {
       this.db.pool.query("SELECT * FROM jobs WHERE user=?", id.toString(), (err, rows: any[]) => {
         if (err)
           return reject(err);
         resolve(rows);
+      });
+    });
+  }
+
+  insertJob(j: Job): Promise<Job> {
+    return new Promise<Job>( (resolve, reject) => {
+      this.db.pool.query('INSERT INTO jobs (type, user, data) VALUES (?,?,?)',
+      [j.type, j.user.toString(), j.data],
+      (err, rows) => {
+        if (err)
+          return reject(err);
+        j.id = parseInt(rows.insertId);
+        resolve(j);
       });
     });
   }

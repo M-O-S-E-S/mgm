@@ -8,6 +8,7 @@ settings.mgm.db_pass = "mgm";
 settings.mgm.db_name = "mgm";
 
 settings.mgm.log_dir = "/opt/moses/mgm/logs";
+settings.mgm.upload_dir = "/opt/moses/mgm/uploads";
 
 // Templates available for user creation
 settings.mgm.templates = {

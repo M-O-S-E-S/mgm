@@ -1,12 +1,33 @@
 
 import * as express from 'express';
+import * as path from "path";
 
 import { Job } from '../Job';
 import { MGM } from '../MGM';
 import { UUIDString } from '../../halcyon/UUID';
+import { Region } from '../Region';
 
-export function TaskHandler(mgm: MGM): express.Router {
+import fs = require("fs");
+import * as multer from 'multer';
+
+export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
   let router = express.Router();
+
+  //ensure the directory for logs exists
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdir(path.join(uploadDir), (err) => {
+      if (err && err.code !== "EEXIST")
+        throw new Error('Cannot create region log directory at ' + uploadDir);
+    });
+  }
+
+  var uploading = multer({
+    dest: uploadDir,
+    limits: {
+      fileSize: 1000000, //1MB
+      files: 1
+    }
+  }).any();
 
   router.get('/', MGM.isUser, (req, res) => {
     mgm.getJobsFor(new UUIDString(req.cookies['uuid'])).then((jobs: Job[]) => {
@@ -19,9 +40,51 @@ export function TaskHandler(mgm: MGM): express.Router {
     });
   });
 
-  router.post('/loadOar/:uuid', MGM.isUser, (req, res) => {
+  router.post('/loadOar/:uuid', MGM.isAdmin, (req, res) => {
+    let merge = req.body.merge;
+    let regionID = new UUIDString(req.params.uuid);
+    let user = new UUIDString(req.cookies['uuid']);
 
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    console.log('User ' + user + ' requesting load oar for region ' + regionID);
+
+    mgm.getRegion(regionID).then((r: Region) => {
+      if (!r.isRunning) {
+        throw new Error('Region is not running');
+      }
+      let j: Job = {
+        id: 0,
+        timestamp: '',
+        type: 'load_oar',
+        user: user,
+        data: JSON.stringify({
+          Status: 'Pending...',
+          Region: regionID.toString(),
+          merge: merge
+        })
+      };
+
+      return mgm.insertJob(j);
+    }).then((j: Job) => {
+      res.send(JSON.stringify({ Success: true, ID: j.id }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
+  });
+
+  router.post('/delete/:id', MGM.isUser, (req, res) => {
+    let taskID = parseInt(req.params.id);
+
+    mgm.getJob(taskID).then( (j: Job) => {
+      let datum = JSON.parse(j.data);
+      if( datum.File && datum.File !== ''){
+        fs.unlink( path.join(uploadDir, datum.File));
+      }
+      return mgm.deleteJob(j);
+    }).then( () => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
   });
 
   router.post('/saveOar/:uuid', MGM.isUser, (req, res) => {
@@ -56,8 +119,26 @@ export function TaskHandler(mgm: MGM): express.Router {
     res.send('MGM');
   });
 
-  router.get('/upload', (req, res) => {
-    res.send('MGM');
+  router.post('/upload:id', uploading, (req, res) => {
+    let taskID = parseInt(req.params.id);
+
+    mgm.getJob(taskID).then( (j: Job) => {
+      switch(j.type){
+        case 'load_oar':
+          let datum = JSON.parse(j.data);
+          datum.Status = "Loading";
+          datum.File = req.file;
+          j.data = JSON.stringify(datum);
+          return mgm.updateJob(j);
+        default:
+          throw new Error('invalid upload for job type: ' + j.type);
+      }
+    }).then( (j: Job) => {
+      //do more oar loading magics.
+      res.send(JSON.stringify({ Success: false, Message: 'Oar loading not implemented' }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
   });
 
   return router;

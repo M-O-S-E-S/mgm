@@ -4,3 +4,5 @@ dist
 .tmp
 .sass-cache
 settings.js
+logs
+uploads

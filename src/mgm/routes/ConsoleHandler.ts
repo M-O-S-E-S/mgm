@@ -59,8 +59,10 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
       }
       return RestConsole.close(req.cookies['console']);
     }).then(() => {
+      res.clearCookie('console');
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
+      res.clearCookie('console');
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
   });

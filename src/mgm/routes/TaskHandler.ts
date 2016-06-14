@@ -21,14 +21,6 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
     });
   }
 
-  var uploading = multer({
-    dest: uploadDir,
-    limits: {
-      fileSize: 1000000, //1MB
-      files: 1
-    }
-  }).any();
-
   router.get('/', MGM.isUser, (req, res) => {
     mgm.getJobsFor(new UUIDString(req.cookies['uuid'])).then((jobs: Job[]) => {
       res.send(JSON.stringify({
@@ -77,7 +69,7 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
     mgm.getJob(taskID).then( (j: Job) => {
       let datum = JSON.parse(j.data);
       if( datum.File && datum.File !== ''){
-        fs.unlink( path.join(uploadDir, datum.File));
+        fs.unlink( datum.File);
       }
       return mgm.deleteJob(j);
     }).then( () => {
@@ -119,15 +111,17 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
     res.send('MGM');
   });
 
-  router.post('/upload:id', uploading, (req, res) => {
+  router.post('/upload/:id', multer({ dest: uploadDir}).single('file'), (req, res) => {
     let taskID = parseInt(req.params.id);
+
+    console.log(req.file);
 
     mgm.getJob(taskID).then( (j: Job) => {
       switch(j.type){
         case 'load_oar':
           let datum = JSON.parse(j.data);
           datum.Status = "Loading";
-          datum.File = req.file;
+          datum.File = req.file.path;
           j.data = JSON.stringify(datum);
           return mgm.updateJob(j);
         default:

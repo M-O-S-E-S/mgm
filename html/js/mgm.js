@@ -338,7 +338,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
                 //upload file
                 $http.post("/server/task/upload/" + data.ID, form, {
                     transformRequest: angular.identity,
-                    headers: {'Content-Type': "multipart/form-data"}
+                    headers: {'Content-Type': undefined}
                 })
                 .success(function(data, status, headers, config){
                     if(data.Success){

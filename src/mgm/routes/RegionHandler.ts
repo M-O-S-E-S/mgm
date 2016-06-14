@@ -24,11 +24,7 @@ export interface ConsoleSettings {
 export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, logDir: string): express.Router {
   let router = express.Router();
 
-  router.get('/', (req, res) => {
-    if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-      return;
-    }
+  router.get('/', MGM.isUser, (req, res) => {
     let regions: Region[];
     let w;
     if (req.cookies['userLevel'] >= 250) {
@@ -71,15 +67,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     });
   });
 
-  router.get('/logs/:uuid', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.get('/logs/:uuid', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
 
     mgm.getRegion(regionID).then((r: Region) => {
@@ -89,15 +77,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     });
   });
 
-  router.post('/destroy/:uuid', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/destroy/:uuid', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let region: Region;
 
@@ -120,15 +100,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     });
   });
 
-  router.post('/estate/:uuid', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/estate/:uuid', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let estateID: number = parseInt(req.body.estate);
 
@@ -146,15 +118,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     });
   });
 
-  router.post('/setXY/:uuid', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/setXY/:uuid', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let region: Region;
     let x = parseInt(req.body.x);
@@ -181,15 +145,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     });
   });
 
-  router.post('/create', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/create', MGM.isAdmin, (req, res) => {
     let region: Region = new Region();
     region.name = req.body.name;
     region.size = req.body.size;
@@ -211,15 +167,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     });
   });
 
-  router.post('/host/:regionID', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/host/:regionID', MGM.isAdmin, (req, res) => {
     //moving a region to a new host
 
     //get region
@@ -280,7 +228,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     });
   });
 
-  router.post('/stop/:uuid', (req, res) => {
+  router.post('/stop/:uuid', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let session: ConsoleSession;
 
@@ -300,7 +248,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     });
   });
 
-  router.post('/kill/:uuid', (req, res) => {
+  router.post('/kill/:uuid', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let target: Region;
     mgm.getRegion(regionID).then((r: Region) => {
@@ -319,17 +267,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     });
   });
 
-  router.post('/start/:regionID', (req, res) => {
-    if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-      return;
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-      return;
-    }
-
+  router.post('/start/:regionID', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.regionID);
     let r: Region
 
@@ -345,17 +283,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     })
   });
 
-  router.get('/config/:uuid?', (req, res) => {
-    if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-      return;
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-      return;
-    }
-
+  router.get('/config/:uuid?', MGM.isAdmin, (req, res) => {
     let regionID = req.params.uuid;
     let p;
     if (regionID) {

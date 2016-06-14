@@ -1,13 +1,14 @@
 
 import * as express from 'express';
 import { User, Credential } from '../../halcyon/User';
+import { MGM } from '../MGM';
 
 export interface Halcyon {
   getUserByName(string): Promise<User>
   setUserPassword(string, Credential): Promise<void>
 }
 
-export function AuthHandler(hal: Halcyon): express.Router{
+export function AuthHandler(hal: Halcyon): express.Router {
   let router: express.Router = express.Router();
 
   //resume session
@@ -28,18 +29,16 @@ export function AuthHandler(hal: Halcyon): express.Router{
     }
   });
 
-  router.get('/logout', (req, res) => {
-    if (req.cookies['uuid']) {
-      console.log('User ' + req.cookies['uuid'] + ' logging out');
+  router.get('/logout', MGM.isUser, (req, res) => {
+    console.log('User ' + req.cookies['uuid'] + ' logging out');
 
-      res.clearCookie('name');
-      res.clearCookie('uuid');
-      res.clearCookie('userLevel');
-      res.clearCookie('email');
-      res.send(JSON.stringify({
-        Success: true
-      }));
-    }
+    res.clearCookie('name');
+    res.clearCookie('uuid');
+    res.clearCookie('userLevel');
+    res.clearCookie('email');
+    res.send(JSON.stringify({
+      Success: true
+    }));
   });
 
   router.post('/login', (req, res) => {
@@ -49,7 +48,7 @@ export function AuthHandler(hal: Halcyon): express.Router{
     hal.getUserByName(username).then((u: User) => {
       if (u.passwordHash.compare(password)) {
 
-        if(u.godLevel === 0){
+        if (u.godLevel === 0) {
           res.send(JSON.stringify({
             Success: false,
             Message: 'Account Suspended'
@@ -80,14 +79,10 @@ export function AuthHandler(hal: Halcyon): express.Router{
     });
   });
 
-  router.post('/changePassword', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
+  router.post('/changePassword', MGM.isUser, (req, res) => {
     let password: string = req.body.password || '';
 
-    if(password === ''){
+    if (password === '') {
       return res.send(JSON.stringify({ Success: false, Message: 'Password cannot be blank' }));
     }
 
@@ -95,7 +90,7 @@ export function AuthHandler(hal: Halcyon): express.Router{
 
     console.log(credential.hash);
 
-    hal.setUserPassword(req.cookies['uuid'], credential).then( () => {
+    hal.setUserPassword(req.cookies['uuid'], credential).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));

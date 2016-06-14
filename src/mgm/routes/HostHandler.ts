@@ -6,17 +6,7 @@ import { MGM } from '../MGM';
 export function HostHandler(mgm: MGM): express.Router {
   let router = express.Router();
 
-  router.get('/', (req, res) => {
-    if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-      return;
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-      return;
-    }
-
+  router.get('/', MGM.isAdmin, (req, res) => {
     mgm.getHosts().then((hosts: Host[]) => {
       res.send(JSON.stringify({
         Success: true,
@@ -25,17 +15,7 @@ export function HostHandler(mgm: MGM): express.Router {
     });
   });
 
-  router.post('/add', (req, res) => {
-    if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-      return;
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-      return;
-    }
-
+  router.post('/add', MGM.isAdmin, (req, res) => {
     let host: string = req.body.host || '';
     if (host === '') {
       res.send(JSON.stringify({ Success: false, Message: 'Invalid host' }));
@@ -49,17 +29,7 @@ export function HostHandler(mgm: MGM): express.Router {
     });
   });
 
-  router.post('/remove', (req, res) => {
-    if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-      return;
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-      return;
-    }
-
+  router.post('/remove', MGM.isAdmin,  (req, res) => {
     let host: string = req.body.host || '';
 
     mgm.deleteHost(host).then(() => {

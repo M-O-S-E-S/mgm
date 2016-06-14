@@ -63,6 +63,20 @@ export class MGM {
     this.hal = new HAL(config.halcyon);
   }
 
+  static isUser(req, res, next){
+    if (req.cookies['uuid']) {
+      return next();
+    }
+    return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+  }
+
+  static isAdmin(req,res, next){
+    if (req.cookies['userLevel'] >= 250) {
+      return next();
+    }
+    return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+  }
+
   getRouter(): express.Router {
     let router = express.Router();
     router.use('/auth', AuthHandler(this.hal));

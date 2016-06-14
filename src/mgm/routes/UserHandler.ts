@@ -1,6 +1,7 @@
 
 import * as express from 'express';
 
+import { MGM } from '../MGM';
 import { User, Credential } from '../../halcyon/User';
 import { UUIDString } from '../../halcyon/UUID';
 import { SqlConnector } from '../../halcyon/sqlConnector';
@@ -8,12 +9,7 @@ import { SqlConnector } from '../../halcyon/sqlConnector';
 export function UserHandler(hal: SqlConnector, templates: {[key: string]: string}): express.Router {
   let router = express.Router();
 
-  router.get('/', (req, res) => {
-    if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-      return;
-    }
-
+  router.get('/', MGM.isUser, (req, res) => {
     hal.getAllUsers().then((users: User[]) => {
       //map these to simina appearing users for current MGM front-end
       let result: any[] = [];
@@ -39,15 +35,7 @@ export function UserHandler(hal: SqlConnector, templates: {[key: string]: string
   });
 
 
-  router.post('/accessLevel', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/accessLevel', MGM.isAdmin, (req, res) => {
     let accessLevel = parseInt(req.body.accessLevel);
     let userID = new UUIDString(req.body.uuid);
 
@@ -65,15 +53,7 @@ export function UserHandler(hal: SqlConnector, templates: {[key: string]: string
     });
   });
 
-  router.post('/email', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/email', MGM.isAdmin, (req, res) => {
     let email = req.body.email;
     let userID = new UUIDString(req.body.id);
 
@@ -90,15 +70,7 @@ export function UserHandler(hal: SqlConnector, templates: {[key: string]: string
     });
   });
 
-  router.post('/password', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/password', MGM.isAdmin, (req, res) => {
     let password = req.body.password;
     let userID = new UUIDString(req.body.id);
 
@@ -115,19 +87,11 @@ export function UserHandler(hal: SqlConnector, templates: {[key: string]: string
     });
   });
 
-  router.post('/suspend', (req, res) => {
+  router.post('/suspend', MGM.isAdmin, (req, res) => {
     res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
   });
 
-  router.post('/destroy/:id', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/destroy/:id', MGM.isAdmin, (req, res) => {
     let userID = new UUIDString(req.params.id);
 
     hal.getUser(userID).then( (u: User) => {
@@ -139,16 +103,7 @@ export function UserHandler(hal: SqlConnector, templates: {[key: string]: string
     });
   });
 
-  router.post('/create', (req, res) => {
-
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/create', MGM.isAdmin, (req, res) => {
     let fullname: string = req.body.name.trim() || '';
     let email = req.body.email || '';
     let template: string = req.body.template || '';

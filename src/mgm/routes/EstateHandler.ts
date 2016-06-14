@@ -1,5 +1,6 @@
 import * as express from 'express';
 
+import { MGM } from '../MGM';
 import { Estate } from '../../halcyon/estate';
 import { User } from '../../halcyon/User';
 import { UUIDString } from '../../halcyon/UUID';
@@ -16,12 +17,7 @@ export interface Halcyon {
 export function EstateHandler(hal: Halcyon): express.Router {
   let router = express.Router();
 
-  router.get('/', (req, res) => {
-    if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-      return;
-    }
-
+  router.get('/', MGM.isUser, (req, res) => {
     hal.getEstates().then((estates: Estate[]) => {
       let result: any[] = []
       for (let r of estates) {
@@ -43,15 +39,7 @@ export function EstateHandler(hal: Halcyon): express.Router {
 
   });
 
-  router.post('/create', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/create', MGM.isAdmin, (req, res) => {
     let estateName = req.body.name;
     let owner = new UUIDString(req.body.owner);
 
@@ -79,15 +67,7 @@ export function EstateHandler(hal: Halcyon): express.Router {
     });
   });
 
-  router.post('/destroy/:id', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/destroy/:id', MGM.isAdmin, (req, res) => {
     let estateID = req.params.id;
 
     hal.getEstate(estateID).then( (e: Estate) => {

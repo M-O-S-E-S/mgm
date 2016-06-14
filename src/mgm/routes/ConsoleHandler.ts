@@ -14,11 +14,7 @@ export interface ConsoleSettings {
 export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Router{
   let router = express.Router();
 
-  router.post('/open/:uuid', (req, res) => {
-    if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-      return;
-    }
+  router.post('/open/:uuid', MGM.isUser, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
     mgm.getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
@@ -33,7 +29,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
     });
   });
 
-  router.post('/read/:uuid', (req, res) => {
+  router.post('/read/:uuid', MGM.isUser, (req, res) => {
     if (!req.cookies['console']) {
       res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
       return;
@@ -51,7 +47,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
     });
   });
 
-  router.post('/close/:uuid', (req, res) => {
+  router.post('/close/:uuid', MGM.isUser, (req, res) => {
     if (!req.cookies['console']) {
       res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
       return;
@@ -69,7 +65,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
     });
   });
 
-  router.post('/write/:uuid', (req, res) => {
+  router.post('/write/:uuid', MGM.isUser, (req, res) => {
     if (!req.cookies['console']) {
       res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
       return;

@@ -1,6 +1,7 @@
 
 import * as express from 'express';
 
+import { MGM } from '../MGM';
 import { Group } from '../../halcyon/group';
 import { User } from '../../halcyon/User';
 import { UUIDString } from '../../halcyon/UUID';
@@ -16,12 +17,7 @@ export interface Halcyon {
 export function GroupHandler(hal: Halcyon): express.Router {
   let router = express.Router();
 
-  router.get('/', (req, res) => {
-    if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-      return;
-    }
-
+  router.get('/', MGM.isUser, (req, res) => {
     hal.getGroups().then((groups: Group[]) => {
       let result = [];
       for (let g of groups) {
@@ -60,15 +56,7 @@ export function GroupHandler(hal: Halcyon): express.Router {
     })
   });
 
-  router.post('/removeUser/:id', (req,res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/removeUser/:id', MGM.isAdmin, (req,res) => {
     let groupID = new UUIDString(req.params.id);
     let userID = new UUIDString(req.body.user);
     let user: User;
@@ -87,15 +75,7 @@ export function GroupHandler(hal: Halcyon): express.Router {
     })
   });
 
-  router.post('/addUser/:id', (req, res) => {
-    if (!req.cookies['uuid']) {
-      return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-    }
-
-    if (req.cookies['userLevel'] < 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }
-
+  router.post('/addUser/:id', MGM.isAdmin, (req, res) => {
     let groupID = new UUIDString(req.params.id);
     let userID = new UUIDString(req.body.user);
     let roleID = new UUIDString(req.body.role);

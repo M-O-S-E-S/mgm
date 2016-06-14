@@ -8,12 +8,7 @@ import { UUIDString } from '../../halcyon/UUID';
 export function TaskHandler(mgm: MGM): express.Router {
   let router = express.Router();
 
-  router.get('/', (req, res) => {
-    if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-      return;
-    }
-
+  router.get('/', MGM.isUser, (req, res) => {
     mgm.getJobsFor(new UUIDString(req.cookies['uuid'])).then((jobs: Job[]) => {
       res.send(JSON.stringify({
         Success: true,
@@ -24,23 +19,24 @@ export function TaskHandler(mgm: MGM): express.Router {
     });
   });
 
-  router.post('/loadOar/:uuid', (req, res) => {
+  router.post('/loadOar/:uuid', MGM.isUser, (req, res) => {
+
     res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
   });
 
-  router.post('/saveOar/:uuid', (req, res) => {
+  router.post('/saveOar/:uuid', MGM.isUser, (req, res) => {
     res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
   });
 
-  router.post('/nukeContent/:uuid', (req, res) => {
+  router.post('/nukeContent/:uuid', MGM.isUser, (req, res) => {
     res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
   });
 
-  router.post('/loadIar', (req, res) => {
+  router.post('/loadIar', MGM.isUser, (req, res) => {
     res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
   });
 
-  router.post('/saveIar', (req, res) => {
+  router.post('/saveIar', MGM.isUser, (req, res) => {
     res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
   });
 

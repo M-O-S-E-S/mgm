@@ -16,6 +16,11 @@ import { GroupHandler } from './routes/GroupHandler';
 import { DispatchHandler } from './routes/DispatchHandler';
 
 import * as express from 'express';
+import * as http from 'http';
+
+import * as request from 'request';
+import fs = require('fs');
+import { RestConsole, ConsoleSession } from './console';
 
 var urllib = require('urllib');
 
@@ -141,6 +146,85 @@ export class MGM {
     return router;
   }
 
+  //perform job tasking asynchronously
+  doJob(j: Job) {
+    let datum = JSON.parse(j.data);
+
+    switch (j.type) {
+      case 'load_oar':
+        /*loading oar is a multi step job:
+         * 1 - push file to mgmNode
+         * 2 - trigger oar load on console
+         * 3 - observe logs for oar completion
+        */
+        let region: Region;
+        let host: Host;
+        let oarPath: string;
+        console.log('beginning task load oar');
+        this.getRegion(new UUIDString(datum.Region)).then((r: Region) => {
+          region = r;
+          return this.getHost(r.slaveAddress);
+        }).then((h: Host) => {
+          host = h;
+          console.log('uploading oar to mgmNode');
+          datum.Status = 'Copying...';
+          j.data = JSON.stringify(datum);
+          this.updateJob(j);
+          return new Promise<string>((resolve, reject) => {
+
+            var formData = {
+              fileData: fs.createReadStream(datum.File),
+            }
+
+            request.post({
+              url: 'http://' + h.address + ':' + h.port + '/upload',
+              formData: formData
+            }, (err, res, body) => {
+                if (err) return reject(err);
+                let result = JSON.parse(body);
+                if(result.Success){
+                  resolve(result.File);
+                } else {
+                  reject(new Error('Cannot push file to mgmNode'));
+                }
+              })
+          });
+        }).then((uri: string) => {
+          // open a console and trigger the load
+          oarPath = uri;
+          let session: ConsoleSession;
+          return RestConsole.open(region.slaveAddress, region.consolePort, this.conf.console.user, this.conf.console.pass)
+          .then((cs: ConsoleSession) => {
+            session = cs;
+            return RestConsole.write(session, 'load oar ' + oarPath);
+          }).then( () => {
+            return RestConsole.close(session);
+          })
+        }).then( () => {
+          datum.Status = 'Loading Oar...';
+          j.data = JSON.stringify(datum);
+          this.updateJob(j);
+          console.log('load oar triggered successfuly');
+        }).then( () => {
+          //monitor region log for oar change
+        }).finally( () => {
+          //pull file back off of mgmNode whether we succeed or fail
+          //request.get('http://' + host.address + ':' + host.port + '/delete/' + oarPath.slice(-36))
+        }).catch((err: Error) => {
+          console.log('load oar failed: ' + err.message);
+          datum.Status = 'Failed...';
+          j.data = JSON.stringify(datum);
+          this.updateJob(j);
+        })
+
+      default:
+        console.log('No worker present for job type: ' + j.type);
+        datum.Status = 'Worker Not Implemented';
+        j.data = JSON.stringify(datum);
+        this.updateJob(j);
+    }
+  }
+
   deleteJob(j: Job): Promise<void> {
     return this.sql.deleteJob(j.id);
   }
@@ -149,7 +233,7 @@ export class MGM {
   }
 
   getJob(id: number): Promise<Job> {
-    return this.sql.getJob(id).then( (row: any) => {
+    return this.sql.getJob(id).then((row: any) => {
       return this.buildJob(row);
     });
   }

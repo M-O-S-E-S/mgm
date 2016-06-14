@@ -36,7 +36,7 @@
                     <tbody style="height: 9em; overflow: auto;">
                         <tr ng-repeat="task in tasks track by task.id">
                             <td width="80"><button ng-click="delete(task)">delete</button></td>
-                            <td width="140">{{task.timestamp}}</td>
+                            <td width="140">{{task.timestamp.toLocaleString()}}</td>
                             <td width="300">{{task.type}}
                                 <span ng-if="task.data.Region">-> {{regionNameFromUUID(task.data.Region)}}</span>
                             </td>

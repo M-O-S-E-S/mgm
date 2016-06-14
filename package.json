@@ -6,11 +6,13 @@
     "bluebird": "^3.3.4",
     "body-parser": "^1.15.1",
     "cookie-parser": "^1.4.1",
+    "form-data": "^1.0.0-rc4",
     "log4js": "^0.6.33",
     "multer": "^1.1.0",
     "mysql": "^2.10.2",
     "prompt": "~0.2.14",
     "randomstring": "~1.0.7",
+    "request": "^2.72.0",
     "sha1": "^1.1.1",
     "urllib": "^2.9.1",
     "xml2js": "^0.4.16"

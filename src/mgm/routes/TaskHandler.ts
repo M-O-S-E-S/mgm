@@ -114,7 +114,7 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
   router.post('/upload/:id', multer({ dest: uploadDir}).single('file'), (req, res) => {
     let taskID = parseInt(req.params.id);
 
-    console.log(req.file);
+    console.log('upload file received for job ' + taskID);
 
     mgm.getJob(taskID).then( (j: Job) => {
       switch(j.type){
@@ -128,8 +128,10 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
           throw new Error('invalid upload for job type: ' + j.type);
       }
     }).then( (j: Job) => {
-      //do more oar loading magics.
-      res.send(JSON.stringify({ Success: false, Message: 'Oar loading not implemented' }));
+      //do oar loading magics.
+      mgm.doJob(j);
+
+      res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });

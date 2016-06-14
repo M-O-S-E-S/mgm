@@ -1,8 +1,5 @@
 {
   "name": "halcyonUtil",
-  "dependencies": {
-    "request": "registry:npm/request#2.69.0+20160428223725"
-  },
   "globalDependencies": {
     "bluebird": "registry:dt/bluebird#2.0.0+20160319051630",
     "body-parser": "registry:dt/body-parser#0.0.0+20160317120654",

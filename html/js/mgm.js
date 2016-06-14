@@ -239,6 +239,10 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
         $http.get("/server/task").success(function(data, status, headers, config){
             if(data.Success){
                 tasks = data.Tasks;
+                for(var t in tasks){
+                  tasks[t].data = JSON.parse(tasks[t].data);
+                  tasks[t].timestamp = new Date(tasks[t].timestamp);
+                }
                 $rootScope.$broadcast("taskService", "update");
             }
         });

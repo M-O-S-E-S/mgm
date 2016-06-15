@@ -449,7 +449,32 @@ export class SqlConnector {
 
   insertEstate(e: Estate): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.db.pool.query('INSERT INTO estate_settings (EstateName, EstateOwner) VALUES (?,?)', [e.name, e.owner.toString()], err => {
+      let args = {
+        EstateName: e.name,
+        EstateOwner: e.owner.toString(),
+        AbuseEmailToEstateOwner: 0,
+        DenyAnonymous: 1,
+        ResetHomeOnTeleport: 0,
+        FixedSun: 0,
+        DenyTransacted: 0,
+        BlockDwell: 0,
+        DenyIdentified: 0,
+        AllowVoice: 0,
+        UseGlobalTime: 1,
+        PricePerMeter: 0,
+        TaxFree: 1,
+        AllowDirectTeleport: 1,
+        RedirectGridX: 0,
+        RedirectGridY: 0,
+        ParentEstateID: 0,
+        SunPosition: 0,
+        EstateSkipScripts: 0,
+        BillableFactor: 0,
+        PublicAccess: 1,
+        AbuseEmail: '',
+        DenyMinors: 0,
+      }
+      this.db.pool.query('INSERT INTO estate_settings SET ?', args, err => {
         if (err) return reject(err);
         resolve();
       })

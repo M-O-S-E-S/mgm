@@ -13,7 +13,7 @@
     "./**/*.ts"
   ],
   "files": [
-    "./bots.ts",
+    "./cli.ts",
     "./halcyon/estate.ts",
     "./halcyon/Group.ts",
     "./halcyon/Inventory.ts",

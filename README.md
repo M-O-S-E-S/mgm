@@ -13,6 +13,11 @@ npm install
 cp settings.js.example settings.js && vim settings.js
 gulp && node dist/mgm.js
 
+to manually create users on the command line:
+node dist/cli.js createUser FNAME LNAME PASSWORD [EMAIL] [GODLEVEL]
+
+Initialize the mgm database by applying the sql files under doc in order.
+
 # Other Information
 
 This mgm installation is written against a similar branch for mgmNode, which has been rolled back to tag 1.0 for better windows support and to undo all python twisted modifications.

@@ -2,8 +2,9 @@
 import { UUIDString } from './halcyon/UUID';
 import { SqlConnector } from './halcyon/sqlConnector';
 import { User, Appearance, Credential } from './halcyon/User';
+import { Inventory } from './halcyon/Inventory';
 
-var conf = require('../conf.json');
+var conf = require('../settings.js');
 
 let hal = new SqlConnector(conf.halcyon);
 
@@ -60,5 +61,60 @@ function deleteBots() {
   });
 }
 
+function createUser(args: string[]) {
+  if (args.length < 3) {
+    return usage();
+  }
+  let firstName = args[0];
+  let lastName = args[1];
+  let password = args[2];
+  let email = args[3] || '';
+  let userLevel = parseInt(args[4]) || 1;
+
+  console.log('Creating new user ' + firstName + ' ' + lastName);
+
+  let user = new User(
+    UUIDString.random(),
+    firstName,
+    lastName,
+    email,
+    Credential.fromPlaintext(password),
+    userLevel,
+    0
+    );
+  let inventory = Inventory.skeleton(user.UUID);
+  hal.addUser(user).then(() => {
+    return hal.addInventory(inventory);
+  }).then(() => {
+    console.log('User added successfully');
+  }).catch( (err: Error) => {
+    console.log('Error: ' + err.message);
+  }).finally( () => {
+    process.exit();
+  })
+
+}
+
+function usage() {
+  console.log('---------USAGE--------');
+  console.log('createUser fname lname password [email] [userLevel]');
+  console.log('    create a new user. default user level is 1');
+}
+
+let args = process.argv.slice(2);
+
+if (args.length < 1) {
+  usage();
+}
+
+switch (args[0]) {
+  case 'createUser':
+    createUser(args.splice(1));
+    break;
+
+  default:
+    usage();
+}
+
 //deleteBots();
-createBots();
+//createBots();

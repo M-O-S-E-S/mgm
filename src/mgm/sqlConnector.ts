@@ -58,8 +58,8 @@ export class SqlConnector {
 
   insertHost(address: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.db.pool.query('INSERT INTO hosts (address, cmd_key, status) VALUES (?, ?, ?)',
-        [address, UUIDString.zero(), "{}"], (err) => {
+      this.db.pool.query('INSERT INTO hosts (address, status) VALUES (?, ?)',
+        [address, "{}"], (err) => {
           if (err)
             return reject(err);
           resolve();
@@ -69,8 +69,8 @@ export class SqlConnector {
 
   updateHost(h: Host): Promise<Host> {
     return new Promise<Host>((resolve, reject) => {
-      this.db.pool.query('UPDATE hosts SET port=?, name=?, cmd_key=?, slots=? WHERE address=?',
-        [h.port, h.name, h.cmd_key, h.slots, h.address], (err) => {
+      this.db.pool.query('UPDATE hosts SET port=?, name=?, slots=? WHERE address=?',
+        [h.port, h.name, h.slots, h.address], (err) => {
           if (err)
             return reject(err);
           resolve(h);

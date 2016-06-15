@@ -143,7 +143,6 @@ export function DispatchHandler(mgm: MGM, logDir: string): express.Router {
       host.slots = payload.slots;
       host.name = payload.host;
       host.port = payload.port;
-      host.cmd_key = new UUIDString(payload.key);
 
       return host;
     }).then((h: Host) => {

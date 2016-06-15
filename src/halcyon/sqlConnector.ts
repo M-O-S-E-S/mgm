@@ -48,12 +48,12 @@ export class SqlConnector {
   }
   getUserByName(name: string): Promise<User> {
     let nameParts = name.split(' ');
-    return new Promise<User>(resolve => {
+    return new Promise<User>( (resolve, reject) => {
       this.db.pool.query('SELECT * FROM users WHERE username=? AND lastname=?', nameParts, (err, row) => {
         if (err)
           throw err;
         if (!row || row.length !== 1)
-          throw new Error('User ' + name + ' not found.');
+          return reject(new Error('User ' + name + ' not found.'));
         resolve(User.fromDB(row[0]));
       })
     });

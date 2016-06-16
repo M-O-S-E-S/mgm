@@ -181,11 +181,15 @@ export class MGM {
               formData: formData
             }, (err, res, body) => {
                 if (err) return reject(err);
-                let result = JSON.parse(body);
-                if(result.Success){
-                  resolve(result.File);
-                } else {
-                  reject(new Error('Cannot push file to mgmNode'));
+                try {
+                  let result = JSON.parse(body);
+                  if(result.Success){
+                    resolve(result.File);
+                  } else {
+                    reject(new Error('Cannot push file to mgmNode'));
+                  }
+                } catch(err){
+                  reject(new Error('Error sending file to mgmNode'));
                 }
               })
           });
@@ -212,7 +216,7 @@ export class MGM {
           //request.get('http://' + host.address + ':' + host.port + '/delete/' + oarPath.slice(-36))
         }).catch((err: Error) => {
           console.log('load oar failed: ' + err.message);
-          datum.Status = 'Failed...';
+          datum.Status = 'Failed:' + err.message;
           j.data = JSON.stringify(datum);
           this.updateJob(j);
         })

@@ -75,7 +75,7 @@ interface InventoryRow {
   Description: string
   ContentType: string
   Version: number
-  CreationDate: number
+  CreationDate: Date
   Type: string
   LeftNode: number
   RightNode: number
@@ -291,7 +291,7 @@ export class SimianConnector {
     i.salePrice = extraData.SalePrice;
     //i.saleType
 
-    i.creationDate = r.CreationDate;
+    i.creationDate = Math.floor(r.CreationDate.getTime()/1000);
     i.groupID = UUIDString.zero();
     i.groupOwned = 0;
     i.flags = 0;

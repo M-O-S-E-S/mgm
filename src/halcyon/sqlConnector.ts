@@ -329,7 +329,7 @@ export class SqlConnector {
   }
 
   addInventory(inventory: Inventory): Promise<void> {
-    return new Promise<void>(resolve => {
+    return new Promise<void>( (resolve,reject) => {
       //push all of the inventory folders in first
       let folders = inventory.getFolders();
       let query = 'INSERT INTO inventoryfolders (folderName, type, version, folderID, agentID, parentFolderID) VALUES ?';
@@ -343,40 +343,40 @@ export class SqlConnector {
 
         //once folders are inserted, insert items
         let items = inventory.getItems();
-        query = 'INSERT INTO inventoryitems (assetID,assetType,inventoryName,inventoryDescription,inventoryNextPermissions,inventoryCurrentPermissions,invType,creatorID,inventoryBasePermissions,inventoryEveryOnePermissions,salePrice,saleType,creationDate,groupID,groupOwned,flags,inventoryID,avatarID,parentFolderID,inventoryGroupPermissions) VALUES ?'
-        values = [];
-        for (let i of items) {
-          values.push([
-            i.assetID.toString(),
-            i.assetType,
-            i.inventoryName,
-            i.inventoryDescription || '',
-            i.inventoryNextPermissions,     //???
-            i.inventoryCurrentPermissions,  //???
-            i.invType,
-            i.creatorID.toString(),
-            i.inventoryBasePermissions || 647168,     //???
-            i.inventoryEveryOnePermissions || 0, //???
-            i.salePrice || 0,
-            i.saleType || 0,
-            i.creationDate,
-            i.groupID.toString(),
-            i.groupOwned || 0,
-            i.flags || 0,
-            i.inventoryID.toString(),
-            i.avatarID.toString(),
-            i.parentFolderID.toString(),
-            i.inventoryGroupPermissions || 0
-          ]);
-        }
-        if (values.length == 0)
-          return resolve();
-        this.db.pool.query(query, [values], (err: mysql.IError) => {
-          if (err)
-            throw err;
-
-          resolve();
+        let tasks = items.map( (i: Item) => {
+          return new Promise<void>( (resolve, reject) => {
+            this.db.pool.query('INSERT INTO inventoryitems SET ?',{
+              assetID: i.assetID.toString(),
+              assetType: i.assetType,
+              inventoryName: i.inventoryName,
+              inventoryDescription: i.inventoryDescription || 'description',
+              inventoryNextPermissions: i.inventoryNextPermissions,     //???
+              inventoryCurrentPermissions: i.inventoryCurrentPermissions,  //???
+              invType: i.invType,
+              creatorID: i.creatorID.toString(),
+              inventoryBasePermissions: i.inventoryBasePermissions || 647168,     //???
+              inventoryEveryOnePermissions: i.inventoryEveryOnePermissions || 0, //???
+              salePrice: i.salePrice || 0,
+              saleType: i.saleType || 0,
+              creationDate: i.creationDate,
+              groupID: i.groupID.toString(),
+              groupOwned: i.groupOwned || 0,
+              flags: i.flags || 0,
+              inventoryID: i.inventoryID.toString(),
+              avatarID: i.avatarID.toString(),
+              parentFolderID: i.parentFolderID.toString(),
+              inventoryGroupPermissions: i.inventoryGroupPermissions || 0
+            }, (err) => {
+              if(err) return reject(err);
+              resolve();
+            });
+          });
         });
+       Promise.all(tasks).then( () => {
+         resolve();
+       }).catch( (err) => {
+         reject(err);
+       })
       });
     });
   }

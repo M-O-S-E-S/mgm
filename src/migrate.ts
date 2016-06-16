@@ -20,7 +20,7 @@ let sim = new SimianConnector(conf.simian);
 let args = process.argv.slice(2);
 
 if (process.argv.length < 3) {
-  throw new Error('targetID and iarfile required');
+  throw new Error('simian sourceID and halcyon targetID required');
 }
 
 let targetID = new UUIDString(args[1]);

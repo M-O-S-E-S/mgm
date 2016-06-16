@@ -69,7 +69,13 @@ whip.connect().then(() => {
       }
       a.name = i.inventoryName;
       a.description = i.inventoryDescription;
-      return whip.putAsset(a);
+      return whip.testAsset(a.uuid).then( (res) => {
+        if(res === null){
+          console.log('Uploading asset ' + a.uuid.toString() + ' to whip');
+          return whip.putAsset(a);
+        }
+        return 'Asset ' + a.uuid.toString() + ' is already on whip, skipping';
+      })
     }).then( (msg: string) => {
       console.log( counter + '/' + items.length + ': ' + msg);
       counter++;

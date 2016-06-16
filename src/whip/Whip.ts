@@ -112,7 +112,7 @@ export class WhipServer {
       case ServerResponseCodes.Found:
         return req.resolve(resp.data);
       case ServerResponseCodes.NotFound:
-        return req.reject(new Error('asset not found'));
+        return req.resolve(null);
       case ServerResponseCodes.Error:
         return req.resolve(resp.data.toString());
       case ServerResponseCodes.OK:

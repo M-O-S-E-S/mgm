@@ -26,8 +26,9 @@ function createUsers(path: string) {
     let rows: string[] = data.trim().split('\n');
     let workers = rows.map((row) => {
       let r: UserRow = JSON.parse(row)
+      console.log('r.lname');
       return hal.getUser(new UUIDString(conf.mgm.templates[r.template])).then((u: User) => {
-        u.templateOnto(r.fname, r.lname, r.password, r.email, hal);
+        return u.templateOnto(r.fname, r.lname, r.password, r.email, hal);
       });
     });
 
@@ -38,7 +39,7 @@ function createUsers(path: string) {
   });
 }
 
-/*function deleteUsers(path: string) {
+function deleteUsers(path: string) {
   fs.readFile('users.txt', 'utf8', (err, data) => {
     if (err)
       throw err;
@@ -65,7 +66,7 @@ function createUsers(path: string) {
       process.exit();
     });
   });
-}*/
+}
 
 function createUser(args: string[]) {
   if (args.length < 3) {
@@ -101,6 +102,16 @@ function createUser(args: string[]) {
 
 }
 
+function printInventory(id: string){
+  let uuid = new UUIDString(id);
+  hal.getInventory(uuid).then( (i: Inventory) => {
+    console.log(i);
+  }).then( () => {
+    console.log('complete');
+    process.exit();
+  })
+}
+
 function usage() {
   console.log('---------USAGE--------');
   console.log('createUser fname lname password [email] [userLevel]');
@@ -121,6 +132,12 @@ switch (args[0]) {
     break;
   case 'createUsers':
     createUsers(args.splice(1)[0]);
+    break;
+  case 'deleteUsers':
+    deleteUsers(args.splice(1)[0]);
+    break;
+  case 'printInventory':
+    printInventory(args.splice(1)[0]);
     break;
   default:
     usage();

@@ -3,36 +3,42 @@ import { UUIDString } from './halcyon/UUID';
 import { SqlConnector } from './halcyon/sqlConnector';
 import { User, Appearance, Credential } from './halcyon/User';
 import { Inventory } from './halcyon/Inventory';
+import { Config } from './mgm/MGM';
 
-var conf = require('../settings.js');
+let fs = require('fs');
+
+var conf: Config = require('../settings.js');
 
 let hal = new SqlConnector(conf.halcyon);
 
-function createBots() {
-  hal.getUser(new UUIDString('38ed49f0-986a-40e7-bb12-227ea40b8b7c')).then((t: User) => {
-    let fs = require('fs');
-    fs.readFile('users.txt', 'utf8', (err, data) => {
-      if (err)
-        throw err;
-      let rows: string[] = data.trim().split('\n');
-      let workers = [];
-      for (let row of rows) {
-        let u = JSON.parse(row)
-        console.log(u.lname);
-        let w = t.templateOnto(u.fname, u.lname, u.password, u.email, hal);
-        workers.push(w);
-      }
-
-      Promise.all(workers).then(() => {
-        console.log('complete');
-        process.exit();
+class UserRow {
+  fname: string
+  lname: string
+  password: string
+  email: string
+  template: string
+}
+// users are of the format: { fname:, lname:, password:, email:, template: }
+function createUsers(path: string) {
+  fs.readFile(path, 'utf8', (err, data) => {
+    if (err)
+      throw err;
+    let rows: string[] = data.trim().split('\n');
+    let workers = rows.map((row) => {
+      let r: UserRow = JSON.parse(row)
+      return hal.getUser(new UUIDString(conf.mgm.templates[r.template])).then((u: User) => {
+        u.templateOnto(r.fname, r.lname, r.password, r.email, hal);
       });
+    });
+
+    Promise.all(workers).then(() => {
+      console.log('complete');
+      process.exit();
     });
   });
 }
 
-function deleteBots() {
-  let fs = require('fs');
+/*function deleteUsers(path: string) {
   fs.readFile('users.txt', 'utf8', (err, data) => {
     if (err)
       throw err;
@@ -59,7 +65,7 @@ function deleteBots() {
       process.exit();
     });
   });
-}
+}*/
 
 function createUser(args: string[]) {
   if (args.length < 3) {
@@ -81,15 +87,15 @@ function createUser(args: string[]) {
     Credential.fromPlaintext(password),
     userLevel,
     0
-    );
+  );
   let inventory = Inventory.skeleton(user.UUID);
   hal.addUser(user).then(() => {
     return hal.addInventory(inventory);
   }).then(() => {
     console.log('User added successfully');
-  }).catch( (err: Error) => {
+  }).catch((err: Error) => {
     console.log('Error: ' + err.message);
-  }).finally( () => {
+  }).finally(() => {
     process.exit();
   })
 
@@ -99,6 +105,8 @@ function usage() {
   console.log('---------USAGE--------');
   console.log('createUser fname lname password [email] [userLevel]');
   console.log('    create a new user. default user level is 1');
+  console.log('createUsers filename');
+  console.log('    create many users using a newline delimited file containing json records')
 }
 
 let args = process.argv.slice(2);
@@ -111,7 +119,9 @@ switch (args[0]) {
   case 'createUser':
     createUser(args.splice(1));
     break;
-
+  case 'createUsers':
+    createUsers(args.splice(1)[0]);
+    break;
   default:
     usage();
 }

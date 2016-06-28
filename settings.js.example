@@ -16,6 +16,9 @@ settings.mgm.templates = {
   female: ''
 };
 
+// External IP address for grid voice services
+settings.mgm.voiceIP = "Freeswitch IP";
+
 // Settings for MGM to communicate with the Halcyon databases
 settings.halcyon = {};
 settings.halcyon.db_host = "devsql";

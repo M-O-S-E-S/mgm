@@ -193,11 +193,6 @@ export class User {
       return hal.addAppearance(newAppearance);
     }).then(() => {
       return hal.addInventory(newInventory);
-    }).catch((err: Error) => {
-      console.log('An Error Occurred!!');
-      console.log(err.stack);
-    }).finally(() => {
-      console.log('template of user ' + firstname + ' ' + lastname + ' complete');
     });
   }
 

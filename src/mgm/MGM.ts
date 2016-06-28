@@ -14,6 +14,8 @@ import { UserHandler } from './routes/UserHandler';
 import { RegionHandler } from './routes/RegionHandler';
 import { GroupHandler } from './routes/GroupHandler';
 import { DispatchHandler } from './routes/DispatchHandler';
+import { Freeswitch } from './Freeswitch';
+import { FreeswitchHandler } from './routes/FreeswitchHandler';
 
 import * as express from 'express';
 import * as http from 'http';
@@ -33,6 +35,7 @@ export interface Config {
     log_dir: string
     upload_dir: string
     templates: { [key: string]: string }
+    voiceIP: string
   },
   halcyon: {
     db_host: string
@@ -83,6 +86,8 @@ export class MGM {
 
   getRouter(): express.Router {
     let router = express.Router();
+    let fs = new Freeswitch(this.conf);
+
     router.use('/auth', AuthHandler(this.hal));
     router.use('/console', ConsoleHandler(this, this.conf.console));
     router.use('/task', TaskHandler(this, this.conf.mgm.upload_dir));
@@ -91,6 +96,8 @@ export class MGM {
     router.use('/user', UserHandler(this.hal, this.conf.mgm.templates));
     router.use('/region', RegionHandler(this, this.hal, this.conf.console, this.conf.mgm.log_dir));
     router.use('/group', GroupHandler(this.hal));
+
+    router.use('/fsapi', FreeswitchHandler(fs));
 
     router.use('/server/dispatch', DispatchHandler(this, this.conf.mgm.log_dir));
 
@@ -143,6 +150,7 @@ export class MGM {
       console.log('Received registration request.  Not Implemented');
       res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
     });
+
     return router;
   }
 

@@ -105,7 +105,10 @@ function createUser(args: string[]) {
 function printInventory(id: string){
   let uuid = new UUIDString(id);
   hal.getInventory(uuid).then( (i: Inventory) => {
-    console.log(i);
+    for(let l of i.getItems()){
+      console.log(l.assetID.toString());
+    }
+    //console.log(i);
   }).then( () => {
     console.log('complete');
     process.exit();

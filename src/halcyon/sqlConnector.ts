@@ -25,33 +25,29 @@ export class SqlConnector {
   }
 
   getAllUsers(): Promise<User[]> {
-    return new Promise<User[]>(resolve => {
+    return new Promise<User[]>((resolve, reject) => {
       this.db.pool.query('SELECT * FROM users WHERE 1', (err, rows: any[]) => {
-        if (err)
-          throw err;
-
+        if (err) return reject(err);
         resolve(rows)
       });
     });
   }
 
   getUserByEmail(email: string): Promise<User> {
-    return new Promise<User>(resolve => {
+    return new Promise<User>((resolve, reject) => {
       this.db.pool.query('SELECT * FROM users WHERE email=?', email, (err, row) => {
-        if (err)
-          throw err;
+        if (err) return reject(err);
         if (!row || row.length !== 1)
-          throw new Error('User ' + email + ' not found.');
+          return reject(new Error('User ' + email + ' not found.'));
         resolve(User.fromDB(row[0]));
       })
     });
   }
   getUserByName(name: string): Promise<User> {
     let nameParts = name.split(' ');
-    return new Promise<User>( (resolve, reject) => {
+    return new Promise<User>((resolve, reject) => {
       this.db.pool.query('SELECT * FROM users WHERE username=? AND lastname=?', nameParts, (err, row) => {
-        if (err)
-          throw err;
+        if (err) return reject(err);
         if (!row || row.length !== 1)
           return reject(new Error('User ' + name + ' not found.'));
         resolve(User.fromDB(row[0]));
@@ -59,19 +55,18 @@ export class SqlConnector {
     });
   }
   getUser(id: UUIDString): Promise<User> {
-    return new Promise<User>(resolve => {
+    return new Promise<User>((resolve, reject) => {
       this.db.pool.query('SELECT * FROM users WHERE UUID=?', id.toString(), (err, row) => {
-        if (err)
-          throw err;
+        if (err) return reject(err);
         if (!row || row.length !== 1)
-          throw new Error('User ' + id.toString() + ' not found.');
+          return reject(new Error('User ' + id.toString() + ' not found.'));
         resolve(User.fromDB(row[0]));
       })
     });
   }
 
   addAppearance(appearance: Appearance): Promise<void> {
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve, reject) => {
       let args = {
         Owner: appearance.Owner.toString(),
         Serial: appearance.Serial,
@@ -112,20 +107,18 @@ export class SqlConnector {
         physics_asset: appearance.physics_asset.toString(),
       }
       this.db.pool.query('INSERT INTO avatarappearance SET ?', args, (err) => {
-        if (err)
-          throw err;
+        if (err) return reject(err);
         resolve();
       });
     });
   }
 
   getAppearance(id: UUIDString): Promise<Appearance> {
-    return new Promise<Appearance>(resolve => {
+    return new Promise<Appearance>((resolve, reject) => {
       this.db.pool.query('SELECT * FROM avatarappearance WHERE Owner=?', id.toString(), (err, row) => {
-        if (err)
-          throw err;
+        if (err) return reject(err);
         if (!row || row.length !== 1)
-          throw new Error('appearance for user ' + id.toString() + ' not found.');
+          return reject(new Error('appearance for user ' + id.toString() + ' not found.'));
         let r = row[0];
         let a = new Appearance();
         a.Owner = new UUIDString(r.Owner);
@@ -171,12 +164,11 @@ export class SqlConnector {
   }
 
   getInventory(id: UUIDString): Promise<Inventory> {
-    return new Promise<Inventory>(resolve => {
+    return new Promise<Inventory>((resolve, reject) => {
       let folders: Folder[] = [];
       let items: Item[] = [];
       this.db.pool.query('SELECT * FROM inventoryfolders WHERE agentID=?', id.toString(), (err, rows) => {
-        if (err)
-          throw err;
+        if (err) return reject(err);
         for (let r of rows) {
           folders.push(new Folder(
             r.folderName,
@@ -185,11 +177,10 @@ export class SqlConnector {
             new UUIDString(r.folderID),
             new UUIDString(r.agentID),
             new UUIDString(r.parentFolderID)
-            ));
+          ));
         }
         this.db.pool.query('SELECT * FROM inventoryitems WHERE avatarID=?', id.toString(), (err, rows) => {
-          if (err)
-            throw err;
+          if (err) return reject(err);
           for (let r of rows) {
             let i: Item = new Item();
             i.assetID = new UUIDString(r.assetID);
@@ -221,22 +212,18 @@ export class SqlConnector {
   }
 
   deleteUser(user: UUIDString): Promise<void> {
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve, reject) => {
       this.db.pool.query("DELETE FROM users WHERE UUID=?", user.toString(), (err) => {
-        if (err)
-          throw err
+        if (err) return reject(err);
 
         this.db.pool.query("DELETE FROM avatarappearance WHERE Owner=?", user.toString(), (err) => {
-          if (err)
-            throw err
+          if (err) return reject(err);
 
           this.db.pool.query("DELETE FROM inventoryfolders WHERE agentID=?", user.toString(), (err) => {
-            if (err)
-              throw err
+            if (err) return reject(err);
 
             this.db.pool.query("DELETE FROM inventoryitems WHERE avatarID=?", user.toString(), (err) => {
-              if (err)
-                throw err
+              if (err) return reject(err);
               resolve();
             });
           });
@@ -246,23 +233,23 @@ export class SqlConnector {
   }
 
   setUserPassword(userID: string, cred: Credential): Promise<void> {
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve, reject) => {
       this.db.pool.query('UPDATE users SET passwordHash=? WHERE UUID=?', [cred.hash, userID], (err) => {
-        if (err) throw err;
+        if (err) return reject(err);
         resolve();
       });
     });
   }
 
   addUser(user: User): Promise<void> {
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve, reject) => {
       let args = {
         UUID: user.UUID.toString(),
         username: user.username,
         lastname: user.lastname,
         passwordHash: user.passwordHash.hash,
         passwordSalt: '',
-        created: Math.round(new Date().getTime()/1000.0),
+        created: Math.round(new Date().getTime() / 1000.0),
         lastLogin: 0,
         godLevel: user.godLevel,
         iz_level: user.iz_level,
@@ -287,40 +274,37 @@ export class SqlConnector {
         profileWantDoMask: user.profileWantDoMask
       }
       this.db.pool.query('INSERT INTO users SET ?', args, (err) => {
-        if (err)
-          throw err;
+        if (err) return reject(err);
         resolve();
       });
     });
   }
 
   setGodLevel(user: User, level: number): Promise<void> {
-    return new Promise<void>( (resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.db.pool.query('UPDATE users SET godLevel=? WHERE UUID=?', [level, user.UUID.toString()], err => {
-        if(err)
-          return reject(err);
+        if (err) return reject(err);
         resolve();
       });
     });
   }
 
   setEmail(user: User, email: string): Promise<void> {
-    return new Promise<void>( (resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.db.pool.query('UPDATE users SET email=? WHERE UUID=?', [email, user.UUID.toString()], err => {
-        if(err)
-          return reject(err);
+        if (err) return reject(err);
         resolve();
       });
     });
   }
 
   deleteInventory(u: User): Promise<void> {
-    return new Promise<void>( (resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.db.pool.query('DELETE FROM inventoryfolders WHERE agentID=?', u.UUID.toString(), (err) => {
-        if(err) return reject(err);
+        if (err) return reject(err);
 
         this.db.pool.query('DELETE FROM inventoryitems WHERE avatarID=?', u.UUID.toString(), (err) => {
-          if(err) reject(err);
+          if (err) return reject(err);
 
           resolve();
         });
@@ -329,7 +313,7 @@ export class SqlConnector {
   }
 
   addInventory(inventory: Inventory): Promise<void> {
-    return new Promise<void>( (resolve,reject) => {
+    return new Promise<void>((resolve, reject) => {
       //push all of the inventory folders in first
       let folders = inventory.getFolders();
       let query = 'INSERT INTO inventoryfolders (folderName, type, version, folderID, agentID, parentFolderID) VALUES ?';
@@ -338,14 +322,16 @@ export class SqlConnector {
         values.push([f.folderName, f.Type, f.version, f.folderID.toString(), f.agentID.toString(), f.parentFolderID.toString()]);
       }
       this.db.pool.query(query, [values], (err: mysql.IError) => {
-        if (err)
-          throw err;
+        if (err) return reject(err);
 
         //once folders are inserted, insert items
         let items = inventory.getItems();
-        let tasks = items.map( (i: Item) => {
-          return new Promise<void>( (resolve, reject) => {
-            this.db.pool.query('INSERT INTO inventoryitems SET ?',{
+        let tasks = items.map((i: Item) => {
+          if(i.assetID === undefined){
+            console.log(i);
+          }
+          return new Promise<void>((resolve, reject) => {
+            this.db.pool.query('INSERT INTO inventoryitems SET ?', {
               assetID: i.assetID.toString(),
               assetType: i.assetType,
               inventoryName: i.inventoryName,
@@ -367,16 +353,16 @@ export class SqlConnector {
               parentFolderID: i.parentFolderID.toString(),
               inventoryGroupPermissions: i.inventoryGroupPermissions || 0
             }, (err) => {
-              if(err) return reject(err);
+              if (err) return reject(err);
               resolve();
             });
           });
         });
-       Promise.all(tasks).then( () => {
-         resolve();
-       }).catch( (err) => {
-         reject(err);
-       })
+        Promise.all(tasks).then(() => {
+          resolve();
+        }).catch((err) => {
+          reject(err);
+        })
       });
     });
   }
@@ -384,8 +370,7 @@ export class SqlConnector {
   private getManagersForEstate(id: number): Promise<UUIDString[]> {
     return new Promise<UUIDString[]>((resolve, reject) => {
       this.db.pool.query('SELECT uuid FROM estate_managers WHERE EstateID=?', id, (err, rows: any[]) => {
-        if (err)
-          return reject(err);
+        if (err) return reject(err);
         resolve(rows);
       })
     }).then((rows: any[]) => {
@@ -400,8 +385,7 @@ export class SqlConnector {
   private getRegionsForEstate(id: number): Promise<UUIDString[]> {
     return new Promise<UUIDString[]>((resolve, reject) => {
       this.db.pool.query('SELECT RegionID FROM estate_map WHERE EstateID=?', id, (err, rows: any[]) => {
-        if (err)
-          return reject(err);
+        if (err) return reject(err);
         resolve(rows);
       })
     }).then((rows: any[]) => {

@@ -4,6 +4,7 @@ import { SqlConnector } from './halcyon/sqlConnector';
 import { User, Appearance, Credential } from './halcyon/User';
 import { Inventory } from './halcyon/Inventory';
 import { Config } from './mgm/MGM';
+import { RemoteAdmin } from './halcyon/RemoteAdmin';
 
 let fs = require('fs');
 
@@ -102,14 +103,14 @@ function createUser(args: string[]) {
 
 }
 
-function printInventory(id: string){
+function printInventory(id: string) {
   let uuid = new UUIDString(id);
-  hal.getInventory(uuid).then( (i: Inventory) => {
-    for(let l of i.getItems()){
+  hal.getInventory(uuid).then((i: Inventory) => {
+    for (let l of i.getItems()) {
       console.log(l.assetID.toString());
     }
     //console.log(i);
-  }).then( () => {
+  }).then(() => {
     console.log('complete');
     process.exit();
   })
@@ -141,6 +142,16 @@ switch (args[0]) {
     break;
   case 'printInventory':
     printInventory(args.splice(1)[0]);
+    break;
+  case 'radmin':
+    RemoteAdmin.Open('10.10.0.108', 9000, 'username', 'password')
+      .then((session) => {
+        console.log(session);
+        return RemoteAdmin.Close(session);
+      }).catch((err: Error) => {
+        //console.log(err);
+        console.log('ERROR:' + err.message);
+      })
     break;
   default:
     usage();

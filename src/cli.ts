@@ -144,13 +144,12 @@ switch (args[0]) {
     printInventory(args.splice(1)[0]);
     break;
   case 'radmin':
-    RemoteAdmin.Open('10.10.0.108', 9000, 'username', 'password')
-      .then((session) => {
-        console.log(session);
-        return RemoteAdmin.Close(session);
-      }).catch((err: Error) => {
-        //console.log(err);
-        console.log('ERROR:' + err.message);
+    RemoteAdmin.Open('10.10.0.108', 9000, conf.console.user, conf.console.pass)
+      .then( (session) => {
+        return RemoteAdmin.Backup(session, 'Ratio', 'haz', true);
+      }).then(RemoteAdmin.Close)
+      .catch((err: Error) => {
+        console.log('Error: ' + err.message);
       })
     break;
   default:

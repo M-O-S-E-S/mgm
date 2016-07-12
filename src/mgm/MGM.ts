@@ -20,7 +20,7 @@ import { FreeswitchHandler } from './routes/FreeswitchHandler';
 import * as express from 'express';
 import * as http from 'http';
 
-import * as request from 'request';
+var urllib = require('urllib');
 import fs = require('fs');
 import { RestConsole, ConsoleSession } from './console';
 
@@ -178,48 +178,41 @@ export class MGM {
           datum.Status = 'Copying...';
           j.data = JSON.stringify(datum);
           this.updateJob(j);
-          return new Promise<string>((resolve, reject) => {
 
-            var formData = {
-              fileData: fs.createReadStream(datum.File),
+          var formData = {
+            fileData: fs.createReadStream(datum.File),
+          }
+
+          return urllib.request('http://' + h.address + ':' + h.port + '/upload', {
+            method: 'POST',
+            data: formData
+          }).then((body) => {
+            let result = JSON.parse(body);
+            if (result.Success) {
+              return result.File;
+            } else {
+              throw new Error('Cannot push file to mgmNode');
             }
-
-            request.post({
-              url: 'http://' + h.address + ':' + h.port + '/upload',
-              formData: formData
-            }, (err, res, body) => {
-                if (err) return reject(err);
-                try {
-                  let result = JSON.parse(body);
-                  if(result.Success){
-                    resolve(result.File);
-                  } else {
-                    reject(new Error('Cannot push file to mgmNode'));
-                  }
-                } catch(err){
-                  reject(new Error('Error sending file to mgmNode'));
-                }
-              })
-          });
+          })
         }).then((uri: string) => {
           // open a console and trigger the load
           oarPath = uri;
           let session: ConsoleSession;
           return RestConsole.open(region.slaveAddress, region.consolePort, this.conf.console.user, this.conf.console.pass)
-          .then((cs: ConsoleSession) => {
-            session = cs;
-            return RestConsole.write(session, 'load oar ' + oarPath);
-          }).then( () => {
-            return RestConsole.close(session);
-          })
-        }).then( () => {
+            .then((cs: ConsoleSession) => {
+              session = cs;
+              return RestConsole.write(session, 'load oar ' + oarPath);
+            }).then(() => {
+              return RestConsole.close(session);
+            })
+        }).then(() => {
           datum.Status = 'Loading Oar...';
           j.data = JSON.stringify(datum);
           this.updateJob(j);
           console.log('load oar triggered successfuly');
-        }).then( () => {
+        }).then(() => {
           //monitor region log for oar change
-        }).finally( () => {
+        }).finally(() => {
           //pull file back off of mgmNode whether we succeed or fail
           //request.get('http://' + host.address + ':' + host.port + '/delete/' + oarPath.slice(-36))
         }).catch((err: Error) => {

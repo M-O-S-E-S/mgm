@@ -12,8 +12,6 @@
     "mysql": "^2.10.2",
     "prompt": "~0.2.14",
     "randomstring": "~1.0.7",
-    "request": "^2.72.0",
-    "request-promise": "^3.0.0",
     "sha1": "^1.1.1",
     "urllib": "^2.9.1",
     "xml2js": "^0.4.16"

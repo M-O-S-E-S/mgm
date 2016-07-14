@@ -1,6 +1,6 @@
 
 import * as express from 'express';
-import { Host } from '../host';
+import { Host } from '../Host';
 import { MGM } from '../MGM';
 
 export function HostHandler(mgm: MGM): express.Router {

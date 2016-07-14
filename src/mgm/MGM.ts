@@ -1,5 +1,5 @@
 
-import { SqlConnector } from './sqlConnector';
+import { MGMDB } from './database/mgmDB';
 import { Job } from './Job';
 import { Region } from './Region';
 import { Host } from './host';
@@ -14,6 +14,7 @@ import { UserHandler } from './routes/UserHandler';
 import { RegionHandler } from './routes/RegionHandler';
 import { GroupHandler } from './routes/GroupHandler';
 import { DispatchHandler } from './routes/DispatchHandler';
+import { OfflineMessageHandler } from './routes/OfflineMessageHandler';
 import { Freeswitch } from './Freeswitch';
 import { FreeswitchHandler } from './routes/FreeswitchHandler';
 
@@ -61,12 +62,15 @@ export interface Config {
 
 export class MGM {
   private conf: Config
-  private sql: SqlConnector
   private hal: HAL
+  private db: MGMDB
 
   constructor(config: Config) {
     this.conf = config;
-    this.sql = new SqlConnector(config)
+
+    //initialize singleton
+    this.db = new MGMDB(config.mgm);
+
     this.hal = new HAL(config.halcyon);
   }
 
@@ -98,6 +102,8 @@ export class MGM {
     router.use('/group', GroupHandler(this.hal));
 
     router.use('/fsapi', FreeswitchHandler(fs));
+
+    router.use('/offline', OfflineMessageHandler());
 
     router.use('/server/dispatch', DispatchHandler(this, this.conf.mgm.log_dir));
 
@@ -231,121 +237,82 @@ export class MGM {
   }
 
   deleteJob(j: Job): Promise<void> {
-    return this.sql.deleteJob(j.id);
+    return this.db.jobs.delete(j.id);
   }
   updateJob(j: Job): Promise<Job> {
-    return this.sql.updateJob(j);
+    return this.db.jobs.update(j);
   }
 
   getJob(id: number): Promise<Job> {
-    return this.sql.getJob(id).then((row: any) => {
-      return this.buildJob(row);
-    });
+    return this.db.jobs.get(id);
   }
 
   getJobsFor(id: UUIDString): Promise<Job[]> {
-    return this.sql.getJobsFor(id).then((rows: any[]) => {
-      let jobs: Job[] = [];
-      for (let r of rows) {
-        jobs.push(this.buildJob(r));
-      }
-      return jobs;
-    });
+    return this.db.jobs.getFor(id);
   }
 
   insertJob(j: Job): Promise<Job> {
-    return this.sql.insertJob(j);
+    return this.db.jobs.insert(j);
   }
 
   getAllRegions(): Promise<Region[]> {
-    return this.sql.getAllRegions().then((rows: any[]) => {
-      let regions: Region[] = [];
-      for (let r of rows) {
-        regions.push(this.buildRegion(r));
-      }
-      return regions;
-    });
+    return this.db.regions.getAll();
   }
 
   getRegionsFor(id: UUIDString): Promise<Region[]> {
-    return this.sql.getRegionsFor(id).then((rows: any[]) => {
-      let regions: Region[] = [];
-      for (let r of rows) {
-        regions.push(this.buildRegion(r));
-      }
-      return regions;
-    })
+    return this.db.regions.getFor(id);
   }
 
   getRegion(id: UUIDString): Promise<Region> {
-    return this.sql.getRegion(id).then((row: any) => {
-      return this.buildRegion(row);
-    });
+    return this.db.regions.get(id);
   }
 
   getHost(ip: string): Promise<Host> {
-    return this.sql.getHost(ip).then((row) => {
-      return this.buildHost(row);
-    });
+    return this.db.hosts.get(ip);
   }
 
   getHosts(): Promise<Host[]> {
-    return this.sql.getHosts().then((rows: any[]) => {
-      let hosts: Host[] = [];
-      for (let r of rows) {
-        hosts.push(this.buildHost(r));
-      }
-      return hosts;
-    })
+    return this.db.hosts.getAll();
   }
 
   getRegionsOn(h: Host): Promise<Region[]> {
-    return this.sql.getRegionsOn(h).then((rows: any[]) => {
-      let regions: Region[] = [];
-      for (let r of rows) {
-        regions.push(this.buildRegion(r));
-      }
-      return regions;
-    })
+    return this.db.regions.getOn(h.address);
   }
 
   getRegionByName(name: string): Promise<Region> {
-    return this.sql.getRegionByName(name).then((row: any) => {
-      return this.buildRegion(row);
-    })
+    return this.db.regions.getByName(name);
   }
 
   updateRegion(r: Region): Promise<Region> {
-    return this.sql.updateRegion(r);
+    return this.db.regions.update(r);
   }
 
   updateHost(h: Host): Promise<Host> {
-    return this.sql.updateHost(h);
+    return this.db.hosts.update(h);
   }
 
   updateHostStats(h: Host, stats: string): Promise<Host> {
-    return this.sql.updateHostStats(h, stats);
+    return this.db.hosts.updateStats(h, stats);
   }
 
   updateRegionStats(r: Region, isRunning: boolean, stats: string): Promise<void> {
-    return this.sql.updateRegionStats(r, isRunning, stats);
+    return this.db.regions.updateStats(r, isRunning, stats);
   }
 
   deleteHost(address: string): Promise<void> {
-    return this.sql.deleteHost(address);
+    return this.db.hosts.delete(address);
   }
 
   insertHost(address: string): Promise<void> {
-    return this.sql.insertHost(address);
+    return this.db.hosts.insert(address);
   }
 
   insertRegion(r: Region): Promise<Region> {
-    r.status = {};
-    return this.sql.insertRegion(r);
+    return this.db.regions.insert(r);
   }
 
   destroyRegion(r: Region): Promise<void> {
-    return this.sql.destroyRegion(r);
+    return this.db.regions.delete(r);
   }
 
   startRegion(r: Region, h: Host): Promise<void> {
@@ -377,7 +344,7 @@ export class MGM {
   }
 
   setRegionCoordinates(r: Region, x: number, y: number): Promise<void> {
-    return this.sql.setRegionCoordinates(r, x, y);
+    return this.db.regions.setCoordinates(r, x, y);
   }
 
   removeRegionFromHost(r: Region, h: Host): Promise<void> {
@@ -389,7 +356,7 @@ export class MGM {
     //host may be null
 
     //update region in mysql
-    return this.sql.setHostForRegion(r, h).then(() => {
+    return this.db.regions.setHost(r, h.address || '').then(() => {
       //sql is updated, contact new host
       if (h === null) {
         return Promise.resolve();
@@ -407,7 +374,7 @@ export class MGM {
   }
 
   getConfigs(r: Region): Promise<{ [key: string]: { [key: string]: string } }> {
-    return this.sql.getConfigs(r);
+    return this.db.regions.getConfigs(r);
   }
 
   getRegionINI(r: Region): Promise<{ [key: string]: { [key: string]: string } }> {
@@ -540,46 +507,5 @@ export class MGM {
     config['AvatarRemoteCommands']['Enabled'] = 'false';
 
     return Promise.resolve(config);
-  }
-
-  private buildJob(row: any): Job {
-    let j: Job = {
-      id: row.id,
-      timestamp: row.timestamp,
-      type: row.type,
-      user: new UUIDString(row.user),
-      data: row.data
-    }
-    return j;
-  }
-
-  private buildHost(row: any): Host {
-    let h = new Host;
-    h.address = row.address;
-    h.port = row.port;
-    h.name = row.name;
-    //h.cmd_key = new UUIDString(rows[0].cmd_key);
-    h.slots = row.slots;
-    h.status = JSON.parse(row.status);
-    return h;
-  }
-
-  private buildRegion(row: any): Region {
-    let r = new Region()
-    r.uuid = new UUIDString(row.uuid);
-    r.name = row.name;
-    r.size = row.size;
-    r.httpPort = row.httpPort;
-    r.consolePort = row.consolePort;
-    // halcyon does not use these for console connectivity
-    //r.consoleUname = new UUIDString(row.consoleUname);
-    //r.consolePass = new UUIDString(row.consolePass);
-    r.locX = row.locX;
-    r.locY = row.locY;
-    r.externalAddress = row.externalAddress;
-    r.slaveAddress = row.slaveAddress;
-    r.isRunning = row.isRunning;
-    r.status = JSON.parse(row.status);
-    return r;
   }
 }

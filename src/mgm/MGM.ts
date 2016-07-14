@@ -37,6 +37,7 @@ export interface Config {
     upload_dir: string
     templates: { [key: string]: string }
     voiceIP: string
+    internalUrl: string
   },
   halcyon: {
     db_host: string
@@ -67,11 +68,12 @@ export class MGM {
 
   constructor(config: Config) {
     this.conf = config;
+    this.hal = new HAL(config.halcyon);
 
     //initialize singleton
     this.db = new MGMDB(config.mgm);
 
-    this.hal = new HAL(config.halcyon);
+
   }
 
   static isUser(req, res, next) {
@@ -449,6 +451,9 @@ export class MGM {
     config['Messaging']['InstantMessageModule'] = 'InstantMessageModule';
     config['Messaging']['MessageTransferModule'] = 'MessageTransferModule';
     config['Messaging']['OfflineMessageModule'] = 'OfflineMessageModule';
+    config['Messaging']['OfflineMessageURL'] = this.conf.mgm.internalUrl + '/offline';
+    config['Messaging']['MuteListModule'] = 'MuteListModule';
+    config['Messaging']['MuteListURL'] = '127.0.0.1';
 
     config['Sun'] = {};
     config['Sun']['day_length'] = '24.0';

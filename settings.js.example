@@ -6,6 +6,8 @@ settings.mgm.db_host = "devsql";
 settings.mgm.db_user = "mgm";
 settings.mgm.db_pass = "mgm";
 settings.mgm.db_name = "mgm";
+// ip and port for internal connections to MGM
+settings.mgm.internalUrl = "http://127.0.0.1:3000/";
 
 settings.mgm.log_dir = "/opt/moses/mgm/logs";
 settings.mgm.upload_dir = "/opt/moses/mgm/uploads";

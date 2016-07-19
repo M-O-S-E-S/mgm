@@ -1,13 +1,13 @@
 
 import * as express from 'express';
-import * as path from "path";
 
 import { Region } from '../Region';
 import { Host } from '../Host';
 import { Estate } from '../../halcyon/estate';
 import { UUIDString } from '../../halcyon/UUID';
 import { MGM } from '../MGM';
-import { ConsoleSession, RestConsole } from '../console';
+import { AdminSession, RemoteAdmin } from '../../halcyon/RemoteAdmin';
+import { RegionLogs } from '../util/regionLogs';
 
 export interface Halcyon {
   getEstate(number): Promise<Estate>
@@ -21,7 +21,7 @@ export interface ConsoleSettings {
   pass: string
 }
 
-export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, logDir: string): express.Router {
+export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): express.Router {
   let router = express.Router();
 
   router.get('/', MGM.isUser, (req, res) => {
@@ -71,7 +71,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     let regionID = new UUIDString(req.params.uuid);
 
     mgm.getRegion(regionID).then((r: Region) => {
-      res.sendFile(path.join(logDir, r.name))
+      res.sendFile(RegionLogs.instance().getFilePath(r.uuid))
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
@@ -176,6 +176,8 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
     let region: Region;
     let newHost: Host;
 
+    console.log('Setting host for region ' + regionID.toString() + ' to host: ' + hostAddress);
+
     mgm.getRegion(regionID).then((r: Region) => {
       if (r.isRunning) {
         throw new Error('Region is currently running');
@@ -230,20 +232,24 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings, log
 
   router.post('/stop/:uuid', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
-    let session: ConsoleSession;
+    let session: AdminSession;
+
+    let region: Region;
 
     mgm.getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
         throw new Error('Region ' + r.name + ' is not running');
       }
-      return RestConsole.open(r.slaveAddress, r.consolePort, conf.user, conf.pass);
-    }).then((s: ConsoleSession) => {
+      region = r;
+      return RemoteAdmin.Open(r.slaveAddress, r.httpPort, conf.user, conf.pass);
+    }).then((s: AdminSession) => {
       session = s;
-      return RestConsole.write(s, 'quit');
+      return RemoteAdmin.Shutdown(s, region.uuid, 0);
       // dont bother closing the session, the process is terminating
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
+      console.log(err);
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
   });

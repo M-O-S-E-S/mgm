@@ -1,24 +1,14 @@
 
 import * as express from 'express';
-import * as path from "path";
 
 import { MGM } from '../MGM';
 import { Region } from '../Region';
 import { Host } from '../host';
 import { UUIDString } from '../../halcyon/UUID';
+import { RegionLogs } from '../util/regionLogs';
 
-import fs = require("fs");
-
-export function DispatchHandler(mgm: MGM, logDir: string): express.Router {
+export function DispatchHandler(mgm: MGM): express.Router {
   let router: express.Router = express.Router();
-
-  //ensure the directory for logs exists
-  if (!fs.existsSync(logDir)) {
-    fs.mkdir(path.join(logDir), (err) => {
-      if (err && err.code !== "EEXIST")
-        throw new Error('Cannot create region log directory at ' + logDir);
-    });
-  }
 
   router.post('/logs/:name', (req, res) => {
     let regionName = req.params.name;
@@ -27,7 +17,8 @@ export function DispatchHandler(mgm: MGM, logDir: string): express.Router {
       return mgm.getRegionByName(regionName);
     }).then((r: Region) => {
       let logs: string[] = JSON.parse(req.body.log);
-      fs.appendFile(path.join(logDir, r.name), logs.join('\n'));
+      return RegionLogs.instance().append(r.uuid, logs);
+    }).then( () => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       console.log('Error serving logs for host ' + remoteIP + ': ' + err.message);
@@ -49,7 +40,7 @@ export function DispatchHandler(mgm: MGM, logDir: string): express.Router {
       let halted = 0;
       let running = 0;
       for (let proc of stats.processes) {
-        let w = mgm.getRegionByName(proc.name).then((r: Region) => {
+        let w = mgm.getRegion(new UUIDString(proc.id)).then((r: Region) => {
           r.isRunning = proc.running.toUpperCase() === 'FALSE' ? false : true;
           if (r.isRunning)
             running++;
@@ -70,24 +61,20 @@ export function DispatchHandler(mgm: MGM, logDir: string): express.Router {
   });
 
 
-  router.get('/region/:name', (req, res) => {
-    let regionName = req.params.name;
+  router.get('/region/:id', (req, res) => {
+    let uuid = new UUIDString(req.params.id);
     //validate host
     let remoteIP: string = req.ip.split(':').pop();
-    mgm.getHost(remoteIP).then((host: Host) => {
-      //get region on host
-      return mgm.getRegionsOn(host);
-    }).then((regions: Region[]) => {
-      for (let r of regions) {
-        if (r.name === regionName) {
-          return r;
-        }
+    mgm.getRegion(uuid).then( (r: Region) => {
+      if(r.slaveAddress === remoteIP){
+        return r;
       }
       throw new Error('Requested region does not exist on the requesting host');
     }).then((r: Region) => {
       res.send(JSON.stringify({
         Success: true,
         Region: {
+          Name: r.name,
           RegionUUID: r.uuid.toString(),
           LocationX: r.locX,
           LocationY: r.locY,
@@ -101,21 +88,16 @@ export function DispatchHandler(mgm: MGM, logDir: string): express.Router {
     });
   });
 
-  router.get('/process/:name', (req, res) => {
-    let regionName = req.params.name;
+  router.get('/process/:id', (req, res) => {
+    let uuid = new UUIDString(req.params.id);
     let httpPort = req.query.httpPort;
     let consolePort = req.query.consolePort;
     let externalAddress = req.query.externalAddress;
     //validate host
     let remoteIP: string = req.ip.split(':').pop();
-    mgm.getHost(remoteIP).then((host: Host) => {
-      //get region on host
-      return mgm.getRegionsOn(host);
-    }).then((regions: Region[]) => {
-      for (let r of regions) {
-        if (r.name === regionName) {
-          return r;
-        }
+    mgm.getRegion(uuid).then( (r: Region) => {
+      if(r.slaveAddress === remoteIP){
+        return r;
       }
       throw new Error('Requested region does not exist on the requesting host');
     }).then((r: Region) => {

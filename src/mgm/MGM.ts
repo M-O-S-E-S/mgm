@@ -23,7 +23,8 @@ import * as http from 'http';
 
 var urllib = require('urllib');
 import fs = require('fs');
-import { RestConsole, ConsoleSession } from './console';
+import { RemoteAdmin, AdminSession } from '../halcyon/RemoteAdmin';
+import { RegionLogs } from './util/regionLogs';
 
 var urllib = require('urllib');
 
@@ -54,7 +55,7 @@ export interface Config {
     mgm: string,
     gridName: string,
     gridNick: string,
-  }
+  },
   console: {
     user: string,
     pass: string
@@ -70,9 +71,9 @@ export class MGM {
     this.conf = config;
     this.hal = new HAL(config.halcyon);
 
-    //initialize singleton
+    //initialize singletons
     this.db = new MGMDB(config.mgm);
-
+    new RegionLogs(this.conf.mgm.log_dir);
 
   }
 
@@ -100,14 +101,14 @@ export class MGM {
     router.use('/estate', EstateHandler(this.hal));
     router.use('/host', HostHandler(this));
     router.use('/user', UserHandler(this.hal, this.conf.mgm.templates));
-    router.use('/region', RegionHandler(this, this.hal, this.conf.console, this.conf.mgm.log_dir));
+    router.use('/region', RegionHandler(this, this.hal, this.conf.console));
     router.use('/group', GroupHandler(this.hal));
 
     router.use('/fsapi', FreeswitchHandler(fs));
 
     router.use('/offline', OfflineMessageHandler());
 
-    router.use('/server/dispatch', DispatchHandler(this, this.conf.mgm.log_dir));
+    router.use('/server/dispatch', DispatchHandler(this));
 
     router.get('/', (req, res) => {
       res.send('MGM');
@@ -194,25 +195,29 @@ export class MGM {
           return urllib.request('http://' + h.address + ':' + h.port + '/upload', {
             method: 'POST',
             data: formData
-          }).then((body) => {
-            let result = JSON.parse(body);
-            if (result.Success) {
-              return result.File;
-            } else {
-              throw new Error('Cannot push file to mgmNode');
-            }
           })
-        }).then((uri: string) => {
+        }).then((body) => {
+          let result = JSON.parse(body);
+          if (result.Success) {
+            oarPath = result.File;
+            fs.unlink(datum.File);
+            console.log('oar upload to mgmNode complete')
+          } else {
+            throw new Error('Cannot push file to mgmNode');
+          }
+        }).then(() => {
           // open a console and trigger the load
-          oarPath = uri;
-          let session: ConsoleSession;
-          return RestConsole.open(region.slaveAddress, region.consolePort, this.conf.console.user, this.conf.console.pass)
-            .then((cs: ConsoleSession) => {
-              session = cs;
-              return RestConsole.write(session, 'load oar ' + oarPath);
-            }).then(() => {
-              return RestConsole.close(session);
-            })
+          return RemoteAdmin.Open(region.slaveAddress, region.consolePort, this.conf.console.user, this.conf.console.pass);
+        }).then((cs: AdminSession) => {
+          return RemoteAdmin.LoadOar(cs, region.name, oarPath);
+        }).then((cs: AdminSession) => {
+          datum.Status = 'Loading Oar...';
+          j.data = JSON.stringify(datum);
+          this.updateJob(j);
+          console.log('load oar triggered successfuly');
+          return cs;
+        }).then((cs: AdminSession) => {
+          return RemoteAdmin.Close(cs);
         }).then(() => {
           datum.Status = 'Loading Oar...';
           j.data = JSON.stringify(datum);
@@ -220,6 +225,13 @@ export class MGM {
           console.log('load oar triggered successfuly');
         }).then(() => {
           //monitor region log for oar change
+          return new Promise<void>((resolve, reject) => {
+            let listener = RegionLogs.instance().source(region.uuid).subscribe(
+              (line) => { console.log(line); },
+              (err) => { reject(err); listener.dispose(); },
+              () => { reject(new Error('Region halted')); listener.dispose(); }
+            )
+          })
         }).finally(() => {
           //pull file back off of mgmNode whether we succeed or fail
           //request.get('http://' + host.address + ':' + host.port + '/delete/' + oarPath.slice(-36))
@@ -320,7 +332,7 @@ export class MGM {
   startRegion(r: Region, h: Host): Promise<void> {
     console.log('starting ' + r.name);
     let client = urllib.create();
-    let url = 'http://' + h.address + ':' + h.port + '/region/' + r.name + '/start';
+    let url = 'http://' + h.address + ':' + h.port + '/start/' + r.uuid.toString();
     return client.request(url).then((body) => {
       let result = JSON.parse(body.data);
       if (result.Success) {
@@ -334,7 +346,7 @@ export class MGM {
   killRegion(r: Region, h: Host): Promise<void> {
     console.log('terminating ' + r.name);
     let client = urllib.create();
-    let url = 'http://' + h.address + ':' + h.port + '/region/' + r.name + '/stop';
+    let url = 'http://' + h.address + ':' + h.port + '/stop/' + r.uuid.toString();
     return client.request(url).then((body) => {
       let result = JSON.parse(body.data);
       if (result.Success) {
@@ -401,7 +413,7 @@ export class MGM {
     config['Startup']['MaximumTimeBeforePersistenceConsidered'] = '600';
     config['Startup']['physical_prim'] = 'true';
     config['Startup']['physics'] = 'InWorldz.PhysxPhysics';
-    config['Startup']['permissionmodules'] = 'DefaultPermissionModule';
+    config['Startup']['permissionmodules'] = 'DefaultPermissionsModule';
     config['Startup']['serverside_object_permissions'] = 'true';
     config['Startup']['allow_grid_gods'] = 'true';
     config['Startup']['use_aperture_server'] = 'yes';
@@ -437,9 +449,6 @@ export class MGM {
     config['Network']['asset_server_url'] = this.conf.halcyon.whip;
     config['Network']['messaging_server_url'] = this.conf.halcyon.messaging_server;
     config['Network']['shard'] = 'HalcyonHome';
-    config['Network']['ConsoleUser'] = r.consoleUname.toString();
-    config['Network']['ConsolePass'] = r.consolePass.toString();
-    config['Network']['console_port'] = '' + r.consolePort;
 
     config['Chat'] = {};
     config['Chat']['enabled'] = 'true';

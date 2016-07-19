@@ -21,12 +21,28 @@ function LogoutRequest(id: UUIDString): string {
     </params></methodCall>';
 }
 
-function BackupRequest(session: UUIDString, regionName: string, filename: string, saveAssets: boolean) {
-  return '<?xml version="1.0"?><methodCall><methodName>Region.Backup</methodName>\
+function SaveOarRequest(session: UUIDString, regionName: string, filename: string, saveAssets: boolean) {
+  return '<?xml version="1.0"?><methodCall><methodName>Region.SaveOar</methodName>\
     <params><param><value>'+ session.toString() + '</value></param>\
     <param><value>' + regionName + '</value></param>\
     <param><value>' + filename + '</value></param>\
     <param><value>' + saveAssets + '</value></param>\
+    </params></methodCall>';
+}
+
+function LoadRequest(session: UUIDString, regionName: string, filename: string) {
+  return '<?xml version="1.0"?><methodCall><methodName>Region.LoadOar</methodName>\
+    <params><param><value>'+ session.toString() + '</value></param>\
+    <param><value>' + regionName + '</value></param>\
+    <param><value>' + filename + '</value></param>\
+    </params></methodCall>';
+}
+
+function ShutdownRequest(session: UUIDString, regionID: UUIDString, delay: number) {
+  return '<?xml version="1.0"?><methodCall><methodName>Region.Shutdown</methodName>\
+    <params><param><value>'+ session.toString() + '</value></param>\
+    <param><value>' + regionID.toString() + '</value></param>\
+    <param><value>' + delay + '</value></param>\
     </params></methodCall>';
 }
 
@@ -84,15 +100,38 @@ export class RemoteAdmin {
     });
   }
 
-  static Backup(session: AdminSession, regionName: string, filename: string, saveAssets: boolean): Promise<AdminSession> {
-    console.log('backup called');
+  static LoadOar(session: AdminSession, regionName: string, filename: string): Promise<AdminSession> {
+    return new Promise<AdminSession>((resolve, reject) => {
+      urllib.request(session.url, {
+        method: 'POST',
+        data: LoadRequest(session.SessionID, regionName, filename)
+      }).then((body) => {
+        return Response.Parse(body.data);
+      }).then((r: Response) => {
+        if (r.value === 'true') {
+          resolve(session);
+        } else {
+          reject(new Error('Could not execute oar load'));
+        }
+      }).catch((err: Error) => {
+        if (err.name === 'ResponseTimeoutError') {
+          resolve(session);
+        } else {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  static SaveOar(session: AdminSession, regionName: string, filename: string, saveAssets: boolean): Promise<AdminSession> {
+
     // Halcyon tries to wait for the oar save to finish, but its http server times out after 5 seconds
     // we must catch this server-side timeout and report as success
     // THERE IS NO WAY TO DISCERN A SLOW SERVER FROM A SUCCESSFUL CALL
     return new Promise<AdminSession>((resolve, reject) => {
       urllib.request(session.url, {
         method: 'POST',
-        data: BackupRequest(session.SessionID, regionName, filename, saveAssets)
+        data: SaveOarRequest(session.SessionID, regionName, filename, saveAssets)
       }).then((body) => {
         return Response.Parse(body.data);
       }).then((r: Response) => {
@@ -108,6 +147,16 @@ export class RemoteAdmin {
           reject(err);
         }
       });
+    });
+  }
+
+  static Shutdown(session: AdminSession, regionID: UUIDString, delay: number): Promise<void> {
+    console.log('shutting down region');
+    return urllib.request(session.url, {
+      method: 'POST',
+      data: ShutdownRequest(session.SessionID, regionID, delay)
+    }).then((body) => {
+      return Response.Parse(body.data);
     });
   }
 

@@ -133,9 +133,8 @@ export class regions {
     return new Promise<void>((resolve, reject) => {
       //update region sql to point to new host
       this.pool.query('UPDATE regions SET slaveAddress=? WHERE uuid=?',
-        [address==='' ? address : null, r.uuid.toString()], err => {
-          if (err)
-            return reject(err);
+        [address, r.uuid.toString()], err => {
+          if (err) return reject(err);
           resolve();
         })
     })

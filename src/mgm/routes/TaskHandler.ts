@@ -129,8 +129,8 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
       }
     }).then( (j: Job) => {
       //do oar loading magics.
-      mgm.doJob(j);
-
+      return mgm.doJob(j);
+    }).then( () => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));

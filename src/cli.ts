@@ -146,7 +146,7 @@ switch (args[0]) {
   case 'radmin':
     RemoteAdmin.Open('10.10.0.108', 9000, conf.console.user, conf.console.pass)
       .then( (session) => {
-        return RemoteAdmin.Backup(session, 'Ratio', 'haz', true);
+        return RemoteAdmin.SaveOar(session, 'Ratio', 'haz', true);
       }).then(RemoteAdmin.Close)
       .catch((err: Error) => {
         console.log('Error: ' + err.message);

@@ -1,7 +1,6 @@
 
 import * as express from 'express';
 import { UUIDString } from '../../halcyon/UUID';
-import { RestConsole, ConsoleSession } from '../console';
 import { Region } from '../Region';
 
 import { MGM } from '../MGM';
@@ -16,7 +15,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
 
   router.post('/open/:uuid', MGM.isUser, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
-    mgm.getRegion(regionID).then((r: Region) => {
+    /*mgm.getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
         throw new Error('Region must be running to open a console');
       }
@@ -26,7 +25,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
       res.send(JSON.stringify({ Success: true, Prompt: session.prompt }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
-    });
+    });*/
   });
 
   router.post('/read/:uuid', MGM.isUser, (req, res) => {
@@ -34,7 +33,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
       res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
       return;
     }
-    let regionID = new UUIDString(req.params.uuid);
+    /*let regionID = new UUIDString(req.params.uuid);
     mgm.getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
         throw new Error('Region is no longer running');
@@ -44,7 +43,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
       res.send(JSON.stringify({ Success: true, Lines: lines }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
-    });
+    });*/
   });
 
   router.post('/close/:uuid', MGM.isUser, (req, res) => {
@@ -52,7 +51,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
       res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
       return;
     }
-    let regionID = new UUIDString(req.params.uuid);
+    /*let regionID = new UUIDString(req.params.uuid);
     mgm.getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
         throw new Error('Region is no longer running');
@@ -64,7 +63,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
     }).catch((err: Error) => {
       res.clearCookie('console');
       res.send(JSON.stringify({ Success: false, Message: err.message }));
-    });
+    });*/
   });
 
   router.post('/write/:uuid', MGM.isUser, (req, res) => {
@@ -72,7 +71,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
       res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
       return;
     }
-    let regionID = new UUIDString(req.params.uuid);
+    /*let regionID = new UUIDString(req.params.uuid);
     let command: string = req.body.command;
     mgm.getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
@@ -83,7 +82,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
-    });
+    });*/
   });
 
   return router;

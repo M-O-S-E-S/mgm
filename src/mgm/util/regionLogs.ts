@@ -42,7 +42,7 @@ export class RegionLogs {
         this.subjects[region.toString()] = new Subject<string>();
         //dont send log lines, if it didn't exist nobody can be subscribed
       }
-      fs.appendFile(path.join(this.dir, region.getShort()), lines.join('\n'), (err) => {
+      fs.appendFile(path.join(this.dir, region.getShort()), lines.join(''), (err) => {
         if(err) return reject(err);
         resolve();
       });

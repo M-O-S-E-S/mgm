@@ -39,9 +39,4 @@ settings.grid_info.mgm = "http://yourpublicmgm/";
 settings.grid_info.gridName = "MOSES Halcyon Grid";
 settings.grid_info.gridNick = "MG";
 
-// halcyon requires system credentials for the remote console
-settings.console = {};
-settings.console.user = 'username';
-settings.console.pass = 'password';
-
 module.exports = settings;

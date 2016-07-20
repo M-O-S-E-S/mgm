@@ -10,18 +10,17 @@ import { RegionLogs } from '../util/regionLogs';
 export function DispatchHandler(mgm: MGM): express.Router {
   let router: express.Router = express.Router();
 
-  router.post('/logs/:name', (req, res) => {
-    let regionName = req.params.name;
+  router.post('/logs/:uuid', (req, res) => {
+    let regionID = new UUIDString(req.params.uuid);
     let remoteIP: string = req.ip.split(':').pop();
-    mgm.getHost(remoteIP).then((host: Host) => {
-      return mgm.getRegionByName(regionName);
-    }).then((r: Region) => {
+    mgm.getRegion(regionID)
+    .then((r: Region) => {
       let logs: string[] = JSON.parse(req.body.log);
       return RegionLogs.instance().append(r.uuid, logs);
     }).then( () => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
-      console.log('Error serving logs for host ' + remoteIP + ': ' + err.message);
+      console.log('Error handling logs for host ' + remoteIP + ': ' + err.message);
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
   });

@@ -23,7 +23,6 @@ import * as http from 'http';
 
 var urllib = require('urllib');
 import fs = require('fs');
-import { RemoteAdmin, AdminSession } from '../halcyon/RemoteAdmin';
 import { RegionLogs } from './util/regionLogs';
 
 var urllib = require('urllib');
@@ -163,93 +162,6 @@ export class MGM {
     return router;
   }
 
-  //perform job tasking asynchronously
-  doJob(j: Job) {
-    let datum = JSON.parse(j.data);
-
-    switch (j.type) {
-      case 'load_oar':
-        /*loading oar is a multi step job:
-         * 1 - push file to mgmNode
-         * 2 - trigger oar load on console
-         * 3 - observe logs for oar completion
-        */
-        let region: Region;
-        let host: Host;
-        let oarPath: string;
-        console.log('beginning task load oar');
-        this.getRegion(new UUIDString(datum.Region)).then((r: Region) => {
-          region = r;
-          return this.getHost(r.slaveAddress);
-        }).then((h: Host) => {
-          host = h;
-          console.log('uploading oar to mgmNode');
-          datum.Status = 'Copying...';
-          j.data = JSON.stringify(datum);
-          this.updateJob(j);
-
-          var formData = {
-            fileData: fs.createReadStream(datum.File),
-          }
-
-          return urllib.request('http://' + h.address + ':' + h.port + '/upload', {
-            method: 'POST',
-            data: formData
-          })
-        }).then((body) => {
-          let result = JSON.parse(body);
-          if (result.Success) {
-            oarPath = result.File;
-            fs.unlink(datum.File);
-            console.log('oar upload to mgmNode complete')
-          } else {
-            throw new Error('Cannot push file to mgmNode');
-          }
-        }).then(() => {
-          // open a console and trigger the load
-          return RemoteAdmin.Open(region.slaveAddress, region.consolePort, this.conf.console.user, this.conf.console.pass);
-        }).then((cs: AdminSession) => {
-          return RemoteAdmin.LoadOar(cs, region.name, oarPath);
-        }).then((cs: AdminSession) => {
-          datum.Status = 'Loading Oar...';
-          j.data = JSON.stringify(datum);
-          this.updateJob(j);
-          console.log('load oar triggered successfuly');
-          return cs;
-        }).then((cs: AdminSession) => {
-          return RemoteAdmin.Close(cs);
-        }).then(() => {
-          datum.Status = 'Loading Oar...';
-          j.data = JSON.stringify(datum);
-          this.updateJob(j);
-          console.log('load oar triggered successfuly');
-        }).then(() => {
-          //monitor region log for oar change
-          return new Promise<void>((resolve, reject) => {
-            let listener = RegionLogs.instance().source(region.uuid).subscribe(
-              (line) => { console.log(line); },
-              (err) => { reject(err); listener.dispose(); },
-              () => { reject(new Error('Region halted')); listener.dispose(); }
-            )
-          })
-        }).finally(() => {
-          //pull file back off of mgmNode whether we succeed or fail
-          //request.get('http://' + host.address + ':' + host.port + '/delete/' + oarPath.slice(-36))
-        }).catch((err: Error) => {
-          console.log('load oar failed: ' + err.message);
-          datum.Status = 'Failed:' + err.message;
-          j.data = JSON.stringify(datum);
-          this.updateJob(j);
-        })
-
-      default:
-        console.log('No worker present for job type: ' + j.type);
-        datum.Status = 'Worker Not Implemented';
-        j.data = JSON.stringify(datum);
-        this.updateJob(j);
-    }
-  }
-
   deleteJob(j: Job): Promise<void> {
     return this.db.jobs.delete(j.id);
   }
@@ -343,10 +255,52 @@ export class MGM {
     });
   }
 
-  killRegion(r: Region, h: Host): Promise<void> {
-    console.log('terminating ' + r.name);
+  stopRegion(r: Region, h: Host): Promise<void> {
+    console.log('halting ' + r.name);
     let client = urllib.create();
     let url = 'http://' + h.address + ':' + h.port + '/stop/' + r.uuid.toString();
+    return client.request(url).then((body) => {
+      let result = JSON.parse(body.data);
+      if (result.Success) {
+        return Promise.resolve();
+      } else {
+        return Promise.reject(new Error(result.Message));
+      }
+    });
+  }
+
+  saveOar(r: Region, h: Host, j: Job): Promise<void> {
+    console.log('triggering oar save for ' + r.name);
+    let client = urllib.create();
+    let url = 'http://' + h.address + ':' + h.port + '/saveOar/' + r.uuid.toString() + '/' + j.id;
+    return client.request(url).then((body) => {
+      let result = JSON.parse(body.data);
+      if (result.Success) {
+        return Promise.resolve();
+      } else {
+        return Promise.reject(new Error(result.Message));
+      }
+    });
+  }
+
+  loadOar(r: Region, h: Host, j: Job): Promise<void> {
+    console.log('triggering oar load for ' + r.name);
+    let client = urllib.create();
+    let url = 'http://' + h.address + ':' + h.port + '/loadOar/' + r.uuid.toString() + '/' + j.id;
+    return client.request(url).then((body) => {
+      let result = JSON.parse(body.data);
+      if (result.Success) {
+        return Promise.resolve();
+      } else {
+        return Promise.reject(new Error(result.Message));
+      }
+    });
+  }
+
+  killRegion(r: Region, h: Host): Promise<void> {
+    console.log('killing ' + r.name);
+    let client = urllib.create();
+    let url = 'http://' + h.address + ':' + h.port + '/kill/' + r.uuid.toString();
     return client.request(url).then((body) => {
       let result = JSON.parse(body.data);
       if (result.Success) {

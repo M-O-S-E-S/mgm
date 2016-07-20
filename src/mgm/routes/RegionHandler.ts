@@ -6,7 +6,6 @@ import { Host } from '../Host';
 import { Estate } from '../../halcyon/estate';
 import { UUIDString } from '../../halcyon/UUID';
 import { MGM } from '../MGM';
-import { AdminSession, RemoteAdmin } from '../../halcyon/RemoteAdmin';
 import { RegionLogs } from '../util/regionLogs';
 
 export interface Halcyon {
@@ -232,24 +231,19 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
 
   router.post('/stop/:uuid', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
-    let session: AdminSession;
-
-    let region: Region;
-
+    let target: Region;
     mgm.getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
         throw new Error('Region ' + r.name + ' is not running');
       }
-      region = r;
-      return RemoteAdmin.Open(r.slaveAddress, r.httpPort, conf.user, conf.pass);
-    }).then((s: AdminSession) => {
-      session = s;
-      return RemoteAdmin.Shutdown(s, region.uuid, 0);
-      // dont bother closing the session, the process is terminating
-    }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
-    }).catch((err: Error) => {
-      console.log(err);
+      if (r.slaveAddress === null || r.slaveAddress === '') {
+        throw new Error('Region ' + r.name + ' is not assigned a host');
+      }
+      target = r;
+      return mgm.getHost(r.slaveAddress);
+    }).then((h: Host) => {
+      return mgm.stopRegion(target, h);
+    }).catch((err) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
   });

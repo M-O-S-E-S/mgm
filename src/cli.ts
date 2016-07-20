@@ -4,7 +4,6 @@ import { SqlConnector } from './halcyon/sqlConnector';
 import { User, Appearance, Credential } from './halcyon/User';
 import { Inventory } from './halcyon/Inventory';
 import { Config } from './mgm/MGM';
-import { RemoteAdmin } from './halcyon/RemoteAdmin';
 
 let fs = require('fs');
 
@@ -142,15 +141,6 @@ switch (args[0]) {
     break;
   case 'printInventory':
     printInventory(args.splice(1)[0]);
-    break;
-  case 'radmin':
-    RemoteAdmin.Open('10.10.0.108', 9000, conf.console.user, conf.console.pass)
-      .then( (session) => {
-        return RemoteAdmin.SaveOar(session, 'Ratio', 'haz', true);
-      }).then(RemoteAdmin.Close)
-      .catch((err: Error) => {
-        console.log('Error: ' + err.message);
-      })
     break;
   default:
     usage();

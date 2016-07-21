@@ -269,6 +269,22 @@ export class MGM {
     });
   }
 
+  consoleCommand(r: Region, h: Host, cmd: string): Promise<void> {
+    let client = urllib.create();
+    let url = 'http://' + h.address + ':' + h.port + '/consoleCmd/' + r.uuid.toString();
+    return client.request(url, {
+      method: 'POST',
+      data: { "cmd" : cmd }
+    }).then((body) => {
+      let result = JSON.parse(body.data);
+      if (result.Success) {
+        return Promise.resolve();
+      } else {
+        return Promise.reject(new Error(result.Message));
+      }
+    });
+  }
+
   saveOar(r: Region, h: Host, j: Job): Promise<void> {
     console.log('triggering oar save for ' + r.name);
     let client = urllib.create();

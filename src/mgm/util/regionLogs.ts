@@ -9,10 +9,10 @@ export class RegionLogs {
   private static _instance: RegionLogs = null;
 
   private dir: string = '';
-  private subjects: {[key:string]: Subject<string>}
+  private subjects: { [key: string]: Subject<string> }
 
-  constructor(logDir: string){
-    if(RegionLogs._instance){
+  constructor(logDir: string) {
+    if (RegionLogs._instance) {
       throw new Error('RegionLogs singleton has already been initialized');
     }
 
@@ -28,22 +28,22 @@ export class RegionLogs {
     RegionLogs._instance = this;
   }
 
-  public static instance():RegionLogs {
+  public static instance(): RegionLogs {
     return RegionLogs._instance;
   }
 
   append(region: UUIDString, lines: string[]): Promise<void> {
-    return new Promise<void>( (resolve, reject) => {
-      if(region.toString() in this.subjects){
-        for(let line of lines){
+    return new Promise<void>((resolve, reject) => {
+      if (region.toString() in this.subjects) {
+        for (let line of lines) {
           this.subjects[region.toString()].onNext(line);
         }
-      }else {
+      } else {
         this.subjects[region.toString()] = new Subject<string>();
         //dont send log lines, if it didn't exist nobody can be subscribed
       }
       fs.appendFile(path.join(this.dir, region.getShort()), lines.join(''), (err) => {
-        if(err) return reject(err);
+        if (err) return reject(err);
         resolve();
       });
     });
@@ -54,12 +54,34 @@ export class RegionLogs {
   }
 
   source(region: UUIDString): Subject<string> {
-    if(region.toString() in this.subjects){
+    if (region.toString() in this.subjects) {
       return this.subjects[region.toString()];
     } else {
       this.subjects[region.toString()] = new Subject<string>();
       return this.subjects[region.toString()];
     }
+  }
+
+  read(region: UUIDString, offset: number): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      var lineReader = require('readline').createInterface({
+        input: require('fs').createReadStream(path.join(this.dir, region.getShort()))
+      });
+
+      let lineCount = 0;
+      let lines: string[] = [];
+
+      lineReader.on('line', (line) => {
+        lineCount++;
+        if (lineCount >= offset) {
+          lines.push(line);
+        }
+      });
+
+      lineReader.on('close', () => {
+        resolve(lines);
+      });
+    });
   }
 
 }

@@ -1,7 +1,7 @@
 
 import * as express from 'express';
 
-import { Freeswitch } from '../Freeswitch';
+import { Freeswitch } from '../util/Freeswitch';
 
 export function FreeswitchHandler(fs: Freeswitch): express.Router {
   let router = express.Router();

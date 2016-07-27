@@ -1,22 +1,14 @@
 
-import { MGMDB } from './database/mgmDB';
 import { Job } from './Job';
-import { Region } from './Region';
-import { Host } from './host';
+import { Region, RegionMgr } from './Region';
+import { EstateMgr } from '../halcyon/Estate';
+import { UserMgr } from '../halcyon/User';
+import { GroupMgr } from '../halcyon/Group';
+import { JobMgr } from './Job'
+import { Host, HostMgr } from './Host';
 import { UUIDString } from '../halcyon/UUID';
-import { SqlConnector as HAL } from '../halcyon/sqlConnector';
-import { AuthHandler } from './routes/AuthHandler';
-import { ConsoleHandler } from './routes/ConsoleHandler';
-import { TaskHandler } from './routes/TaskHandler';
-import { EstateHandler } from './routes/EstateHandler';
-import { HostHandler } from './routes/HostHandler';
-import { UserHandler } from './routes/UserHandler';
-import { RegionHandler } from './routes/RegionHandler';
-import { GroupHandler } from './routes/GroupHandler';
-import { DispatchHandler } from './routes/DispatchHandler';
-import { OfflineMessageHandler } from './routes/OfflineMessageHandler';
-import { Freeswitch } from './Freeswitch';
-import { FreeswitchHandler } from './routes/FreeswitchHandler';
+import { Sql } from '../mysql/sql';
+import { SetupRoutes } from './routes/MGMRouter';
 
 import * as express from 'express';
 import * as http from 'http';
@@ -63,17 +55,20 @@ export interface Config {
 
 export class MGM {
   private conf: Config
-  private hal: HAL
-  private db: MGMDB
 
   constructor(config: Config) {
     this.conf = config;
-    this.hal = new HAL(config.halcyon);
+    let hal = new Sql(config.halcyon);
 
     //initialize singletons
-    this.db = new MGMDB(config.mgm);
+    let db = new Sql(config.mgm);
     new RegionLogs(this.conf.mgm.log_dir);
-
+    new RegionMgr(db, hal);
+    new EstateMgr(hal);
+    new UserMgr(hal);
+    new GroupMgr(hal);
+    new JobMgr(db);
+    new HostMgr(db);
   }
 
   static isUser(req, res, next) {
@@ -91,160 +86,13 @@ export class MGM {
   }
 
   getRouter(): express.Router {
-    let router = express.Router();
-    let fs = new Freeswitch(this.conf);
-
-    router.use('/auth', AuthHandler(this.hal));
-    router.use('/console', ConsoleHandler(this, this.conf.console));
-    router.use('/task', TaskHandler(this, this.conf.mgm.upload_dir));
-    router.use('/estate', EstateHandler(this.hal));
-    router.use('/host', HostHandler(this));
-    router.use('/user', UserHandler(this.hal, this.conf.mgm.templates));
-    router.use('/region', RegionHandler(this, this.hal, this.conf.console));
-    router.use('/group', GroupHandler(this.hal));
-
-    router.use('/fsapi', FreeswitchHandler(fs));
-
-    router.use('/offline', OfflineMessageHandler());
-
-    router.use('/server/dispatch', DispatchHandler(this));
-
-    router.get('/', (req, res) => {
-      res.send('MGM');
-    });
-
-    router.get('/get_grid_info', (req, res) => {
-      res.send('<?xml version="1.0"?><gridinfo><login>' +
-        this.conf.grid_info.login +
-        '</login><register>' +
-        this.conf.grid_info.mgm +
-        '</register><welcome>' +
-        this.conf.grid_info.mgm + '\welcome.html' +
-        '</welcome><password>' +
-        this.conf.grid_info.mgm +
-        '</password><gridname>' +
-        this.conf.grid_info.gridName +
-        '</gridname><gridnick>' +
-        this.conf.grid_info.gridNick +
-        '</gridnick><about>' +
-        this.conf.grid_info.mgm +
-        '</about><economy>' +
-        this.conf.grid_info.mgm +
-        '</economy></gridinfo>');
-    });
-
-    router.get('/map/regions', (req, res) => {
-      if (!req.cookies['uuid']) {
-        res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-        return;
-      }
-
-      this.getAllRegions().then((regions: Region[]) => {
-        let result = [];
-        for (let r of regions) {
-          result.push({
-            Name: r.name,
-            x: r.locX,
-            y: r.locY
-          })
-        }
-        res.send(JSON.stringify(result));
-      }).catch((err: Error) => {
-        res.send(JSON.stringify({ Success: false, Message: err.message }));
-      });
-    });
-
-    router.post('/register/submit', (req, res) => {
-      console.log('Received registration request.  Not Implemented');
-      res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
-    });
-
-    return router;
-  }
-
-  deleteJob(j: Job): Promise<void> {
-    return this.db.jobs.delete(j.id);
-  }
-  updateJob(j: Job): Promise<Job> {
-    return this.db.jobs.update(j);
-  }
-
-  getJob(id: number): Promise<Job> {
-    return this.db.jobs.get(id);
-  }
-
-  getJobsFor(id: UUIDString): Promise<Job[]> {
-    return this.db.jobs.getFor(id);
-  }
-
-  insertJob(j: Job): Promise<Job> {
-    return this.db.jobs.insert(j);
-  }
-
-  getAllRegions(): Promise<Region[]> {
-    return this.db.regions.getAll();
-  }
-
-  getRegionsFor(id: UUIDString): Promise<Region[]> {
-    return this.db.regions.getFor(id);
-  }
-
-  getRegion(id: UUIDString): Promise<Region> {
-    return this.db.regions.get(id);
-  }
-
-  getHost(ip: string): Promise<Host> {
-    return this.db.hosts.get(ip);
-  }
-
-  getHosts(): Promise<Host[]> {
-    return this.db.hosts.getAll();
-  }
-
-  getRegionsOn(h: Host): Promise<Region[]> {
-    return this.db.regions.getOn(h.address);
-  }
-
-  getRegionByName(name: string): Promise<Region> {
-    return this.db.regions.getByName(name);
-  }
-
-  updateRegion(r: Region): Promise<Region> {
-    return this.db.regions.update(r);
-  }
-
-  updateHost(h: Host): Promise<Host> {
-    return this.db.hosts.update(h);
-  }
-
-  updateHostStats(h: Host, stats: string): Promise<Host> {
-    return this.db.hosts.updateStats(h, stats);
-  }
-
-  updateRegionStats(r: Region, isRunning: boolean, stats: string): Promise<void> {
-    return this.db.regions.updateStats(r, isRunning, stats);
-  }
-
-  deleteHost(address: string): Promise<void> {
-    return this.db.hosts.delete(address);
-  }
-
-  insertHost(address: string): Promise<void> {
-    return this.db.hosts.insert(address);
-  }
-
-  insertRegion(r: Region): Promise<Region> {
-    return this.db.regions.insert(r);
-  }
-
-  destroyRegion(r: Region): Promise<void> {
-    return this.db.regions.delete(r);
+    return SetupRoutes(this, this.conf.mgm.voiceIP);
   }
 
   startRegion(r: Region, h: Host): Promise<void> {
-    console.log('starting ' + r.name);
+    console.log('starting ' + r.getName());
     let client = urllib.create();
-    let url = 'http://' + h.address + ':' + h.port + '/start/' + r.uuid.toString();
+    let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/start/' + r.getUUID().toString();
     return client.request(url).then((body) => {
       let result = JSON.parse(body.data);
       if (result.Success) {
@@ -256,9 +104,9 @@ export class MGM {
   }
 
   stopRegion(r: Region, h: Host): Promise<void> {
-    console.log('halting ' + r.name);
+    console.log('halting ' + r.getName());
     let client = urllib.create();
-    let url = 'http://' + h.address + ':' + h.port + '/stop/' + r.uuid.toString();
+    let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/stop/' + r.getUUID().toString();
     return client.request(url).then((body) => {
       let result = JSON.parse(body.data);
       if (result.Success) {
@@ -271,7 +119,7 @@ export class MGM {
 
   consoleCommand(r: Region, h: Host, cmd: string): Promise<void> {
     let client = urllib.create();
-    let url = 'http://' + h.address + ':' + h.port + '/consoleCmd/' + r.uuid.toString();
+    let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/consoleCmd/' + r.getUUID().toString();
     return client.request(url, {
       method: 'POST',
       data: { "cmd" : cmd }
@@ -286,9 +134,9 @@ export class MGM {
   }
 
   saveOar(r: Region, h: Host, j: Job): Promise<void> {
-    console.log('triggering oar save for ' + r.name);
+    console.log('triggering oar save for ' + r.getName());
     let client = urllib.create();
-    let url = 'http://' + h.address + ':' + h.port + '/saveOar/' + r.uuid.toString() + '/' + j.id;
+    let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/saveOar/' + r.getUUID().toString() + '/' + j.id;
     return client.request(url).then((body) => {
       let result = JSON.parse(body.data);
       if (result.Success) {
@@ -300,9 +148,9 @@ export class MGM {
   }
 
   loadOar(r: Region, h: Host, j: Job): Promise<void> {
-    console.log('triggering oar load for ' + r.name);
+    console.log('triggering oar load for ' + r.getName());
     let client = urllib.create();
-    let url = 'http://' + h.address + ':' + h.port + '/loadOar/' + r.uuid.toString() + '/' + j.id;
+    let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/loadOar/' + r.getUUID().toString() + '/' + j.id;
     return client.request(url).then((body) => {
       let result = JSON.parse(body.data);
       if (result.Success) {
@@ -314,9 +162,9 @@ export class MGM {
   }
 
   killRegion(r: Region, h: Host): Promise<void> {
-    console.log('killing ' + r.name);
+    console.log('killing ' + r.getName());
     let client = urllib.create();
-    let url = 'http://' + h.address + ':' + h.port + '/kill/' + r.uuid.toString();
+    let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/kill/' + r.getUUID().toString();
     return client.request(url).then((body) => {
       let result = JSON.parse(body.data);
       if (result.Success) {
@@ -327,20 +175,14 @@ export class MGM {
     });
   }
 
-  setRegionCoordinates(r: Region, x: number, y: number): Promise<void> {
-    return this.db.regions.setCoordinates(r, x, y);
-  }
-
   removeRegionFromHost(r: Region, h: Host): Promise<void> {
     let client = urllib.create();
-    return client.request('http://' + h.address + ':' + h.port + '/region/' + r.name + '/remove');
+    return client.request('http://' + h.getAddress() + ':' + h.getPort() + '/region/' + r.getName() + '/remove');
   }
 
   putRegionOnHost(r: Region, h: Host): Promise<void> {
     //host may be null
-
-    //update region in mysql
-    return this.db.regions.setHost(r, h.address || '').then(() => {
+    return r.setNodeAddress(h? h.getAddress() : '').then(() => {
       //sql is updated, contact new host
       if (h === null) {
         return Promise.resolve();
@@ -348,7 +190,7 @@ export class MGM {
 
       let client = urllib.create();
       return new Promise<void>((resolve, reject) => {
-        client.request('http://' + h.address + ':' + h.port + '/region/' + r.name + '/add', { timeout: 10000 }).then(() => {
+        client.request('http://' + h.getAddress() + ':' + h.getPort() + '/region/' + r.getName() + '/add', { timeout: 10000 }).then(() => {
           resolve();
         }).catch(() => {
           reject(new Error('Region assignment recorded, but could not contac tthe host'));
@@ -357,8 +199,12 @@ export class MGM {
     });
   }
 
-  getConfigs(r: Region): Promise<{ [key: string]: { [key: string]: string } }> {
-    return this.db.regions.getConfigs(r);
+  getUploadDir(): string {
+    return this.conf.mgm.upload_dir;
+  }
+
+  getTemplates(): {[key: string]: string} {
+    return this.conf.mgm.templates;
   }
 
   getRegionINI(r: Region): Promise<{ [key: string]: { [key: string]: string } }> {
@@ -405,10 +251,10 @@ export class MGM {
     config['Inventory']['migration_active'] = 'true';
 
     config['Network'] = {};
-    config['Network']['http_listener_port'] = '' + r.httpPort;
-    config['Network']['default_location_x'] = '' + r.locX;
-    config['Network']['default_location_y'] = '' + r.locY;
-    config['Network']['hostname'] = r.externalAddress;
+    config['Network']['http_listener_port'] = '' + r.getPort();
+    config['Network']['default_location_x'] = '' + r.getX();
+    config['Network']['default_location_y'] = '' + r.getY();
+    config['Network']['hostname'] = r.getExternalAddress();
     config['Network']['http_listener_ssl'] = 'false';
     config['Network']['grid_server_url'] = this.conf.halcyon.grid_server;
     config['Network']['grid_send_key'] = 'null';

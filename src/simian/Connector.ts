@@ -6,6 +6,7 @@ import * as Promise from 'bluebird';
 
 import { Inventory, Folder, Item } from '../halcyon/Inventory';
 import { User, Credential} from '../halcyon/User';
+import { SimUser } from './User';
 import { UUIDString } from '../halcyon/UUID';
 import { Asset } from '../whip/asset';
 
@@ -225,14 +226,14 @@ export class SimianConnector {
 
   private buildUser(r: UserRow): User {
     let names: string[] = r.Name.split(' ');
-    return new User(
+    return new SimUser(
       new UUIDString(r.ID),
       names[0],
       names[1],
       r.Email,
       Credential.fromOpensim(r.Credential),
       r.AccessLevel,
-      r.Enabled
+      r.Enabled == 0? false : true
     );
   }
 

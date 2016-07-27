@@ -1,14 +1,15 @@
 
 import * as express from 'express';
-import { User, Credential } from '../../halcyon/User';
+import { User, UserMgr, Credential } from '../../halcyon/User';
 import { MGM } from '../MGM';
+import { UUIDString } from '../../halcyon/UUID';
 
 export interface Halcyon {
   getUserByName(string): Promise<User>
   setUserPassword(string, Credential): Promise<void>
 }
 
-export function AuthHandler(hal: Halcyon): express.Router {
+export function AuthHandler(): express.Router {
   let router: express.Router = express.Router();
 
   //resume session
@@ -45,25 +46,25 @@ export function AuthHandler(hal: Halcyon): express.Router {
     let auth = req.body;
     let username: string = auth.username || '';
     let password: string = auth.password || '';
-    hal.getUserByName(username).then((u: User) => {
-      if (u.passwordHash.compare(password)) {
+    UserMgr.instance().getUserByName(username).then((u: User) => {
+      if (u.getCredential().compare(password)) {
 
-        if (u.godLevel === 0) {
+        if (u.getGodLevel() === 0) {
           res.send(JSON.stringify({
             Success: false,
             Message: 'Account Suspended'
           }));
         } else {
-          res.cookie('name', u.username);
-          res.cookie('uuid', u.UUID.toString());
-          res.cookie('userLevel', u.godLevel);
-          res.cookie('email', u.email);
+          res.cookie('name', u.getUsername());
+          res.cookie('uuid', u.getUUID().toString());
+          res.cookie('userLevel', u.getGodLevel());
+          res.cookie('email', u.getEmail());
 
           res.send(JSON.stringify({
             Success: true,
-            username: u.username,
-            accessLevel: u.godLevel,
-            email: u.email
+            username: u.getUsername(),
+            accessLevel: u.getGodLevel(),
+            email: u.getEmail()
           }));
         }
 
@@ -90,7 +91,9 @@ export function AuthHandler(hal: Halcyon): express.Router {
 
     console.log(credential.hash);
 
-    hal.setUserPassword(req.cookies['uuid'], credential).then(() => {
+    UserMgr.instance().getUser(new UUIDString(req.cookies['uuid'])).then( (u: User) => {
+      return u.setCredential(credential);
+    }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));

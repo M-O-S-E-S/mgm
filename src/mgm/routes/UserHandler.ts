@@ -2,25 +2,24 @@
 import * as express from 'express';
 
 import { MGM } from '../MGM';
-import { User, Credential } from '../../halcyon/User';
+import { User, UserMgr, Credential } from '../../halcyon/User';
 import { UUIDString } from '../../halcyon/UUID';
-import { SqlConnector } from '../../halcyon/sqlConnector';
 
-export function UserHandler(hal: SqlConnector, templates: {[key: string]: string}): express.Router {
+export function UserHandler(templates: {[key: string]: string}): express.Router {
   let router = express.Router();
 
   router.get('/', MGM.isUser, (req, res) => {
-    hal.getAllUsers().then((users: User[]) => {
+    UserMgr.instance().getUsers().then((users: User[]) => {
       //map these to simina appearing users for current MGM front-end
       let result: any[] = [];
       for (let u of users) {
         result.push({
-          name: u.username + ' ' + u.lastname,
-          uuid: u.UUID.toString(),
-          email: u.email,
-          userLevel: u.godLevel,
+          name: u.getUsername() + ' ' + u.getLastName(),
+          uuid: u.getUUID().toString(),
+          email: u.getEmail(),
+          userLevel: u.getGodLevel(),
           identities: [{
-            Identifier: u.username + ' ' + u.lastname,
+            Identifier: u.getUsername() + ' ' + u.getLastName(),
             Enabled: true
           }],
           group: ''
@@ -43,9 +42,9 @@ export function UserHandler(hal: SqlConnector, templates: {[key: string]: string
       return res.send(JSON.stringify({ Success: false, Message: 'Invalid access level' }));
     }
 
-    hal.getUser(userID).then((u: User) => {
+    UserMgr.instance().getUser(userID).then((u: User) => {
       console.log('setting access level for user ' + userID + ' to ' + accessLevel);
-      return hal.setGodLevel(u, accessLevel);
+      return u.setGodLevel(accessLevel);
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
@@ -61,8 +60,8 @@ export function UserHandler(hal: SqlConnector, templates: {[key: string]: string
       return res.send(JSON.stringify({ Success: false, Message: 'Invalid Email' }));
     }
 
-    hal.getUser(userID).then((u: User) => {
-      hal.setEmail(u, email);
+    UserMgr.instance().getUser(userID).then((u: User) => {
+      return u.setEmail(email);
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
@@ -78,8 +77,8 @@ export function UserHandler(hal: SqlConnector, templates: {[key: string]: string
       return res.send(JSON.stringify({ Success: false, Message: 'Password cannot be blank' }));
     }
 
-    hal.getUser(userID).then((u: User) => {
-      return hal.setUserPassword(u.UUID.toString(), Credential.fromPlaintext(password));
+    UserMgr.instance().getUser(userID).then((u: User) => {
+      return u.setCredential(Credential.fromPlaintext(password));
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
@@ -94,8 +93,8 @@ export function UserHandler(hal: SqlConnector, templates: {[key: string]: string
   router.post('/destroy/:id', MGM.isAdmin, (req, res) => {
     let userID = new UUIDString(req.params.id);
 
-    hal.getUser(userID).then( (u: User) => {
-      return hal.deleteUser(u.UUID);
+    UserMgr.instance().getUser(userID).then( (u: User) => {
+      return UserMgr.instance().deleteUser(u);
     }).then( () => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
@@ -124,12 +123,11 @@ export function UserHandler(hal: SqlConnector, templates: {[key: string]: string
     try {
       templateID = new UUIDString(templates[template]);
     } catch (e) {
-      console.log(e);
       return res.send(JSON.stringify({ Success: false, Message: 'Selected template does not contain a user uuid' }));
     }
 
-    hal.getUser(new UUIDString(templates[template])).then( (t: User) => {
-      return t.templateOnto(names[0], names[1], password, email, hal);
+    UserMgr.instance().getUser(new UUIDString(templates[template])).then( (t: User) => {
+      return t.templateOnto(names[0], names[1], password, email);
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {

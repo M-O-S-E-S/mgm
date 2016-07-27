@@ -2,17 +2,19 @@
 import * as express from 'express';
 import * as path from "path";
 
-import { Job } from '../Job';
+import { Job, JobMgr } from '../Job';
 import { MGM } from '../MGM';
 import { UUIDString } from '../../halcyon/UUID';
-import { Region } from '../Region';
-import { Host } from '../Host';
+import { Region, RegionMgr } from '../Region';
+import { Host, HostMgr } from '../Host';
 
 import fs = require("fs");
 import * as multer from 'multer';
 
-export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
+export function TaskHandler(mgm: MGM): express.Router {
   let router = express.Router();
+
+  let uploadDir = mgm.getUploadDir();
 
   //ensure the directory for logs exists
   if (!fs.existsSync(uploadDir)) {
@@ -23,7 +25,7 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
   }
 
   router.get('/', MGM.isUser, (req, res) => {
-    mgm.getJobsFor(new UUIDString(req.cookies['uuid'])).then((jobs: Job[]) => {
+    JobMgr.instance().getFor(new UUIDString(req.cookies['uuid'])).then((jobs: Job[]) => {
       res.send(JSON.stringify({
         Success: true,
         Tasks: jobs
@@ -40,7 +42,7 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
 
     console.log('User ' + user + ' requesting load oar for region ' + regionID);
 
-    mgm.getRegion(regionID).then((r: Region) => {
+    RegionMgr.instance().getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
         throw new Error('Region is not running');
       }
@@ -56,7 +58,7 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
         })
       };
 
-      return mgm.insertJob(j);
+      return JobMgr.instance().insert(j);
     }).then((j: Job) => {
       res.send(JSON.stringify({ Success: true, ID: j.id }));
     }).catch((err: Error) => {
@@ -67,7 +69,7 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
   router.post('/delete/:id', MGM.isUser, (req, res) => {
     let taskID = parseInt(req.params.id);
 
-    mgm.getJob(taskID).then((j: Job) => {
+    JobMgr.instance().get(taskID).then((j: Job) => {
       let datum = JSON.parse(j.data);
       if (datum.File && datum.File !== '') {
         fs.exists(datum.File, (exists) => {
@@ -76,7 +78,7 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
           }
         });
       }
-      return mgm.deleteJob(j);
+      return JobMgr.instance().delete(j.id);
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
@@ -91,13 +93,13 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
     let region: Region;
     let host: Host;
 
-    mgm.getRegion(regionID).then((r: Region) => {
+    RegionMgr.instance().getRegion(regionID).then((r: Region) => {
       console.log('User ' + user + ' requesting save oar for region ' + regionID);
       if (!r.isRunning) {
         throw new Error('Region is not running');
       }
       region = r;
-      return mgm.getHost(r.slaveAddress);
+      return HostMgr.instance().get(r.getNodeAddress());
     }).then((h: Host) => {
       host = h;
 
@@ -112,7 +114,7 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
         })
       };
 
-      return mgm.insertJob(j);
+      return JobMgr.instance().insert(j);
     }).then((j: Job) => {
       return mgm.saveOar(region, host, j);
     }).then(() => {
@@ -145,7 +147,7 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
   router.get('/ready/:id', (req, res) => {
     let jobID = parseInt(req.params.id);
 
-    mgm.getJob(jobID).then( (j: Job) => {
+    JobMgr.instance().get(jobID).then( (j: Job) => {
       switch(j.type){
         case 'save_oar':
           let user = new UUIDString(req.cookies['uuid']);
@@ -159,7 +161,7 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
           break;
         case 'load_oar':
           let remoteIP: string = req.ip.split(':').pop();
-          return mgm.getHost(remoteIP).then( (h: Host) => {
+          return HostMgr.instance().get(remoteIP).then( (h: Host) => {
             //valid host, serve the file
 
           });
@@ -174,13 +176,13 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
     let taskID = parseInt(req.params.id);
     let remoteIP: string = req.ip.split(':').pop();
 
-    mgm.getHost(remoteIP).then((h: Host) => {
-      return mgm.getJob(taskID);
+    HostMgr.instance().get(remoteIP).then((h: Host) => {
+      return JobMgr.instance().get(taskID);
     }).then( (j: Job) => {
       let datum = JSON.parse(j.data);
       datum.Status = req.body.Status;
       j.data = JSON.stringify(datum);
-      return mgm.updateJob(j);
+      return JobMgr.instance().update(j);
     }).then( () => {
       res.send('OK');
     }).catch( (err) => {
@@ -193,11 +195,11 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
 
     console.log('upload file received for job ' + taskID);
 
-    mgm.getJob(taskID).then((j: Job) => {
+    JobMgr.instance().get(taskID).then((j: Job) => {
       switch (j.type) {
         case 'save_oar':
           let remoteIP: string = req.ip.split(':').pop();
-          return mgm.getHost(remoteIP).then((h: Host) => {
+          return HostMgr.instance().get(remoteIP).then((h: Host) => {
             //host is valid
             let datum = JSON.parse(j.data);
             datum.Status = 'Done';
@@ -205,7 +207,7 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
             datum.FileName = req.file.originalname;
             datum.Size = req.file.size;
             j.data = JSON.stringify(datum);
-            return mgm.updateJob(j);
+            return JobMgr.instance().update(j);
           }).then( () => {});
         case 'load_oar':
           let user = new UUIDString(req.cookies['uuid']);
@@ -217,14 +219,14 @@ export function TaskHandler(mgm: MGM, uploadDir: string): express.Router {
           datum.File = req.file.path;
           j.data = JSON.stringify(datum);
           let region: Region;
-          return mgm.updateJob(j).then( (j: Job) =>{
-            return mgm.getRegion(datum.Region);
+          return JobMgr.instance().update(j).then( (j: Job) =>{
+            return RegionMgr.instance().getRegion(datum.Region);
           }).then( (r: Region) => {
             region = r;
             if(! r.isRunning){
               throw new Error('Region is not running');
             }
-            return mgm.getHost(r.slaveAddress);
+            return HostMgr.instance().get(r.getNodeAddress());
           }).then( (h: Host) => {
             return mgm.loadOar(region, h, j);
           })

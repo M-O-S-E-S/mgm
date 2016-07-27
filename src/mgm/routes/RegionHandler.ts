@@ -1,9 +1,9 @@
 
 import * as express from 'express';
 
-import { Region } from '../Region';
-import { Host } from '../Host';
-import { Estate } from '../../halcyon/estate';
+import { Region, RegionMgr } from '../Region';
+import { Host, HostMgr } from '../Host';
+import { Estate, EstateMgr } from '../../halcyon/Estate';
 import { UUIDString } from '../../halcyon/UUID';
 import { MGM } from '../MGM';
 import { RegionLogs } from '../util/regionLogs';
@@ -20,42 +20,41 @@ export interface ConsoleSettings {
   pass: string
 }
 
-export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): express.Router {
+export function RegionHandler(mgm: MGM): express.Router {
   let router = express.Router();
 
   router.get('/', MGM.isUser, (req, res) => {
     let regions: Region[];
     let w;
     if (req.cookies['userLevel'] >= 250) {
-      w = mgm.getAllRegions();
+      w = RegionMgr.instance().getAllRegions();
     } else {
-      w = mgm.getRegionsFor(new UUIDString(req.cookies['uuid']));
+      w = RegionMgr.instance().getRegionsFor(new UUIDString(req.cookies['uuid']));
     }
     w.then((rs: Region[]) => {
       regions = rs;
-      return hal.getEstates();
+      return EstateMgr.instance().getAllEstates();
     }).then((estates: Estate[]) => {
       let result = [];
       for (let r of regions) {
         let estateName: string = '';
         for (let e of estates) {
           for (let reg of e.regions) {
-            if (reg.toString() === r.uuid.toString()) {
+            if (reg.toString() === r.getUUID().toString()) {
               estateName = e.name;
             }
           }
         }
-        r.status['simStats'] = { 'Uptime': r.status.uptime };
+        //r.status['simStats'] = { 'Uptime': r.status.uptime };
         result.push({
-          uuid: r.uuid.toString(),
-          name: r.name,
-          x: r.locX,
-          y: r.locY,
-          size: r.size,
+          uuid: r.getUUID().toString(),
+          name: r.getName(),
+          x: r.getX(),
+          y: r.getY(),
           estateName: estateName,
-          status: r.status,
-          node: r.slaveAddress ? r.slaveAddress : '',
-          isRunning: r.isRunning,
+          status: r.getStatus(),
+          node: r.getNodeAddress() ? r.getNodeAddress() : '',
+          isRunning: r.isRunning(),
         });
       }
 
@@ -69,8 +68,8 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
   router.get('/logs/:uuid', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
 
-    mgm.getRegion(regionID).then((r: Region) => {
-      res.sendFile(RegionLogs.instance().getFilePath(r.uuid))
+    RegionMgr.instance().getRegion(regionID).then((r: Region) => {
+      res.sendFile(RegionLogs.instance().getFilePath(r.getUUID()))
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
@@ -80,18 +79,16 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
     let regionID = new UUIDString(req.params.uuid);
     let region: Region;
 
-    mgm.getRegion(regionID).then((r: Region) => {
+    RegionMgr.instance().getRegion(regionID).then((r: Region) => {
       if (r.isRunning) {
         return res.send(JSON.stringify({ Success: false, Message: 'cannot delete a running region' }));
       }
-      if (r.slaveAddress !== null) {
+      if (r.getNodeAddress() !== null) {
         return res.send(JSON.stringify({ Success: false, Message: 'region is still allocated a host' }));
       }
       region = r;
     }).then(() => {
-      return mgm.destroyRegion(region);
-    }).then(() => {
-      return hal.destroyRegion(region.uuid.toString());
+      return RegionMgr.instance().destroyRegion(region);
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
@@ -105,11 +102,11 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
 
     let estate: Estate;
 
-    hal.getEstate(estateID).then((e: Estate) => {
+    EstateMgr.instance().getEstate(estateID).then((e: Estate) => {
       estate = e;
-      return mgm.getRegion(regionID);
+      return RegionMgr.instance().getRegion(regionID);
     }).then((r: Region) => {
-      return hal.setEstateForRegion(r.uuid.toString(), estate);
+      return r.setEstate(estate);
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
@@ -123,20 +120,20 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
     let x = parseInt(req.body.x);
     let y = parseInt(req.body.y);
 
-    mgm.getRegion(regionID).then((r: Region) => {
+    RegionMgr.instance().getRegion(regionID).then((r: Region) => {
       if (r.isRunning) throw new Error('Cannot move a region while it is running');
-      if (r.locX === x && r.locY === y) throw new Error('Region is already at those coordinates');
+      if (r.getX() === x && r.getY() === y) throw new Error('Region is already at those coordinates');
       region = r;
-      return mgm.getAllRegions();
+      return RegionMgr.instance().getAllRegions();
     }).then((regions: Region[]) => {
       for (let r of regions) {
-        if (r.uuid === region.uuid) {
+        if (r.getUUID() === region.getUUID()) {
           continue;
         }
-        if (r.locX === x && r.locY === y) throw new Error('Region ' + r.name + ' is already at those coordinates');
+        if (r.getX() === x && r.getY() === y) throw new Error('Region ' + r.getName() + ' is already at those coordinates');
       }
     }).then(() => {
-      return mgm.setRegionCoordinates(region, x, y);
+      return region.setCoordinates(x,y);
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
@@ -145,20 +142,14 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
   });
 
   router.post('/create', MGM.isAdmin, (req, res) => {
-    let region: Region = new Region();
-    region.name = req.body.name;
-    region.size = req.body.size;
-    region.locX = req.body.x;
-    region.locY = req.body.y;
     let estateID = req.body.estate;
     let estate: Estate;
 
-    hal.getEstate(estateID).then((e: Estate) => {
+    EstateMgr.instance().getEstate(estateID).then((e: Estate) => {
       estate = e;
-      return mgm.insertRegion(region);
+      return RegionMgr.instance().insertRegion(req.body.name, req.body.x, req.body.y);
     }).then((r: Region) => {
-      region = r;
-      return hal.setEstateForRegion(region.uuid.toString(), estate);
+      return r.setEstate(estate);
     }).then(() => {
       return res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
@@ -177,18 +168,18 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
 
     console.log('Setting host for region ' + regionID.toString() + ' to host: ' + hostAddress);
 
-    mgm.getRegion(regionID).then((r: Region) => {
+    RegionMgr.instance().getRegion(regionID).then((r: Region) => {
       if (r.isRunning) {
         throw new Error('Region is currently running');
       }
       region = r;
-      if (r.slaveAddress === hostAddress) {
+      if (r.getNodeAddress() === hostAddress) {
         throw new Error('Region is already on that host');
       }
     }).then(() => {
       //get new host
       return new Promise<Host>((resolve, reject) => {
-        mgm.getHost(hostAddress).then((h: Host) => {
+        HostMgr.instance().get(hostAddress).then((h: Host) => {
           resolve(h);
         }).catch(() => {
           resolve(null);
@@ -199,7 +190,7 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
 
       //try to get region's current host
       return new Promise<Host>((resolve, reject) => {
-        mgm.getHost(region.slaveAddress).then((h: Host) => {
+        HostMgr.instance().get(region.getNodeAddress()).then((h: Host) => {
           resolve(h);
         }).catch(() => {
           resolve(null);
@@ -232,15 +223,15 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
   router.post('/stop/:uuid', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let target: Region;
-    mgm.getRegion(regionID).then((r: Region) => {
+    RegionMgr.instance().getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
-        throw new Error('Region ' + r.name + ' is not running');
+        throw new Error('Region ' + r.getName() + ' is not running');
       }
-      if (r.slaveAddress === null || r.slaveAddress === '') {
-        throw new Error('Region ' + r.name + ' is not assigned a host');
+      if (r.getNodeAddress() === null || r.getNodeAddress() === '') {
+        throw new Error('Region ' + r.getName() + ' is not assigned a host');
       }
       target = r;
-      return mgm.getHost(r.slaveAddress);
+      return HostMgr.instance().get(r.getNodeAddress());
     }).then((h: Host) => {
       return mgm.stopRegion(target, h);
     }).catch((err) => {
@@ -251,15 +242,15 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
   router.post('/kill/:uuid', MGM.isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let target: Region;
-    mgm.getRegion(regionID).then((r: Region) => {
+    RegionMgr.instance().getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
-        throw new Error('Region ' + r.name + ' is not running');
+        throw new Error('Region ' + r.getName() + ' is not running');
       }
-      if (r.slaveAddress === null || r.slaveAddress === '') {
-        throw new Error('Region ' + r.name + ' is not assigned a host');
+      if (r.getNodeAddress() === null || r.getNodeAddress() === '') {
+        throw new Error('Region ' + r.getName() + ' is not assigned a host');
       }
       target = r;
-      return mgm.getHost(r.slaveAddress);
+      return HostMgr.instance().get(r.getNodeAddress());
     }).then((h: Host) => {
       return mgm.killRegion(target, h);
     }).catch((err) => {
@@ -271,9 +262,9 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
     let regionID = new UUIDString(req.params.regionID);
     let r: Region
 
-    mgm.getRegion(regionID).then((region: Region) => {
+    RegionMgr.instance().getRegion(regionID).then((region: Region) => {
       r = region;
-      return mgm.getHost(r.slaveAddress);
+      return HostMgr.instance().get(r.getNodeAddress());
     }).then((h: Host) => {
       return mgm.startRegion(r, h);
     }).then(() => {
@@ -287,12 +278,12 @@ export function RegionHandler(mgm: MGM, hal: Halcyon, conf: ConsoleSettings): ex
     let regionID = req.params.uuid;
     let p;
     if (regionID) {
-      p = mgm.getRegion(new UUIDString(regionID)).then((r: Region) => {
-        return mgm.getConfigs(r);
+      p = RegionMgr.instance().getRegion(new UUIDString(regionID)).then((r: Region) => {
+        return r.getConfigs();
       });
 
     } else {
-      p = mgm.getConfigs(null);
+      p = Promise.resolve({});
     }
     p.then((configs) => {
       res.send(JSON.stringify({ Success: true, Config: configs }));

@@ -4,7 +4,7 @@
 import * as Promise from 'bluebird';
 
 import { SqlConnector } from './halcyon/sqlConnector';
-import { User, Appearance, Credential } from './halcyon/User';
+import { User, UserMgr, Appearance, Credential } from './halcyon/User';
 import { Inventory, Folder, Item } from './halcyon/Inventory';
 import { WhipServer } from './whip/Whip';
 import { UUIDString } from './halcyon/UUID';
@@ -31,18 +31,18 @@ let sourceUser: User;
 let sourceInventory: Inventory;
 
 whip.connect().then(() => {
-  return hal.getUser(targetID);
+  return UserMgr.instance().getUser(targetID);
 }).then((u: User) => {
-  console.log('loading inventory onto halcyon account ' + u.username + ' ' + u.lastname);
+  console.log('loading inventory onto halcyon account ' + u.getUsername() + ' ' + u.getLastName());
   targetUser = u;
   return sim.getUser(sourceID);
 }).then((u: User) => {
   sourceUser = u;
-  console.log('copying inventory from simian user ' + u.username + ' ' + u.lastname + ' to halcyon user ' + targetUser.username + ' ' + targetUser.lastname);
-  return sim.getInventory(u.UUID.toString());
+  console.log('copying inventory from simian user ' + u.getUsername() + ' ' + u.getLastName() + ' to halcyon user ' + targetUser.getUsername() + ' ' + targetUser.getLastName());
+  return sim.getInventory(u.getUUID().toString());
 }).then((i: Inventory) => {
   sourceInventory = i;
-  return hal.getInventory(targetUser.UUID);
+  return hal.getInventory(targetUser.getUUID());
 }).then((i: Inventory) => {
   //both users are in good shape and we have both inventories
   console.log('Inventories retrieved.  Erasing current Halcyon inventory.');
@@ -50,7 +50,7 @@ whip.connect().then(() => {
 }).then(() => {
   //convert inventory for new owner
   console.log('Inserting new Halcyon inventory.');
-  sourceInventory.changeOwner(targetUser.UUID);
+  sourceInventory.changeOwner(targetUser.getUUID());
   return hal.addInventory(sourceInventory);
 }).then(() => {
   //the target account contains all of the folder and item references, now to collect and upload assets

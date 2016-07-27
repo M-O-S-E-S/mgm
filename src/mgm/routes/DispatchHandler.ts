@@ -2,8 +2,8 @@
 import * as express from 'express';
 
 import { MGM } from '../MGM';
-import { Region } from '../Region';
-import { Host } from '../host';
+import { Region, RegionMgr } from '../Region';
+import { Host, HostMgr } from '../Host';
 import { UUIDString } from '../../halcyon/UUID';
 import { RegionLogs } from '../util/regionLogs';
 
@@ -13,39 +13,39 @@ export function DispatchHandler(mgm: MGM): express.Router {
   router.post('/logs/:uuid', (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let remoteIP: string = req.ip.split(':').pop();
-    mgm.getRegion(regionID)
-    .then((r: Region) => {
-      let logs: string[] = JSON.parse(req.body.log);
-      return RegionLogs.instance().append(r.uuid, logs);
-    }).then( () => {
-      res.send(JSON.stringify({ Success: true }));
-    }).catch((err: Error) => {
-      console.log('Error handling logs for host ' + remoteIP + ': ' + err.message);
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
-    });
+    RegionMgr.instance().getRegion(regionID)
+      .then((r: Region) => {
+        let logs: string[] = JSON.parse(req.body.log);
+        return RegionLogs.instance().append(r.getUUID(), logs);
+      }).then(() => {
+        res.send(JSON.stringify({ Success: true }));
+      }).catch((err: Error) => {
+        console.log('Error handling logs for host ' + remoteIP + ': ' + err.message);
+        res.send(JSON.stringify({ Success: false, Message: err.message }));
+      });
   });
 
   router.post('/stats/:host', (req, res) => {
     let host = req.params.host; //url parameter, not relaly used
     let remoteIP: string = req.ip.split(':').pop();
-    mgm.getHost(remoteIP).then((host: Host) => {
+    HostMgr.instance().get(remoteIP).then((host: Host) => {
       //this is from mgmNode, which isnt following the rules
       let stats = JSON.parse(req.body.json);
       let hostStatus = JSON.stringify(stats.host);
 
       let workers = [];
-      workers.push(mgm.updateHostStats(host, hostStatus));
+      host.setStatus(hostStatus);
 
       let halted = 0;
       let running = 0;
       for (let proc of stats.processes) {
-        let w = mgm.getRegion(new UUIDString(proc.id)).then((r: Region) => {
-          r.isRunning = proc.running.toUpperCase() === 'FALSE' ? false : true;
-          if (r.isRunning)
+        let w = RegionMgr.instance().getRegion(new UUIDString(proc.id)).then((r: Region) => {
+          if (proc.running.toUpperCase() === 'FALSE' ? false : true)
             running++;
           else
             halted++;
-          return mgm.updateRegionStats(r, proc.running.toUpperCase() === 'FALSE' ? false : true, JSON.stringify(proc.stats));
+          r.setRunning(proc.running.toUpperCase() === 'FALSE' ? false : true);
+          r.setStats(proc.stats)
         });
         workers.push(w);
       }
@@ -64,8 +64,8 @@ export function DispatchHandler(mgm: MGM): express.Router {
     let uuid = new UUIDString(req.params.id);
     //validate host
     let remoteIP: string = req.ip.split(':').pop();
-    mgm.getRegion(uuid).then( (r: Region) => {
-      if(r.slaveAddress === remoteIP){
+    RegionMgr.instance().getRegion(uuid).then((r: Region) => {
+      if (r.getNodeAddress() === remoteIP) {
         return r;
       }
       throw new Error('Requested region does not exist on the requesting host');
@@ -73,12 +73,12 @@ export function DispatchHandler(mgm: MGM): express.Router {
       res.send(JSON.stringify({
         Success: true,
         Region: {
-          Name: r.name,
-          RegionUUID: r.uuid.toString(),
-          LocationX: r.locX,
-          LocationY: r.locY,
-          InternalPort: r.httpPort,
-          ExternalHostName: r.externalAddress
+          Name: r.getName(),
+          RegionUUID: r.getUUID().toString(),
+          LocationX: r.getX(),
+          LocationY: r.getY(),
+          InternalPort: r.getPort(),
+          ExternalHostName: r.getExternalAddress()
         }
       }));
     }).catch((err: Error) => {
@@ -94,16 +94,15 @@ export function DispatchHandler(mgm: MGM): express.Router {
     let externalAddress = req.query.externalAddress;
     //validate host
     let remoteIP: string = req.ip.split(':').pop();
-    mgm.getRegion(uuid).then( (r: Region) => {
-      if(r.slaveAddress === remoteIP){
+    RegionMgr.instance().getRegion(uuid).then((r: Region) => {
+      if (r.getNodeAddress() === remoteIP) {
         return r;
       }
       throw new Error('Requested region does not exist on the requesting host');
     }).then((r: Region) => {
-      r.httpPort = httpPort;
-      r.consolePort = consolePort;
-      r.externalAddress = externalAddress;
-      return mgm.updateRegion(r);
+      return r.setPort(httpPort);
+    }).then((r: Region) => {
+      return r.setExternalAddress(externalAddress);
     }).then((r: Region) => {
       return mgm.getRegionINI(r);
     }).then((config: { [key: string]: { [key: string]: string } }) => {
@@ -117,28 +116,24 @@ export function DispatchHandler(mgm: MGM): express.Router {
 
   router.post('/node', (req, res) => {
     let remoteIP: string = req.ip.split(':').pop();
-    mgm.getHost(remoteIP).then((host: Host) => {
+    let payload = req.body;
+    HostMgr.instance().get(remoteIP).then((host: Host) => {
       console.log('Received registration for node at ' + remoteIP);
-      let payload = req.body;
-
-      host.slots = payload.slots;
-      host.name = payload.host;
-      host.port = payload.port;
-
-      return host;
+      return host.setPort(payload.port)
     }).then((h: Host) => {
-      return mgm.updateHost(h);
+      return h.setName(payload.host);
     }).then((h: Host) => {
-      return mgm.getRegionsOn(h);
+      return h.setSlots(payload.slots);
+    }).then((h: Host) => {
+      return RegionMgr.instance().getRegionsOn(h);
     }).then((regions: Region[]) => {
       let result = []
       for (let r of regions) {
         result.push({
-          name: r.name,
-          uuid: r.uuid.toString(),
-          locX: r.locX,
-          locY: r.locY,
-          size: r.size
+          name: r.getName(),
+          uuid: r.getUUID().toString(),
+          locX: r.getX(),
+          locY: r.getY()
         });
       }
       res.send(JSON.stringify({

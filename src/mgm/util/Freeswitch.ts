@@ -1,17 +1,17 @@
 
-import { Config } from './MGM';
-
 export class Freeswitch {
 
   private idMap: {[key:string]:string}
+  private voiceIP: string
 
-  constructor(private cfg: Config) {
+  constructor(voiceIP: string) {
+    this.voiceIP = voiceIP;
     this.idMap = {};
   }
 
   config(body: any): string {
     let context = 'default';
-    let realm = this.cfg.mgm.voiceIP;
+    let realm = this.voiceIP;
     let sipProxy = realm;
     let attemptUseStun = false;
     let echoServer = '';
@@ -38,7 +38,7 @@ export class Freeswitch {
 
   directory(body: any): string {
     let context = 'default';
-    let realm = this.cfg.mgm.voiceIP;
+    let realm = this.voiceIP;
     let reqDomain = body.domain;
 
     if (reqDomain !== realm) {
@@ -80,7 +80,7 @@ export class Freeswitch {
 
   dialplan(body: any) {
     let context = 'default';
-    let realm = this.cfg.mgm.voiceIP;
+    let realm = this.voiceIP;
     let reqContext = body['Hunt-Context'];
 
     if (reqContext !== context) {

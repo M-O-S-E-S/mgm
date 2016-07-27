@@ -1,31 +1,26 @@
 
 import * as express from 'express';
 import { UUIDString } from '../../halcyon/UUID';
-import { Region } from '../Region';
-import { Host } from '../Host';
+import { Region, RegionMgr } from '../Region';
+import { Host, HostMgr } from '../Host';
 
 import { RegionLogs } from '../util/regionLogs';
 
 import { MGM } from '../MGM';
 
-export interface ConsoleSettings {
-  user: string,
-  pass: string
-}
-
-export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Router {
+export function ConsoleHandler(mgm: MGM): express.Router {
   let router = express.Router();
 
   let logs = RegionLogs.instance();
 
   router.post('/open/:uuid', MGM.isUser, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
-    mgm.getRegion(regionID).then((r: Region) => {
-      if (!r.isRunning) {
+    RegionMgr.instance().getRegion(regionID).then((r: Region) => {
+      if (!r.isRunning()) {
         throw new Error('Region must be running to open a console');
       }
       res.cookie('console', 0);
-      res.send(JSON.stringify({ Success: true, Prompt: r.name + ' >' }));
+      res.send(JSON.stringify({ Success: true, Prompt: r.getName() + ' >' }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
@@ -37,7 +32,7 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
       return;
     }
     let regionID = new UUIDString(req.params.uuid);
-    mgm.getRegion(regionID).then((r: Region) => {
+    RegionMgr.instance().getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
         throw new Error('Region is no longer running');
       }
@@ -67,12 +62,12 @@ export function ConsoleHandler(mgm: MGM, settings: ConsoleSettings): express.Rou
     let regionID = new UUIDString(req.params.uuid);
     let command: string = req.body.command;
     let region: Region;
-    mgm.getRegion(regionID).then((r: Region) => {
+    RegionMgr.instance().getRegion(regionID).then((r: Region) => {
       if (!r.isRunning) {
         throw new Error('Region is no longer running');
       }
       region = r;
-      return mgm.getHost(r.slaveAddress);
+      return HostMgr.instance().get(r.getNodeAddress());
     }).then((h: Host) => {
       return mgm.consoleCommand(region, h, command);
     }).then(() => {

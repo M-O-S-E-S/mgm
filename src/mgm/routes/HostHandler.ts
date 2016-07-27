@@ -1,16 +1,23 @@
 
 import * as express from 'express';
-import { Host } from '../Host';
+import { Host, HostMgr } from '../Host';
 import { MGM } from '../MGM';
 
 export function HostHandler(mgm: MGM): express.Router {
   let router = express.Router();
 
   router.get('/', MGM.isAdmin, (req, res) => {
-    mgm.getHosts().then((hosts: Host[]) => {
+    HostMgr.instance().getAll().then((hosts: Host[]) => {
       res.send(JSON.stringify({
         Success: true,
-        Hosts: hosts
+        Hosts: hosts.map( host => {
+          return {
+            address: host.getAddress(),
+            name: host.getName(),
+            slots: host.getSlots(),
+            status: host.getStatus()
+          }
+        })
       }));
     });
   });
@@ -22,7 +29,7 @@ export function HostHandler(mgm: MGM): express.Router {
       return;
     }
 
-    mgm.insertHost(host).then(() => {
+    HostMgr.instance().insert(host).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
@@ -32,7 +39,7 @@ export function HostHandler(mgm: MGM): express.Router {
   router.post('/remove', MGM.isAdmin,  (req, res) => {
     let host: string = req.body.host || '';
 
-    mgm.deleteHost(host).then(() => {
+    HostMgr.instance().delete(host).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));

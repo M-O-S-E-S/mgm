@@ -3,7 +3,7 @@ import * as express from 'express';
 import { UUIDString } from '../../halcyon/UUID';
 
 import { Parser } from 'xml2js';
-import { MGMDB } from '../database/mgmDB';
+import { OfflineMgr } from '../util/OfflineMgr';
 
 export function OfflineMessageHandler(): express.Router {
   let router = express.Router();
@@ -34,7 +34,7 @@ export function OfflineMessageHandler(): express.Router {
       });
     }).then((xml: any) => {
       let toAgent = new UUIDString(xml.GridInstantMessage.toAgentID[0]);
-      return MGMDB.instance().messages.save(toAgent, xmlMessage);
+      return OfflineMgr.instance().save(toAgent, xmlMessage);
     }).then(() => {
       res.send('<?xml version="1.0" encoding="utf-8"?><boolean>true</boolean>');
     }).catch((err) => {
@@ -54,14 +54,14 @@ export function OfflineMessageHandler(): express.Router {
       });
     }).then((xml: any) => {
       userID = new UUIDString(xml.UUID.Guid[0]);
-      return MGMDB.instance().messages.getFor(userID);
+      return OfflineMgr.instance().getFor(userID);
     }).then((messages: string[]) => {
 
       res.send('<?xml version="1.0" encoding="utf-8"?><ArrayOfGridInstantMessage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">' +
         messages.join('') + '</ArrayOfGridInstantMessage>'
       );
     }).then(() => {
-      return MGMDB.instance().messages.clearFor(userID);
+      return OfflineMgr.instance().clearFor(userID);
     }).catch((err) => {
       console.log('Error saving offline message: ' + err.Message);
       res.send('');

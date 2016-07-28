@@ -5,8 +5,6 @@ import { Freeswitch } from '../util/Freeswitch';
 import { MGM } from '../MGM';
 import { Region, RegionMgr } from '../Region';
 
-import { SqlConnector as halcyon} from '../../halcyon/sqlConnector';
-
 import { AuthHandler } from './AuthHandler';
 import { ConsoleHandler } from './ConsoleHandler';
 import { TaskHandler } from './TaskHandler';

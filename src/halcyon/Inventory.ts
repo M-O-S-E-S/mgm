@@ -1,5 +1,6 @@
 
 import { UUIDString } from './UUID';
+import { Sql } from '../mysql/sql';
 
 import fs = require("fs");
 
@@ -117,6 +118,123 @@ export class Inventory {
     //  throw new Error('Not Implemented');
     //  return null;
     //});
+  }
+
+  save(db: Sql): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      //push all of the inventory folders in first
+      let folders = this.getFolders();
+      let query = 'INSERT INTO inventoryfolders (folderName, type, version, folderID, agentID, parentFolderID) VALUES ?';
+      let values = [];
+      for (let f of folders) {
+        values.push([f.folderName, f.Type, f.version, f.folderID.toString(), f.agentID.toString(), f.parentFolderID.toString()]);
+      }
+      db.pool.query(query, [values], (err) => {
+        if (err) return reject(err);
+
+        //once folders are inserted, insert items
+        let items = this.getItems();
+        let tasks = items.map((i: Item) => {
+          if(i.assetID === undefined){
+            console.log(i);
+          }
+          return new Promise<void>((resolve, reject) => {
+            db.pool.query('INSERT INTO inventoryitems SET ?', {
+              assetID: i.assetID.toString(),
+              assetType: i.assetType,
+              inventoryName: i.inventoryName,
+              inventoryDescription: i.inventoryDescription || 'description',
+              inventoryNextPermissions: i.inventoryNextPermissions,     //???
+              inventoryCurrentPermissions: i.inventoryCurrentPermissions,  //???
+              invType: i.invType,
+              creatorID: i.creatorID.toString(),
+              inventoryBasePermissions: i.inventoryBasePermissions || 647168,     //???
+              inventoryEveryOnePermissions: i.inventoryEveryOnePermissions || 0, //???
+              salePrice: i.salePrice || 0,
+              saleType: i.saleType || 0,
+              creationDate: i.creationDate,
+              groupID: i.groupID.toString(),
+              groupOwned: i.groupOwned || 0,
+              flags: i.flags || 0,
+              inventoryID: i.inventoryID.toString(),
+              avatarID: i.avatarID.toString(),
+              parentFolderID: i.parentFolderID.toString(),
+              inventoryGroupPermissions: i.inventoryGroupPermissions || 0
+            }, (err) => {
+              if (err) return reject(err);
+              resolve();
+            });
+          });
+        });
+        Promise.all(tasks).then(() => {
+          resolve();
+        }).catch((err) => {
+          reject(err);
+        })
+      });
+    });
+  }
+
+  static Delete(db: Sql, id: UUIDString): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      db.pool.query('DELETE FROM inventoryfolders WHERE agentID=?', id.toString(), (err) => {
+        if (err) return reject(err);
+
+        db.pool.query('DELETE FROM inventoryitems WHERE avatarID=?', id.toString(), (err) => {
+          if (err) return reject(err);
+
+          resolve();
+        });
+      });
+    });
+  }
+
+  static FromDB(db: Sql, id: UUIDString): Promise<Inventory> {
+    return new Promise<Inventory>((resolve, reject) => {
+      let folders: Folder[] = [];
+      let items: Item[] = [];
+      db.pool.query('SELECT * FROM inventoryfolders WHERE agentID=?', id.toString(), (err, rows) => {
+        if (err) return reject(err);
+        for (let r of rows) {
+          folders.push(new Folder(
+            r.folderName,
+            r.type,
+            r.version,
+            new UUIDString(r.folderID),
+            new UUIDString(r.agentID),
+            new UUIDString(r.parentFolderID)
+          ));
+        }
+        db.pool.query('SELECT * FROM inventoryitems WHERE avatarID=?', id.toString(), (err, rows) => {
+          if (err) return reject(err);
+          for (let r of rows) {
+            let i: Item = new Item();
+            i.assetID = new UUIDString(r.assetID);
+            i.assetType = r.assetType;
+            i.inventoryName = r.inventoryName;
+            i.inventoryDescription = r.inventoryDescription;
+            i.inventoryNextPermissions = r.inventoryNextPermissions;
+            i.inventoryCurrentPermissions = r.inventoryCurrentPermissions;
+            i.invType = r.invType;
+            i.creatorID = new UUIDString(r.creatorID);
+            i.inventoryBasePermissions = r.inventoryBasePermissions;
+            i.inventoryEveryOnePermissions = r.inventoryEveryOnePermissions;
+            i.salePrice = r.salePrice;
+            i.saleType = r.saleType;
+            i.creationDate = r.creationDate;
+            i.groupID = r.groupID;
+            i.groupOwned = r.groupOwned;
+            i.flags = r.flags;
+            i.inventoryID = new UUIDString(r.inventoryID);
+            i.avatarID = new UUIDString(r.avatarID);
+            i.parentFolderID = new UUIDString(r.parentFolderID);
+            i.inventoryGroupPermissions = r.inventoryGroupPermissions;
+            items.push(i);
+          }
+          resolve(new Inventory(folders, items));
+        });
+      })
+    });
   }
 
   prettyPrint(){

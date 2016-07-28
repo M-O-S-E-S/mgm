@@ -13,10 +13,10 @@
     "./**/*.ts"
   ],
   "files": [
+    "./halcyon/Appearance.ts",
     "./halcyon/Estate.ts",
     "./halcyon/Group.ts",
     "./halcyon/Inventory.ts",
-    "./halcyon/sqlConnector.ts",
     "./halcyon/User.ts",
     "./halcyon/UUID.ts",
     "./mgm.ts",

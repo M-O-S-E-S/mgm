@@ -3,6 +3,7 @@ import * as crypto from 'crypto';
 import {UUIDString} from './UUID';
 import { Inventory, Folder, Item } from './Inventory';
 import { Sql } from '../mysql/sql';
+import { Appearance } from './Appearance';
 
 export interface User {
   getUUID(): UUIDString
@@ -129,16 +130,15 @@ class UserObj {
   }
 
   templateOnto(firstname: string, lastname: string, password: string, email: string): Promise<void> {
-    let hal = null;//UserMgr.instance().getDB();
     let appearance: Appearance;
     let inventory: Inventory;
     let newUser: UserObj;
     let newAppearance: Appearance;
     let newInventory: Inventory;
-    return hal.getAppearance(this.UUID)
+    return Appearance.FromDB(this.db, this.UUID)
       .then((a: Appearance) => {
         appearance = a;
-        return hal.getInventory(this.UUID);
+        return Inventory.FromDB(this.db, this.UUID);
       }).then((i: Inventory) => {
         inventory = i;
 
@@ -300,51 +300,11 @@ class UserObj {
           });
         });
       }).then(() => {
-        return hal.addAppearance(newAppearance);
+        return newAppearance.save(this.db);
       }).then(() => {
-        return hal.addInventory(newInventory);
+        return newInventory.save(this.db);
       });
   }
-}
-
-export class Appearance {
-  Owner: UUIDString
-  Serial: number
-  Visual_Params: Buffer
-  Texture: Buffer
-  Avatar_Height: number
-  Body_Item: UUIDString
-  Body_Asset: UUIDString
-  Skin_Item: UUIDString
-  Skin_Asset: UUIDString
-  Hair_Item: UUIDString
-  Hair_Asset: UUIDString
-  Eyes_Item: UUIDString
-  Eyes_Asset: UUIDString
-  Shirt_Item: UUIDString
-  Shirt_Asset: UUIDString
-  Pants_Item: UUIDString
-  Pants_Asset: UUIDString
-  Shoes_Item: UUIDString
-  Shoes_Asset: UUIDString
-  Socks_Item: UUIDString
-  Socks_Asset: UUIDString
-  Jacket_Item: UUIDString
-  Jacket_Asset: UUIDString
-  Gloves_Item: UUIDString
-  Gloves_Asset: UUIDString
-  Undershirt_Item: UUIDString
-  Undershirt_Asset: UUIDString
-  Underpants_Item: UUIDString
-  Underpants_Asset: UUIDString
-  Skirt_Item: UUIDString
-  Skirt_Asset: UUIDString
-  alpha_item: UUIDString
-  alpha_asset: UUIDString
-  tattoo_item: UUIDString
-  tattoo_asset: UUIDString
-  physics_item: UUIDString
-  physics_asset: UUIDString
 }
 
 export class Credential {

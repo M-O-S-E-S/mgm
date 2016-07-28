@@ -3,8 +3,8 @@
 
 import * as Promise from 'bluebird';
 
-import { SqlConnector } from './halcyon/sqlConnector';
-import { User, UserMgr, Appearance, Credential } from './halcyon/User';
+import { Sql } from './mysql/Sql';
+import { User, UserMgr, Credential } from './halcyon/User';
 import { Inventory, Folder, Item } from './halcyon/Inventory';
 import { WhipServer } from './whip/Whip';
 import { UUIDString } from './halcyon/UUID';
@@ -13,7 +13,7 @@ import { SimianConnector } from './simian/Connector';
 
 var conf = require('../settings.js');
 
-let hal = new SqlConnector(conf.halcyon);
+let hal = new Sql(conf.halcyon);
 let whip = new WhipServer(conf.whip);
 let sim = new SimianConnector(conf.simian);
 
@@ -42,16 +42,16 @@ whip.connect().then(() => {
   return sim.getInventory(u.getUUID().toString());
 }).then((i: Inventory) => {
   sourceInventory = i;
-  return hal.getInventory(targetUser.getUUID());
+  return Inventory.FromDB(hal, targetUser.getUUID());
 }).then((i: Inventory) => {
   //both users are in good shape and we have both inventories
   console.log('Inventories retrieved.  Erasing current Halcyon inventory.');
-  return hal.deleteInventory(targetUser);
+  return Inventory.Delete(hal, targetUser.getUUID());
 }).then(() => {
   //convert inventory for new owner
   console.log('Inserting new Halcyon inventory.');
   sourceInventory.changeOwner(targetUser.getUUID());
-  return hal.addInventory(sourceInventory);
+  return sourceInventory.save(hal);
 }).then(() => {
   //the target account contains all of the folder and item references, now to collect and upload assets
   let items = sourceInventory.getItems();

@@ -33,7 +33,6 @@ export class RegionLogs {
   }
 
   append(region: UUIDString, lines: string[]): Promise<void> {
-    console.log(region);
     return new Promise<void>((resolve, reject) => {
       if (region.toString() in this.subjects) {
         for (let line of lines) {

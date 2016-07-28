@@ -31,10 +31,9 @@ export function DispatchHandler(mgm: MGM): express.Router {
     HostMgr.instance().get(remoteIP).then((host: Host) => {
       //this is from mgmNode, which isnt following the rules
       let stats = JSON.parse(req.body.json);
-      let hostStatus = JSON.stringify(stats.host);
 
       let workers = [];
-      host.setStatus(hostStatus);
+      host.setStatus(stats.host);
 
       let halted = 0;
       let running = 0;
@@ -136,13 +135,13 @@ export function DispatchHandler(mgm: MGM): express.Router {
           locY: r.getY()
         });
       }
-      res.send(JSON.stringify({
+      return res.send(JSON.stringify({
         Success: true,
         Regions: result
       }));
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
-      return;
+      console.log(err.stack);
+      return res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
   });
 

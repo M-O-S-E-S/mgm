@@ -125,7 +125,9 @@ class RegionObj {
         [address, this.uuid.toString()], err => {
           if (err) return reject(err);
           resolve();
-        })
+        });
+    }).then( () => {
+      this.nodeAddress = address;
     })
   }
 
@@ -402,7 +404,7 @@ export class RegionMgr {
       });
     }).then((rows: any[]) => {
       for (let r of rows) {
-        let reg = new RegionObj(r.uuid, r.name, parseInt(r.httpPort), parseInt(r.locX), parseInt(r.locY), r.externalAddress, r.slaveAddress);
+        let reg = new RegionObj(new UUIDString(r.uuid), r.name, parseInt(r.httpPort), parseInt(r.locX), parseInt(r.locY), r.externalAddress, r.slaveAddress);
         reg.db = this.db;
         reg.hal = this.hal;
         this.regions[reg.uuid.toString()] = reg;

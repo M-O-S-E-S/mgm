@@ -169,7 +169,7 @@ export function RegionHandler(mgm: MGM): express.Router {
     console.log('Setting host for region ' + regionID.toString() + ' to host: ' + hostAddress);
 
     RegionMgr.instance().getRegion(regionID).then((r: Region) => {
-      if (r.isRunning) {
+      if (r.isRunning()) {
         throw new Error('Region is currently running');
       }
       region = r;

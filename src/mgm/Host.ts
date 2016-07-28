@@ -1,6 +1,6 @@
 
 import { UUIDString } from '../halcyon/UUID';
-import { Region } from './Region';
+import { Region, RegionMgr } from './Region';
 import { Sql } from '../mysql/sql';
 
 export interface Host {
@@ -53,7 +53,8 @@ export class HostObj implements Host {
     return this.name;
   }
 
-  setName(string): Promise<Host> {
+  setName(name: string): Promise<Host> {
+    console.log('Host at ' + this.address + ' is named ' + name);
     return new Promise<void>((resolve, reject) => {
       this.db.pool.query('UPDATE hosts SET name=? WHERE address=?',
         [name, this.address], (err) => {
@@ -81,7 +82,7 @@ export class HostObj implements Host {
 
   setSlots(slots: number): Promise<Host> {
     return new Promise<Host>((resolve, reject) => {
-      this.db.pool.query('UPDATE hosts SET port=?, name=?, slots=? WHERE address=?',
+      this.db.pool.query('UPDATE hosts SET slots=? WHERE address=?',
         [slots, this.address], (err) => {
           if (err)
             return reject(err);
@@ -130,36 +131,44 @@ export class HostMgr {
 
   insert(address: string): Promise<Host> {
     return new Promise<void>((resolve, reject) => {
-      this.db.pool.query('INSERT INTO hosts (address, status) VALUES (?, ?)',
-        [address, "{}"], (err) => {
+      this.db.pool.query('INSERT INTO hosts (address) VALUES (?)',
+        [address], (err) => {
           if (err)
             return reject(err);
           resolve();
         })
     }).then(() => {
-      return new HostObj(this.db);
-    })
+      let h = new HostObj(this.db)
+      h.address = address;
+      this.hosts[h.address] = h;
+      return h;
+    });
   }
 
   delete(address: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.db.pool.query('DELETE FROM hosts WHERE address=?', address, (err) => {
-        if (err)
-          return reject(err);
-        resolve();
-      });
-    }).then(() => {
-      this.db.pool.query('UPDATE regions SET isRunning=? and slaveAddress=? WHERE slaveAddress=?',
-        [false, '', address], (err) => {
+    return HostMgr.instance().get(address).then((h: Host) => {
+      return new Promise<Host>((resolve, reject) => {
+        this.db.pool.query('DELETE FROM hosts WHERE address=?', address, (err) => {
           if (err)
-            throw err;
+            return reject(err);
+          resolve(h);
         });
-    })
+      })
+    }).then( (h: Host) => {
+      delete this.hosts[h.getAddress()];
+      return h;
+    }).then((h: Host) => {
+      return RegionMgr.instance().getRegionsOn(h);
+    }).then( (regions: Region[]) => {
+      for(let r of regions){
+        r.setRunning(false);
+      }
+    });
   }
 
   private initialize() {
     return new Promise<Host[]>((resolve, reject) => {
-      this.db.pool.query('SELECT address, name, status, slots FROM hosts WHERE 1', (err, rows: any[]) => {
+      this.db.pool.query('SELECT address, name, slots, port FROM hosts WHERE 1', (err, rows: any[]) => {
         if (err)
           return reject(err);
         resolve(rows);
@@ -180,7 +189,6 @@ export class HostMgr {
     h.port = row.port;
     h.name = row.name;
     h.slots = row.slots;
-    h.status = JSON.parse(row.status);
     return h;
   }
 }

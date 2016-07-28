@@ -177,7 +177,7 @@ export class MGM {
 
   removeRegionFromHost(r: Region, h: Host): Promise<void> {
     let client = urllib.create();
-    return client.request('http://' + h.getAddress() + ':' + h.getPort() + '/region/' + r.getName() + '/remove');
+    return client.request('http://' + h.getAddress() + ':' + h.getPort() + '/remove/' + r.getUUID().toString());
   }
 
   putRegionOnHost(r: Region, h: Host): Promise<void> {
@@ -190,7 +190,7 @@ export class MGM {
 
       let client = urllib.create();
       return new Promise<void>((resolve, reject) => {
-        client.request('http://' + h.getAddress() + ':' + h.getPort() + '/region/' + r.getName() + '/add', { timeout: 10000 }).then(() => {
+        client.request('http://' + h.getAddress() + ':' + h.getPort() + '/add/' + r.getUUID().toString() + '/' + r.getName(), { timeout: 10000 }).then(() => {
           resolve();
         }).catch(() => {
           reject(new Error('Region assignment recorded, but could not contac tthe host'));

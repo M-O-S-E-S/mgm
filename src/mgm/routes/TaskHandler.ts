@@ -163,7 +163,8 @@ export function TaskHandler(mgm: MGM): express.Router {
           let remoteIP: string = req.ip.split(':').pop();
           return HostMgr.instance().get(remoteIP).then( (h: Host) => {
             //valid host, serve the file
-
+            let datum = JSON.parse(j.data);
+            res.sendFile(datum.File);
           });
       }
 

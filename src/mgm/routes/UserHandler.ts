@@ -127,7 +127,7 @@ export function UserHandler(templates: {[key: string]: string}): express.Router 
     }
 
     UserMgr.instance().getUser(new UUIDString(templates[template])).then( (t: User) => {
-      return t.templateOnto(names[0], names[1], password, email);
+      return UserMgr.instance().createFromTemplate(t, names[0], names[1], password, email);
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {

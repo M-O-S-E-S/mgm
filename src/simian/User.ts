@@ -44,5 +44,5 @@ export class SimUser implements User {
     return this.hash;
   }
   setCredential(cred: Credential): Promise<User> { return Promise.reject(new Error('SimUser is not fully implemented')) }
-  templateOnto(firstname: string, lastname: string, password: string, email: string): Promise<void> { return Promise.reject(new Error('SimUser is not fully implemented')) }
+  templateOnto(firstname: string, lastname: string, password: string, email: string): Promise<any> { return Promise.reject(new Error('SimUser is not fully implemented')) }
 }

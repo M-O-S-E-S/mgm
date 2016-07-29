@@ -15,7 +15,7 @@ export interface User {
   setGodLevel(level: number): Promise<User>
   getCredential(): Credential
   setCredential(cred: Credential): Promise<User>
-  templateOnto(firstname: string, lastname: string, password: string, email: string): Promise<void>
+  templateOnto(firstname: string, lastname: string, password: string, email: string): Promise<UserObj>
 
 }
 
@@ -129,7 +129,7 @@ class UserObj {
     })
   }
 
-  templateOnto(firstname: string, lastname: string, password: string, email: string): Promise<void> {
+  templateOnto(firstname: string, lastname: string, password: string, email: string): Promise<UserObj> {
     let appearance: Appearance;
     let inventory: Inventory;
     let newUser: UserObj;
@@ -303,6 +303,8 @@ class UserObj {
         return newAppearance.save(this.db);
       }).then(() => {
         return newInventory.save(this.db);
+      }).then(() => {
+        return newUser;
       });
   }
 }
@@ -351,6 +353,12 @@ export class UserMgr {
 
   public static instance(): UserMgr {
     return UserMgr._instance;
+  }
+
+  createFromTemplate(t: User, fname: string, lname: string, password: string, email: string): Promise<void> {
+    return t.templateOnto(fname, lname, password, email).then( (u: UserObj) => {
+      this.users[u.UUID.toString()] = u;
+    });
   }
 
   getUsers(): Promise<User[]> {
@@ -432,9 +440,9 @@ export class UserMgr {
         u.profileAboutText = r.profileAboutText;
         u.profileFirstText = r.profileFirstText;
         u.profileImage = new UUIDString(r.profileImage || UUIDString.zero().toString());
-        u.profileFirstImage = new UUIDString(r.profileFirstImage  || UUIDString.zero().toString());
-        u.webLoginKey = new UUIDString(r.webLoginKey  || UUIDString.zero().toString());
-        u.homeRegionID = new UUIDString(r.homeRegionID  || UUIDString.zero().toString());
+        u.profileFirstImage = new UUIDString(r.profileFirstImage || UUIDString.zero().toString());
+        u.webLoginKey = new UUIDString(r.webLoginKey || UUIDString.zero().toString());
+        u.homeRegionID = new UUIDString(r.homeRegionID || UUIDString.zero().toString());
         u.userFlags = r.userFlags;
         u.godLevel = r.godLevel;
         u.iz_level = r.iz_level;
@@ -449,7 +457,7 @@ export class UserMgr {
         u.languagesText = r.languagesText;
         this.users[u.getUUID().toString()] = u;
       }
-    }).catch( (err: Error) => {
+    }).catch((err: Error) => {
       console.log(err.stack);
     })
   }

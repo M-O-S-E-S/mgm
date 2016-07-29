@@ -40,23 +40,24 @@ export function SetupRoutes(mgm: MGM, voiceIP: string): express.Router{
     res.send('MGM');
   });
 
+  let grid_info = mgm.getGridInfo();
   router.get('/get_grid_info', (req, res) => {
     res.send('<?xml version="1.0"?><gridinfo><login>' +
-      this.conf.grid_info.login +
+      grid_info.login +
       '</login><register>' +
-      this.conf.grid_info.mgm +
+      grid_info.mgm +
       '</register><welcome>' +
-      this.conf.grid_info.mgm + '\welcome.html' +
+      grid_info.mgm + '\welcome.html' +
       '</welcome><password>' +
-      this.conf.grid_info.mgm +
+      grid_info.mgm +
       '</password><gridname>' +
-      this.conf.grid_info.gridName +
+      grid_info.gridName +
       '</gridname><gridnick>' +
-      this.conf.grid_info.gridNick +
+      grid_info.gridNick +
       '</gridnick><about>' +
-      this.conf.grid_info.mgm +
+      grid_info.mgm +
       '</about><economy>' +
-      this.conf.grid_info.mgm +
+      grid_info.mgm +
       '</economy></gridinfo>');
   });
 

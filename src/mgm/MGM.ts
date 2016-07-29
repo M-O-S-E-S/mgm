@@ -89,6 +89,10 @@ export class MGM {
     return SetupRoutes(this, this.conf.mgm.voiceIP);
   }
 
+  getGridInfo(): any {
+    return this.conf.grid_info;
+  }
+
   startRegion(r: Region, h: Host): Promise<void> {
     console.log('starting ' + r.getName());
     let client = urllib.create();

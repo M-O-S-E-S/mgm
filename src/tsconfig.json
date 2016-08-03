@@ -36,6 +36,7 @@
     "./mgm/routes/RegionHandler.ts",
     "./mgm/routes/TaskHandler.ts",
     "./mgm/routes/UserHandler.ts",
+    "./mgm/util/Email.ts",
     "./mgm/util/Freeswitch.ts",
     "./mgm/util/OfflineMgr.ts",
     "./mgm/util/regionLogs.ts",

@@ -5,6 +5,7 @@ import { EstateMgr } from '../halcyon/Estate';
 import { UserMgr } from '../halcyon/User';
 import { GroupMgr } from '../halcyon/Group';
 import { JobMgr } from './Job'
+import { EmailMgr } from './util/Email';
 import { Host, HostMgr } from './Host';
 import { UUIDString } from '../halcyon/UUID';
 import { Sql } from '../mysql/sql';
@@ -69,6 +70,7 @@ export class MGM {
     new GroupMgr(hal);
     new JobMgr(db);
     new HostMgr(db);
+    new EmailMgr();
   }
 
   static isUser(req, res, next) {

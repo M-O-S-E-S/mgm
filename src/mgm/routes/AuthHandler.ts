@@ -89,13 +89,12 @@ export function AuthHandler(): express.Router {
 
     let credential = Credential.fromPlaintext(password);
 
-    console.log(credential.hash);
-
     UserMgr.instance().getUser(new UUIDString(req.cookies['uuid'])).then( (u: User) => {
       return u.setCredential(credential);
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
+      console.log('Error updating user password: ' + err.message);
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
   });

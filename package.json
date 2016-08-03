@@ -10,6 +10,7 @@
     "log4js": "^0.6.33",
     "multer": "^1.1.0",
     "mysql": "^2.10.2",
+    "nodemailer": "^2.5.0",
     "prompt": "~0.2.14",
     "randomstring": "~1.0.7",
     "rx": "^4.1.0",

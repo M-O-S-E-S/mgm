@@ -5,6 +5,7 @@ import { Credential } from '../halcyon/User';
 export interface PendingUser {
   getName():string
   getEmail():string
+  getPassword(): Credential
   getRegistered(): Date
   getGender(): string
   getSummary(): string
@@ -33,6 +34,9 @@ class UserObj implements PendingUser {
   getSummary(): string {
     return this.summary;
   }
+  getPassword():Credential {
+    return this.password;
+  }
 }
 
 export class PendingUserMgr {
@@ -60,6 +64,15 @@ export class PendingUserMgr {
       users.push(this.users[id]);
     }
     return Promise.resolve(users);
+  }
+
+  getByName(name:string): Promise<PendingUser> {
+    for(let uName in this.users){
+      if(uName === name){
+        return Promise.resolve(this.users[name]);
+      }
+    }
+    return Promise.reject(new Error('Pending User ' + name + ' does not exist'));
   }
 
   insert(name: string, email:string, gender:string, password:Credential, summary:string): Promise<PendingUser> {

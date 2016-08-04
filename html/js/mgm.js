@@ -658,7 +658,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     };
     this.approvePending = function(user){
         var defer = new $q.defer();
-        $http.post("/server/user/approve", {"email": user.email})
+        $http.post("/server/user/approve", {"name": user.name})
         .success(function(data, status, headers, config){
             if(data.Success){
                 var index = pending.indexOf(user);
@@ -674,7 +674,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     };
     this.denyPending = function(user, reasons){
         var defer = new $q.defer();
-        $http.post("/server/user/deny", {"email": user.email, 'reason': reasons})
+        $http.post("/server/user/deny", {"name": user.name, 'reason': reasons})
         .success(function(data, status, headers, config){
             if(data.Success){
                 var index = pending.indexOf(user);

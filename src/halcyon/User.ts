@@ -15,11 +15,11 @@ export interface User {
   setGodLevel(level: number): Promise<User>
   getCredential(): Credential
   setCredential(cred: Credential): Promise<User>
-  templateOnto(firstname: string, lastname: string, password: string, email: string): Promise<UserObj>
+  templateOnto(firstname: string, lastname: string, password: Credential, email: string): Promise<UserObj>
 
 }
 
-class UserObj {
+class UserObj implements User{
   db: Sql
   UUID: UUIDString
   username: string
@@ -129,7 +129,7 @@ class UserObj {
     })
   }
 
-  templateOnto(firstname: string, lastname: string, password: string, email: string): Promise<UserObj> {
+  templateOnto(firstname: string, lastname: string, password: Credential, email: string): Promise<UserObj> {
     let appearance: Appearance;
     let inventory: Inventory;
     let newUser: UserObj;
@@ -148,7 +148,7 @@ class UserObj {
         newUser.username = firstname;
         newUser.lastname = lastname;
         newUser.email = email;
-        newUser.passwordHash = Credential.fromPlaintext(password);
+        newUser.passwordHash = password;
         newUser.godLevel = 1;
         newUser.homeRegion = this.homeRegion;
         newUser.homeLocationX = this.homeLocationX;
@@ -355,7 +355,7 @@ export class UserMgr {
     return UserMgr._instance;
   }
 
-  createFromTemplate(t: User, fname: string, lname: string, password: string, email: string): Promise<void> {
+  createFromTemplate(t: User, fname: string, lname: string, password: Credential, email: string): Promise<void> {
     return t.templateOnto(fname, lname, password, email).then( (u: UserObj) => {
       this.users[u.UUID.toString()] = u;
     });

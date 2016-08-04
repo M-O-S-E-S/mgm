@@ -18,6 +18,24 @@ settings.mgm.templates = {
   female: ''
 };
 
+// settings.mgm.mail is the configuration for sending emails
+settings.mgm.mail = {};
+// transport is passed to nodemailer smtpTransport in initialization
+settings.mgm.mail.transport = {
+  service: 'Gmail',
+  auth: {
+    user: 'username',
+    pass: 'password'
+  }
+};
+settings.mgm.mail.sourceAccount = 'mgm@halcyon.militarymetaverse.org';
+// users notified of new user applications
+settings.mgm.mail.admins = ['mheilman@ist.ucf.edu'];
+// the name of the grid as referenced in emails
+settings.mgm.mail.gridName = 'MOSES:Halcyon';
+// the public url of your MGM instance
+settings.mgm.mail.loginURI = 'halcyon.militarymetaverse.org'
+
 // External IP address for grid voice services
 settings.mgm.voiceIP = "Freeswitch IP";
 

@@ -7,6 +7,8 @@ import { MGM } from '../MGM';
 import { UUIDString } from '../../halcyon/UUID';
 import { Region, RegionMgr } from '../Region';
 import { Host, HostMgr } from '../Host';
+import { User, UserMgr } from '../../halcyon/User';
+import { EmailMgr } from '../util/Email';;
 
 import fs = require("fs");
 import * as multer from 'multer';
@@ -200,6 +202,7 @@ export function TaskHandler(mgm: MGM): express.Router {
       switch (j.type) {
         case 'save_oar':
           let remoteIP: string = req.ip.split(':').pop();
+          let fileName: string;
           return HostMgr.instance().get(remoteIP).then((h: Host) => {
             //host is valid
             let datum = JSON.parse(j.data);
@@ -208,8 +211,13 @@ export function TaskHandler(mgm: MGM): express.Router {
             datum.FileName = req.file.originalname;
             datum.Size = req.file.size;
             j.data = JSON.stringify(datum);
+            fileName = datum.FileName;
             return JobMgr.instance().update(j);
-          }).then( () => {});
+          }).then( () => {
+            return UserMgr.instance().getUser(j.user);
+          }).then( (u: User) => {
+            return EmailMgr.instance().sendSaveOarComplete(u.getEmail(), fileName);
+          })
         case 'load_oar':
           let user = new UUIDString(req.cookies['uuid']);
           if(user.toString() !== j.user.toString()){

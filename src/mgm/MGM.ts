@@ -31,6 +31,7 @@ export interface Config {
     templates: { [key: string]: string }
     voiceIP: string
     internalUrl: string
+    mail: any
   },
   halcyon: {
     db_host: string
@@ -70,7 +71,7 @@ export class MGM {
     new GroupMgr(hal);
     new JobMgr(db);
     new HostMgr(db);
-    new EmailMgr();
+    new EmailMgr(this.conf.mgm.mail);
   }
 
   static isUser(req, res, next) {

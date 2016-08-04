@@ -3,6 +3,7 @@ import { Job } from './Job';
 import { Region, RegionMgr } from './Region';
 import { EstateMgr } from '../halcyon/Estate';
 import { UserMgr } from '../halcyon/User';
+import { PendingUserMgr } from './PendingUser';
 import { GroupMgr } from '../halcyon/Group';
 import { JobMgr } from './Job'
 import { EmailMgr } from './util/Email';
@@ -72,6 +73,7 @@ export class MGM {
     new JobMgr(db);
     new HostMgr(db);
     new EmailMgr(this.conf.mgm.mail);
+    new PendingUserMgr(db);
   }
 
   static isUser(req, res, next) {

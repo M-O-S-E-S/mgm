@@ -3,17 +3,19 @@ import * as express from 'express';
 
 import { MGM } from '../MGM';
 import { User, UserMgr, Credential } from '../../halcyon/User';
+import { PendingUser, PendingUserMgr } from '../PendingUser';
 import { UUIDString } from '../../halcyon/UUID';
 
 export function UserHandler(templates: {[key: string]: string}): express.Router {
   let router = express.Router();
 
   router.get('/', MGM.isUser, (req, res) => {
+    let outUsers: any[] = [];
+    let outPUsers: any[] = [];
     UserMgr.instance().getUsers().then((users: User[]) => {
-      //map these to simina appearing users for current MGM front-end
-      let result: any[] = [];
+      //map these to simian appearing users for current MGM front-end
       for (let u of users) {
-        result.push({
+        outUsers.push({
           name: u.getUsername() + ' ' + u.getLastName(),
           uuid: u.getUUID().toString(),
           email: u.getEmail(),
@@ -25,12 +27,30 @@ export function UserHandler(templates: {[key: string]: string}): express.Router 
           group: ''
         });
       }
+    }).then(() => {
+      // only admins see pending users
+      if (req.cookies['userLevel'] >= 250) {
+        return PendingUserMgr.instance().getAll();
+      } else {
+        return [];
+      }
+    }).then((users: PendingUser[]) => {
+      for(let u of users) {
+        outPUsers.push({
+          name: u.getName(),
+          email: u.getEmail(),
+          gender: u.getGender(),
+          registered: u.getRegistered(),
+          summary: u.getSummary()
+        });
+      }
+    }).then( () => {
       res.send(JSON.stringify({
         Success: true,
-        Users: result,
-        Pending: []
+        Users: outUsers,
+        Pending: outPUsers
       }));
-    });
+    })
   });
 
 
@@ -133,6 +153,16 @@ export function UserHandler(templates: {[key: string]: string}): express.Router 
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
+  });
+
+  //deny a pending user
+  router.post('/deny', MGM.isAdmin, (req, res) => {
+    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+  });
+
+  //approve a pending user, creating their halcyon account
+  router.post('/approve', MGM.isAdmin, (req, res) => {
+    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
   });
 
   return router;

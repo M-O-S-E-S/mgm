@@ -15,6 +15,7 @@ import { RegionHandler } from './RegionHandler';
 import { GroupHandler } from './GroupHandler';
 import { DispatchHandler } from './DispatchHandler';
 import { OfflineMessageHandler } from './OfflineMessageHandler';
+import { RegisterHandler } from './RegisterHandler';
 import { FreeswitchHandler } from './FreeswitchHandler';
 
 export function SetupRoutes(mgm: MGM, voiceIP: string): express.Router{
@@ -33,6 +34,7 @@ export function SetupRoutes(mgm: MGM, voiceIP: string): express.Router{
   router.use('/fsapi', FreeswitchHandler(fs));
 
   router.use('/offline', OfflineMessageHandler());
+  router.use('/register', RegisterHandler(mgm.getTemplates()));
 
   router.use('/server/dispatch', DispatchHandler(mgm));
 

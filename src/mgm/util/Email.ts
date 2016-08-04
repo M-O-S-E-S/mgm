@@ -67,7 +67,7 @@ export class EmailMgr {
     );
   }
 
-  notifyUserPending(name: string, email: string): Promise<void[]> {
+  notifyAdminUserPending(name: string, email: string): Promise<void[]> {
     let pending: Promise<void>[] = this.admins.map( (adminEmail) => {
       return this.sendMail(adminEmail,
         this.gridName + ' Application Received',

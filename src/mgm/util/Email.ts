@@ -33,7 +33,7 @@ export class EmailMgr {
         from: this.source,
         to: destination,
         subject: subject,
-        text: body
+        html: body
       };
       this.transporter.sendMail(mailOptions, (err, info) => {
         if (err)

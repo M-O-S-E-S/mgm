@@ -154,6 +154,7 @@ export function RegionHandler(mgm: MGM): express.Router {
       return res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
+      console.log(err);
     });
   });
 

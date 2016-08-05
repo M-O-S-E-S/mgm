@@ -26,8 +26,8 @@ export interface Region {
 }
 
 class RegionObj {
-  db: Sql
-  hal: Sql
+  private db: Sql
+  private hal: Sql
   uuid: UUIDString
   name: string
   port: number
@@ -38,14 +38,16 @@ class RegionObj {
   running: boolean
   status: any;
 
-  constructor(id: UUIDString, name: string, port: number, x: number, y: number, externalAddress: string, nodeAddress: string) {
-    this.uuid = id;
-    this.name = name;
-    this.port = port;
-    this.x = x;
-    this.y = y;
-    this.externalAddress = externalAddress;
-    this.nodeAddress = nodeAddress;
+  constructor(db: Sql, hal: Sql) {
+    this.db = db;
+    this.hal = hal;
+    this.uuid = UUIDString.zero();
+    this.name = '';
+    this.port = 0;
+    this.x = 1000;
+    this.y = 1000;
+    this.externalAddress = '';
+    this.nodeAddress = '';
     this.running = false;
   }
 
@@ -83,7 +85,10 @@ class RegionObj {
         if (err) return reject(err);
         resolve();
       });
-    }).then(() => { return this });
+    }).then(() => {
+      e.regions.push(this.uuid);
+      return this;
+     });
   }
 
   getX(): number {
@@ -187,11 +192,12 @@ export class RegionMgr {
   private hal: Sql
   private regions: { [key: string]: RegionObj } = {}
 
-  constructor(db: Sql, halk: Sql) {
+  constructor(db: Sql, hal: Sql) {
     if (RegionMgr._instance) {
       throw new Error('RegionMgr singleton has already been initialized');
     }
     this.db = db;
+    this.hal = hal;
     this.initialize();
 
     RegionMgr._instance = this;
@@ -382,14 +388,17 @@ export class RegionMgr {
   insertRegion(name: string, x: number, y: number): Promise<Region> {
     let uuid = UUIDString.random();
     return new Promise<Region>((resolve, reject) => {
-      this.db.pool.query('INSERT INTO regions (uuid,name, size, locX, locY, status) VALUES (?,?,?,?,?,?)',
-        [uuid.toString(), name, x, y], (err) => {
+      this.db.pool.query('INSERT INTO regions (uuid, name, locX, locY, status) VALUES (?,?,?,?,?)',
+        [uuid.toString(), name, x, y, ''], (err) => {
           if (err) return reject(err);
-          resolve(new RegionObj(uuid, name, 0, x, y, null, null));
+          let r = new RegionObj(this.db, this.hal);
+          r.uuid = uuid;
+          r.name = name;
+          r.x = x;
+          r.y = y;
+          resolve(r);
         })
     }).then((r: RegionObj) => {
-      r.db = this.db;
-      r.hal = this.hal;
       this.regions[r.uuid.toString()] = r;
       return r;
     })
@@ -404,9 +413,14 @@ export class RegionMgr {
       });
     }).then((rows: any[]) => {
       for (let r of rows) {
-        let reg = new RegionObj(new UUIDString(r.uuid), r.name, parseInt(r.httpPort), parseInt(r.locX), parseInt(r.locY), r.externalAddress, r.slaveAddress);
-        reg.db = this.db;
-        reg.hal = this.hal;
+        let reg = new RegionObj(this.db, this.hal);
+        reg.uuid =new UUIDString(r.uuid);
+        reg.name = r.name;
+        reg.port = parseInt(r.httpPort);
+        reg.x = parseInt(r.locX);
+        reg.y = parseInt(r.locY);
+        reg.externalAddress = r.externalAddress;
+        reg.nodeAddress = r.slaveAddress;
         this.regions[reg.uuid.toString()] = reg;
       }
     });

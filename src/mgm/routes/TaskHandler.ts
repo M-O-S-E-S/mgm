@@ -7,11 +7,12 @@ import { MGM } from '../MGM';
 import { UUIDString } from '../../halcyon/UUID';
 import { Region, RegionMgr } from '../Region';
 import { Host, HostMgr } from '../Host';
-import { User, UserMgr } from '../../halcyon/User';
+import { User, UserMgr, Credential } from '../../halcyon/User';
 import { EmailMgr } from '../util/Email';;
 
 import fs = require("fs");
 import * as multer from 'multer';
+let jwt = require('jsonwebtoken');
 
 export function TaskHandler(mgm: MGM): express.Router {
   let router = express.Router();
@@ -139,11 +140,53 @@ export function TaskHandler(mgm: MGM): express.Router {
   });
 
   router.post('/resetCode', (req, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    let email = req.body.email;
+
+    UserMgr.instance().getUserByEmail(email).then( (u: User) => {
+      console.log('User ' + u.getUUID().toString() + ' requesting password reset token');
+      return new Promise<string>((resolve, reject) => {
+        jwt.sign({email: email}, 'super secret code goes here', {
+          expiresIn: '2d'
+        }, (err,token) => {
+          if(err) return reject(err);
+          resolve(token);
+        })
+      })
+    }).then((token: string) => {
+      return EmailMgr.instance().sendAuthResetToken(email, token);
+    }).then(() => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
   });
 
   router.post('/resetPassword', (req, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    let name = req.body.name;
+    let token = req.body.token;
+    let password = req.body.password;
+
+    if(! password || password === ''){
+      return res.send(JSON.stringify({ Success: false, Message: 'Blank passwords not permitted' }));
+    }
+
+    new Promise<string>( (resolve, reject) => {
+      jwt.verify(token, 'super secret code goes here', (err, decoded) => {
+        if(err) return reject(new Error('Invalid Token'));
+        resolve(decoded.email);
+      });
+    }).then( (email:string) => {
+      return UserMgr.instance().getUserByEmail(email);
+    }).then( (u: User) => {
+      if(u.getUsername() + ' ' + u.getLastName() === name){
+        return u.setCredential(Credential.fromPlaintext(password));
+      }
+      return Promise.reject(new Error('Invalid submission'));
+    }).then(() => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
   });
 
   router.get('/ready/:id', (req, res) => {

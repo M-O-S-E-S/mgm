@@ -7,6 +7,7 @@
     "body-parser": "^1.15.1",
     "cookie-parser": "^1.4.1",
     "form-data": "^1.0.0-rc4",
+    "jsonwebtoken": "^7.1.7",
     "log4js": "^0.6.33",
     "multer": "^1.1.0",
     "mysql": "^2.10.2",

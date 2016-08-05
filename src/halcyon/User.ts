@@ -16,7 +16,6 @@ export interface User {
   getCredential(): Credential
   setCredential(cred: Credential): Promise<User>
   templateOnto(firstname: string, lastname: string, password: Credential, email: string): Promise<UserObj>
-
 }
 
 class UserObj implements User{
@@ -374,6 +373,15 @@ export class UserMgr {
       return Promise.resolve(this.users[id.toString()]);
     }
     return Promise.reject(new Error("User " + id.toString() + " does not exist"));
+  }
+
+  getUserByEmail(email:string): Promise<User> {
+    for (let id in this.users) {
+      if (this.users[id].email === email) {
+        return Promise.resolve(this.users[id]);
+      }
+    }
+    return Promise.reject(new Error("User " + email + " does not exist"));
   }
 
   getUserByName(name: string): Promise<User> {

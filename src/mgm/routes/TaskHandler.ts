@@ -145,7 +145,7 @@ export function TaskHandler(mgm: MGM): express.Router {
     UserMgr.instance().getUserByEmail(email).then( (u: User) => {
       console.log('User ' + u.getUUID().toString() + ' requesting password reset token');
       return new Promise<string>((resolve, reject) => {
-        jwt.sign({email: email}, 'super secret code goes here', {
+        jwt.sign({email: email}, mgm.getTokenKey(), {
           expiresIn: '2d'
         }, (err,token) => {
           if(err) return reject(err);
@@ -171,7 +171,7 @@ export function TaskHandler(mgm: MGM): express.Router {
     }
 
     new Promise<string>( (resolve, reject) => {
-      jwt.verify(token, 'super secret code goes here', (err, decoded) => {
+      jwt.verify(token, mgm.getTokenKey(), (err, decoded) => {
         if(err) return reject(new Error('Invalid Token'));
         resolve(decoded.email);
       });

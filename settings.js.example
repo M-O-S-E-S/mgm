@@ -36,6 +36,9 @@ settings.mgm.mail.gridName = 'MOSES:Halcyon';
 // the public url of your MGM instance
 settings.mgm.mail.loginURI = 'halcyon.militarymetaverse.org'
 
+// long random string for generating jwt tokens
+settings.mgm.tokenKey = 'SomethingRandomAndSecure';
+
 // External IP address for grid voice services
 settings.mgm.voiceIP = "Freeswitch IP";
 

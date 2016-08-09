@@ -33,6 +33,7 @@ export interface Config {
     voiceIP: string
     internalUrl: string
     mail: any
+    tokenKey: string
   },
   halcyon: {
     db_host: string
@@ -206,6 +207,10 @@ export class MGM {
         })
       });
     });
+  }
+
+  getTokenKey(): string {
+    return this.conf.mgm.tokenKey;
   }
 
   getUploadDir(): string {

@@ -25,43 +25,44 @@ export function RegionHandler(mgm: MGM): express.Router {
 
   router.get('/', MGM.isUser, (req, res) => {
     let regions: Region[];
-    let w;
-    if (req.cookies['userLevel'] >= 250) {
-      w = RegionMgr.instance().getAllRegions();
-    } else {
-      w = RegionMgr.instance().getRegionsFor(new UUIDString(req.cookies['uuid']));
-    }
-    w.then((rs: Region[]) => {
+    let user = new UUIDString(req.cookies['uuid']);
+
+    RegionMgr.instance().getAllRegions().then( (rs: Region[]) => {
       regions = rs;
       return EstateMgr.instance().getAllEstates();
-    }).then((estates: Estate[]) => {
-      let result = [];
-      for (let r of regions) {
-        let estateName: string = '';
-        for (let e of estates) {
-          for (let reg of e.regions) {
-            if (reg.toString() === r.getUUID().toString()) {
-              estateName = e.name;
-            }
+    }).then( (estates: Estate[]) => {
+      let isAdmin = req.cookies['userLevel'] >= 250;
+      //generate list of regions this user may manage
+      let rgns: {[key: string]:Estate} = {};
+      for (let e of estates) {
+        if (isAdmin || e.owner === user || e.managers.indexOf(user) !== -1) {
+          for (let r of e.regions) {
+            rgns[r.toString()] = e;
           }
         }
-        //r.status['simStats'] = { 'Uptime': r.status.uptime };
-        result.push({
+      }
+
+      return regions.filter((r: Region) => {
+        return r.getUUID().toString() in rgns;
+      }).map( (r: Region) => {
+        return {
           uuid: r.getUUID().toString(),
           name: r.getName(),
           x: r.getX(),
           y: r.getY(),
-          estateName: estateName,
+          estateName: rgns[r.getUUID().toString()].name,
           status: r.getStatus(),
           node: r.getNodeAddress() ? r.getNodeAddress() : '',
           isRunning: r.isRunning(),
-        });
-      }
-
+        }
+      })
+    }).then((result: any[]) => {
       res.send(JSON.stringify({
         Success: true,
         Regions: result
       }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
   });
 

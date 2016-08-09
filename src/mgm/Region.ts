@@ -215,20 +215,6 @@ export class RegionMgr {
     return Promise.resolve(regions);
   }
 
-  getRegionsFor(user: UUIDString): Promise<Region[]> {
-    let regions: Region[] = [];
-    return EstateMgr.instance().getAllEstates().then((estates: Estate[]) => {
-      for (let e of estates) {
-        if (e.owner === user || e.managers.indexOf(user) !== -1) {
-          for (let r of e.regions) {
-            regions.push(this.regions[r.toString()]);
-          }
-        }
-      }
-      return regions;
-    });
-  }
-
   getRegionsOn(h: Host): Promise<Region[]> {
     let regions: Region[] = [];
     for (let r in this.regions) {

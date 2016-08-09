@@ -122,7 +122,7 @@ export function RegionHandler(mgm: MGM): express.Router {
     let y = parseInt(req.body.y);
 
     RegionMgr.instance().getRegion(regionID).then((r: Region) => {
-      if (r.isRunning) throw new Error('Cannot move a region while it is running');
+      if (r.isRunning()) throw new Error('Cannot move a region while it is running');
       if (r.getX() === x && r.getY() === y) throw new Error('Region is already at those coordinates');
       region = r;
       return RegionMgr.instance().getAllRegions();

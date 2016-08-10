@@ -101,93 +101,74 @@ export class MGM {
 
   startRegion(r: Region, h: Host): Promise<void> {
     console.log('starting ' + r.getName());
-    let client = urllib.create();
     let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/start/' + r.getUUID().toString();
-    return client.request(url).then((body) => {
+    return urllib.request(url).then((body) => {
       let result = JSON.parse(body.data);
-      if (result.Success) {
-        return Promise.resolve();
-      } else {
-        return Promise.reject(new Error(result.Message));
+      if (!result.Success) {
+        throw new Error(result.Message);
       }
     });
   }
 
   stopRegion(r: Region, h: Host): Promise<void> {
     console.log('halting ' + r.getName());
-    let client = urllib.create();
     let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/stop/' + r.getUUID().toString();
-    return client.request(url).then((body) => {
+    return urllib.request(url).then((body) => {
       let result = JSON.parse(body.data);
-      if (result.Success) {
-        return Promise.resolve();
-      } else {
-        return Promise.reject(new Error(result.Message));
+      if (!result.Success) {
+        throw new Error(result.Message);
       }
     });
   }
 
   consoleCommand(r: Region, h: Host, cmd: string): Promise<void> {
-    let client = urllib.create();
     let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/consoleCmd/' + r.getUUID().toString();
-    return client.request(url, {
+    return urllib.request(url, {
       method: 'POST',
       data: { "cmd" : cmd }
     }).then((body) => {
       let result = JSON.parse(body.data);
-      if (result.Success) {
-        return Promise.resolve();
-      } else {
-        return Promise.reject(new Error(result.Message));
+      if (!result.Success) {
+        throw new Error(result.Message);
       }
     });
   }
 
   saveOar(r: Region, h: Host, j: Job): Promise<void> {
     console.log('triggering oar save for ' + r.getName());
-    let client = urllib.create();
     let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/saveOar/' + r.getUUID().toString() + '/' + j.id;
-    return client.request(url).then((body) => {
+    return urllib.request(url).then((body) => {
       let result = JSON.parse(body.data);
-      if (result.Success) {
-        return Promise.resolve();
-      } else {
-        return Promise.reject(new Error(result.Message));
+      if (!result.Success) {
+        throw new Error(result.Message);
       }
     });
   }
 
   loadOar(r: Region, h: Host, j: Job): Promise<void> {
     console.log('triggering oar load for ' + r.getName());
-    let client = urllib.create();
     let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/loadOar/' + r.getUUID().toString() + '/' + j.id;
-    return client.request(url).then((body) => {
+    return urllib.request(url).then((body) => {
       let result = JSON.parse(body.data);
-      if (result.Success) {
-        return Promise.resolve();
-      } else {
-        return Promise.reject(new Error(result.Message));
+      if (!result.Success) {
+        throw new Error(result.Message);
       }
     });
   }
 
   killRegion(r: Region, h: Host): Promise<void> {
     console.log('killing ' + r.getName());
-    let client = urllib.create();
     let url = 'http://' + h.getAddress() + ':' + h.getPort() + '/kill/' + r.getUUID().toString();
-    return client.request(url).then((body) => {
+    return urllib.request(url).then((body) => {
       let result = JSON.parse(body.data);
-      if (result.Success) {
-        return Promise.resolve();
-      } else {
-        return Promise.reject(new Error(result.Message));
+      if (!result.Success) {
+        throw new Error(result.Message);
       }
     });
   }
 
   removeRegionFromHost(r: Region, h: Host): Promise<void> {
-    let client = urllib.create();
-    return client.request('http://' + h.getAddress() + ':' + h.getPort() + '/remove/' + r.getUUID().toString());
+    return urllib.request('http://' + h.getAddress() + ':' + h.getPort() + '/remove/' + r.getUUID().toString());
   }
 
   putRegionOnHost(r: Region, h: Host): Promise<void> {
@@ -198,14 +179,7 @@ export class MGM {
         return Promise.resolve();
       }
 
-      let client = urllib.create();
-      return new Promise<void>((resolve, reject) => {
-        client.request('http://' + h.getAddress() + ':' + h.getPort() + '/add/' + r.getUUID().toString() + '/' + r.getName(), { timeout: 10000 }).then(() => {
-          resolve();
-        }).catch(() => {
-          reject(new Error('Region assignment recorded, but could not contac tthe host'));
-        })
-      });
+      urllib.request('http://' + h.getAddress() + ':' + h.getPort() + '/add/' + r.getUUID().toString() + '/' + r.getName(), { timeout: 10000 });
     });
   }
 

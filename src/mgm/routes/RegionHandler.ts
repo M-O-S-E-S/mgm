@@ -236,6 +236,8 @@ export function RegionHandler(mgm: MGM): express.Router {
       return HostMgr.instance().get(r.getNodeAddress());
     }).then((h: Host) => {
       return mgm.stopRegion(target, h);
+    }).then(() => {
+      res.send(JSON.stringify({ Success: true }));
     }).catch((err) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });

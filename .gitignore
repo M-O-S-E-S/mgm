@@ -3,6 +3,7 @@ typings
 dist
 .tmp
 .sass-cache
+.vscode
 settings.js
 logs
 uploads

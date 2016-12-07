@@ -92,6 +92,8 @@ class App extends React.Component<{}, {}> {
                 .set('godLevel', res.accessLevel)
                 .set('email', res.email)
             store.dispatch(createLoginAction(u));
+            if(url == "" || url == "/")
+                store.dispatch(createNavigateToAction('/account'));
             this.setState({
                 loading: false
             })

@@ -54,7 +54,7 @@ export class Login extends React.Component<loginProps, {}> {
                         .set('name', res.username)
                         .set('godLevel', res.accessLevel)
                         .set('email', res.email)
-                    this.props.dispatch(createLoginAction(u,res.token));
+                    this.props.dispatch(createLoginAction(u));
                 } else {
                     console.log('auth failed');
                     this.setState({
@@ -63,10 +63,7 @@ export class Login extends React.Component<loginProps, {}> {
                 }
             }
         };
-        xhr.send('payload=' + JSON.stringify({
-            username: this.state.username,
-            password: this.state.password
-        }));
+        xhr.send('username=' + this.state.username + '&password=' + this.state.password);
 
     }
 

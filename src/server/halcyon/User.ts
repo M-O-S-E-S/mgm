@@ -387,7 +387,8 @@ export class UserMgr {
   getUserByName(name: string): Promise<User> {
     let nameParts = name.split(' ');
     for (let id in this.users) {
-      if (this.users[id].username === nameParts[0] && this.users[id].lastname === nameParts[1]) {
+      if (this.users[id].username.toLowerCase() === nameParts[0].toLowerCase() && 
+          this.users[id].lastname.toLowerCase() === nameParts[1].toLowerCase()) {
         return Promise.resolve(this.users[id]);
       }
     }

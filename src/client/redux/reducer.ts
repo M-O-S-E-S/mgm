@@ -31,8 +31,7 @@ function auth(state = new Auth(), action: Action): Auth {
       return state
         .set('loggedIn', true)
         .set('errorMsg', '')
-        .set('user', act.user)
-        .set('token', act.token);
+        .set('user', act.user);
     case APP_LOGOUT:
       return state
         .set('loggedIn', false)

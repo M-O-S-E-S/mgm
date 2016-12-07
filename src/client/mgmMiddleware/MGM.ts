@@ -80,16 +80,6 @@ import { APP_LOGIN, APP_LOGOUT, APP_CHANGE_PASSWORD} from '../redux/actions';
  */
 export const MGM = (store: Store<StateModel>) => (next: Dispatch<StateModel>) => (action: Action) => {
   switch (action.type) {
-    case APP_LOGIN:
-      let act = <LoginAction>action;
-      connectSocket(store, act.token).then(() => {
-        console.log('connection succeeded, proceeding with login')
-        next(action);
-      }).catch((e: Error) => {
-        // log out, and set error message
-        store.dispatch(createSetAuthErrorMessageAction(e.message));
-      })
-      break;
     case APP_LOGOUT:
       Connection.instance().closeSocket();
       next(action);

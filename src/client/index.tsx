@@ -38,7 +38,7 @@ let user: User = null;
 if (localStorage.getItem("user")) {
     user = new User(JSON.parse(localStorage.getItem("user")));
     let token = localStorage.getItem("token")
-    store.dispatch(createLoginAction(user, token));
+    store.dispatch(createLoginAction(user));
 }
 store.subscribe(() => {
     let auth = store.getState().auth;

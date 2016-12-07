@@ -19,7 +19,7 @@
     "./halcyon/Inventory.ts",
     "./halcyon/User.ts",
     "./halcyon/UUID.ts",
-    "./mgm.ts",
+    "./server.ts",
     "./mgm/Host.ts",
     "./mgm/Job.ts",
     "./mgm/MGM.ts",

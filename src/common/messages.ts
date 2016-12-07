@@ -98,3 +98,10 @@ export interface IRegionStat {
     cpuPercent: number
   }
 }
+
+export interface LoginResponse {
+  uuid: string
+  username: string
+  accessLevel: string
+  email: string
+}

@@ -3,8 +3,6 @@ import { Store } from 'redux'
 import { Estate } from '../Estates';
 import { Region, RegionStat } from '.';
 
-import { RequestStartRegion } from '../../mgmMiddleware'
-
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 import { RegionStatView } from './RegionStatView';
 
@@ -22,7 +20,8 @@ export class RegionView extends React.Component<regionProps, {}> {
       return alertify.error(this.props.region.name + " is not assigned to a host");
     if(this.props.status && this.props.status.running)
       return alertify.error(this.props.region.name + " is already running");
-    RequestStartRegion(this.props.region);
+    //RequestStartRegion(this.props.region);
+    alertify.error('not implemented');
   }
 
   render() {

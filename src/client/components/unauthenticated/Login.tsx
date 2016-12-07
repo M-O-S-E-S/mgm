@@ -6,7 +6,11 @@ import { Splash } from "../Splash";
 import { createLoginAction } from '../../redux/actions';
 import { User } from '../Users';
 
+import { post } from '../../util/network';
+
 import { Form, FormGroup, FormControl, ControlLabel, Button, Alert } from "react-bootstrap"
+
+import { LoginResponse } from '../../../common/messages';
 
 interface loginProps {
     dispatch: (a: Action) => void,
@@ -36,35 +40,21 @@ export class Login extends React.Component<loginProps, {}> {
     }
     handleLogin(e: React.FormEvent) {
         e.preventDefault();
-        let xhr = new XMLHttpRequest();
-        xhr.open('POST', '/auth/login');
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-        xhr.onload = () => {
-            if (xhr.status !== 200) {
-                console.log('Request failed.  Returned status of ' + xhr.status);
+        post('/auth/login', { username: this.state.username, password: this.state.password })
+            .then((res: LoginResponse) => {
+                console.log('auth succeeded');
+                let u = new User()
+                    .set('uuid', res.uuid)
+                    .set('name', res.username)
+                    .set('godLevel', res.accessLevel)
+                    .set('email', res.email)
+                this.props.dispatch(createLoginAction(u));
+            }).catch((err: Error) => {
+                console.log('auth failed');
                 this.setState({
-                    msg: "Login failed, cannot contact MGM"
-                })
-            } else {
-                let res = JSON.parse(xhr.response);
-                if (res.Success) {
-                    console.log('auth succeeded');
-                    let u = new User()
-                        .set('uuid', res.uuid)
-                        .set('name', res.username)
-                        .set('godLevel', res.accessLevel)
-                        .set('email', res.email)
-                    this.props.dispatch(createLoginAction(u));
-                } else {
-                    console.log('auth failed');
-                    this.setState({
-                        msg: res.Message
-                    })
-                }
-            }
-        };
-        xhr.send('username=' + this.state.username + '&password=' + this.state.password);
-
+                    msg: err.message
+                });
+            })
     }
 
     render() {

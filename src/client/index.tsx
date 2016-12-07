@@ -4,6 +4,9 @@ import { Map } from 'immutable';
 
 import { createStore, applyMiddleware, Store } from 'redux'
 
+import { get } from './util/network';
+import { LoginResponse } from '../common/messages';
+
 import { Auth, StateModel } from "./redux/model";
 import { User } from './components/Users';
 
@@ -11,8 +14,7 @@ import reducer from "./redux/reducer";
 import { createNavigateToAction, createLoginAction } from "./redux/actions"
 
 //create the redux store, using our websocket middleware for MGM async
-import { MGM } from "./mgmMiddleware";
-let store = createStore<StateModel>(reducer, applyMiddleware(MGM));
+let store = createStore<StateModel>(reducer);
 
 
 // Update url to match internal state
@@ -62,6 +64,7 @@ class App extends React.Component<{}, {}> {
     private sub: Redux.Unsubscribe;
     state: {
         st: StateModel
+        loading: Boolean
     };
 
     constructor(props: any) {
@@ -74,17 +77,43 @@ class App extends React.Component<{}, {}> {
             }
         });
         this.state = {
-            st: store.getState()
+            st: store.getState(),
+            loading: true
         }
+        this.resumeSession();
+    }
+
+    resumeSession() {
+        get('/server/auth').then((res: LoginResponse) => {
+            console.log("session resume successfull");
+            let u = new User()
+                .set('uuid', res.uuid)
+                .set('name', res.username)
+                .set('godLevel', res.accessLevel)
+                .set('email', res.email)
+            store.dispatch(createLoginAction(u));
+            this.setState({
+                loading: false
+            })
+        }).catch((err: Error) => {
+            console.log('session resume failed')
+            this.setState({
+                loading: false
+            })
+        });
     }
 
     render() {
+        if (this.state.loading) {
+            return <h1>Loading</h1>
+        }
+
         if (this.state.st.auth.loggedIn) {
             // show authenticated tree
-            return <Authenticated state={this.state.st} dispatch={ store.dispatch } />
+            return <Authenticated state={this.state.st} dispatch={store.dispatch} />
         } else {
             // show splash, login, registration tree
-            return <Unauthenticated route={this.state.st.url} dispatch={ store.dispatch } errorMsg={this.state.st.auth.errorMsg}/>
+            return <Unauthenticated route={this.state.st.url} dispatch={store.dispatch} errorMsg={this.state.st.auth.errorMsg} />
         }
     }
 }

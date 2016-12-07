@@ -4,6 +4,8 @@ import { StateModel } from '../redux/model';
 import { createLogoutAction, createNavigateToAction } from '../redux/actions';
 import { Map } from 'immutable';
 
+import { get } from '../util/network';
+
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem, Button } from 'react-bootstrap';
 
 import { Account } from "./Account";
@@ -44,6 +46,7 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
     }
 
     handleLogout() {
+        get("/server/auth/logout");
         this.props.dispatch(createLogoutAction());
     }
 

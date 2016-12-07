@@ -2,7 +2,6 @@ import * as React from "react";
 import { Action } from 'redux';
 import { Map } from 'immutable';
 
-import { RequestDeleteHost } from '../../mgmMiddleware'
 import { Region, RegionStat } from '.';
 
 import { Col } from 'react-bootstrap';

@@ -2,7 +2,6 @@ import * as React from "react";
 import { Action } from 'redux';
 import { Map } from 'immutable';
 
-import { RequestCreateHost } from '../../mgmMiddleware';
 import { Host, HostStat } from '.';
 import { Region } from '../Regions';
 
@@ -35,7 +34,8 @@ export class HostList extends React.Component<props, {}> {
     }
 
     onNewHost(address: string) {
-        RequestCreateHost(address);
+        //RequestCreateHost(address);
+        alertify.error('not implemented');
         this.setState({
             showAdd: false
         })

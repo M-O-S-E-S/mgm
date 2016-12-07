@@ -2,7 +2,6 @@ import * as React from "react";
 import { Action } from 'redux';
 import { Map } from 'immutable';
 
-import { RequestDeleteHost } from '../../mgmMiddleware'
 import { Host, HostStat } from '.'
 import { Region } from '../Regions';
 
@@ -28,7 +27,8 @@ export class HostView extends React.Component<props, {}> {
       return alertify.error('Cannot remove host ' + this.props.host.address + ', there are ' + regionCount + ' regions assigned');
     }
     alertify.confirm('Are you sure you want to remove host ' + this.props.host.address + '?', () => {
-      RequestDeleteHost(this.props.host);
+      //RequestDeleteHost(this.props.host);
+      alertify.error('not implemented');
     });
   }
 

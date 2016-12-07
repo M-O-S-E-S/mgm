@@ -2,7 +2,6 @@ import * as React from "react";
 import { Action } from "redux";
 import { Map, Set } from 'immutable';
 
-import { RequestCreateEstate } from '../../mgmMiddleware';
 import { Estate } from '.'
 import { User } from '../Users';
 
@@ -37,9 +36,8 @@ export class EstateList extends React.Component<props, {}> {
     }
 
     onNewEstate(name: string, owner: string) {
-        console.log(owner);
-        console.log(name);
-        RequestCreateEstate(name, owner);
+        //RequestCreateEstate(name, owner);
+        alertify.error('not implemented');
         this.setState({
             showAdd: false
         })

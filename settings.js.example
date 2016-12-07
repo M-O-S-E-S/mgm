@@ -2,10 +2,11 @@ var settings = {};
 
 // MGM component settings
 settings.mgm = {};
-settings.mgm.db_host = "devsql";
-settings.mgm.db_user = "mgm";
-settings.mgm.db_pass = "mgm";
-settings.mgm.db_name = "mgm";
+settings.mgm.db = {}
+settings.mgm.db.host = "devsql";
+settings.mgm.db.user = "mgm";
+settings.mgm.db.pass = "mgm";
+settings.mgm.db.name = "mgm";
 // ip and port for internal connections to MGM
 settings.mgm.internalUrl = "http://127.0.0.1:3000/";
 
@@ -44,10 +45,11 @@ settings.mgm.voiceIP = "Freeswitch IP";
 
 // Settings for MGM to communicate with the Halcyon databases
 settings.halcyon = {};
-settings.halcyon.db_host = "devsql";
-settings.halcyon.db_user = "inworldz";
-settings.halcyon.db_pass = "inworldz";
-settings.halcyon.db_name = "inworldz";
+settings.halcyon.db = {}
+settings.halcyon.db.host = "devsql";
+settings.halcyon.db.user = "inworldz";
+settings.halcyon.db.pass = "inworldz";
+settings.halcyon.db.name = "inworldz";
 settings.halcyon.grid_server = "http://yourfrontend:8001"
 settings.halcyon.user_server = "http://yourfrontend:8002"
 settings.halcyon.messaging_server = "http://yourfrontend:8006"

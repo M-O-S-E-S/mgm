@@ -21,8 +21,9 @@ export class SetPasswordModal extends React.Component<props, {}> {
     }
   }
 
-  handleSubmit() {
-    if(this.state.p1 === ''){
+  handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (this.state.p1 === '') {
       return alertify.error('Password may not be blank');
     }
     if (this.state.p1 !== this.state.p2) {
@@ -43,20 +44,22 @@ export class SetPasswordModal extends React.Component<props, {}> {
   render() {
     return (
       <Modal.Dialog>
-        <Modal.Header>
-          <Modal.Title>Set Password</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <ControlLabel>Password: </ControlLabel>
-          <FormControl type="password" placeholder="" onChange={this.onP1.bind(this) }/>
-          <ControlLabel>Repeat: </ControlLabel>
-          <FormControl type="password" placeholder="" onChange={this.onP2.bind(this) }/>
-        </Modal.Body>
+        <form onSubmit={this.handleSubmit.bind(this)}>
+          <Modal.Header>
+            <Modal.Title>Set Password</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <ControlLabel>Password: </ControlLabel>
+            <FormControl type="password" placeholder="" onChange={this.onP1.bind(this)} />
+            <ControlLabel>Repeat: </ControlLabel>
+            <FormControl type="password" placeholder="" onChange={this.onP2.bind(this)} />
+          </Modal.Body>
 
-        <Modal.Footer>
-          <Button onClick={this.handleSubmit.bind(this) }>Submit</Button>
-          <Button onClick={this.props.cancel}>Cancel</Button>
-        </Modal.Footer>
+          <Modal.Footer>
+            <Button type="submit">Submit</Button>
+            <Button onClick={this.props.cancel}>Cancel</Button>
+          </Modal.Footer>
+        </form>
       </Modal.Dialog>
     )
   }

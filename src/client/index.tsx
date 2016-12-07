@@ -84,7 +84,7 @@ class App extends React.Component<{}, {}> {
     }
 
     resumeSession() {
-        get('/server/auth').then((res: LoginResponse) => {
+        get('/api/auth').then((res: LoginResponse) => {
             console.log("session resume successfull");
             let u = new User()
                 .set('uuid', res.uuid)

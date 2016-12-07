@@ -59,11 +59,3 @@ export function createNavigateToAction(url: string): Action {
   }
   return act;
 }
-
-export function createSetMyPasswordAction(password: string): Action {
-  let act: MyPasswordAction = {
-    type: APP_CHANGE_PASSWORD,
-    password: password
-  }
-  return act;
-}

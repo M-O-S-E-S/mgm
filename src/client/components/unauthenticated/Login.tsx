@@ -40,7 +40,7 @@ export class Login extends React.Component<loginProps, {}> {
     }
     handleLogin(e: React.FormEvent) {
         e.preventDefault();
-        post('/auth/login', { username: this.state.username, password: this.state.password })
+        post('/api/auth/login', { username: this.state.username, password: this.state.password })
             .then((res: LoginResponse) => {
                 console.log('auth succeeded');
                 let u = new User()

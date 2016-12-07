@@ -4,7 +4,7 @@ import { Map } from 'immutable';
 
 import { Job } from '.';
 import { User } from '../Users';
-import { createSetMyPasswordAction } from '../../redux/actions';
+import { post } from '../../util/network';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 
@@ -14,7 +14,7 @@ import { SetPasswordModal } from '../SetPassword';
 interface props {
     dispatch: (a: Action) => void,
     user: User
-    jobs: Map<number,Job>
+    jobs: Map<number, Job>
 }
 
 export class Account extends React.Component<props, {}> {
@@ -30,9 +30,13 @@ export class Account extends React.Component<props, {}> {
     }
 
     handleNewPassword(password: string) {
-        this.props.dispatch(createSetMyPasswordAction(password));
-        this.setState({
-            showPasswordModal: false
+        post('/api/auth/changePassword', { password: password }).then(() => {
+            this.setState({
+                showPasswordModal: false
+            })
+            alertify.success('password changed successfully');
+        }).catch((err:Error) => {
+            alertify.error('Password change failed: ' + err.message);
         })
     }
 
@@ -49,12 +53,12 @@ export class Account extends React.Component<props, {}> {
     }
 
     render() {
-        let passwordReset = <div><Button onClick={this.showNewPassword.bind(this) }>Set Password</Button></div>
+        let passwordReset = <div><Button onClick={this.showNewPassword.bind(this)}>Set Password</Button></div>
         if (this.state.showPasswordModal) {
             passwordReset = (
                 <div>
-                    <Button onClick={this.showNewPassword.bind(this) } disabled>Set Password</Button>
-                    <SetPasswordModal submit={this.handleNewPassword.bind(this) } cancel={this.cancelNewPassword.bind(this) } />
+                    <Button onClick={this.showNewPassword.bind(this)} disabled>Set Password</Button>
+                    <SetPasswordModal submit={this.handleNewPassword.bind(this)} cancel={this.cancelNewPassword.bind(this)} />
                 </div>
             )
         }
@@ -75,7 +79,7 @@ export class Account extends React.Component<props, {}> {
                 <hr />
                 {passwordReset}
                 <hr />
-                <JobList dispatch={this.props.dispatch} jobs={this.props.jobs}/>
+                <JobList dispatch={this.props.dispatch} jobs={this.props.jobs} />
             </Grid>
         )
     }

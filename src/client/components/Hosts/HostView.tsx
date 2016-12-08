@@ -20,7 +20,7 @@ export class HostView extends React.Component<props, {}> {
   onRemoveHost() {
     let regionCount = 0;
     this.props.regions.toList().map((r: Region) => {
-      if (r.slaveAddress === this.props.host.address)
+      if (r.node === this.props.host.address)
         regionCount++;
     })
     if (regionCount != 0) {
@@ -35,7 +35,7 @@ export class HostView extends React.Component<props, {}> {
   render() {
     let regionCount = 0;
     this.props.regions.toList().map((r: Region) => {
-      if (r.slaveAddress === this.props.host.address)
+      if (r.node === this.props.host.address)
         regionCount++;
     })
     return (

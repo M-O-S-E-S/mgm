@@ -20,7 +20,7 @@ export const EstateMapReducer = function(state = Map<string, number>(), action: 
   switch (action.type) {
     case ASSIGN_REGION:
       let ra = <EstateMapAction>action;
-      return state.set(ra.region.RegionID, ra.region.EstateID);
+      return state.set(ra.region.region, ra.region.estate);
     default:
       return state;
   }

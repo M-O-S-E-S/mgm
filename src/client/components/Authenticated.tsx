@@ -5,6 +5,7 @@ import { createLogoutAction, createNavigateToAction } from '../redux/actions';
 import { Map } from 'immutable';
 
 import { get } from '../util/network';
+import { Synchroniser } from '../util/sync';
 
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem, Button } from 'react-bootstrap';
 
@@ -19,18 +20,23 @@ import { PendingUserList } from "./PendingUsers";
 interface authenticatedProps {
     dispatch: (a: Action) => void,
     state: StateModel
+    synchronizer: Synchroniser
 }
 
 export class Authenticated extends React.Component<authenticatedProps, {}> {
     state: {
         url: string
     }
+    timerToken: number;
 
     constructor(props: authenticatedProps) {
         super(props);
         this.state = {
             url: props.state.url
         }
+
+        this.timerToken = setInterval(this.props.synchronizer.sync.bind(this.props.synchronizer), 10000);
+        this.props.synchronizer.sync();
     }
 
     shouldComponentUpdate(nextProps: authenticatedProps, nextState: { url: string }) {
@@ -46,8 +52,9 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
     }
 
     handleLogout() {
-        get("/server/auth/logout");
+        get("/api/auth/logout");
         this.props.dispatch(createLogoutAction());
+        clearInterval(this.timerToken);
     }
 
     handleNav(href: string) {
@@ -112,7 +119,6 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
                         <RegionList
                             dispatch={this.props.dispatch}
                             regions={this.props.state.regions}
-                            regionStats={this.props.state.regionStats}
                             estateMap={this.props.state.estateMap}
                             estates={this.props.state.estates} />
                     </div>

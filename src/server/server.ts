@@ -5,19 +5,9 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as path from "path";
 
-import { Sql } from './mysql/sql';
-import { MGM } from './mgm/MGM';
-import { User } from './halcyon/User';
-import { Host } from './mgm/Host';
-import { UUIDString } from './halcyon/UUID';
-import { Job } from './mgm/Job';
-import { Region } from './mgm/Region';
-import { Estate } from './halcyon/Estate';
-import { Group } from './halcyon/Group';
+import { SetupRoutes } from './routes';
 
 var conf = require('../../settings.js');
-
-let mgm = new MGM(conf);
 
 let app = express();
 
@@ -30,7 +20,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   limit: '1gb'
 }));
 
-app.use('/', mgm.getRouter());
+app.use('/', SetupRoutes(conf));
 
 app.listen(3000, function() {
   console.log('MGM listening on port 3000!');

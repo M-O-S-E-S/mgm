@@ -14,30 +14,6 @@ interface UpsertRegionStat extends Action {
   status: RegionStat
 }
 
-const RegionClass = Record({
-  uuid: '',
-  name: '',
-  httpPort: 0,
-  locX: 0,
-  locY: 0,
-  externalAddress: '',
-  slaveAddress: ''
-})
-
-export class Region extends RegionClass implements IRegion {
-  readonly uuid: string
-  readonly name: string
-  readonly httpPort: number
-  readonly locX: number
-  readonly locY: number
-  readonly externalAddress: string
-  readonly slaveAddress: string
-
-  set(key: string, value: string | number): Region {
-    return <Region>super.set(key, value);
-  }
-}
-
 const RegionStatClass = Record({
   id: '',
   running: false,
@@ -59,6 +35,32 @@ export class RegionStat extends RegionStatClass implements IRegionStat {
     memPercent: number
     memKB: number
     cpuPercent: number
+  }
+}
+
+const RegionClass = Record({
+  uuid: '',
+  name: '',
+  x: 1000,
+  y: 1000,
+  estateName: '',
+  status: new RegionStat(),
+  node: '',
+  isRunning: false
+})
+
+export class Region extends RegionClass implements IRegion {
+  readonly uuid: string
+  readonly name: string
+  readonly estateName: string
+  readonly x: number
+  readonly y: number
+  readonly node: string
+  readonly isRunning: Boolean
+  readonly status: RegionStat
+
+  set(key: string, value: string | number): Region {
+    return <Region>super.set(key, value);
   }
 }
 

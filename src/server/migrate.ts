@@ -1,19 +1,18 @@
 
 /// <reference path="../../typings/index.d.ts" />
-
+/*
 import * as Promise from 'bluebird';
 
-import { Sql } from './mysql/sql';
-import { User, UserMgr, Credential } from './halcyon/User';
-import { Inventory, Folder, Item } from './halcyon/Inventory';
+import { PersistanceLayer } from './database';
+import { Credential } from './auth/Credential';
 import { WhipServer } from './whip/Whip';
-import { UUIDString } from './halcyon/UUID';
+import { UUIDString } from './util/UUID';
 import { Asset } from './whip/asset';
 import { SimianConnector } from './simian/Connector';
 
 var conf = require('../settings.js');
 
-let hal = new Sql(conf.halcyon);
+let hal = new PersistanceLayer(conf.mgm.db, conf.halcyon.db);
 let whip = new WhipServer(conf.whip);
 let sim = new SimianConnector(conf.simian);
 
@@ -26,8 +25,8 @@ if (process.argv.length < 3) {
 let targetID = new UUIDString(args[1]);
 let sourceID = new UUIDString(args[0]);
 
-let targetUser: User;
-let sourceUser: User;
+let targetUser: UserInstance;
+let sourceUser: UserInstance;
 let sourceInventory: Inventory;
 
 whip.connect().then(() => {
@@ -83,24 +82,6 @@ whip.connect().then(() => {
   }
 
   return w;
-
-  /*let counter = 1;
-  return Promise.all(items.map( (i: Item ) => {
-    return sim.getAsset(i.assetID).then((a: Asset) => {
-      if(a === null) return "Asset does not exist in simian";
-      a.name = i.inventoryName;
-      a.description = i.inventoryDescription;
-      return whip.putAsset(a);
-    }).then((res: string) => {
-      console.log( counter + '/' + items.length + ': asset loaded: ' + res);
-      counter++;
-    })//.catch((err: Error) => {
-    //  console.log( counter + '/' + items.length + ': ' + err.message);
-    //  counter++;
-    //  resolve();
-    //});
-
-  }));*/
 }).then(() => {
   console.log('Complete');
   process.exit();
@@ -108,26 +89,6 @@ whip.connect().then(() => {
   console.log('An Error occurred: ' + err.message);
   process.exit();
 });
-
-/********* LOAD IAR ***************
-let user: User;
-
-hal.getUser(targetID).then( (u: User) => {
-  console.log('loading iar onto user account ' + u.username + ' ' + u.lastname);
-  user = u;
-  return Inventory.FromIar(iarFile);
-}).then( (i: Inventory) => {
-
-
-  console.log('parsed inventory');
-}).catch((err: Error) => {
-  console.log('An Error occurred: ' + err.message);
-  process.exit();
-});
-
-console.log('Migrating iarfile ' + iarFile + ' merging inventory for ' + targetID);
-
-*/
 
 let totalAssets: number = 0;
 let assetMap: { [key: string]: number } = {}
@@ -211,33 +172,4 @@ function testLoadAsset() {
     console.log('testLoadAsset Complete');
   })
 }
-
-//incomplete, does not copy inventory or any other information, just username and password
-/*function migrateUser(id: UUIDString) {
-  whip.connect().then(() => {
-    return sim.getUser(id);
-  }).then((user: User) => {
-
-
-
-
-    return hal.addUser(user);
-  }).then(() => {
-    console.log('user migrated, creating skeleton inventory');
-    return hal.addInventory(Inventory.skeleton(id));
-  }).then(() => {
-    console.log('complete');
-    process.exit();
-  }).catch((err: Error) => {
-    console.log(err.stack);
-  });
-}
-
-function migrateUsers() {
-  //we are already connected to the simian database
-  //initiate connection to the whip server
-  let owner = UUIDString.random()
-  console.log(owner.toString());
-  let inv = Inventory.skeleton(owner);
-  inv.prettyPrint();
-}*/
+*/

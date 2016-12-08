@@ -59,12 +59,12 @@ export class EstateList extends React.Component<props, {}> {
         })
         let estates = this.props.estates.toList().map((e: Estate) => {
             return <EstateView
-                key={e.EstateID}
+                key={e.id}
                 dispatch={this.props.dispatch}
                 users={this.props.users}
-                managers={this.props.managers.get(e.EstateID)}
+                managers={this.props.managers.get(e.id)}
                 estate={e}
-                regionCount={regionCount[e.EstateID] || 0} />
+                regionCount={regionCount[e.id] || 0} />
         })
         let addEstate = <span />
         if (this.state.showAdd) {

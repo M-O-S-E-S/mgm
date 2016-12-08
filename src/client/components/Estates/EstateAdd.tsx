@@ -35,7 +35,7 @@ export class EstateAddModal extends React.Component<props, {}> {
     }
     //make sure the name does not collide with another estate
     let duplicates = this.props.estates.filter((e: Estate) => {
-      return e.EstateName === this.state.name;
+      return e.name === this.state.name;
     });
     if (duplicates.size > 0) {
       return alertify.error('An estate already exists by that name');

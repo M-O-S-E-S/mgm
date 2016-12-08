@@ -57,6 +57,9 @@ store.subscribe(() => {
     }
 })
 
+import { Synchroniser } from './util/sync';
+let syncer = new Synchroniser(store);
+
 import { Authenticated } from "./components/Authenticated";
 import { Unauthenticated } from "./components/Unauthenticated";
 
@@ -112,7 +115,7 @@ class App extends React.Component<{}, {}> {
 
         if (this.state.st.auth.loggedIn) {
             // show authenticated tree
-            return <Authenticated state={this.state.st} dispatch={store.dispatch} />
+            return <Authenticated state={this.state.st} dispatch={store.dispatch} synchronizer={syncer} />
         } else {
             // show splash, login, registration tree
             return <Unauthenticated route={this.state.st.url} dispatch={store.dispatch} errorMsg={this.state.st.auth.errorMsg} />

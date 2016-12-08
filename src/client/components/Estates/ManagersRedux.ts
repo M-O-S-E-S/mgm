@@ -21,8 +21,8 @@ export const ManagersReducer = function(state = Map<number, Set<string>>(), acti
   switch (action.type) {
     case ADD_MANAGER:
       let ma = <ManagerAction>action;
-      let managers = state.get(ma.manager.EstateId) || Set<string>()
-      return state.set(ma.manager.EstateId, managers.add(ma.manager.uuid))
+      let managers = state.get(ma.manager.estate) || Set<string>()
+      return state.set(ma.manager.estate, managers.add(ma.manager.uuid))
     case ESTATE_DELETED:
       let da = <EstateDeletedAction>action;
       return state.delete(da.id);

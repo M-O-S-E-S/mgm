@@ -57,7 +57,7 @@ export class HostList extends React.Component<props, {}> {
 
     render() {
         let hosts = this.props.hosts.toList().map((h: Host) => {
-            return <HostView key={h.id} host={h} status={this.props.hostStats.get(h.id)} regions={this.props.regions} dispatch={this.props.dispatch} />
+            return <HostView key={h.id} host={h} regions={this.props.regions} dispatch={this.props.dispatch} />
         });
         let addHost = <span />
         if (this.state.showAdd) {

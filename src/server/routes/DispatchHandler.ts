@@ -30,7 +30,6 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
     db.Hosts.getByAddress(remoteIP).then( (h: HostInstance) => {
       //this is from mgmNode, which isnt following the rules
       let stats = JSON.parse(req.body.json);
-      console.log(stats);
 
       let workers = [];
       h.status = JSON.stringify(stats.host);

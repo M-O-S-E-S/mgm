@@ -28,6 +28,7 @@ export interface IHost {
     address: string
     name: string
     slots: number
+    status: string
 }
 
 export interface IGroup {

@@ -11,7 +11,8 @@ const HostClass = Record({
   address: '',
   port: 0,
   name: '',
-  slots: 0
+  slots: 0,
+  status: ''
 })
 
 export class Host extends HostClass implements IHost {
@@ -20,6 +21,7 @@ export class Host extends HostClass implements IHost {
   port: number
   name: string
   slots: number
+  status: string
 
   set(key: string, value: string | number): Host {
     return <Host>super.set(key, value);

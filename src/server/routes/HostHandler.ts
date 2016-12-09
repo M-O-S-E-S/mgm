@@ -17,7 +17,8 @@ export function HostHandler(db: PersistanceLayer): express.Router {
             id: host.id,
             address: host.address,
             name: host.name,
-            slots: host.slots
+            slots: host.slots,
+            status: host.status
           }
           return ih;
         })

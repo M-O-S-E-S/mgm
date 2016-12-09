@@ -2,10 +2,15 @@ import { Store } from 'redux';
 import { StateModel } from '../redux/model';
 import { get } from './network';
 
-import { IRegion, IEstate } from '../../common/messages';
+import { IRegion, IEstate, IGroup, IMembership, IRole, IHost } from '../../common/messages';
 
 import { Region, UpsertRegionAction } from '../components/Regions';
 import { Estate, UpsertEstateAction } from '../components/Estates';
+import {
+  Group, UpsertGroupAction,
+  UpsertMemberAction,
+  Role, UpsertRoleAction
+} from '../components/Groups';
 
 interface NetworkResult {
   Success: Boolean
@@ -19,6 +24,16 @@ interface estateResult extends NetworkResult {
   Estates: IEstate[]
 }
 
+interface groupResult extends NetworkResult {
+  Groups: IGroup[]
+  Members: IMembership[]
+  Roles: IRole[]
+}
+
+interface hostResult extends NetworkResult {
+  Hosts: IHost[]
+}
+
 export class Synchroniser {
   private store: Store<StateModel>
 
@@ -29,6 +44,8 @@ export class Synchroniser {
   sync() {
     this.regions();
     this.estates();
+    this.groups();
+    this.hosts();
   }
 
 
@@ -45,10 +62,31 @@ export class Synchroniser {
   private estates() {
     get('/api/estate').then((res: estateResult) => {
       if (!res.Success) return;
-      console.log(res);
       res.Estates.map((r: IEstate) => {
         this.store.dispatch(UpsertEstateAction(new Estate(r)))
       });
+    });
+  }
+
+  private groups() {
+    get('/api/group').then((res: groupResult) => {
+      if (!res.Success) return;
+      res.Groups.map((r: IGroup) => {
+        this.store.dispatch(UpsertGroupAction(new Group(r)));
+      });
+      res.Members.map((m: IMembership) => {
+        this.store.dispatch(UpsertMemberAction(m));
+      })
+      res.Roles.map((r: IRole) => {
+        this.store.dispatch(UpsertRoleAction(new Role(r)));
+      })
+    });
+  }
+
+  private hosts() {
+    get('/api/host').then((res: groupResult) => {
+      if (!res.Success) return;
+      console.log(res);
     });
   }
 

@@ -1,13 +1,14 @@
 import { Action } from 'redux';
 import { Record, Map } from 'immutable';
-import { IGroup } from '../../../common/messages';
+import { IGroup, IMembership } from '../../../common/messages';
 
 
-export interface GroupAction extends Action {
+interface GroupAction extends Action {
   group: Group
 }
 
 const ADD_GROUP = 'GROUPS_ADD_GROUP';
+const ADD_MEMBER = 'GROUPS_ADD_MEMBER';
 
 const GroupClass = Record({
   GroupID: '',
@@ -27,7 +28,7 @@ export class Group extends GroupClass implements IGroup {
   }
 }
 
-export function CreateGroupAction(g: Group): Action {
+export function UpsertGroupAction(g: Group): Action {
   let act: GroupAction = {
     type: ADD_GROUP,
     group: g
@@ -35,13 +36,19 @@ export function CreateGroupAction(g: Group): Action {
   return act;
 }
 
-export const GroupsReducer = function(state = Map<string, Group>(), action: Action): Map<string, Group> {
+export const GroupsReducer = function (state = Map<string, Group>(), action: Action): Map<string, Group> {
   let gr: Group;
   switch (action.type) {
     case ADD_GROUP:
       let ga = <GroupAction>action;
-      gr = state.get(ga.group.GroupID) || ga.group
-      return state.set(ga.group.GroupID, gr);
+      gr = state.get(ga.group.GroupID) || new Group()
+      return state.set(
+        ga.group.GroupID,
+        gr.set('GroupID', ga.group.GroupID)
+          .set('Name', ga.group.Name)
+          .set('FounderID', ga.group.FounderID)
+          .set('OwnerRoleID', ga.group.OwnerRoleID)
+      );
     default:
       return state
   }

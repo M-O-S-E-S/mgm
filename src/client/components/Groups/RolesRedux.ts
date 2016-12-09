@@ -30,7 +30,7 @@ export class Role extends RoleClass implements IRole {
   }
 }
 
-export const CreateRoleAction = function(r: Role): Action {
+export const UpsertRoleAction = function(r: Role): Action {
   let act: RoleAction = {
     type: ADD_ROLE,
     role: r

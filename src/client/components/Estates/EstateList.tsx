@@ -76,6 +76,7 @@ export class EstateList extends React.Component<props, {}> {
         }
         return (
             <Grid>
+                <h1>Estates</h1>
                 <Row>
                     <Col md={3}>Name</Col>
                     <Col md={1}>Regions</Col>

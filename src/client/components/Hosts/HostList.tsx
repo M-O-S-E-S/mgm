@@ -12,9 +12,9 @@ import { HostAddModal } from './HostAdd';
 
 interface props {
     dispatch: (a: Action) => void,
-    hosts: Map<number,Host>
+    hosts: Map<number, Host>
     hostStats: Map<number, HostStat>
-    regions: Map<string,Region>
+    regions: Map<string, Region>
 }
 
 export class HostList extends React.Component<props, {}> {
@@ -54,22 +54,23 @@ export class HostList extends React.Component<props, {}> {
         let addHost = <span />
         if (this.state.showAdd) {
             addHost = <HostAddModal
-                cancel={this.cancelNewHost.bind(this) }
-                submit={this.onNewHost.bind(this) }/>;
+                cancel={this.cancelNewHost.bind(this)}
+                submit={this.onNewHost.bind(this)} />;
         }
 
 
         return (
             <Grid>
+                <h1>Hosts</h1>
                 <Row>
                     <Col md={2}>Name</Col>
                     <Col md={1}>Address</Col>
                     <Col md={1}>Regions</Col>
                     <Col md={7}>Performance</Col>
-                    <Col md={1}><Button onClick={this.showAddHost.bind(this) }>Add Host</Button></Col>
+                    <Col md={1}><Button onClick={this.showAddHost.bind(this)}>Add Host</Button></Col>
                 </Row>
-                { hosts }
-                { addHost }
+                {hosts}
+                {addHost}
             </Grid >
         );
     }

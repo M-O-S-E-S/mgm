@@ -8,7 +8,7 @@ interface MembershipAction extends Action {
 
 const ADD_MEMBER = "GROUPS_ADD_MEMBER";
 
-export const CreateMemberAction = function(m: IMembership): Action {
+export const UpsertMemberAction = function(m: IMembership): Action {
   let act: MembershipAction = {
     type: ADD_MEMBER,
     member: m

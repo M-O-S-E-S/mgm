@@ -1,4 +1,4 @@
 export { GroupList } from './GroupList';
-export { Group, CreateGroupAction, GroupsReducer } from './GroupsRedux';
-export { MembersReducer, CreateMemberAction } from './MembersRedux'
-export { Role, RolesReducer, CreateRoleAction } from './RolesRedux';
+export { Group, UpsertGroupAction, GroupsReducer } from './GroupsRedux';
+export { MembersReducer, UpsertMemberAction } from './MembersRedux'
+export { Role, RolesReducer, UpsertRoleAction } from './RolesRedux';

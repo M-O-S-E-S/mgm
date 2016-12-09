@@ -48,6 +48,7 @@ export class RegionList extends React.Component<props, {}> {
         let regions = this.props.regions.toList().map((r: Region) => {
             let estateId: number = this.props.estateMap.get(r.uuid);
             let e = this.props.estates.get(estateId);
+
             return <RegionView
                 key={r.uuid}
                 region={r}

@@ -18,7 +18,7 @@ export interface IRegion {
     readonly name: string
     readonly x: number
     readonly y: number
-    readonly status: any
+    readonly status: string
     readonly node: string
     readonly isRunning: Boolean
 }

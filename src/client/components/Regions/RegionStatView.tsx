@@ -7,31 +7,39 @@ import { Region, RegionStat } from '.';
 import { Col } from 'react-bootstrap';
 
 interface props {
-  status: RegionStat
+  status: string
+}
+
+interface Status {
+  memPercent: number 
+  timestamp: number 
+  uptime: number 
+  cpuPercent: number 
+  memKB: number
 }
 
 export class RegionStatView extends React.Component<props, {}> {
 
   render() {
-    if (!this.props.status)
+    if (!this.props.status || this.props.status === '')
       return <span>~ no data ~</span>
+
+    let status: Status = JSON.parse(this.props.status)
+
     let now = new Date().getTime()/1000;
-    if(now - this.props.status.stats.timestamp > 60)
+    if(now - status.timestamp > 60)
       return <span>~ stale data ~</span>
-    
-    if(! this.props.status.running)
-      return <span>~ not running ~</span>
 
     //CPU
     //MEM
     //UPTIME
-    let mem = this.props.status.stats.memKB / 1073741824;
+    let mem = status.memKB / 1073741824;
 
     return (
       <div>
-        <Col md={4}>CPU: {this.props.status.stats.cpuPercent}</Col>
-        <Col md={4}>RAM: {this.props.status.stats.memPercent.toFixed(2)}% [{mem.toFixed(2)}GiB]</Col>
-        <Col md={4}>UP: {this.props.status.stats.uptime}</Col>
+        <Col md={4}>CPU: {status.cpuPercent}</Col>
+        <Col md={4}>RAM: {status.memPercent.toFixed(2)}% [{mem.toFixed(2)}GiB]</Col>
+        <Col md={4}>UP: {status.uptime}</Col>
       </div>
     )
 

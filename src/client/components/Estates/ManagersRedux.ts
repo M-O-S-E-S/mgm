@@ -9,7 +9,7 @@ interface ManagerAction extends Action {
   manager: IManager
 }
 
-export const CreateManagerAction = function(m: IManager): Action {
+export const UpsertManagerAction = function(m: IManager): Action {
   let act: ManagerAction = {
     type: ADD_MANAGER,
     manager: m

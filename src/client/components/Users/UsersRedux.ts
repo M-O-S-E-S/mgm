@@ -2,7 +2,7 @@ import { Map, Record } from 'immutable';
 import { IUser } from '../../../common/messages';
 import { Action } from 'redux';
 
-const UPSERT_USER = "USERS_UPSER_USER";
+const UPSERT_USER = "USERS_UPSERT_USER";
 
 const UserClass = Record({
   uuid: '',
@@ -13,9 +13,9 @@ const UserClass = Record({
 
 export class User extends UserClass implements IUser {
   readonly uuid: string
-  name: string
-  email: string
-  godLevel: number
+  readonly name: string
+  readonly email: string
+  readonly godLevel: number
 
   set(key: string, value: string | number): User {
     return <User>super.set(key, value);

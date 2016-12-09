@@ -24,6 +24,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
           email: u.email,
           godLevel: u.godLevel
         }
+        return iu;
       });
     }).then(() => {
       // only admins see pending users

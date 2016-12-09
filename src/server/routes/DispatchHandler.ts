@@ -25,25 +25,27 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
   });
 
   router.post('/stats/:host', (req, res) => {
-    let host = req.params.host; //url parameter, not relaly used
+    //let host = req.params.host; //url parameter, not really used
     let remoteIP: string = req.ip.split(':').pop();
     db.Hosts.getByAddress(remoteIP).then( (h: HostInstance) => {
       //this is from mgmNode, which isnt following the rules
       let stats = JSON.parse(req.body.json);
+      console.log(stats);
 
       let workers = [];
-      host.setStatus(stats.host);
+      h.status = JSON.stringify(stats.host);
+      h.save();
 
       let halted = 0;
       let running = 0;
       for (let proc of stats.processes) {
         let w = db.Regions.getByUUID(proc.id).then((r: RegionInstance) => {
-          if (proc.running.toUpperCase() === 'FALSE' ? false : true)
+          if (proc.running)
             running++;
           else
             halted++;
-          r.isRunning = proc.running.toUpperCase() === 'FALSE' ? false : true;
-          r.status = proc.stats;
+          r.isRunning = proc.running;
+          r.status = JSON.stringify(proc.stats);
           r.save();
         });
         workers.push(w);
@@ -138,7 +140,7 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
         Regions: result
       }));
     }).catch((err: Error) => {
-      console.log(err.stack);
+      console.log('Error with host registration from ' + remoteIP);
       return res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
   });

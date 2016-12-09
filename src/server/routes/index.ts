@@ -52,7 +52,7 @@ export function SetupRoutes(conf: Config): express.Router {
   router.use('/offline', OfflineMessageHandler(db));
   router.use('/register', RegisterHandler(db, conf.mgm.templates));
 
-  router.use('/server/dispatch', DispatchHandler(db, conf));
+  router.use('/dispatch', DispatchHandler(db, conf));
 
   router.get('/', (req, res) => {
     res.send('MGM');

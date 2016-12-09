@@ -11,6 +11,7 @@ import {
   UpsertMemberAction,
   Role, UpsertRoleAction
 } from '../components/Groups';
+import { Host, UpsertHostAction } from '../components/Hosts';
 
 interface NetworkResult {
   Success: Boolean
@@ -84,9 +85,11 @@ export class Synchroniser {
   }
 
   private hosts() {
-    get('/api/host').then((res: groupResult) => {
+    get('/api/host').then((res: hostResult) => {
       if (!res.Success) return;
-      console.log(res);
+      res.Hosts.map( (h: IHost) => {
+        this.store.dispatch(UpsertHostAction(new Host(h)));
+      })
     });
   }
 

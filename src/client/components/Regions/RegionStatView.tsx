@@ -20,6 +20,10 @@ interface Status {
 
 export class RegionStatView extends React.Component<props, {}> {
 
+  shouldComponentUpdate(nextProps: props) {
+    return this.props.status !== nextProps.status;
+  }
+
   render() {
     if (!this.props.status || this.props.status === '')
       return <span>~ no data ~</span>

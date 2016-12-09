@@ -3,6 +3,7 @@ import { Action } from 'redux'
 import { StateModel } from '../redux/model';
 import { createLogoutAction, createNavigateToAction } from '../redux/actions';
 import { Map } from 'immutable';
+const shallowequal = require('shallowequal');
 
 import { get } from '../util/network';
 import { Synchroniser } from '../util/sync';
@@ -23,10 +24,12 @@ interface authenticatedProps {
     synchronizer: Synchroniser
 }
 
+interface state {
+    url: string
+}
+
 export class Authenticated extends React.Component<authenticatedProps, {}> {
-    state: {
-        url: string
-    }
+    state: state
     timerToken: number;
 
     constructor(props: authenticatedProps) {
@@ -39,8 +42,8 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
         this.props.synchronizer.sync();
     }
 
-    shouldComponentUpdate(nextProps: authenticatedProps, nextState: { url: string }) {
-        return nextProps.state !== this.props.state || this.state.url !== nextState.url;
+    shouldComponentUpdate(nextProps: authenticatedProps, nextState: state) {
+        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
     }
 
     componentWillReceiveProps(newProps: authenticatedProps) {

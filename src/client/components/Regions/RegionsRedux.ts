@@ -4,10 +4,15 @@ import { Action } from 'redux';
 import { IRegion, IRegionStat } from '../../../common/messages';
 
 const UPSERT_REGION = "REGIONS_UPSERT_REGION";
+const UPSERT_REGION_BULK = "REGIONS_UPSERT_REGION_BULK";
 const UPSERT_REGIONSTAT = "REGIONS_UPSERT_REGIONSTAT";
 
 interface UpsertRegion extends Action {
   region: Region
+}
+
+interface UpsertRegionBulk extends Action {
+  regions: Region[]
 }
 
 interface UpsertRegionStat extends Action {
@@ -59,12 +64,12 @@ export class Region extends RegionClass implements IRegion {
   readonly isRunning: Boolean
   readonly status: string
 
-  set(key: string, value: string | number): Region {
+  set(key: string, value: string | number | Boolean): Region {
     return <Region>super.set(key, value);
   }
 }
 
-export const UpsertRegionAction = function(r: Region): Action {
+export const UpsertRegionAction = function (r: Region): Action {
   let act: UpsertRegion = {
     type: UPSERT_REGION,
     region: r
@@ -72,17 +77,47 @@ export const UpsertRegionAction = function(r: Region): Action {
   return act;
 }
 
-export const RegionsReducer = function(state = Map<string, Region>(), action: Action): Map<string, Region> {
+export const UpsertRegionBulkAction = function (r: Region[]): Action {
+  let act: UpsertRegionBulk = {
+    type: UPSERT_REGION_BULK,
+    regions: r
+  }
+  return act;
+}
+
+// internal function to update the state with a single user
+function upsertRegion(state: Map<string, Region>, r: Region): Map<string, Region> {
+  let rec = state.get(r.uuid) || new Region();
+  return state.set(
+    r.uuid,
+    rec.set('uuid', r.uuid)
+      .set('name', r.name)
+      .set('x', r.x)
+      .set('y', r.y)
+      .set('estateName', r.estateName)
+      .set('status', r.status)
+      .set('node', r.node)
+      .set('isRunning', r.isRunning)
+  );
+}
+
+export const RegionsReducer = function (state = Map<string, Region>(), action: Action): Map<string, Region> {
   switch (action.type) {
     case UPSERT_REGION:
       let act = <UpsertRegion>action;
-      return state.set(act.region.uuid, act.region);
+      return upsertRegion(state, act.region);
+    case UPSERT_REGION_BULK:
+      let urb = <UpsertRegionBulk>action;
+      urb.regions.map((r: Region) => {
+        state = upsertRegion(state, r);
+      })
+      return state;
     default:
       return state;
   }
 }
 
-export const UpsertRegionStatAction = function(r: RegionStat): Action {
+export const UpsertRegionStatAction = function (r: RegionStat): Action {
   let act: UpsertRegionStat = {
     type: UPSERT_REGIONSTAT,
     status: r
@@ -90,7 +125,7 @@ export const UpsertRegionStatAction = function(r: RegionStat): Action {
   return act;
 }
 
-export const RegionStatsReducer = function(state = Map<string, RegionStat>(), action: Action): Map<string, RegionStat> {
+export const RegionStatsReducer = function (state = Map<string, RegionStat>(), action: Action): Map<string, RegionStat> {
   switch (action.type) {
     case UPSERT_REGIONSTAT:
       let act = <UpsertRegionStat>action;

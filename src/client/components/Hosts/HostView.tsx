@@ -18,8 +18,8 @@ interface props {
 export class HostView extends React.Component<props, {}> {
 
   shouldComponentUpdate(nextProps: props) {
-        return !shallowequal(this.props, nextProps);
-    }
+    return !shallowequal(this.props, nextProps);
+  }
 
   onRemoveHost() {
     let regionCount = 0;

@@ -13,6 +13,10 @@ interface props {
 
 export class HostStatView extends React.Component<props, {}> {
 
+  shouldComponentUpdate(nextProps: props) {
+    return this.props.status !== nextProps.status;
+  }
+
   render() {
     if (!this.props.status || this.props.status === '')
       return <span>~ not connected to this instance ~</span>

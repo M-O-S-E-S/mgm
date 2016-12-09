@@ -10,7 +10,7 @@ import {
   IUser, IPendingUser
 } from '../../common/messages';
 
-import { Region, UpsertRegionAction } from '../components/Regions';
+import { Region, UpsertRegionBulkAction } from '../components/Regions';
 import { Estate, UpsertEstateAction, UpsertManagerAction, AssignRegionEstateAction } from '../components/Estates';
 import {
   Group, UpsertGroupAction,
@@ -18,7 +18,7 @@ import {
   Role, UpsertRoleAction
 } from '../components/Groups';
 import { Host, UpsertHostAction } from '../components/Hosts';
-import { User, UpsertUserAction } from '../components/Users';
+import { User, UpsertUserBulkAction } from '../components/Users';
 import { PendingUser, UpsertPendingUserAction } from '../components/PendingUsers';
 
 interface NetworkResult {
@@ -70,9 +70,9 @@ export class Synchroniser {
   private regions() {
     get('/api/region').then((res: regionResult) => {
       if (!res.Success) return;
-      res.Regions.map((r: IRegion) => {
-        this.store.dispatch(UpsertRegionAction(new Region(r)))
-      });
+      this.store.dispatch(UpsertRegionBulkAction(res.Regions.map( (r: IRegion) => {
+        return new Region(r);
+      })));
     });
   }
 
@@ -118,9 +118,11 @@ export class Synchroniser {
   private users() {
     get('/api/user').then((res: userResult) => {
       if (!res.Success) return;
-      res.Users.map((u: IUser) => {
-        this.store.dispatch(UpsertUserAction(new User(u)));
-      });
+      this.store.dispatch(UpsertUserBulkAction(
+        res.Users.map( (u: IUser) => {
+          return new User(u);
+        })
+      ));
       res.Pending.map((u: IPendingUser) => {
         this.store.dispatch(UpsertPendingUserAction(new PendingUser(u)));
       });

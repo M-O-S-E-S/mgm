@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Action } from 'redux'
 import { Map, Set, Iterable } from 'immutable';
+const shallowequal = require('shallowequal');
 
 import { Estate } from '.';
 import { User } from '../Users';
@@ -16,6 +17,10 @@ interface props {
 }
 
 export class EstateView extends React.Component<props, {}> {
+
+  shouldComponentUpdate(nextProps: props) {
+        return !shallowequal(this.props, nextProps);
+    }
 
   onRemoveEstate(){
     if (this.props.regionCount != 0){
@@ -39,6 +44,7 @@ export class EstateView extends React.Component<props, {}> {
         }
       })
     }
+    console.log(this.props);
     return (
       <Row>
         <Col md={1}><Button bsSize='xsmall' onClick={this.onRemoveEstate.bind(this)} >

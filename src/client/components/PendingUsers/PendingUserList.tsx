@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Action } from 'redux';
 import { Map } from 'immutable';
+const shallowequal = require('shallowequal');
 
 import { PendingUser } from '.';
 import { PendingUserView } from './PendingUserView';
@@ -13,6 +14,12 @@ interface props {
 }
 
 export class PendingUserList extends React.Component<props, {}> {
+
+    shouldComponentUpdate(nextProps: props) {
+        return !shallowequal(this.props, nextProps);
+    }
+
+
     render() {
         let users = this.props.users.toList().map((u: PendingUser) => {
             return <PendingUserView key={u.name} user={u}/>

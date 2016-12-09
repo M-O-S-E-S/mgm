@@ -20,6 +20,7 @@
     "reselect": "registry:dt/reselect#2.0.2+20160319031821",
     "sequelize": "registry:dt/sequelize#3.4.1+20160815132916",
     "serve-static": "registry:dt/serve-static#0.0.0+20160501131543",
+    "shallowequal": "registry:dt/shallowequal#0.2.2+20160928205935",
     "socket.io": "registry:dt/socket.io#1.4.4+20160909205835",
     "socket.io-client": "registry:dt/socket.io-client#1.4.4+20160317120654",
     "validator": "registry:dt/validator#5.7.0+20160914130311",

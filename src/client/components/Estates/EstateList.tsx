@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Action } from "redux";
 import { Map, Set } from 'immutable';
+const shallowequal = require('shallowequal');
 
 import { Estate } from '.'
 import { User } from '../Users';
@@ -18,15 +19,21 @@ interface props {
     users: Map<string, User>
 }
 
+interface state {
+    showAdd: boolean
+}
+
 export class EstateList extends React.Component<props, {}> {
-    state: {
-        showAdd: boolean
-    }
+    state: state
     constructor(props: props) {
         super(props);
         this.state = {
             showAdd: false
         }
+    }
+
+    shouldComponentUpdate(nextProps: props, nextState: state) {
+        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState) ;
     }
 
     showAddEstate() {

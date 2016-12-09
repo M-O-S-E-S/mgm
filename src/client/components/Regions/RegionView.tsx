@@ -2,6 +2,7 @@ import * as React from "react";
 import { Store } from 'redux'
 import { Estate } from '../Estates';
 import { Region, RegionStat } from '.';
+const shallowequal = require('shallowequal');
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 import { RegionStatView } from './RegionStatView';
@@ -14,10 +15,14 @@ interface regionProps {
 
 export class RegionView extends React.Component<regionProps, {}> {
 
-  start(){
-    if(! this.props.region.node || this.props.region.node == '')
+  shouldComponentUpdate(nextProps: regionProps) {
+    return !shallowequal(this.props, nextProps);
+  }
+
+  start() {
+    if (!this.props.region.node || this.props.region.node == '')
       return alertify.error(this.props.region.name + " is not assigned to a host");
-    if(this.props.region.isRunning)
+    if (this.props.region.isRunning)
       return alertify.error(this.props.region.name + " is already running");
     //RequestStartRegion(this.props.region);
     alertify.error('not implemented');
@@ -25,8 +30,8 @@ export class RegionView extends React.Component<regionProps, {}> {
 
   render() {
     let statView = <span>~ not running ~</span>;
-    if(this.props.region.isRunning){
-      statView = <RegionStatView status={this.props.region.status}/>;
+    if (this.props.region.isRunning) {
+      statView = <RegionStatView status={this.props.region.status} />;
     }
 
     return (

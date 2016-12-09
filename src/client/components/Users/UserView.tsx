@@ -1,10 +1,20 @@
 import * as React from "react";
+const shallowequal = require('shallowequal');
 
 import { User } from '.';
 
 import { Row, Col } from 'react-bootstrap'
 
-export class UserView extends React.Component<{ user: User }, {}> {
+interface props {
+    user: User
+}
+
+export class UserView extends React.Component<props, {}> {
+
+    shouldComponentUpdate(nextProps: props) {
+        return !shallowequal(this.props, nextProps);
+    }
+
     render() {
         return (
             <Row>

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Store } from 'redux'
 import { PendingUser } from '.';
+const shallowequal = require('shallowequal');
 
 import { Grid, Row, Col } from 'react-bootstrap';
 
@@ -9,6 +10,10 @@ interface PUProps {
 }
 
 export class PendingUserView extends React.Component<PUProps, {}> {
+
+  shouldComponentUpdate(nextProps: PUProps) {
+        return !shallowequal(this.props, nextProps);
+    }
 
   render() {
     return (

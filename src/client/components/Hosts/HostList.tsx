@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Action } from 'redux';
 import { Map } from 'immutable';
+const shallowequal = require('shallowequal');
 
 import { Host, HostStat } from '.';
 import { Region } from '../Regions';
@@ -17,16 +18,23 @@ interface props {
     regions: Map<string, Region>
 }
 
+interface state {
+    showAdd: boolean
+}
+
 export class HostList extends React.Component<props, {}> {
-    state: {
-        showAdd: boolean
-    }
+    state: state
     constructor(props: props) {
         super(props);
         this.state = {
             showAdd: false
         }
     }
+
+    shouldComponentUpdate(nextProps: props, nextState: state) {
+        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState) ;
+    }
+
     showAddHost() {
         this.setState({
             showAdd: true

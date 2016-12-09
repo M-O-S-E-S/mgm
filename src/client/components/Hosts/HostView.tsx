@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Action } from 'redux';
 import { Map } from 'immutable';
+const shallowequal = require('shallowequal');
 
 import { Host, HostStat } from '.'
 import { Region } from '../Regions';
@@ -16,6 +17,10 @@ interface props {
 }
 
 export class HostView extends React.Component<props, {}> {
+
+  shouldComponentUpdate(nextProps: props) {
+        return !shallowequal(this.props, nextProps);
+    }
 
   onRemoveHost() {
     let regionCount = 0;

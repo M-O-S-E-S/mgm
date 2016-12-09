@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Map, Set, Iterable } from 'immutable';
+const shallowequal = require('shallowequal');
 
 import { Group, Role } from '.';
 import { User } from '../Users';
@@ -14,6 +15,10 @@ interface props {
 }
 
 export class GroupView extends React.Component<props, {}> {
+
+  shouldComponentUpdate(nextProps: props) {
+        return !shallowequal(this.props, nextProps);
+    }
 
   render() {
     let roles: JSX.Element[];

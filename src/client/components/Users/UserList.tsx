@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Action } from 'redux';
 import { Map } from 'immutable';
+const shallowequal = require('shallowequal');
 
 import { UserView } from './UserView';
 import { User } from '.';
@@ -13,6 +14,11 @@ interface UserListProps {
 }
 
 export class UserList extends React.Component<UserListProps, {}> {
+
+    shouldComponentUpdate(nextProps: UserListProps) {
+        return !shallowequal(this.props, nextProps);
+    }
+
     render() {
         let users = this.props.users.toList().map((u: User) => {
             return <UserView key={u.uuid} user={u}/>

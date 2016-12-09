@@ -1,4 +1,5 @@
 import * as React from "react";
+const shallowequal = require('shallowequal');
 
 import { Job } from '.';
 
@@ -19,11 +20,19 @@ const monthNames: string[] = [
     'Dec'
 ]
 
-export class JobView extends React.Component<{ job: Job }, {}> {
+interface props {
+    job: Job
+}
 
-    timestamptoDate(timestamp: string): string{
+export class JobView extends React.Component<props, {}> {
+
+    shouldComponentUpdate(nextProps: props) {
+        return !shallowequal(this.props.job, nextProps.job);
+    }
+
+    timestamptoDate(timestamp: string): string {
         let date = new Date(timestamp);
-        return monthNames[date.getMonth()]+' '+date.getDate()+' ' + date.getHours() +':'+ date.getMinutes();
+        return monthNames[date.getMonth()] + ' ' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes();
     }
 
     render() {

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Action } from 'redux';
 import { Map } from 'immutable';
+const shallowequal = require('shallowequal');
 
 import { RegionView } from './RegionView';
 import { Estate } from '../Estates';
@@ -17,18 +18,24 @@ interface props {
     estates: Map<number, Estate>
 }
 
-export class RegionList extends React.Component<props, {}> {
-    state: {
-        showManage: boolean
-        selectedRegion: Region
-    }
+interface state {
+    showManage: boolean
+    selectedRegion: Region
+}
 
-    constructor(p: props){
+export class RegionList extends React.Component<props, {}> {
+    state: state
+
+    constructor(p: props) {
         super(p);
         this.state = {
             showManage: false,
             selectedRegion: null
         }
+    }
+
+    shouldComponentUpdate(nextProps: props, nextState: state) {
+        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState) ;
     }
 
     onManageRegion(r: Region) {
@@ -38,7 +45,7 @@ export class RegionList extends React.Component<props, {}> {
         })
     }
 
-    dismissManage(){
+    dismissManage() {
         this.setState({
             showManage: false
         })
@@ -64,7 +71,7 @@ export class RegionList extends React.Component<props, {}> {
                     <Col md={1}>Controls</Col>
                 </Row>
                 {regions}
-                { this.state.showManage ? <ManageModal dismiss={this.dismissManage.bind(this)} region={this.state.selectedRegion}/> : <span />}
+                {this.state.showManage ? <ManageModal dismiss={this.dismissManage.bind(this)} region={this.state.selectedRegion} /> : <span />}
             </Grid>
         )
     }

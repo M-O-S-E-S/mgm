@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Action } from "redux";
 import { Map, Set } from 'immutable';
+const shallowequal = require('shallowequal');
 
 import { Group, Role } from '.';
 import { GroupView } from './GroupView';
@@ -17,6 +18,10 @@ interface props {
 }
 
 export class GroupList extends React.Component<props, {}> {
+
+    shouldComponentUpdate(nextProps: props) {
+        return !shallowequal(this.props, nextProps);
+    }
 
     render() {
         let groups = this.props.groups.toList().map((g: Group) => {

@@ -36,7 +36,7 @@ export function SetupRoutes(mgm: MGM, voiceIP: string): express.Router{
   router.use('/offline', OfflineMessageHandler());
   router.use('/register', RegisterHandler(mgm.getTemplates()));
 
-  router.use('/server/dispatch', DispatchHandler(mgm));
+  router.use('/dispatch', DispatchHandler(mgm));
 
   router.get('/', (req, res) => {
     res.send('MGM');

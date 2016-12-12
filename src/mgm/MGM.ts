@@ -10,7 +10,7 @@ import { EmailMgr } from './util/Email';
 import { Host, HostMgr } from './Host';
 import { UUIDString } from '../halcyon/UUID';
 import { Sql } from '../mysql/sql';
-import { SetupRoutes } from './routes/MGMRouter';
+import { SetupRoutes } from './routes';
 
 import * as express from 'express';
 import * as http from 'http';
@@ -23,10 +23,12 @@ var urllib = require('urllib');
 
 export interface Config {
   mgm: {
-    db_host: string
-    db_user: string
-    db_pass: string
-    db_name: string
+    db: {
+      host: string
+      user: string
+      pass: string
+      name: string
+    },
     log_dir: string
     upload_dir: string
     templates: { [key: string]: string }
@@ -36,10 +38,12 @@ export interface Config {
     tokenKey: string
   },
   halcyon: {
-    db_host: string
-    db_user: string
-    db_pass: string
-    db_name: string
+    db: {
+      host: string
+      user: string
+      pass: string
+      name: string
+    },
     grid_server: string
     user_server: string
     messaging_server: string
@@ -62,10 +66,10 @@ export class MGM {
 
   constructor(config: Config) {
     this.conf = config;
-    let hal = new Sql(config.halcyon);
+    let hal = new Sql(config.halcyon.db);
 
     //initialize singletons
-    let db = new Sql(config.mgm);
+    let db = new Sql(config.mgm.db);
     new RegionLogs(this.conf.mgm.log_dir);
     new RegionMgr(db, hal);
     new EstateMgr(hal);
@@ -196,7 +200,7 @@ export class MGM {
   }
 
   getRegionINI(r: Region): Promise<{ [key: string]: { [key: string]: string } }> {
-    let connString: string = 'Data Source=' + this.conf.halcyon.db_host + ';Database=' + this.conf.halcyon.db_name + ';User ID=' + this.conf.halcyon.db_user + ';Password=' + this.conf.halcyon.db_pass + ';';
+    let connString: string = 'Data Source=' + this.conf.halcyon.db.host + ';Database=' + this.conf.halcyon.db.name + ';User ID=' + this.conf.halcyon.db.user + ';Password=' + this.conf.halcyon.db.pass + ';';
 
     let config: { [key: string]: { [key: string]: string } } = {}
     config['Startup'] = {};

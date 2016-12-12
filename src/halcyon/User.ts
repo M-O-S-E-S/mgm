@@ -1,6 +1,6 @@
 
 import * as crypto from 'crypto';
-import {UUIDString} from './UUID';
+import { UUIDString } from './UUID';
 import { Inventory, Folder, Item } from './Inventory';
 import { Sql } from '../mysql/sql';
 import { Appearance } from './Appearance';
@@ -18,7 +18,7 @@ export interface User {
   templateOnto(firstname: string, lastname: string, password: Credential, email: string): Promise<UserObj>
 }
 
-class UserObj implements User{
+class UserObj implements User {
   db: Sql
   UUID: UUIDString
   username: string
@@ -355,7 +355,7 @@ export class UserMgr {
   }
 
   createFromTemplate(t: User, fname: string, lname: string, password: Credential, email: string): Promise<void> {
-    return t.templateOnto(fname, lname, password, email).then( (u: UserObj) => {
+    return t.templateOnto(fname, lname, password, email).then((u: UserObj) => {
       this.users[u.UUID.toString()] = u;
     });
   }
@@ -375,7 +375,7 @@ export class UserMgr {
     return Promise.reject(new Error("User " + id.toString() + " does not exist"));
   }
 
-  getUserByEmail(email:string): Promise<User> {
+  getUserByEmail(email: string): Promise<User> {
     for (let id in this.users) {
       if (this.users[id].email === email) {
         return Promise.resolve(this.users[id]);
@@ -387,7 +387,8 @@ export class UserMgr {
   getUserByName(name: string): Promise<User> {
     let nameParts = name.split(' ');
     for (let id in this.users) {
-      if (this.users[id].username === nameParts[0] && this.users[id].lastname === nameParts[1]) {
+      if (this.users[id].username.toLowerCase() === nameParts[0].toLowerCase() &&
+        this.users[id].lastname.toLowerCase() === nameParts[1].toLowerCase()) {
         return Promise.resolve(this.users[id]);
       }
     }

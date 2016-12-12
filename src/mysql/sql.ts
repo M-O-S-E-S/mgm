@@ -4,15 +4,22 @@
 import * as Promise from 'bluebird';
 import * as mysql from 'mysql';
 
+interface Config {
+  host: string,
+  user: string,
+  pass: string,
+  name: string
+}
+
 export class Sql {
   public pool: mysql.IPool
 
-  constructor(config) {
+  constructor(config: Config) {
     this.pool = mysql.createPool({
-      host: config.db_host,
-      user: config.db_user,
-      password: config.db_pass,
-      database: config.db_name
+      host: config.host,
+      user: config.user,
+      password: config.pass,
+      database: config.name
     });
   }
 }

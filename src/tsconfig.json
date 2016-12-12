@@ -32,7 +32,7 @@
     "./mgm/routes/FreeswitchHandler.ts",
     "./mgm/routes/GroupHandler.ts",
     "./mgm/routes/HostHandler.ts",
-    "./mgm/routes/MGMRouter.ts",
+    "./mgm/routes/index.ts",
     "./mgm/routes/OfflineMessageHandler.ts",
     "./mgm/routes/RegionHandler.ts",
     "./mgm/routes/RegisterHandler.ts",

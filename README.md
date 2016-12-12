@@ -1,6 +1,10 @@
 # mgm
 
-This branch of MGM is a partial rewrite in node-js.  MOSES is shifting towards supporting the halcyon fork of OpenSimulator, and is dropping support for Simiangrid-based front-ends.  This rewrite currently has less funcitonality than the normal MGM: 1- halcyon does not have IAR support.  2- halcyon does not load OAR files accross a network connection, so the controls do not work in MGM. 3- Suspending users is not as explicit in halcyon as in simian, so the front-end must be configured using minloginlevel set to 1 for it to work.
+Project MOSES is phasing out OpenSimulator support.  We are not keeping up with upstream Opensim, and have little reason to do so.  MOSES is switching to the Halcyon branch of OpenSimulator, as used by InWorldz.  The MGM and MGMNode code is being updated to reflect this.
+
+MGM is being rewritten to utilize a node-js backend in the hopes of doing real-time data in the future.  It is not perfect, but I do not have the time to do what it needs to be really great.  You can see the beginnings of that in the react branch.  I will develop as needed, but I will make time if others want to contribute.
+
+This branch of MGM is a partial rewrite in node-js.  MOSES is shifting towards supporting the halcyon fork of OpenSimulator, and is dropping support for Simiangrid-based front-ends.  This rewrite currently has less functionality than the normal MGM: 1- halcyon does not have IAR support.  2- halcyon does not load OAR files across a network connection, so the controls do not work in MGM. 3- Suspending users is not as explicit in halcyon as in simian, so the front-end must be configured using minloginlevel set to 1 for it to work.  Other pieces may not function either, as I have been forced to move quickly on the minimum viable product.
 
 # Upgrading
 

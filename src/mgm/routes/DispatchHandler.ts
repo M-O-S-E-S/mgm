@@ -39,11 +39,11 @@ export function DispatchHandler(mgm: MGM): express.Router {
       let running = 0;
       for (let proc of stats.processes) {
         let w = RegionMgr.instance().getRegion(new UUIDString(proc.id)).then((r: Region) => {
-          if (proc.running.toUpperCase() === 'FALSE' ? false : true)
+          if (proc.running)
             running++;
           else
             halted++;
-          r.setRunning(proc.running.toUpperCase() === 'FALSE' ? false : true);
+          r.setRunning(proc.running);
           r.setStats(proc.stats)
         });
         workers.push(w);

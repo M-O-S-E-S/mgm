@@ -11,7 +11,7 @@ angular.module('mgmApp')
         );
     };
     $scope.download = function(task){
-        $scope.$broadcast("downloadFile", '/server/task/ready/' + task.id);
+        $scope.$broadcast("downloadFile", '/api/task/ready/' + task.id);
     };
     $scope.regionNameFromUUID = function(uuid){
         var regions = regionService.getRegions();

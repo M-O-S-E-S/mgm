@@ -1,5 +1,11 @@
 # mgm
 
+MGM is a grid manager for project MOSES, which you can read more at militarymetaverse.org.
+
+MGM is one half of a grid management solution for OpenSimulator, and now specifically the Halcyon branch.  MGM is a user management, process management, content, and region deployment web application.  When coupled with mgmNode, which is another process that confiugred and launches processes on command from MGM, allows a user to create estates, create regions, deploy the regions to servers, and start them from a single authenticated web interface.
+
+# Current Status
+
 Project MOSES is phasing out OpenSimulator support.  We are not keeping up with upstream Opensim, and have little reason to do so.  MOSES is switching to the Halcyon branch of OpenSimulator, as used by InWorldz.  The MGM and MGMNode code is being updated to reflect this.
 
 MGM is being rewritten to utilize a node-js backend in the hopes of doing real-time data in the future.  It is not perfect, but I do not have the time to do what it needs to be really great.  You can see the beginnings of that in the react branch.  I will develop as needed, but I will make time if others want to contribute.

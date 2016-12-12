@@ -4,6 +4,8 @@ import { Estate } from '../Estates';
 import { Region, RegionStat } from '.';
 const shallowequal = require('shallowequal');
 
+import { post } from '../../util/network';
+
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 import { RegionStatView } from './RegionStatView';
 
@@ -24,8 +26,12 @@ export class RegionView extends React.Component<regionProps, {}> {
       return alertify.error(this.props.region.name + " is not assigned to a host");
     if (this.props.region.isRunning)
       return alertify.error(this.props.region.name + " is already running");
-    //RequestStartRegion(this.props.region);
-    alertify.error('not implemented');
+    post('/api/region/start/' + this.props.region.uuid).then(() => {
+      alertify.success(this.props.region.name + ' signalled START');
+    }).catch( (err: Error) => {
+      alertify.error('Could not start ' + this.props.region.name + ': ' + err.message);
+    })
+    
   }
 
   render() {

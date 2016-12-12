@@ -2,16 +2,17 @@
 import * as express from 'express';
 import { UUIDString } from '../util/UUID';
 import { PersistanceLayer, RegionInstance, HostInstance } from '../database';
+import { Config } from '../config'; 
 
 import { RegionLogs } from '../util/regionLogs';
 import { ConsoleCommand } from '../util/Console';
 
 import { isUser } from '.';
 
-export function ConsoleHandler(db: PersistanceLayer): express.Router {
+export function ConsoleHandler(db: PersistanceLayer, config: Config): express.Router {
   let router = express.Router();
 
-  let logs = RegionLogs.instance();
+  let logger = new RegionLogs(config.mgm.log_dir);
 
   router.post('/open/:uuid', isUser, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
@@ -36,7 +37,7 @@ export function ConsoleHandler(db: PersistanceLayer): express.Router {
       if (!r.isRunning) {
         throw new Error('Region is no longer running');
       }
-      return logs.read(regionID, parseInt(req.cookies['console']));
+      return logger.read(regionID, parseInt(req.cookies['console']));
     }).then((lines: string[]) => {
       res.cookie('console', parseInt(req.cookies['console']) + lines.length);
       res.send(JSON.stringify({ Success: true, Lines: lines }));

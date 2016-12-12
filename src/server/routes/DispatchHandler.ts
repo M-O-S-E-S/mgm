@@ -10,12 +10,14 @@ import { Config } from '../config';
 export function DispatchHandler(db: PersistanceLayer, config: Config): express.Router {
   let router: express.Router = express.Router();
 
+  let logger = new RegionLogs(config.mgm.log_dir);
+
   router.post('/logs/:uuid', (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let remoteIP: string = req.ip.split(':').pop();
     db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
         let logs: string[] = JSON.parse(req.body.log);
-        return RegionLogs.instance().append(new UUIDString(r.uuid), logs);
+        return logger.append(new UUIDString(r.uuid), logs);
       }).then(() => {
         res.send(JSON.stringify({ Success: true }));
       }).catch((err: Error) => {

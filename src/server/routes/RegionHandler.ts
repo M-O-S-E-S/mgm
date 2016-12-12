@@ -2,6 +2,7 @@
 import * as express from 'express';
 
 import { PersistanceLayer, RegionInstance, HostInstance, EstateInstance, EstateMapInstance } from '../database';
+import { Config } from '../config'; 
 
 import { IRegion } from '../../common/messages';
 import { UUIDString } from '../util/UUID';
@@ -15,8 +16,10 @@ export interface ConsoleSettings {
 
 import { isUser, isAdmin } from '.';
 
-export function RegionHandler(db: PersistanceLayer): express.Router {
+export function RegionHandler(db: PersistanceLayer, config: Config): express.Router {
   let router = express.Router();
+
+  let logger = new RegionLogs(config.mgm.log_dir);  
 
   router.get('/', isUser, (req, res) => {
     let user = new UUIDString(req.cookies['uuid']);
@@ -48,7 +51,7 @@ export function RegionHandler(db: PersistanceLayer): express.Router {
     let regionID = new UUIDString(req.params.uuid);
 
     db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
-      res.sendFile(RegionLogs.instance().getFilePath(new UUIDString(r.uuid)));
+      res.sendFile(logger.getFilePath(new UUIDString(r.uuid)));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
@@ -251,9 +254,9 @@ export function RegionHandler(db: PersistanceLayer): express.Router {
     let r: RegionInstance
 
     db.Regions.getByUUID(regionID.toString()).then((region: RegionInstance) => {
+      r = region;
       if (r.isRunning)
         throw new Error('Region ' + r.name + ' is already running');
-      r = region;
       return db.Hosts.getByAddress(r.slaveAddress);
     }).then((h: HostInstance) => {
       return StartRegion(r, h);

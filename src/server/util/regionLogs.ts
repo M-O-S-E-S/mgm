@@ -5,15 +5,9 @@ import * as path from "path";
 import { UUIDString } from '../util/UUID';
 
 export class RegionLogs {
-  private static _instance: RegionLogs = null;
-
   private dir: string = '';
 
   constructor(logDir: string) {
-    if (RegionLogs._instance) {
-      throw new Error('RegionLogs singleton has already been initialized');
-    }
-
     //ensure the directory for logs exists
     if (!fs.existsSync(logDir)) {
       fs.mkdir(path.join(logDir), (err) => {
@@ -22,11 +16,6 @@ export class RegionLogs {
       });
     }
     this.dir = logDir;
-    RegionLogs._instance = this;
-  }
-
-  public static instance(): RegionLogs {
-    return RegionLogs._instance;
   }
 
   append(region: UUIDString, lines: string[]): Promise<void> {

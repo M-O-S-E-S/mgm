@@ -39,12 +39,12 @@ export function SetupRoutes(conf: Config): express.Router {
   let fs = new Freeswitch(conf.mgm.voiceIP);
 
   router.use('/auth', AuthHandler(db));
-  router.use('/console', ConsoleHandler(db));
+  router.use('/console', ConsoleHandler(db, conf));
   router.use('/task', TaskHandler(db,conf));
   router.use('/estate', EstateHandler(db));
   router.use('/host', HostHandler(db));
   router.use('/user', UserHandler(db, conf.mgm.templates));
-  router.use('/region', RegionHandler(db));
+  router.use('/region', RegionHandler(db, conf));
   router.use('/group', GroupHandler(db));
 
   //router.use('/fsapi', FreeswitchHandler(fs));

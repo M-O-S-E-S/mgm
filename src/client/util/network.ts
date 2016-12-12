@@ -27,7 +27,7 @@ function performCall(method: string, route: string, args?: any) {
                 if (res.Success) {
                     resolve(res);
                 } else {
-                    reject(res.Message);
+                    reject(new Error(res.Message));
                 }
             }
         };

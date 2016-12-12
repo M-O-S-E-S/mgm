@@ -80,6 +80,8 @@ export class EstateMgr {
       e.id = id;
       e.name = name;
       e.owner = owner;
+      e.managers = [];
+      e.regions = [];
       return e;
     }).then((e: Estate) => {
       this.estates[e.id] = e;

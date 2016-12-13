@@ -51,7 +51,7 @@ export function AuthHandler(db: PersistanceLayer): express.Router {
             Message: 'Account Suspended'
           }));
         } else {
-          res.cookie('name', u.username);
+          res.cookie('name', u.username + ' ' + u.lastname);
           res.cookie('uuid', u.UUID);
           res.cookie('userLevel', u.godLevel);
           res.cookie('email', u.email);

@@ -25,7 +25,12 @@ export class RegionStatView extends React.Component<props, {}> {
   }
 
   secondsToUptime(dt: number): string {
-    return 'up man';
+    let days = Math.floor(dt / 86400);
+    let hours = Math.floor((dt % 86400) / 3600);
+    if(days > 0)
+      return days + ' days ' + hours + ' hours';
+    let minutes = Math.floor(((dt % 86400) % 3600)/ 60);
+    return hours + ' hours ' + minutes + ' minutes';
   }
 
   render() {
@@ -41,7 +46,8 @@ export class RegionStatView extends React.Component<props, {}> {
     //CPU
     //MEM
     //UPTIME
-    let mem = status.memKB / 1073741824;
+    //let mem = status.memKB / 1073741824;
+    let mem = status.memKB / 1048576;
 
     return (
       <div>

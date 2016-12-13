@@ -72,7 +72,7 @@ export class RegionView extends React.Component<regionProps, {}> {
             content={this.content.bind(this)}
             kill={this.kill.bind(this)} />
         </Col>
-        <Col md={12} lg={8}>{statView}</Col>
+        <Col  xs={12} md={8} lg={8}>{statView}</Col>
       </Row>
     )
   }

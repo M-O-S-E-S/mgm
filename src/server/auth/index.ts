@@ -36,7 +36,7 @@ export class Auth {
       //user located, test credentials
       let cred = Credential.fromHalcyon(candidateUser.passwordHash);
       if (!cred.compare(password)) {
-        throw new Error('Invalid Credentials.  MGM is case-sensitive');
+        throw new Error('Invalid Credentials');
       }
     }).then(() => {
       //test user levels for suspended/God mode

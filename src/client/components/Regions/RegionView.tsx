@@ -46,7 +46,16 @@ export class RegionView extends React.Component<regionProps, {}> {
 
   content() { alertify.log('content pressed'); }
 
-  kill() { alertify.log('kill pressed'); }
+  kill() {
+    if (!this.props.region.isRunning) {
+      return alertify.error('Cannot kill a region that is not running');
+    }
+    post('/api/region/kill/' + this.props.region.uuid).then(() => {
+      alertify.success(this.props.region.name + ' signalled KILL');
+    }).catch((err: Error) => {
+      alertify.error('Could not kill ' + this.props.region.name + ': ' + err.message);
+    })
+  }
 
   render() {
     let statView = <span>~ not running ~</span>;
@@ -72,7 +81,7 @@ export class RegionView extends React.Component<regionProps, {}> {
             content={this.content.bind(this)}
             kill={this.kill.bind(this)} />
         </Col>
-        <Col  xs={12} md={8} lg={8}>{statView}</Col>
+        <Col xs={12} md={8} lg={8}>{statView}</Col>
       </Row>
     )
   }

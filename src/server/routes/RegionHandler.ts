@@ -2,7 +2,7 @@
 import * as express from 'express';
 
 import { PersistanceLayer, RegionInstance, HostInstance, EstateInstance, EstateMapInstance } from '../database';
-import { Config } from '../config'; 
+import { Config } from '../config';
 
 import { IRegion } from '../../common/messages';
 import { UUIDString } from '../util/UUID';
@@ -19,17 +19,17 @@ import { isUser, isAdmin } from '.';
 export function RegionHandler(db: PersistanceLayer, config: Config): express.Router {
   let router = express.Router();
 
-  let logger = new RegionLogs(config.mgm.log_dir);  
+  let logger = new RegionLogs(config.mgm.log_dir);
 
   router.get('/', isUser, (req, res) => {
     let user = new UUIDString(req.cookies['uuid']);
 
     // just send them all and let the client sort them.  They cant control them anyways,
     // and they can see them in-world anyways.  no need to be secret
-    db.Regions.getAll().then( (regions: RegionInstance[]) => {
+    db.Regions.getAll().then((regions: RegionInstance[]) => {
       res.send(JSON.stringify({
         Success: true,
-        Regions: regions.map( (r: RegionInstance) => {
+        Regions: regions.map((r: RegionInstance) => {
           let ir: IRegion = {
             uuid: r.uuid,
             name: r.name,
@@ -88,9 +88,9 @@ export function RegionHandler(db: PersistanceLayer, config: Config): express.Rou
       return db.Estates.getMapForRegion(regionID.toString());
     }).then((r: EstateMapInstance) => {
       return r.destroy();
-    }).then( () => {
+    }).then(() => {
       return db.Estates.setMapForRegion(estateID, regionID.toString());
-    }).then( () => {
+    }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
@@ -102,11 +102,11 @@ export function RegionHandler(db: PersistanceLayer, config: Config): express.Rou
     let x = parseInt(req.body.x);
     let y = parseInt(req.body.y);
 
-    db.Regions.getAll().then( (regions: RegionInstance[]) => {
+    db.Regions.getAll().then((regions: RegionInstance[]) => {
       let region: RegionInstance;
-      for(let r of regions){
-        if(r.locX === x && r.locY === y) throw new Error('Those coordinates are not available');
-        if(r.uuid === regionID.toString()) region = r; 
+      for (let r of regions) {
+        if (r.locX === x && r.locY === y) throw new Error('Those coordinates are not available');
+        if (r.uuid === regionID.toString()) region = r;
       }
       return region;
     }).then((r: RegionInstance) => {
@@ -131,12 +131,12 @@ export function RegionHandler(db: PersistanceLayer, config: Config): express.Rou
     db.Estates.getEstateByID(estateID).then((e: EstateInstance) => {
       //confirmed. check for region name and location
       return db.Regions.getAll();
-    }).then( (regions: RegionInstance[]) => {
-      for(let r of regions){
-        if(r.name === name) throw new Error('That region name is already taken');
-        if(r.locX === x && r.locY === y) throw new Error('Those corrdinates are not available');
+    }).then((regions: RegionInstance[]) => {
+      for (let r of regions) {
+        if (r.name === name) throw new Error('That region name is already taken');
+        if (r.locX === x && r.locY === y) throw new Error('Those corrdinates are not available');
       }
-    }).then( () => {
+    }).then(() => {
       return db.Regions.create(name, x, y);
     }).then((r: RegionInstance) => {
       return db.Estates.setMapForRegion(estateID, r.uuid);
@@ -223,7 +223,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config): express.Rou
       }
       target = r;
       return db.Hosts.getByAddress(r.slaveAddress);
-    }).then( (h: HostInstance) => {
+    }).then((h: HostInstance) => {
       return StopRegion(target, h);
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
@@ -244,6 +244,8 @@ export function RegionHandler(db: PersistanceLayer, config: Config): express.Rou
       return db.Hosts.getByAddress(r.slaveAddress);
     }).then((h: HostInstance) => {
       return KillRegion(target, h);
+    }).then(() => {
+      res.send(JSON.stringify({ Success: true }));
     }).catch((err) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });

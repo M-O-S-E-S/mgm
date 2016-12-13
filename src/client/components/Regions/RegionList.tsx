@@ -35,7 +35,7 @@ export class RegionList extends React.Component<props, {}> {
     }
 
     shouldComponentUpdate(nextProps: props, nextState: state) {
-        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState) ;
+        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
     }
 
     onManageRegion(r: Region) {
@@ -52,25 +52,30 @@ export class RegionList extends React.Component<props, {}> {
     }
 
     render() {
-        let regions = this.props.regions.toList().map((r: Region) => {
-            let estateId: number = this.props.estateMap.get(r.uuid);
-            let e = this.props.estates.get(estateId);
+        let estates = this.props.estates.toArray().sort((a: Estate,b: Estate)=> {return a.name.localeCompare(b.name)}).map((e: Estate) => {
+            let regions = this.props.regions.toArray().map((r: Region) => {
+                let estateId: number = this.props.estateMap.get(r.uuid);
+                if (estateId === e.id) {
+                    return <RegionView
+                        key={r.uuid}
+                        region={r}
+                        onManage={this.onManageRegion.bind(this, r)} />
+                } else {
+                    return null;
+                }
 
-            return <RegionView
-                key={r.uuid}
-                region={r}
-                estate={e ? e : null}
-                onManage={this.onManageRegion.bind(this, r)} />
+            })
+            return (
+                <div key={e.id}>
+                    <h1>{e.name}</h1>
+                    {regions}
+                </div>
+            )
         })
 
         return (
             <Grid>
-                <Row>
-                    <Col md={2}>Name</Col>
-                    <Col md={2}>Estate</Col>
-                    <Col md={1}>Controls</Col>
-                </Row>
-                {regions}
+                {estates}
                 {this.state.showManage ? <ManageModal dismiss={this.dismissManage.bind(this)} region={this.state.selectedRegion} /> : <span />}
             </Grid>
         )

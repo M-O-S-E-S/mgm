@@ -18,11 +18,13 @@ export class HostStatView extends React.Component<props, {}> {
   }
 
   render() {
+    // missing status
     if (!this.props.status || this.props.status === '')
       return <span>~ not connected to this instance ~</span>
 
     let status = JSON.parse(this.props.status);
 
+    // stale status
     let now = new Date().getTime()/1000;
     if(now - status.timestamp > 60)
       return <span>~ not connected to this instance ~</span>

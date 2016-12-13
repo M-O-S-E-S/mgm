@@ -12,7 +12,6 @@ import { Control } from './Control';
 
 interface regionProps {
   region: Region,
-  estate: Estate,
   onManage: () => void
 }
 
@@ -29,11 +28,25 @@ export class RegionView extends React.Component<regionProps, {}> {
       return alertify.error(this.props.region.name + " is already running");
     post('/api/region/start/' + this.props.region.uuid).then(() => {
       alertify.success(this.props.region.name + ' signalled START');
-    }).catch( (err: Error) => {
+    }).catch((err: Error) => {
       alertify.error('Could not start ' + this.props.region.name + ': ' + err.message);
     })
-    
   }
+
+  stop() {
+    if (!this.props.region.isRunning) {
+      return alertify.error('Cannot stop a region that is not running');
+    }
+    post('/api/region/stop/' + this.props.region.uuid).then(() => {
+      alertify.success(this.props.region.name + ' signalled STOP');
+    }).catch((err: Error) => {
+      alertify.error('Could not stop ' + this.props.region.name + ': ' + err.message);
+    })
+  }
+
+  content() { alertify.log('content pressed'); }
+
+  kill() { alertify.log('kill pressed'); }
 
   render() {
     let statView = <span>~ not running ~</span>;
@@ -43,12 +56,23 @@ export class RegionView extends React.Component<regionProps, {}> {
 
     return (
       <Row>
-        <Col md={2}><i className="fa fa-cog" aria-hidden="true" onClick={this.props.onManage}></i>   {this.props.region.name}</Col>
-        <Col md={2}>{this.props.estate ? this.props.estate.name : '~'}</Col>
-        <Col md={1}>
-          <Control isRunning={this.props.region.isRunning} hasHost={ this.props.region.node !== ''} />
+        <Col xs={6} sm={6} md={6} lg={2}>
+          <Row>
+            <Col xs={1}><i className="fa fa-cog" aria-hidden="true" onClick={this.props.onManage}></i></Col>
+            <Col xs={8}>{this.props.region.name}</Col>
+            <Col xs={1}><i className="fa fa-file-text-o" aria-hidden="true" ></i></Col>
+          </Row>
         </Col>
-        <Col md={7}>{statView}</Col>
+        <Col xs={6} sm={6} md={6} lg={2}>
+          <Control
+            isRunning={this.props.region.isRunning}
+            hasHost={this.props.region.node !== ''}
+            start={this.start.bind(this)}
+            stop={this.stop.bind(this)}
+            content={this.content.bind(this)}
+            kill={this.kill.bind(this)} />
+        </Col>
+        <Col md={12} lg={8}>{statView}</Col>
       </Row>
     )
   }

@@ -5,7 +5,7 @@ import { PersistanceLayer, RegionInstance, HostInstance } from '../database';
 import { UUIDString } from '../util/UUID';
 import { RegionLogs } from '../util/regionLogs';
 import { RegionINI } from '../util/Region';
-import { Config } from '../config'; 
+import { Config } from '../config';
 
 export function DispatchHandler(db: PersistanceLayer, config: Config): express.Router {
   let router: express.Router = express.Router();
@@ -16,20 +16,20 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
     let regionID = new UUIDString(req.params.uuid);
     let remoteIP: string = req.ip.split(':').pop();
     db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
-        let logs: string[] = JSON.parse(req.body.log);
-        return logger.append(new UUIDString(r.uuid), logs);
-      }).then(() => {
-        res.send(JSON.stringify({ Success: true }));
-      }).catch((err: Error) => {
-        console.log('Error handling logs for host ' + remoteIP + ': ' + err.message);
-        res.send(JSON.stringify({ Success: false, Message: err.message }));
-      });
+      let logs: string[] = JSON.parse(req.body.log);
+      return logger.append(new UUIDString(r.uuid), logs);
+    }).then(() => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      console.log('Error handling logs for host ' + remoteIP + ': ' + err.message);
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
   });
 
   router.post('/stats/:host', (req, res) => {
     //let host = req.params.host; //url parameter, not really used
     let remoteIP: string = req.ip.split(':').pop();
-    db.Hosts.getByAddress(remoteIP).then( (h: HostInstance) => {
+    db.Hosts.getByAddress(remoteIP).then((h: HostInstance) => {
       //this is from mgmNode, which isnt following the rules
       let stats = JSON.parse(req.body.json);
 
@@ -47,7 +47,7 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
             halted++;
           r.isRunning = proc.running;
           r.status = JSON.stringify(proc.stats);
-          r.save();
+          return r.save();
         });
         workers.push(w);
       }
@@ -66,7 +66,7 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
     let uuid = new UUIDString(req.params.id);
     //validate host
     let remoteIP: string = req.ip.split(':').pop();
-    db.Regions.getByUUID(uuid.toString()).then( (r: RegionInstance) => {
+    db.Regions.getByUUID(uuid.toString()).then((r: RegionInstance) => {
       if (r.slaveAddress === remoteIP) {
         return r;
       }
@@ -118,7 +118,7 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
   router.post('/node', (req, res) => {
     let remoteIP: string = req.ip.split(':').pop();
     let payload = req.body;
-    db.Hosts.getByAddress(remoteIP).then( (h: HostInstance) => {
+    db.Hosts.getByAddress(remoteIP).then((h: HostInstance) => {
       console.log('Received registration for node at ' + remoteIP);
       h.port = payload.port;
       h.name = payload.host;

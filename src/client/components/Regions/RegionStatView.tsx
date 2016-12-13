@@ -24,6 +24,10 @@ export class RegionStatView extends React.Component<props, {}> {
     return this.props.status !== nextProps.status;
   }
 
+  secondsToUptime(dt: number): string {
+    return 'up man';
+  }
+
   render() {
     if (!this.props.status || this.props.status === '')
       return <span>~ no data ~</span>
@@ -43,7 +47,7 @@ export class RegionStatView extends React.Component<props, {}> {
       <div>
         <Col md={4}>CPU: {status.cpuPercent}</Col>
         <Col md={4}>RAM: {status.memPercent.toFixed(2)}% [{mem.toFixed(2)}GiB]</Col>
-        <Col md={4}>UP: {status.uptime}</Col>
+        <Col md={4}>UP: {this.secondsToUptime(status.uptime)}</Col>
       </div>
     )
 

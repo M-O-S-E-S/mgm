@@ -61,10 +61,10 @@ export class Region extends RegionClass implements IRegion {
   readonly x: number
   readonly y: number
   readonly node: string
-  readonly isRunning: Boolean
+  readonly isRunning: boolean
   readonly status: string
 
-  set(key: string, value: string | number | Boolean): Region {
+  set(key: string, value: string | number | boolean): Region {
     return <Region>super.set(key, value);
   }
 }

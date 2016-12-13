@@ -12,7 +12,7 @@ angular.module('mgmApp')
                 alertify.error('Passwords must match');
                 return;
             }
-            $http.post("/server/auth/changePassword",{ 'password':this.password }).success(function(data, status, headers, config){
+            $http.post("/api/auth/changePassword",{ 'password':this.password }).success(function(data, status, headers, config){
                 if(data.Success){
                     alertify.success("Password Changed Successfully");
                     $scope.account.password="";

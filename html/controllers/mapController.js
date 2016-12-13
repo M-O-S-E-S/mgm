@@ -29,14 +29,14 @@ function MosesMap(mapUrl, canvas){
     self.canvas = canvas;
     
     self.updateTiles = function(){
-        $.getJSON("/server/map/tiles", function(data){
+        $.getJSON("/api/map/tiles", function(data){
             self.tiles = data;
             self.redraw();
         });
     }
     
     self.updateNames = function(){
-        $.getJSON("/server/map/regions", function(data){
+        $.getJSON("/api/map/regions", function(data){
             if(self.centered){
                 $.each(data, function(index, region){
                     self.regions[region['x'] + "," + region['y']] = region['Name'];

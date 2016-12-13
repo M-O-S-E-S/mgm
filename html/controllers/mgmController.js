@@ -55,7 +55,7 @@ angular.module('mgmApp')
         userName: "",
         password: "",
         login: function(){
-            $http.post("/server/auth/login",{ 'username':this.userName, 'password': this.password }).success(function(data, status, headers, config){
+            $http.post("/api/auth/login",{ 'username':this.userName, 'password': this.password }).success(function(data, status, headers, config){
                 if(data.Success){
                     console.log("login successfull");
                     $scope.auth.activeUser = { name:data.username, uuid:data.uuid, email:data.email, accessLevel: data.accessLevel, identities: [{Enabled: true}]};
@@ -75,7 +75,7 @@ angular.module('mgmApp')
           
         },
         resume: function(){
-            $http.get("/server/auth").success(function(data, status, headers, config){
+            $http.get("/api/auth").success(function(data, status, headers, config){
                 if(data.Success){
                     console.log("session resume successfull");
                     $scope.auth.activeUser = { name:data.username, uuid:data.uuid, email:data.email, accessLevel: data.accessLevel, identities: [{Enabled: true}]};
@@ -93,7 +93,7 @@ angular.module('mgmApp')
             });
         },
         logout: function(){
-            $http.get("/server/auth/logout");
+            $http.get("/api/auth/logout");
             this.loggedIn = false;
             this.userName = "";
             this.password = "";

@@ -28,7 +28,7 @@ mgmApp.service('groupService', function($http, $q, $rootScope){
 
     this.removeUserFromGroup = function(user, group){
         var defer = new $q.defer();
-        var url = "/server/group/removeUser/" + group.uuid;
+        var url = "/api/group/removeUser/" + group.uuid;
         $http.post(url,{ 'user': user.uuid}).success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();
@@ -42,7 +42,7 @@ mgmApp.service('groupService', function($http, $q, $rootScope){
 
     this.addUserToGroup = function(user, group, role){
         var defer = new $q.defer();
-        var url = "/server/group/addUser/" + group.uuid;
+        var url = "/api/group/addUser/" + group.uuid;
         $http.post(url,{ 'user': user.uuid, 'role': role.roleID}).success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();
@@ -55,7 +55,7 @@ mgmApp.service('groupService', function($http, $q, $rootScope){
     };
 
     var updateGroups = function(){
-        $http.get("/server/group")
+        $http.get("/api/group")
         .success(function(data, status, headers, config){
             if(data.Success){
                 groups = data.Groups;
@@ -82,7 +82,7 @@ mgmApp.service('configService', function($http, $q, $rootScope){
 
     self.getConfig = function(r){
         var defer = new $q.defer();
-        var url = "/server/region/config";
+        var url = "/api/region/config";
         if(r)
             url += "/" + r.uuid;
         $http.get(url)
@@ -101,7 +101,7 @@ mgmApp.service('configService', function($http, $q, $rootScope){
 
     self.setConfig = function(region, section, key, value){
         var defer = new $q.defer();
-        var url = "/server/region/setConfig"
+        var url = "/api/region/setConfig"
         if(region)
             url += "/" + region.uuid;
         $http.post(url,{ 'section': section, 'key': key, 'value':value }).success(function(data, status, headers, config){
@@ -116,7 +116,7 @@ mgmApp.service('configService', function($http, $q, $rootScope){
 
     self.deleteConfig = function(region, section, key){
         var defer = new $q.defer();
-        var url = "/server/region/deleteConfig"
+        var url = "/api/region/deleteConfig"
         if(region)
             url += "/" + region.uuid;
         $http.post(url,{ 'section': section, 'key': key }).success(function(data, status, headers, config){
@@ -157,7 +157,7 @@ mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
             defer.resolve();
         } else {
             console.log("closing console");
-            $http.post("/server/console/close/" + uuid)
+            $http.post("/api/console/close/" + uuid)
             .success(function(data, status, headers, config){
                 defer.resolve();
             });
@@ -173,7 +173,7 @@ mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
         if(uuid == ""){
             defer.reject("Console cannot write, console is not connected");
         } else {
-            $http.post("/server/console/write/" + uuid, {"command": cmd})
+            $http.post("/api/console/write/" + uuid, {"command": cmd})
             .success(function(data, status, headers, config){
                 defer.resolve();
             });
@@ -186,7 +186,7 @@ mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
         if(uuid == ""){
             defer.reject("Console cannot read, console is not connected");
         } else {
-            $http.post("/server/console/read/" + uuid)
+            $http.post("/api/console/read/" + uuid)
             .success(function(data, status, headers, config){
                 if(data.Success){
                     self.term.echo(data.Lines.join('\n'));
@@ -205,7 +205,7 @@ mgmApp.service('consoleService', function($http, $q, $interval, $timeout){
             );
         }
         var defer = new $q.defer();
-        $http.post("/server/console/open/" + r.uuid)
+        $http.post("/api/console/open/" + r.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
                 if(data.Prompt){
@@ -236,7 +236,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
     var tasks = [];
     this.getTasks = function(){ return tasks; };
     this.updateTasks = function(){
-        $http.get("/server/task").success(function(data, status, headers, config){
+        $http.get("/api/task").success(function(data, status, headers, config){
             if(data.Success){
                 tasks = data.Tasks;
                 for(var t in tasks){
@@ -249,7 +249,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
     };
     this.remove = function(task){
         var defer = new $q.defer();
-        $http.post("/server/task/delete/" + task.id)
+        $http.post("/api/task/delete/" + task.id)
         .success(function(data, status, headers, config){
             if(data.Success){
                 var index = tasks.indexOf(task);
@@ -265,13 +265,13 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
     this.loadIar = function(password, form){
         var defer = new $q.defer();
         //create job ticket
-        $http.post("/server/task/loadIar",{ 'password':password }).success(function(data, status, headers, config){
+        $http.post("/api/task/loadIar",{ 'password':password }).success(function(data, status, headers, config){
             if(data.Success){
                 var newTask = { id: data.ID, timestamp: "", type: "load_iar", data: {"Status":"Initializing"}};
                 tasks.push(newTask);
                 $rootScope.$broadcast("taskService", "update");
                 //upload file
-                $http.post("/server/task/upload/" + data.ID, form, {
+                $http.post("/api/task/upload/" + data.ID, form, {
                     transformRequest: angular.identity,
                     headers: {'Content-Type': undefined}
                 })
@@ -292,7 +292,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
     this.saveIar = function(password){
         var defer = new $q.defer();
         //create job
-        $http.post("/server/task/saveIar",{ 'password':password }).success(function(data, status, headers, config){
+        $http.post("/api/task/saveIar",{ 'password':password }).success(function(data, status, headers, config){
             if( data.Success ){
                 var newTask = { id: data.ID, timestamp: "", type: "save_iar", data: {"Status":"Initializing"}};
                 tasks.push(newTask);
@@ -305,7 +305,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
     };
     this.nukeRegion = function(region){
         var defer = new $q.defer();
-        $http.post("/server/task/nukeContent/" + region.uuid)
+        $http.post("/api/task/nukeContent/" + region.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
                 var newTask = { id: data.ID, timestamp: "", type: "nuke_content", data: {"Status":"Initializing","Region":region.uuid}};
@@ -319,7 +319,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
     };
     this.saveOar = function(region){
         var defer = new $q.defer();
-        $http.post("/server/task/saveOar/" + region.uuid)
+        $http.post("/api/task/saveOar/" + region.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
                 var newTask = { id: data.ID, timestamp: "", type: "save_oar", data: {"Status":"Initializing","Region":region.uuid}};
@@ -333,14 +333,14 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
     };
     this.loadOar = function(region, form, merge, x, y, z){
         var defer = new $q.defer();
-        $http.post("/server/task/loadOar/" + region.uuid, {"merge":merge,"x":x,"y":y,"z":z})
+        $http.post("/api/task/loadOar/" + region.uuid, {"merge":merge,"x":x,"y":y,"z":z})
         .success(function(data, status, headers, config){
             if(data.Success){
                 var newTask = { id: data.ID, timestamp: "", type: "load_oar", data: {"Status":"Initializing","Region":region.uuid}};
                 tasks.push(newTask);
                 $rootScope.$broadcast("taskService", "update");
                 //upload file
-                $http.post("/server/task/upload/" + data.ID, form, {
+                $http.post("/api/task/upload/" + data.ID, form, {
                     transformRequest: angular.identity,
                     headers: {'Content-Type': undefined}
                 })
@@ -361,7 +361,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
     };
     this.passwordResetToken = function(email){
         var defer = new $q.defer();
-        $http.post("/server/task/resetCode", {"email": email})
+        $http.post("/api/task/resetCode", {"email": email})
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();
@@ -373,7 +373,7 @@ mgmApp.service('taskService', function($rootScope, $http, $q){
     };
     this.passwordReset = function(username, token, password){
         var defer = new $q.defer();
-        $http.post("/server/task/resetPassword", {"name": username, "token": token, "password": password})
+        $http.post("/api/task/resetPassword", {"name": username, "token": token, "password": password})
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();
@@ -394,7 +394,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     };
     this.add = function(name,x, y, estate) {
         var defer = new $q.defer();
-        $http.post("/server/region/create", {"name": name, "x":x, "y":y, "size":1,"estate":estate.id})
+        $http.post("/api/region/create", {"name": name, "x":x, "y":y, "size":1,"estate":estate.id})
         .success(function(data, status, headers, config){
             if(data.Success){
                 regions.push({"uuid":data.id,"name":name,"x":x,"y":y,"estateName":estate.name,"node":"","isRunning":false,"stat":[]});
@@ -407,7 +407,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
         return defer.promise;
     };
     this.updateRegions = function(){
-        $http.get("/server/region").success(function(data, status, headers, config){
+        $http.get("/api/region").success(function(data, status, headers, config){
             if(data.Success){
                 regions = data.Regions;
                 $rootScope.$broadcast("regionService");
@@ -416,7 +416,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     };
     this.remove = function(region){
         var defer = new $q.defer();
-        $http.post("/server/region/destroy/" + region.uuid)
+        $http.post("/api/region/destroy/" + region.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
                 var index = regions.indexOf(region);
@@ -431,7 +431,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     };
     this.getLog = function(region){
         var defer = new $q.defer();
-        $http.get("/server/region/logs/" + region.uuid)
+        $http.get("/api/region/logs/" + region.uuid)
         .success(function(data, status, headers, config){
             defer.resolve(data);
         })
@@ -442,7 +442,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     };
     this.setEstate = function(region, estate){
         var defer = new $q.defer();
-        $http.post("/server/region/estate/" + region.uuid, {'estate': estate.id})
+        $http.post("/api/region/estate/" + region.uuid, {'estate': estate.id})
         .success(function(data, status, headers, config){
             if(data.Success){
                 region.estateName = estate.name;
@@ -458,7 +458,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
         var h = 'none';
         if(host && host.address)
             h = host.address;
-        $http.post("/server/region/host/" + region.uuid, {'host': h})
+        $http.post("/api/region/host/" + region.uuid, {'host': h})
         .success(function(data, status, headers, config){
             if(data.Success){
                 region.node = host ? host.address : host;
@@ -471,7 +471,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     };
     this.setXY = function(region, x, y){
         var defer = new $q.defer();
-        $http.post("/server/region/setXY/" + region.uuid, {'x': x, 'y' : y})
+        $http.post("/api/region/setXY/" + region.uuid, {'x': x, 'y' : y})
         .success(function(data, status, headers, config){
             if(data.Success){
                 region.x = x;
@@ -485,7 +485,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     };
     this.start = function(region){
         var defer = new $q.defer();
-        $http.post("/server/region/start/" + region.uuid)
+        $http.post("/api/region/start/" + region.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();
@@ -497,7 +497,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     };
     this.stop = function(region){
         var defer = new $q.defer();
-        $http.post("/server/region/stop/" + region.uuid)
+        $http.post("/api/region/stop/" + region.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();
@@ -509,7 +509,7 @@ mgmApp.service('regionService', function($rootScope, $http, $q){
     };
     this.kill = function(region){
         var defer = new $q.defer();
-        $http.post("/server/region/kill/" + region.uuid)
+        $http.post("/api/region/kill/" + region.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();
@@ -528,7 +528,7 @@ mgmApp.service('estateService', function($rootScope, $http, $q){
     this.getEstates = function(){ return estates; };
     this.add = function(owner, name) {
         var defer = new $q.defer();
-        $http.post("/server/estate/create", {'name': name, 'owner': owner.uuid})
+        $http.post("/api/estate/create", {'name': name, 'owner': owner.uuid})
         .success(function(data, status, headers, config){
             if(data.Success){
                 estates.push({name:name, owner:owner.uuid, managers:[], regions:[]});
@@ -541,7 +541,7 @@ mgmApp.service('estateService', function($rootScope, $http, $q){
         return defer.promise;
     };
     this.updateEstates = function(){
-        $http.get("/server/estate").success(function(data, status, headers, config){
+        $http.get("/api/estate").success(function(data, status, headers, config){
             if(data.Success){
                 estates = data.Estates;
                 $rootScope.$broadcast("estateService");
@@ -550,7 +550,7 @@ mgmApp.service('estateService', function($rootScope, $http, $q){
     };
     this.remove = function(est){
         var defer = new $q.defer();
-        $http.post("/server/estate/destroy/" + est.id)
+        $http.post("/api/estate/destroy/" + est.id)
             .success(function(data, status, headers, config){
                 if(data.Success){
                     var index = estates.indexOf(est);
@@ -572,7 +572,7 @@ mgmApp.service('hostService', function($rootScope, $http, $q){
     this.getHosts = function(){ return hosts; };
     this.add = function(address) {
         var defer = new $q.defer();
-        $http.post("/server/host/add", {'name': null, 'host': address})
+        $http.post("/api/host/add", {'name': null, 'host': address})
         .success(function(data, status, headers, config){
             if(data.Success){
                 hosts.push({address:address,regions:[]});
@@ -585,7 +585,7 @@ mgmApp.service('hostService', function($rootScope, $http, $q){
         return defer.promise;
     };
     this.updateHosts = function(){
-        $http.get("/server/host").success(function(data, status, headers, config){
+        $http.get("/api/host").success(function(data, status, headers, config){
             if(data.Success){
                 hosts = data.Hosts;
                 $rootScope.$broadcast("hostService");
@@ -594,7 +594,7 @@ mgmApp.service('hostService', function($rootScope, $http, $q){
     };
     this.remove = function(host){
         var defer = new $q.defer();
-        $http.post("/server/host/remove", {'host': host.address})
+        $http.post("/api/host/remove", {'host': host.address})
             .success(function(data, status, headers, config){
                 if(data.Success){
                     var index = hosts.indexOf(host);
@@ -621,7 +621,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
         $rootScope.$broadcast("userService");
     };
     this.updateUsers = function(){
-        $http.get("/server/user").success(function(data, status, headers, config){
+        $http.get("/api/user").success(function(data, status, headers, config){
             if(data.Success){
                 users = data.Users;
                 pending = data.Pending;
@@ -631,7 +631,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     };
     this.create = function(username, email, template, password){
         var defer = new $q.defer();
-        $http.post("/server/user/create", {"name": username, "email": email, "template": template, 'password': password})
+        $http.post("/api/user/create", {"name": username, "email": email, "template": template, 'password': password})
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();
@@ -643,7 +643,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     };
     this.remove = function(user){
         var defer = new $q.defer();
-        $http.post("/server/user/destroy/" + user.uuid)
+        $http.post("/api/user/destroy/" + user.uuid)
         .success(function(data, status, headers, config){
             if(data.Success){
                 var index = users.indexOf(user);
@@ -658,7 +658,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     };
     this.approvePending = function(user){
         var defer = new $q.defer();
-        $http.post("/server/user/approve", {"name": user.name})
+        $http.post("/api/user/approve", {"name": user.name})
         .success(function(data, status, headers, config){
             if(data.Success){
                 var index = pending.indexOf(user);
@@ -674,7 +674,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     };
     this.denyPending = function(user, reasons){
         var defer = new $q.defer();
-        $http.post("/server/user/deny", {"name": user.name, 'reason': reasons})
+        $http.post("/api/user/deny", {"name": user.name, 'reason': reasons})
         .success(function(data, status, headers, config){
             if(data.Success){
                 var index = pending.indexOf(user);
@@ -689,7 +689,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     };
     this.restore = function(user){
         var defer = new $q.defer();
-        $http.post("/server/user/restore", { 'id': user.uuid })
+        $http.post("/api/user/restore", { 'id': user.uuid })
         .success(function(data, status, headers, config){
             if(data.Success){
                 for(var i = 0; i < user.identities.length; i++){
@@ -706,7 +706,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     };
     this.suspend = function(user){
         var defer = new $q.defer();
-        $http.post("/server/user/suspend", { 'id': user.uuid })
+        $http.post("/api/user/suspend", { 'id': user.uuid })
         .success(function(data, status, headers, config){
             if(data.Success){
                 for(var i = 0; i < user.identities.length; i++){
@@ -723,7 +723,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     };
     this.setEmail = function(user, email){
         var defer = new $q.defer();
-        $http.post("/server/user/email",{ 'id': user.uuid, 'email': email })
+        $http.post("/api/user/email",{ 'id': user.uuid, 'email': email })
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();
@@ -742,7 +742,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
             alertify.error('Error changing password for ' + self.Name() + ': password cannot be blank');
             return;
         }
-        $http.post("/server/user/password", {'id': user.uuid, 'password': password })
+        $http.post("/api/user/password", {'id': user.uuid, 'password': password })
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();
@@ -754,7 +754,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     };
     this.setAccessLevel = function(user, level){
         var defer = new $q.defer();
-        $http.post("/server/user/accessLevel", {"uuid": user.uuid, "accessLevel": level})
+        $http.post("/api/user/accessLevel", {"uuid": user.uuid, "accessLevel": level})
         .success(function(data, status, headers, config){
             if(data.Success){
                 user.userLevel = level;
@@ -767,7 +767,7 @@ mgmApp.service('userService', function($rootScope, $http, $q){
     };
     this.register = function(username, email, gender, password, summary){
         var defer = new $q.defer();
-        $http.post("/server/register/submit", {"name": username, "email": email, "gender": gender, 'password': password, 'summary': summary})
+        $http.post("/api/register/submit", {"name": username, "email": email, "gender": gender, 'password': password, 'summary': summary})
         .success(function(data, status, headers, config){
             if(data.Success){
                 defer.resolve();

@@ -11,7 +11,7 @@ interface props {
 
 const ipRegExp = /(^127\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^192\.168\.)/;
 
-export class ManageModal extends React.Component<props, {}> {
+export class ContentModal extends React.Component<props, {}> {
   state: {
     ip: string
   }
@@ -55,11 +55,7 @@ export class ManageModal extends React.Component<props, {}> {
           <Modal.Title>Managing Region {this.props.region.name}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>estate</p>
-          <p>coordinates</p>
-          <p>host</p>
-          <p>console command?</p>
-          <p>delete me</p>
+          <p>Content Management</p>
         </Modal.Body>
 
         <Modal.Footer>

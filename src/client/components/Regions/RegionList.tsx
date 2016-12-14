@@ -8,6 +8,7 @@ import { Estate } from '../Estates';
 import { Region, RegionStat } from '.';
 
 import { ManageModal } from './Manage';
+import { ContentModal } from './Content';
 
 import { Grid, Row, Col } from 'react-bootstrap';
 
@@ -20,6 +21,7 @@ interface props {
 
 interface state {
     showManage: boolean
+    showContent: boolean
     selectedRegion: Region
 }
 
@@ -30,6 +32,7 @@ export class RegionList extends React.Component<props, {}> {
         super(p);
         this.state = {
             showManage: false,
+            showContent: false,
             selectedRegion: null
         }
     }
@@ -41,6 +44,7 @@ export class RegionList extends React.Component<props, {}> {
     onManageRegion(r: Region) {
         this.setState({
             showManage: true,
+            showContent: false,
             selectedRegion: r
         })
     }
@@ -48,6 +52,20 @@ export class RegionList extends React.Component<props, {}> {
     dismissManage() {
         this.setState({
             showManage: false
+        })
+    }
+
+    onManageRegionContent(r: Region) {
+        this.setState({
+            showManage: false,
+            showContent: true,
+            selectedRegion: r
+        })
+    }
+
+    dismissManageContent() {
+        this.setState({
+            showContent: false
         })
     }
 
@@ -59,7 +77,8 @@ export class RegionList extends React.Component<props, {}> {
                     return <RegionView
                         key={r.uuid}
                         region={r}
-                        onManage={this.onManageRegion.bind(this, r)} />
+                        onManage={this.onManageRegion.bind(this, r)}
+                        onContent={this.onManageRegionContent.bind(this, r)} />
                 } else {
                     return null;
                 }
@@ -77,6 +96,7 @@ export class RegionList extends React.Component<props, {}> {
             <Grid>
                 {estates}
                 {this.state.showManage ? <ManageModal dismiss={this.dismissManage.bind(this)} region={this.state.selectedRegion} /> : <span />}
+                {this.state.showContent ? <ContentModal dismiss={this.dismissManageContent.bind(this)} region={this.state.selectedRegion} /> : <span />}
             </Grid>
         )
     }

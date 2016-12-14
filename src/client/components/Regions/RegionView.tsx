@@ -12,7 +12,8 @@ import { Control } from './Control';
 
 interface regionProps {
   region: Region,
-  onManage: () => void
+  onManage: () => void,
+  onContent: () => void
 }
 
 export class RegionView extends React.Component<regionProps, {}> {
@@ -21,12 +22,16 @@ export class RegionView extends React.Component<regionProps, {}> {
     return !shallowequal(this.props, nextProps);
   }
 
-  start() {
-    if (!this.props.region.node || this.props.region.node == '')
-      return alertify.error(this.props.region.name + " is not assigned to a host");
-    if (this.props.region.isRunning)
-      return alertify.error(this.props.region.name + " is already running");
-    post('/api/region/start/' + this.props.region.uuid).then(() => {
+  start(): Promise<void> {
+    if (!this.props.region.node || this.props.region.node == ''){
+      alertify.error(this.props.region.name + " is not assigned to a host");
+      return Promise.resolve();
+    }
+    if (this.props.region.isRunning){
+      alertify.error(this.props.region.name + " is already running");
+      return Promise.resolve();
+    }
+    return post('/api/region/start/' + this.props.region.uuid).then(() => {
       alertify.success(this.props.region.name + ' signalled START');
     }).catch((err: Error) => {
       alertify.error('Could not start ' + this.props.region.name + ': ' + err.message);
@@ -41,10 +46,8 @@ export class RegionView extends React.Component<regionProps, {}> {
       alertify.success(this.props.region.name + ' signalled STOP');
     }).catch((err: Error) => {
       alertify.error('Could not stop ' + this.props.region.name + ': ' + err.message);
-    })
+    });
   }
-
-  content() { alertify.log('content pressed'); }
 
   kill() {
     if (!this.props.region.isRunning) {
@@ -78,7 +81,7 @@ export class RegionView extends React.Component<regionProps, {}> {
             hasHost={this.props.region.node !== ''}
             start={this.start.bind(this)}
             stop={this.stop.bind(this)}
-            content={this.content.bind(this)}
+            content={this.props.onContent}
             kill={this.kill.bind(this)} />
         </Col>
         <Col xs={12} md={8} lg={8}>{statView}</Col>

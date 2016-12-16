@@ -8,7 +8,7 @@ import { get, post } from '../../util/network';
 
 interface props {
   region: Region,
-  dismiss: () => void
+  onDismiss: () => void
 }
 
 interface state {
@@ -30,39 +30,29 @@ export class LogModal extends React.Component<props, {}> {
       let logString: string = result.Message;
       this.setState({
         loaded: true,
-        content: logString.split('\n').map( (s:string) => {
-          return <p>{s}</p>
+        content: logString.split('\n').map((s: string, idx: number) => {
+          return <p key={'logline ' + idx}>{s}</p>
         })
       });
     }).catch((err: Error) => {
       this.setState({
         loaded: true,
-        content: 'Could not get logs for ' + this.props.region.name + ': ' + err.message
+        content: <p>{'Could not get logs for ' + this.props.region.name + ': ' + err.message}</p>
       });
     })
   }
 
   render() {
-    let content: JSX.Element;
-    if (this.state.loaded) {
-      content = (
-        <p>{this.state.content}</p>
-      )
-    } else {
-      content = (
-        <p>Loading...</p>
-      )
-    }
     return (
-      <Modal show={true} bsSize="large" onHide={this.props.dismiss}>
+      <Modal show={true} onHide={this.props.onDismiss} bsSize="large">
         <Modal.Header closeButton>
-          <Modal.Title>{this.props.region.name}Logs</Modal.Title>
+          <Modal.Title>{this.props.region.name + ' '}Logs</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {content}
+          { this.state.loaded? this.state.content : <p>Loading...</p>}
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={this.props.dismiss}>Close</Button>
+          <Button onClick={this.props.onDismiss}>Close</Button>
         </Modal.Footer>
       </Modal>
     )

@@ -114,7 +114,7 @@ export class RegionList extends React.Component<props, {}> {
                 {estates}
                 {this.state.showManage ? <ManageModal dismiss={this.dismissManage.bind(this)} region={this.state.selectedRegion} /> : <span />}
                 {this.state.showContent ? <ContentModal dismiss={this.dismissManageContent.bind(this)} region={this.state.selectedRegion} /> : <span />}
-                {this.state.showLog ? <LogModal dismiss={this.disMissLog.bind(this)} region={this.state.selectedRegion} /> : <span />}
+                {this.state.showLog ? <LogModal onDismiss={this.disMissLog.bind(this)} region={this.state.selectedRegion} /> : <span />}
             </Grid>
         )
     }

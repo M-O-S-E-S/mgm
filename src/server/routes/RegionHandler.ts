@@ -51,7 +51,12 @@ export function RegionHandler(db: PersistanceLayer, config: Config): express.Rou
     let regionID = new UUIDString(req.params.uuid);
 
     db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
-      res.sendFile(logger.getFilePath(new UUIDString(r.uuid)));
+      return logger.getLogs(regionID);
+    }).then( (log: string) => {
+      res.send(JSON.stringify({
+        Success: true,
+        Message: log
+      }))
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });

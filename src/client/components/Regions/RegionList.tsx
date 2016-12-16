@@ -9,6 +9,7 @@ import { Region, RegionStat } from '.';
 
 import { ManageModal } from './Manage';
 import { ContentModal } from './Content';
+import { LogModal } from './Log';
 
 import { Grid, Row, Col } from 'react-bootstrap';
 
@@ -22,6 +23,7 @@ interface props {
 interface state {
     showManage: boolean
     showContent: boolean
+    showLog: boolean
     selectedRegion: Region
 }
 
@@ -33,6 +35,7 @@ export class RegionList extends React.Component<props, {}> {
         this.state = {
             showManage: false,
             showContent: false,
+            showLog: false,
             selectedRegion: null
         }
     }
@@ -69,8 +72,21 @@ export class RegionList extends React.Component<props, {}> {
         })
     }
 
+    onDisplayLog(r: Region) {
+        this.setState({
+            showLog: true,
+            selectedRegion: r
+        })
+    }
+
+    disMissLog() {
+        this.setState({
+            showLog: false,
+        })
+    }
+
     render() {
-        let estates = this.props.estates.toArray().sort((a: Estate,b: Estate)=> {return a.name.localeCompare(b.name)}).map((e: Estate) => {
+        let estates = this.props.estates.toArray().sort((a: Estate, b: Estate) => { return a.name.localeCompare(b.name) }).map((e: Estate) => {
             let regions = this.props.regions.toArray().map((r: Region) => {
                 let estateId: number = this.props.estateMap.get(r.uuid);
                 if (estateId === e.id) {
@@ -78,7 +94,8 @@ export class RegionList extends React.Component<props, {}> {
                         key={r.uuid}
                         region={r}
                         onManage={this.onManageRegion.bind(this, r)}
-                        onContent={this.onManageRegionContent.bind(this, r)} />
+                        onContent={this.onManageRegionContent.bind(this, r)}
+                        onLog={this.onDisplayLog.bind(this,r)} />
                 } else {
                     return null;
                 }
@@ -97,6 +114,7 @@ export class RegionList extends React.Component<props, {}> {
                 {estates}
                 {this.state.showManage ? <ManageModal dismiss={this.dismissManage.bind(this)} region={this.state.selectedRegion} /> : <span />}
                 {this.state.showContent ? <ContentModal dismiss={this.dismissManageContent.bind(this)} region={this.state.selectedRegion} /> : <span />}
+                {this.state.showLog ? <LogModal dismiss={this.disMissLog.bind(this)} region={this.state.selectedRegion} /> : <span />}
             </Grid>
         )
     }

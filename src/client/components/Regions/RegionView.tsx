@@ -15,7 +15,8 @@ import { Control } from './Control';
 interface regionProps {
   region: Region,
   onManage: () => void,
-  onContent: () => void
+  onContent: () => void,
+  onLog: () => void
 }
 
 export class RegionView extends React.Component<regionProps, {}> {
@@ -64,14 +65,6 @@ export class RegionView extends React.Component<regionProps, {}> {
     })
   }
 
-  handleLog(): Promise<void> {
-    return get('/api/region/logs/' + this.props.region.uuid).then((logs: any) => {
-      console.log(logs);
-    }).catch( (err: Error) => {
-      alertify.error('Could not get logs for ' + this.props.region.name + ': ' + err.message);
-    })
-  }
-
   render() {
     let statView = <span>~ not running ~</span>;
     if (this.props.region.isRunning) {
@@ -89,9 +82,9 @@ export class RegionView extends React.Component<regionProps, {}> {
             </Col>
             <Col xs={8}>{this.props.region.name}</Col>
             <Col xs={1}>
-              <BusyButton bsSize="xsmall" onClick={this.handleLog.bind(this)}>
+              <Button bsSize="xsmall" onClick={this.props.onLog}>
                 <i className="fa fa-file-text-o" aria-hidden="true" ></i>
-              </BusyButton>
+              </Button>
             </Col>
           </Row>
         </Col>

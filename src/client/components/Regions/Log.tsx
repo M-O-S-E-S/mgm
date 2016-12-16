@@ -8,7 +8,7 @@ import { get, post } from '../../util/network';
 
 interface props {
   region: Region,
-  onDismiss: () => void
+  dismiss: () => void
 }
 
 interface state {
@@ -44,7 +44,7 @@ export class LogModal extends React.Component<props, {}> {
 
   render() {
     return (
-      <Modal show={true} onHide={this.props.onDismiss} bsSize="large">
+      <Modal show={true} onHide={this.props.dismiss} bsSize="large">
         <Modal.Header closeButton>
           <Modal.Title>{this.props.region.name + ' '}Logs</Modal.Title>
         </Modal.Header>
@@ -52,7 +52,7 @@ export class LogModal extends React.Component<props, {}> {
           { this.state.loaded? this.state.content : <p>Loading...</p>}
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={this.props.onDismiss}>Close</Button>
+          <Button onClick={this.props.dismiss}>Close</Button>
         </Modal.Footer>
       </Modal>
     )

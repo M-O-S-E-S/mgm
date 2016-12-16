@@ -19,7 +19,7 @@ export class ManageModal extends React.Component<props, {}> {
   constructor(props: props) {
     super(props);
     this.state = {
-       ip: ''
+      ip: ''
     }
   }
 
@@ -50,8 +50,8 @@ export class ManageModal extends React.Component<props, {}> {
 
   render() {
     return (
-      <Modal.Dialog>
-        <Modal.Header>
+      <Modal show={true} onHide={this.props.dismiss} bsSize="large">
+        <Modal.Header closeButton>
           <Modal.Title>Managing Region {this.props.region.name}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -61,11 +61,10 @@ export class ManageModal extends React.Component<props, {}> {
           <p>console command?</p>
           <p>delete me</p>
         </Modal.Body>
-
         <Modal.Footer>
           <Button onClick={this.props.dismiss}>Close</Button>
         </Modal.Footer>
-      </Modal.Dialog>
+      </Modal>
     )
   }
 }

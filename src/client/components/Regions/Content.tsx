@@ -50,18 +50,17 @@ export class ContentModal extends React.Component<props, {}> {
 
   render() {
     return (
-      <Modal.Dialog>
-        <Modal.Header>
+      <Modal show={true} onHide={this.props.dismiss} bsSize="large">
+        <Modal.Header closeButton>
           <Modal.Title>Managing Region {this.props.region.name}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>Content Management</p>
         </Modal.Body>
-
         <Modal.Footer>
           <Button onClick={this.props.dismiss}>Close</Button>
         </Modal.Footer>
-      </Modal.Dialog>
+      </Modal>
     )
   }
 }

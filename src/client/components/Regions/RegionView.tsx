@@ -4,7 +4,9 @@ import { Estate } from '../Estates';
 import { Region, RegionStat } from '.';
 const shallowequal = require('shallowequal');
 
-import { post } from '../../util/network';
+import { BusyButton } from '../../util/BusyButton';
+
+import { get, post } from '../../util/network';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 import { RegionStatView } from './RegionStatView';
@@ -22,12 +24,12 @@ export class RegionView extends React.Component<regionProps, {}> {
     return !shallowequal(this.props, nextProps);
   }
 
-  start(): Promise<void> {
-    if (!this.props.region.node || this.props.region.node == ''){
+  handleStart(): Promise<void> {
+    if (!this.props.region.node || this.props.region.node == '') {
       alertify.error(this.props.region.name + " is not assigned to a host");
       return Promise.resolve();
     }
-    if (this.props.region.isRunning){
+    if (this.props.region.isRunning) {
       alertify.error(this.props.region.name + " is already running");
       return Promise.resolve();
     }
@@ -38,25 +40,35 @@ export class RegionView extends React.Component<regionProps, {}> {
     })
   }
 
-  stop() {
+  handleStop(): Promise<void> {
     if (!this.props.region.isRunning) {
-      return alertify.error('Cannot stop a region that is not running');
+      alertify.error('Cannot stop a region that is not running');
+      return Promise.resolve();
     }
-    post('/api/region/stop/' + this.props.region.uuid).then(() => {
+    return post('/api/region/stop/' + this.props.region.uuid).then(() => {
       alertify.success(this.props.region.name + ' signalled STOP');
     }).catch((err: Error) => {
       alertify.error('Could not stop ' + this.props.region.name + ': ' + err.message);
     });
   }
 
-  kill() {
+  handleKill(): Promise<void> {
     if (!this.props.region.isRunning) {
-      return alertify.error('Cannot kill a region that is not running');
+      alertify.error('Cannot kill a region that is not running');
+      return Promise.resolve();
     }
-    post('/api/region/kill/' + this.props.region.uuid).then(() => {
+    return post('/api/region/kill/' + this.props.region.uuid).then(() => {
       alertify.success(this.props.region.name + ' signalled KILL');
     }).catch((err: Error) => {
       alertify.error('Could not kill ' + this.props.region.name + ': ' + err.message);
+    })
+  }
+
+  handleLog(): Promise<void> {
+    return get('/api/region/logs/' + this.props.region.uuid).then((logs: any) => {
+      console.log(logs);
+    }).catch( (err: Error) => {
+      alertify.error('Could not get logs for ' + this.props.region.name + ': ' + err.message);
     })
   }
 
@@ -70,19 +82,27 @@ export class RegionView extends React.Component<regionProps, {}> {
       <Row>
         <Col xs={6} sm={6} md={6} lg={2}>
           <Row>
-            <Col xs={1}><i className="fa fa-cog" aria-hidden="true" onClick={this.props.onManage}></i></Col>
+            <Col xs={1}>
+              <Button bsSize="xsmall">
+                <i className="fa fa-cog" aria-hidden="true" onClick={this.props.onManage}></i>
+              </Button>
+            </Col>
             <Col xs={8}>{this.props.region.name}</Col>
-            <Col xs={1}><i className="fa fa-file-text-o" aria-hidden="true" ></i></Col>
+            <Col xs={1}>
+              <BusyButton bsSize="xsmall" onClick={this.handleLog.bind(this)}>
+                <i className="fa fa-file-text-o" aria-hidden="true" ></i>
+              </BusyButton>
+            </Col>
           </Row>
         </Col>
         <Col xs={6} sm={6} md={6} lg={2}>
           <Control
             isRunning={this.props.region.isRunning}
             hasHost={this.props.region.node !== ''}
-            start={this.start.bind(this)}
-            stop={this.stop.bind(this)}
+            start={this.handleStart.bind(this)}
+            stop={this.handleStop.bind(this)}
             content={this.props.onContent}
-            kill={this.kill.bind(this)} />
+            kill={this.handleKill.bind(this)} />
         </Col>
         <Col xs={12} md={8} lg={8}>{statView}</Col>
       </Row>

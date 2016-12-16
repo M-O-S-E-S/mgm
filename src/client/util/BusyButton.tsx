@@ -3,8 +3,7 @@ import * as React from "react";
 import { Button, ButtonProps } from 'react-bootstrap';
 
 interface props extends ButtonProps {
-  buttonLabel: JSX.Element
-  callback: () => Promise<void>
+  onClick: () => Promise<void>
 }
 
 interface state {
@@ -28,7 +27,7 @@ export class BusyButton extends React.Component<props, {}> {
     this.setState({
       busy: true
     });
-    this.props.callback().then(() => {
+    this.props.onClick().then(() => {
       this.setState({
         busy: false
       })
@@ -40,7 +39,7 @@ export class BusyButton extends React.Component<props, {}> {
     const {buttonLabel, callback, ...rest} = this.props;
     return (
       <Button {...rest} onClick={this.handleClick.bind(this)}>
-        {this.state.busy ? (<i className="fa fa-spinner fa-spin" aria-hidden="true"></i>) : buttonLabel}
+        {this.state.busy ? (<i className="fa fa-spinner fa-spin" aria-hidden="true"></i>) : this.props.children}
       </Button>
     )
   }

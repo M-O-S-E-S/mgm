@@ -15,9 +15,9 @@ interface props {
   isRunning: boolean,
   hasHost: boolean,
   start: () => Promise<void>,
-  stop: () => void,
+  stop: () => Promise<void>,
   content: () => void,
-  kill: () => void
+  kill: () => Promise<void>
 }
 
 export class Control extends React.Component<props, {}> {
@@ -29,10 +29,10 @@ export class Control extends React.Component<props, {}> {
   render() {
     return (
       <div>
-        <BusyButton bsSize="xsmall" disabled={this.props.isRunning} callback={this.props.start} buttonLabel={<i className="fa fa-play" aria-hidden="true" ></i>} />
-        <Button bsSize="xsmall" disabled={!this.props.isRunning} onClick={this.props.stop}><i className="fa fa-stop" aria-hidden="true" ></i></Button>
+        <BusyButton bsSize="xsmall" disabled={this.props.isRunning} onClick={this.props.start}><i className="fa fa-play" aria-hidden="true" ></i></BusyButton>
+        <BusyButton bsSize="xsmall" disabled={!this.props.isRunning} onClick={this.props.stop}><i className="fa fa-stop" aria-hidden="true" ></i></BusyButton>
         <Button bsSize="xsmall" disabled={!this.props.isRunning} onClick={this.props.content}><i className="fa fa-floppy-o" aria-hidden="true" ></i></Button>
-        <Button bsSize="xsmall" disabled={!this.props.isRunning} onClick={this.props.kill}><i className="fa fa-times" aria-hidden="true" style={{ color: 'red' }}></i></Button>
+        <BusyButton bsSize="xsmall" disabled={!this.props.isRunning} onClick={this.props.kill}><i className="fa fa-times" aria-hidden="true" style={{ color: 'red' }}></i></BusyButton>
       </div>
     )
   }

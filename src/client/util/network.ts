@@ -21,7 +21,10 @@ function performCall(method: string, route: string, args?: any) {
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
         xhr.onload = () => {
             if (xhr.status !== 200) {
-                reject('Request failed.  Returned status of ' + xhr.status);
+                if(xhr.status === 404)
+                    reject(new Error('Request failed.  Does not exist'));
+                else
+                    reject(new Error('Request failed: server error'));
             } else {
                 let res: mgmResponse = JSON.parse(xhr.response);
                 if (res.Success) {

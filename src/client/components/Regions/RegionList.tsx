@@ -5,6 +5,7 @@ const shallowequal = require('shallowequal');
 
 import { RegionView } from './RegionView';
 import { Estate } from '../Estates';
+import { Host } from '../Hosts';
 import { Region, RegionStat } from '.';
 
 import { ManageModal } from './Manage';
@@ -17,7 +18,8 @@ interface props {
     dispatch: (a: Action) => void,
     regions: Map<string, Region>,
     estateMap: Map<string, number>,
-    estates: Map<number, Estate>
+    estates: Map<number, Estate>,
+    hosts: Map<number, Host>
 }
 
 interface state {
@@ -95,7 +97,7 @@ export class RegionList extends React.Component<props, {}> {
                         region={r}
                         onManage={this.onManageRegion.bind(this, r)}
                         onContent={this.onManageRegionContent.bind(this, r)}
-                        onLog={this.onDisplayLog.bind(this,r)} />
+                        onLog={this.onDisplayLog.bind(this, r)} />
                 } else {
                     return null;
                 }
@@ -112,7 +114,12 @@ export class RegionList extends React.Component<props, {}> {
         return (
             <Grid>
                 {estates}
-                {this.state.showManage ? <ManageModal dismiss={this.dismissManage.bind(this)} region={this.state.selectedRegion} /> : <span />}
+                {this.state.showManage ? <ManageModal
+                    dismiss={this.dismissManage.bind(this)}
+                    region={this.state.selectedRegion}
+                    estates={this.props.estates}
+                    estateMap={this.props.estateMap}
+                    hosts={this.props.hosts} /> : <span />}
                 {this.state.showContent ? <ContentModal dismiss={this.dismissManageContent.bind(this)} region={this.state.selectedRegion} /> : <span />}
                 {this.state.showLog ? <LogModal dismiss={this.disMissLog.bind(this)} region={this.state.selectedRegion} /> : <span />}
             </Grid>

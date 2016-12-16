@@ -123,7 +123,8 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
                             dispatch={this.props.dispatch}
                             regions={this.props.state.regions}
                             estateMap={this.props.state.estateMap}
-                            estates={this.props.state.estates} />
+                            estates={this.props.state.estates}
+                            hosts={this.props.state.hosts} />
                     </div>
                 )
             case '/estates':

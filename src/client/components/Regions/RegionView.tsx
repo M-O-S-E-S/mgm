@@ -76,7 +76,7 @@ export class RegionView extends React.Component<regionProps, {}> {
         <Col xs={6} sm={6} md={6} lg={2}>
           <Row>
             <Col xs={1}>
-              <Button bsSize="xsmall">
+              <Button bsSize="xsmall" disabled={this.props.region.isRunning}>
                 <i className="fa fa-cog" aria-hidden="true" onClick={this.props.onManage}></i>
               </Button>
             </Col>

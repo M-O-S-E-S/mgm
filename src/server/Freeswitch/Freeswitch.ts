@@ -15,14 +15,36 @@ export class FreeSwitchDirectory {
   }
 }
 
+export class FreeSwitchUser {
+  public id: string
+  public password: string
+  public realm: string
+
+  constructor(id: string, password: string, realm: string){
+    this.id = id;
+    this.password = password;
+    this.realm = realm;
+  }
+}
+
 export class Freeswitch {
 
   private directories: Map<string, FreeSwitchDirectory>
+  private users: Map<string, FreeSwitchUser>
   private voiceIP: string
 
   constructor(voiceIP: string) {
     this.voiceIP = voiceIP;
     this.directories = Map<string, FreeSwitchDirectory>();
+    this.users = Map<string, FreeSwitchUser>();
+  }
+
+  getAccountInfo(user: string): FreeSwitchUser {
+    this.users = this.users.set(
+      user,
+      new FreeSwitchUser(user, "1234", this.voiceIP) // BAD!! but its what opensim does, so for now ...
+    )
+    return this.users.get(user, null);
   }
 
   getDirectory(dir: string): FreeSwitchDirectory {

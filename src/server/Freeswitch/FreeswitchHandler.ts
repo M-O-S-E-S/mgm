@@ -1,12 +1,12 @@
 
 import * as express from 'express';
 
-import { Freeswitch, FreeSwitchDirectory } from './Freeswitch';
+import { Freeswitch, FreeSwitchDirectory, FreeSwitchUser } from './Freeswitch';
 
 export function FreeswitchHandler(fs: Freeswitch): express.Router {
   let router = express.Router();
 
-  router.get('/', (req,res) => {
+  /*router.get('/', (req,res) => {
     res.send(fs.halcyonConfig());
   });
 
@@ -42,7 +42,7 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
     let result = fs.signin(req.body);
     console.log(result);
     return res.send(result);
-  });
+  });*/
 
   router.get('/getDirectory', (req, res) => {
     // directory request from a region
@@ -61,6 +61,18 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
     let dir: FreeSwitchDirectory = fs.getDirectory(req.query.dirid);
     if(dir){
       return res.send('<Result><Directory><ID>'+dir.id+'</ID></Directory></Result>')
+    }
+    return res.send('<Result></Result>');
+  });
+
+  router.get('/getAccountInfo', (req, res) => {
+    let userAccount: FreeSwitchUser = fs.getAccountInfo(req.query.user);
+    if(userAccount){
+      return res.send(
+        '<Result><Account><UserID>'+
+        userAccount.id+'</UserID><Password>'+
+        userAccount.password+'</Password><Realm>'+
+        userAccount.realm+'</Realm></Account></Result>')
     }
     return res.send('<Result></Result>');
   });

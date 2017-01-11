@@ -1,19 +1,51 @@
 
+import { Set, Map } from 'immutable';
+
+export class FreeSwitchDirectory {
+  public id: string
+  public description: string
+  public type: string
+
+  channels: Set<string>
+
+  constructor(id: string, description: string, type: string) {
+    this.id = id;
+    this.description = description;
+    this.type = type;
+  }
+}
+
 export class Freeswitch {
 
-  private idMap: {[key:string]:string}
+  private directories: Map<string, FreeSwitchDirectory>
   private voiceIP: string
 
   constructor(voiceIP: string) {
     this.voiceIP = voiceIP;
-    this.idMap = {};
+    this.directories = Map<string, FreeSwitchDirectory>();
   }
+
+  getDirectory(dir: string): FreeSwitchDirectory {
+    return this.directories.get(dir, null);
+  }
+
+  createDirectory(id: string, description: string, type: string) {
+    this.directories = this.directories.set(
+      id,
+      new FreeSwitchDirectory(id, description, type)
+    );
+  }
+
+
+
+
+  /*** OLD WORK BELOW THIS POINT **/
 
   // requested on Halcyon startup to configure the FreeSwitch Region Module
   halcyonConfig(): string {
     let xml = '<config>' +
       '<Realm>' + this.voiceIP + '</Realm>' +
-      '<SIPProxy>' + this.voiceIP+":5060" + '</SIPProxy>' +
+      '<SIPProxy>' + this.voiceIP + ":5060" + '</SIPProxy>' +
       '<AttemptUseSTUN>' + 'false' + '</AttemptUseSTUN>' +
       '<EchoServer>' + this.voiceIP + '</EchoServer>' +
       '<EchoPort>' + 50505 + '</EchoPort>' +
@@ -131,20 +163,20 @@ export class Freeswitch {
     let pos = 0;
 
     return '<response xsi:schemaLocation="/xsd/signin.xsd">' +
-    '<level0>' +
-    '<status>OK</status>' +
-    '<body>' +
-    '<code>200</code>' +
-    '<cookie_name>lib_session</cookie_name>' +
-    '<cookie>'+userId+':'+pos+':9303959503950::</cookie>' +
-    '<auth_token>'+userId+':'+pos+':9303959503950::</auth_token>' +
-    '<primary>1</primary>' +
-    '<account_id>'+pos+'</account_id>' +
-    '<displayname>Johnny User</displayname>' +
-    '<msg>auth successful</msg>' +
-    '</body>' +
-    '</level0>' +
-    '</response>';
+      '<level0>' +
+      '<status>OK</status>' +
+      '<body>' +
+      '<code>200</code>' +
+      '<cookie_name>lib_session</cookie_name>' +
+      '<cookie>' + userId + ':' + pos + ':9303959503950::</cookie>' +
+      '<auth_token>' + userId + ':' + pos + ':9303959503950::</auth_token>' +
+      '<primary>1</primary>' +
+      '<account_id>' + pos + '</account_id>' +
+      '<displayname>Johnny User</displayname>' +
+      '<msg>auth successful</msg>' +
+      '</body>' +
+      '</level0>' +
+      '</response>';
     // 0 - userId
     // 1 - pos <-- position in uuid-name mapping???
     // 2 - avatarname

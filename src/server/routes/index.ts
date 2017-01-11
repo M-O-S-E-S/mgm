@@ -1,6 +1,6 @@
 
 import * as express from 'express';
-import { Freeswitch } from '../Freeswitch';
+import { Freeswitch, FreeswitchHandler } from '../Freeswitch';
 import { PersistanceLayer, RegionInstance } from '../database';
 
 import { AuthHandler } from './AuthHandler';
@@ -14,7 +14,6 @@ import { GroupHandler } from './GroupHandler';
 import { DispatchHandler } from './DispatchHandler';
 import { OfflineMessageHandler } from './OfflineMessageHandler';
 import { RegisterHandler } from './RegisterHandler';
-import { FreeswitchHandler } from './FreeswitchHandler';
 
 import { Config } from '../config';
 
@@ -47,7 +46,7 @@ export function SetupRoutes(conf: Config): express.Router {
   router.use('/region', RegionHandler(db, conf));
   router.use('/group', GroupHandler(db));
 
-  //router.use('/fsapi', FreeswitchHandler(fs));
+  router.use('/fsapi', FreeswitchHandler(fs));
 
   router.use('/offline', OfflineMessageHandler(db));
   router.use('/register', RegisterHandler(db, conf.mgm.templates));

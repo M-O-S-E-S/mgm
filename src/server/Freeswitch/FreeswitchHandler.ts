@@ -1,7 +1,7 @@
 
 import * as express from 'express';
 
-import { Freeswitch } from './Freeswitch';
+import { Freeswitch, FreeSwitchDirectory } from './Freeswitch';
 
 export function FreeswitchHandler(fs: Freeswitch): express.Router {
   let router = express.Router();
@@ -42,6 +42,27 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
     let result = fs.signin(req.body);
     console.log(result);
     return res.send(result);
+  });
+
+  router.get('/getDirectory', (req, res) => {
+    // directory request from a region
+    // TODO: validate that this is a region we are communicating with
+    let dir: FreeSwitchDirectory = fs.getDirectory(req.query.channame);
+    if(dir){
+      return res.send('<Result><Directory><ID>'+dir.id+'</ID></Directory></Result>')
+    }
+    return res.send('<Result></Result>');
+  });
+
+  router.get('/createDirectory', (req, res) => {
+    // region requesting to create a directory
+    // directories hold channels, but are channels themselves, ignore that for now
+    fs.createDirectory(req.query.dirid, req.query.chan_desc, req.query.chan_type);
+    let dir: FreeSwitchDirectory = fs.getDirectory(req.query.dirid);
+    if(dir){
+      return res.send('<Result><Directory><ID>'+dir.id+'</ID></Directory></Result>')
+    }
+    return res.send('<Result></Result>');
   });
 
   router.all('*', (req, res, next) => {

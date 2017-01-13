@@ -1,14 +1,18 @@
 
 import * as express from 'express';
 
-import { Freeswitch, FreeSwitchDirectory, FreeSwitchUser } from './Freeswitch';
+import { Freeswitch, FreeSwitchDirectory, FreeSwitchUser, FreeSwitchChannel } from './Freeswitch';
 
 export function FreeswitchHandler(fs: Freeswitch): express.Router {
   let router = express.Router();
 
+  /*****************************
+   * Freeswitch APIS
+   *****************************/
+
   /*router.get('/', (req,res) => {
     res.send(fs.halcyonConfig());
-  });
+  });*/
 
   router.post('/freeswitch-config', (req, res) => {
     let remoteIP: string = req.ip.split(':').pop();
@@ -28,7 +32,9 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
     }
   });
 
-  */
+  /*****************************
+   * Client APIS
+   *****************************/
 
   router.post('/viv_get_prelogin.php', (req, res) => {
     let remoteIP: string = req.ip.split(':').pop();
@@ -44,14 +50,16 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
     return res.send(result);
   });
 
-  router.post('/viv_signout.php', (req, res) => {
-    res.send('');
-  })
+  // giving empty responses to various unknown SLVoice.exe queries
+  router.post('/viv_signout.php', (req, res) => {res.send('')});
+  router.post('/viv_session_fonts.php', (req, res) => {res.send('')});
+  router.post('/viv_template_fonts.php', (req, res) => {res.send('')});
+  router.post('/viv_session_fonts.php', (req, res) => {res.send('')});
+  router.post('/viv_template_fonts.php', (req, res) => {res.send('')});
 
-  //voice: POST: /fsapi/viv_session_fonts.php
-  //voice: POST: /fsapi/viv_template_fonts.php
-  //voice: POST: /fsapi/viv_session_fonts.php
-  //voice: POST: /fsapi/viv_template_fonts.php
+  /*****************************
+   * Region APIS
+   *****************************/
 
   router.get('/getDirectory', (req, res) => {
     // directory request from a region
@@ -70,6 +78,37 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
     let dir: FreeSwitchDirectory = fs.getDirectory(req.query.dirid);
     if(dir){
       return res.send('<Result><Directory><ID>'+dir.id+'</ID></Directory></Result>')
+    }
+    return res.send('<Result></Result>');
+  });
+
+  router.get('/getChannel', (req, res) => {
+    let chan: FreeSwitchChannel = fs.getChannel(req.query.parent, req.query.name);
+    if(chan){
+      return res.send(
+        '<Result><Channel><ID>'
+        + chan.id + 
+        '</ID><URI>'
+        + chan.uri + '</URI><Name>'
+        + chan.name + '</Name><Parent>'
+        + chan.parent + '</Parent></Channel></Result>'
+      );
+    }
+    return res.send('<Result></Result>');
+  });
+
+  router.get('/createChannel', (req, res) => {
+    fs.createChannel(req.query.parent, req.query.id, req.query.name)
+    let chan: FreeSwitchChannel = fs.getChannel(req.query.parent, req.query.name);
+    if(chan){
+      return res.send(
+        '<Result><Channel><ID>'
+        + chan.id + 
+        '</ID><URI>'
+        + chan.uri + '</URI><Name>'
+        + chan.name + '</Name><Parent>'
+        + chan.parent + '</Parent></Channel></Result>'
+      );
     }
     return res.send('<Result></Result>');
   });

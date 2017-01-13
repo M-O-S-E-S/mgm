@@ -6,12 +6,13 @@ export class FreeSwitchDirectory {
   public description: string
   public type: string
 
-  channels: Set<string>
+  channels: Map<string, FreeSwitchChannel>
 
   constructor(id: string, description: string, type: string) {
     this.id = id;
     this.description = description;
     this.type = type;
+    this.channels = Map<string,FreeSwitchChannel>();
   }
 }
 
@@ -24,6 +25,20 @@ export class FreeSwitchUser {
     this.id = id;
     this.password = password;
     this.realm = realm;
+  }
+}
+
+export class FreeSwitchChannel {
+  public id: string
+  public uri: string
+  public name: string
+  public parent: string
+
+  constructor(id: string, name: string, uri: string, parent: string){
+    this.id = id;
+    this.name = name;
+    this.uri = uri;
+    this.parent = parent;
   }
 }
 
@@ -59,6 +74,26 @@ export class Freeswitch {
       id,
       new FreeSwitchDirectory(id, description, type)
     );
+  }
+
+  getChannel(parent: string, name: string): FreeSwitchChannel {
+    let dir = this.directories.get(parent, null);
+    if(!dir) return null;
+    let chan = dir.channels.get(name, null);
+    return chan;
+  }
+
+  createChannel(parent: string, id: string, name: string) {
+    let dir = this.directories.get(parent, null);
+    if(!dir) return;
+    dir.channels = dir.channels.set(name, new FreeSwitchChannel(
+      id,
+      name,
+      'sip:conf-'+id+'@'+this.voiceIP,
+      //channelUri = String.Format("sip:conf-{0}@{1}", "x" + Convert.ToBase64String(Encoding.ASCII.GetBytes(landUUID)), m_freeSwitchRealm);
+      parent
+    ));
+    this.directories = this.directories.set(parent, dir);
   }
 
   // response for SLVOICE viv_get_prelogin.php

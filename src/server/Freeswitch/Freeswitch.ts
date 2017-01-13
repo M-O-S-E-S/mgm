@@ -39,6 +39,7 @@ export class Freeswitch {
     this.users = Map<string, FreeSwitchUser>();
   }
 
+  // Create and return a new voice account
   getAccountInfo(user: string): FreeSwitchUser {
     this.users = this.users.set(
       user,
@@ -47,10 +48,12 @@ export class Freeswitch {
     return this.users.get(user, null);
   }
 
+  // test if directory already exists
   getDirectory(dir: string): FreeSwitchDirectory {
     return this.directories.get(dir, null);
   }
 
+  // create directory
   createDirectory(id: string, description: string, type: string) {
     this.directories = this.directories.set(
       id,
@@ -58,27 +61,7 @@ export class Freeswitch {
     );
   }
 
-
-
-
-  /*** OLD WORK BELOW THIS POINT **/
-
-  // requested on Halcyon startup to configure the FreeSwitch Region Module
-  halcyonConfig(): string {
-    let xml = '<config>' +
-      '<Realm>' + this.voiceIP + '</Realm>' +
-      '<SIPProxy>' + this.voiceIP + ":5060" + '</SIPProxy>' +
-      '<AttemptUseSTUN>' + 'false' + '</AttemptUseSTUN>' +
-      '<EchoServer>' + this.voiceIP + '</EchoServer>' +
-      '<EchoPort>' + 50505 + '</EchoPort>' +
-      '<DefaultWellKnownIP>' + this.voiceIP + '</DefaultWellKnownIP>' +
-      '<DefaultTimeout>' + 5000 + '</DefaultTimeout>' +
-      '<Context>' + 'default' + '</Context>' +
-      '<APIPrefix>' + '/fsapi' + '</APIPrefix>' +
-      '</config>';
-    return xml;
-  }
-
+  // response for SLVOICE viv_get_prelogin.php
   clientConfig(): string {
     let context = 'default';
     let realm = this.voiceIP;
@@ -105,6 +88,54 @@ export class Freeswitch {
       '<App.NoBottomLogo>false</App.NoBottomLogo>' +
       '</VCConfiguration>';
   }
+
+  // response for SLVOICE viv_signin.php
+  signin(body: any) {
+    console.log(body);
+    let userId = body.userid;
+    let pwd = body.pwd;
+    let pos = 0;
+
+    return '<response xsi:schemaLocation="/xsd/signin.xsd">' +
+      '<level0>' +
+      '<status>OK</status>' +
+      '<body>' +
+      '<code>200</code>' +
+      '<cookie_name>lib_session</cookie_name>' +
+      '<cookie>' + userId + ':' + pos + ':9303959503950::</cookie>' +
+      '<auth_token>' + userId + ':' + pos + ':9303959503950::</auth_token>' +
+      '<primary>1</primary>' +
+      '<account_id>' + pos + '</account_id>' +
+      '<displayname>Johnny User</displayname>' +
+      '<msg>auth successful</msg>' +
+      '</body>' +
+      '</level0>' +
+      '</response>';
+    // 0 - userId
+    // 1 - pos <-- position in uuid-name mapping???
+    // 2 - avatarname
+  }
+
+
+  /*** OLD WORK BELOW THIS POINT **/
+
+  // requested on Halcyon startup to configure the FreeSwitch Region Module
+  halcyonConfig(): string {
+    let xml = '<config>' +
+      '<Realm>' + this.voiceIP + '</Realm>' +
+      '<SIPProxy>' + this.voiceIP + ":5060" + '</SIPProxy>' +
+      '<AttemptUseSTUN>' + 'false' + '</AttemptUseSTUN>' +
+      '<EchoServer>' + this.voiceIP + '</EchoServer>' +
+      '<EchoPort>' + 50505 + '</EchoPort>' +
+      '<DefaultWellKnownIP>' + this.voiceIP + '</DefaultWellKnownIP>' +
+      '<DefaultTimeout>' + 5000 + '</DefaultTimeout>' +
+      '<Context>' + 'default' + '</Context>' +
+      '<APIPrefix>' + '/fsapi' + '</APIPrefix>' +
+      '</config>';
+    return xml;
+  }
+
+  
 
   directory(body: any): string {
     let context = 'default';
@@ -178,30 +209,6 @@ export class Freeswitch {
       '<condition field="destination_number" expression="^(x.*)$">\r\n' +
       '<action application="bridge" data="user/$1"/>\r\n' +
       '</condition></extension></context></section></document>\r\n';
-  }
-
-  signin(body: any) {
-    let userId = body.userid;
-    let pos = 0;
-
-    return '<response xsi:schemaLocation="/xsd/signin.xsd">' +
-      '<level0>' +
-      '<status>OK</status>' +
-      '<body>' +
-      '<code>200</code>' +
-      '<cookie_name>lib_session</cookie_name>' +
-      '<cookie>' + userId + ':' + pos + ':9303959503950::</cookie>' +
-      '<auth_token>' + userId + ':' + pos + ':9303959503950::</auth_token>' +
-      '<primary>1</primary>' +
-      '<account_id>' + pos + '</account_id>' +
-      '<displayname>Johnny User</displayname>' +
-      '<msg>auth successful</msg>' +
-      '</body>' +
-      '</level0>' +
-      '</response>';
-    // 0 - userId
-    // 1 - pos <-- position in uuid-name mapping???
-    // 2 - avatarname
   }
 
   private register(context: string, realm: string, params: any): string {

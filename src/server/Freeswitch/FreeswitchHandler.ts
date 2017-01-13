@@ -28,21 +28,30 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
     }
   });
 
-  router.post('/viv_signin.php', (req, res) => {
-    let remoteIP: string = req.ip.split(':').pop();
-    console.log('post: /fsapi/viv_signin.php from ' + remoteIP);
-    let result = fs.signin(req.body);
-    console.log(result);
-    return res.send(result);
-  });*/
+  */
 
   router.post('/viv_get_prelogin.php', (req, res) => {
     let remoteIP: string = req.ip.split(':').pop();
     console.log('post: /fsapi/viv_get_prelogin.php from ' + remoteIP);
     let result = fs.clientConfig();
-    console.log(result);
     return res.send(result);
   });
+
+  router.post('/viv_signin.php', (req, res) => {
+    let remoteIP: string = req.ip.split(':').pop();
+    console.log('post: /fsapi/viv_signin.php from ' + remoteIP);
+    let result = fs.signin(req.body);
+    return res.send(result);
+  });
+
+  router.post('/viv_signout.php', (req, res) => {
+    res.send('');
+  })
+
+  //voice: POST: /fsapi/viv_session_fonts.php
+  //voice: POST: /fsapi/viv_template_fonts.php
+  //voice: POST: /fsapi/viv_session_fonts.php
+  //voice: POST: /fsapi/viv_template_fonts.php
 
   router.get('/getDirectory', (req, res) => {
     // directory request from a region

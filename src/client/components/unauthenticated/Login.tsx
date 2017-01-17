@@ -3,7 +3,7 @@ import { Action } from 'redux'
 
 import { Splash } from "../Splash";
 
-import { createLoginAction, createNavigateToAction } from '../../redux/actions';
+import { createLoginAction, createNavigateToAction, createSetAuthErrorMessageAction } from '../../redux/actions';
 import { User } from '../Users';
 
 import { post } from '../../util/network';
@@ -53,9 +53,7 @@ export class Login extends React.Component<loginProps, {}> {
                     this.props.dispatch(createNavigateToAction('/account'));
             }).catch((err: Error) => {
                 console.log('auth failed');
-                this.setState({
-                    msg: err.message
-                });
+                this.props.dispatch(createSetAuthErrorMessageAction(err.message));
             })
     }
 

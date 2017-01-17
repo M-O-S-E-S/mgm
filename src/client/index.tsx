@@ -83,6 +83,7 @@ class App extends React.Component<{}, {}> {
             st: store.getState(),
             loading: true
         }
+        console.log(this.state.st.auth)
         this.resumeSession();
     }
 
@@ -112,6 +113,8 @@ class App extends React.Component<{}, {}> {
         if (this.state.loading) {
             return <h1>Loading</h1>
         }
+
+        console.log(this.state.st.auth.loggedIn)
 
         if (this.state.st.auth.loggedIn) {
             // show authenticated tree

@@ -40,6 +40,9 @@ export class Users {
         username: nameParts[0],
         lastname: nameParts[1]
       }
+    }).then( (user: UserInstance) => {
+      if(user) return user;
+      throw new Error('User does not exist');
     })
   }
 

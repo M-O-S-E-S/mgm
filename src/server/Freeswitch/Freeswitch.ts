@@ -56,6 +56,7 @@ export class Freeswitch {
 
   // Create and return a new voice account
   getAccountInfo(user: string): FreeSwitchUser {
+    console.log('Freeswitch: account request for ' + user);
     this.users = this.users.set(
       user,
       new FreeSwitchUser(user, "1234", this.voiceIP) // BAD!! but its what opensim does, so for now ...
@@ -89,7 +90,7 @@ export class Freeswitch {
     dir.channels = dir.channels.set(name, new FreeSwitchChannel(
       id,
       name,
-      'sip:conf-'+id+'@'+this.voiceIP,
+      'sip:conf-x'+id+'@'+this.voiceIP,
       //channelUri = String.Format("sip:conf-{0}@{1}", "x" + Convert.ToBase64String(Encoding.ASCII.GetBytes(landUUID)), m_freeSwitchRealm);
       parent
     ));
@@ -126,10 +127,13 @@ export class Freeswitch {
 
   // response for SLVOICE viv_signin.php
   signin(body: any) {
-    console.log(body);
     let userId = body.userid;
+    let user: FreeSwitchUser = this.users.get(userId, null);
+    if(!user) return '';
     let pwd = body.pwd;
-    let pos = 0;
+    let pos = this.users.toArray().indexOf(user);
+
+    console.log('Freeswitch sign-in: ' + userId + ':' + pos);
 
     return '<response xsi:schemaLocation="/xsd/signin.xsd">' +
       '<level0>' +
@@ -141,7 +145,7 @@ export class Freeswitch {
       '<auth_token>' + userId + ':' + pos + ':9303959503950::</auth_token>' +
       '<primary>1</primary>' +
       '<account_id>' + pos + '</account_id>' +
-      '<displayname>Johnny User</displayname>' +
+      '<displayname>Avatar Name</displayname>' +
       '<msg>auth successful</msg>' +
       '</body>' +
       '</level0>' +
@@ -173,11 +177,12 @@ export class Freeswitch {
   
 
   directory(body: any): string {
+    console.log('Freeswitch directory service');
     let context = 'default';
     let realm = this.voiceIP;
     let reqDomain = body.domain;
 
-    console.log(body);
+    //console.log(body);
 
     if (reqDomain !== realm) {
       console.log('domain !== realm, returning empty');
@@ -218,6 +223,7 @@ export class Freeswitch {
   }
 
   dialplan(body: any) {
+    console.log('Freeswitch directory service');
     let context = 'default';
     let realm = this.voiceIP;
     let reqContext = body['Hunt-Context'];

@@ -47,13 +47,12 @@ export class EstateView extends React.Component<props, {}> {
     console.log(this.props);
     return (
       <Row>
-        <Col md={1}><Button bsSize='xsmall' onClick={this.onRemoveEstate.bind(this)} >
+        <Col md={3}><Button bsSize='xsmall' onClick={this.onRemoveEstate.bind(this)} >
           <i className="fa fa-trash" aria-hidden="true"></i>
-        </Button></Col>
-        <Col md={3}>{this.props.estate.name}</Col>
+        </Button>  {this.props.estate.name}</Col>
         <Col md={1}>{this.props.regionCount}</Col>
         <Col md={3}>{estateOwner}</Col>
-        <Col md={4}>{managers}</Col>
+        <Col md={5}>{managers}</Col>
       </Row>
     )
   }

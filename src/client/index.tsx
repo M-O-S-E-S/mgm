@@ -40,7 +40,8 @@ let user: User = null;
 if (localStorage.getItem("user")) {
     user = new User(JSON.parse(localStorage.getItem("user")));
     let token = localStorage.getItem("token")
-    store.dispatch(createLoginAction(user));
+    // do not do this here, we are not using tokens yet
+    //store.dispatch(createLoginAction(user));
 }
 store.subscribe(() => {
     let auth = store.getState().auth;
@@ -113,8 +114,6 @@ class App extends React.Component<{}, {}> {
         if (this.state.loading) {
             return <h1>Loading</h1>
         }
-
-        console.log(this.state.st.auth.loggedIn)
 
         if (this.state.st.auth.loggedIn) {
             // show authenticated tree

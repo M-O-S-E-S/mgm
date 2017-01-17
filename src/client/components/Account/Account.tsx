@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Action } from 'redux';
 import { Map } from 'immutable';
+const shallowequal = require('shallowequal');
 
 import { Job } from '.';
 import { User } from '../Users';
@@ -17,16 +18,22 @@ interface props {
     jobs: Map<number, Job>
 }
 
+interface state {
+    showPasswordModal: boolean
+}
+
 export class Account extends React.Component<props, {}> {
-    state: {
-        showPasswordModal: boolean
-    }
+    state: state
 
     constructor(props: props) {
         super(props);
         this.state = {
             showPasswordModal: false
         }
+    }
+
+    shouldComponentUpdate(nextProps: props, nextState: state) {
+        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
     }
 
     handleNewPassword(password: string) {

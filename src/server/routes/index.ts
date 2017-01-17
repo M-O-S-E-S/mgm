@@ -17,36 +17,67 @@ import { RegisterHandler } from './RegisterHandler';
 
 import { Config } from '../config';
 
-export function isUser(req, res, next) {
-  if (req.cookies['uuid']) {
-    return next();
-  }
-  return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
-}
+class Authorizer {
+  private db: PersistanceLayer
 
-export function isAdmin(req, res, next) {
-  if (req.cookies['userLevel'] >= 250) {
-    return next();
+  constructor(database: PersistanceLayer) {
+    this.db = database;
   }
-  return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+
+  isUser() {
+    return this._isUser.bind(this);
+  }
+
+  private _isUser(req, res, next) {
+    if (req.cookies['uuid']) {
+      return next();
+    }
+    return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+  }
+
+  isAdmin(){
+    return this._isAdmin.bind(this);
+  }
+
+  private _isAdmin(req, res, next) {
+    if (req.cookies['userLevel'] >= 250) {
+      return next();
+    }
+    return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+  }
+
+  isNode(){
+    return this._isNode.bind(this);
+  }
+
+  private _isNode(req, res, next) {
+    let remoteIP: string = req.ip.split(':').pop();
+    this.db.Hosts.getByAddress(remoteIP).then( () => {
+      return next();
+    }).catch( () => {
+      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+    }); 
+  }
 }
 
 export function SetupRoutes(conf: Config): express.Router {
   let db = new PersistanceLayer(conf.mgm.db, conf.halcyon.db);
 
+  let gatekeeper = new Authorizer(db);
+
   let router = express.Router();
   let fs = new Freeswitch(conf.mgm.voiceIP);
 
-  router.use('/auth', AuthHandler(db));
-  router.use('/console', ConsoleHandler(db, conf));
-  router.use('/task', TaskHandler(db,conf));
-  router.use('/estate', EstateHandler(db));
-  router.use('/host', HostHandler(db));
-  router.use('/user', UserHandler(db, conf.mgm.templates));
-  router.use('/region', RegionHandler(db, conf));
-  router.use('/group', GroupHandler(db));
+  router.use('/auth', AuthHandler(db, gatekeeper.isUser()));
+  router.use('/console', ConsoleHandler(db, conf, gatekeeper.isUser()));
+  router.use('/task', TaskHandler(db, conf, gatekeeper.isUser(), gatekeeper.isAdmin()));
+  router.use('/estate', EstateHandler(db, gatekeeper.isUser(), gatekeeper.isAdmin()));
+  router.use('/host', HostHandler(db, gatekeeper.isUser(), gatekeeper.isAdmin()));
+  router.use('/user', UserHandler(db, conf.mgm.templates, gatekeeper.isUser(), gatekeeper.isAdmin()));
+  router.use('/region', RegionHandler(db, conf, gatekeeper.isUser(), gatekeeper.isAdmin()));
+  router.use('/group', GroupHandler(db, gatekeeper.isUser(), gatekeeper.isAdmin()));
 
-  router.use('/fsapi', FreeswitchHandler(fs));
+  router.use('/fsapi', FreeswitchHandler(fs, gatekeeper.isNode()));
 
   router.use('/offline', OfflineMessageHandler(db));
   router.use('/register', RegisterHandler(db, conf.mgm.templates));

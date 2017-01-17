@@ -3,7 +3,7 @@ import * as express from 'express';
 
 import { Freeswitch, FreeSwitchDirectory, FreeSwitchUser, FreeSwitchChannel } from './Freeswitch';
 
-export function FreeswitchHandler(fs: Freeswitch): express.Router {
+export function FreeswitchHandler(fs: Freeswitch, isNode): express.Router {
   let router = express.Router();
 
   /*****************************
@@ -51,17 +51,18 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
   });
 
   // giving empty responses to various unknown SLVoice.exe queries
-  router.post('/viv_signout.php', (req, res) => {res.send('')});
-  router.post('/viv_session_fonts.php', (req, res) => {res.send('')});
-  router.post('/viv_template_fonts.php', (req, res) => {res.send('')});
-  router.post('/viv_session_fonts.php', (req, res) => {res.send('')});
-  router.post('/viv_template_fonts.php', (req, res) => {res.send('')});
+  router.post('/viv_signout.php', (req, res) => { console.log('viv_signout'); res.send('')});
+  router.post('/viv_session_fonts.php', (req, res) => { console.log('viv_session_fonts'); res.send('')});
+  router.post('/viv_template_fonts.php', (req, res) => { console.log('viv_template_fonts'); res.send('')});
+  router.post('/viv_buddy.php', (req, res) => { console.log('viv_buddy'); res.send('')});
+  router.post('/viv_watcher.php', (req, res) => { console.log('viv_watcher'); res.send('')});
+
 
   /*****************************
    * Region APIS
    *****************************/
 
-  router.get('/getDirectory', (req, res) => {
+  router.get('/getDirectory', isNode, (req, res) => {
     // directory request from a region
     // TODO: validate that this is a region we are communicating with
     let dir: FreeSwitchDirectory = fs.getDirectory(req.query.channame);
@@ -71,7 +72,7 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
     return res.send('<Result></Result>');
   });
 
-  router.get('/createDirectory', (req, res) => {
+  router.get('/createDirectory', isNode, (req, res) => {
     // region requesting to create a directory
     // directories hold channels, but are channels themselves, ignore that for now
     fs.createDirectory(req.query.dirid, req.query.chan_desc, req.query.chan_type);
@@ -82,7 +83,7 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
     return res.send('<Result></Result>');
   });
 
-  router.get('/getChannel', (req, res) => {
+  router.get('/getChannel', isNode, (req, res) => {
     let chan: FreeSwitchChannel = fs.getChannel(req.query.parent, req.query.name);
     if(chan){
       return res.send(
@@ -97,7 +98,7 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
     return res.send('<Result></Result>');
   });
 
-  router.get('/createChannel', (req, res) => {
+  router.get('/createChannel', isNode, (req, res) => {
     fs.createChannel(req.query.parent, req.query.id, req.query.name)
     let chan: FreeSwitchChannel = fs.getChannel(req.query.parent, req.query.name);
     if(chan){
@@ -113,7 +114,7 @@ export function FreeswitchHandler(fs: Freeswitch): express.Router {
     return res.send('<Result></Result>');
   });
 
-  router.get('/getAccountInfo', (req, res) => {
+  router.get('/getAccountInfo', isNode, (req, res) => {
     let userAccount: FreeSwitchUser = fs.getAccountInfo(req.query.user);
     if(userAccount){
       return res.send(

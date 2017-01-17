@@ -3,9 +3,7 @@ import * as express from 'express';
 import { PersistanceLayer, UserInstance, EstateInstance, ManagerInstance, EstateMapInstance } from '../database';
 import { IEstate, IManager, IEstateMap } from '../../common/messages';
 
-import { isUser, isAdmin } from '.';
-
-export function EstateHandler(db: PersistanceLayer): express.Router {
+export function EstateHandler(db: PersistanceLayer, isUser: any, isAdmin: any): express.Router {
   let router = express.Router();
 
   router.get('/', isUser, (req, res) => {

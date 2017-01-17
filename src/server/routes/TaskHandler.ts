@@ -10,13 +10,11 @@ import { Config } from '../config';
 import { IJob } from '../../common/messages';
 import { SaveOar, LoadOar } from '../util/Region';
 
-import { isUser, isAdmin } from '.';
-
 import fs = require("fs");
 import * as multer from 'multer';
 let jwt = require('jsonwebtoken');
 
-export function TaskHandler(db: PersistanceLayer, conf: Config): express.Router {
+export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin): express.Router {
   let router = express.Router();
 
   let uploadDir = conf.mgm.upload_dir;

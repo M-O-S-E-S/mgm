@@ -3,9 +3,8 @@ import * as express from 'express';
 import { Credential } from '../auth/Credential';
 import { UUIDString } from '../util/UUID';
 import { PersistanceLayer, UserInstance } from '../database';
-import { isUser } from '.';
 
-export function AuthHandler(db: PersistanceLayer): express.Router {
+export function AuthHandler(db: PersistanceLayer, isUser: any): express.Router {
   let router: express.Router = express.Router();
 
   //resume session

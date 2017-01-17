@@ -5,9 +5,7 @@ import { PersistanceLayer, GroupInstance, UserInstance, RoleInstance, Membership
 import { UUIDString } from '../util/UUID';
 import { IGroup, IRole, IMembership } from '../../common/messages';
 
-import { isUser, isAdmin } from '.';
-
-export function GroupHandler(db: PersistanceLayer): express.Router {
+export function GroupHandler(db: PersistanceLayer, isUser: any, isAdmin): express.Router {
   let router = express.Router();
 
   router.get('/', isUser, (req, res) => {

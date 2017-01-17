@@ -1,5 +1,5 @@
 
-import { Set, Map } from 'immutable';
+import { Set, OrderedMap, Map } from 'immutable';
 
 export class FreeSwitchDirectory {
   public id: string
@@ -12,7 +12,7 @@ export class FreeSwitchDirectory {
     this.id = id;
     this.description = description;
     this.type = type;
-    this.channels = Map<string,FreeSwitchChannel>();
+    this.channels = Map<string, FreeSwitchChannel>();
   }
 }
 
@@ -21,7 +21,7 @@ export class FreeSwitchUser {
   public password: string
   public realm: string
 
-  constructor(id: string, password: string, realm: string){
+  constructor(id: string, password: string, realm: string) {
     this.id = id;
     this.password = password;
     this.realm = realm;
@@ -34,7 +34,7 @@ export class FreeSwitchChannel {
   public name: string
   public parent: string
 
-  constructor(id: string, name: string, uri: string, parent: string){
+  constructor(id: string, name: string, uri: string, parent: string) {
     this.id = id;
     this.name = name;
     this.uri = uri;
@@ -45,13 +45,13 @@ export class FreeSwitchChannel {
 export class Freeswitch {
 
   private directories: Map<string, FreeSwitchDirectory>
-  private users: Map<string, FreeSwitchUser>
+  private users: OrderedMap<string, FreeSwitchUser>
   private voiceIP: string
 
   constructor(voiceIP: string) {
     this.voiceIP = voiceIP;
     this.directories = Map<string, FreeSwitchDirectory>();
-    this.users = Map<string, FreeSwitchUser>();
+    this.users = OrderedMap<string, FreeSwitchUser>();
   }
 
   // Create and return a new voice account
@@ -59,7 +59,7 @@ export class Freeswitch {
     console.log('Freeswitch: account request for ' + user);
     this.users = this.users.set(
       user,
-      new FreeSwitchUser(user, "1234", this.voiceIP) // BAD!! but its what opensim does, so for now ...
+      new FreeSwitchUser(user, Math.random().toString(36).slice(2), this.voiceIP)
     )
     return this.users.get(user, null);
   }
@@ -79,18 +79,18 @@ export class Freeswitch {
 
   getChannel(parent: string, name: string): FreeSwitchChannel {
     let dir = this.directories.get(parent, null);
-    if(!dir) return null;
+    if (!dir) return null;
     let chan = dir.channels.get(name, null);
     return chan;
   }
 
   createChannel(parent: string, id: string, name: string) {
     let dir = this.directories.get(parent, null);
-    if(!dir) return;
+    if (!dir) return;
     dir.channels = dir.channels.set(name, new FreeSwitchChannel(
       id,
       name,
-      'sip:conf-x'+id+'@'+this.voiceIP,
+      'sip:conf-x' + id + '@' + this.voiceIP,
       //channelUri = String.Format("sip:conf-{0}@{1}", "x" + Convert.ToBase64String(Encoding.ASCII.GetBytes(landUUID)), m_freeSwitchRealm);
       parent
     ));
@@ -129,11 +129,18 @@ export class Freeswitch {
   signin(body: any) {
     let userId = body.userid;
     let user: FreeSwitchUser = this.users.get(userId, null);
-    if(!user) return '';
+    if (!user) {
+      console.log('FreeSwitch login: user not found');
+      return '';
+    }
     let pwd = body.pwd;
+    if (pwd !== user.password) {
+      console.log('FreeSwitch login: invalid password');
+      return '';
+    }
     let pos = this.users.toArray().indexOf(user);
 
-    console.log('Freeswitch sign-in: ' + userId + ':' + pos);
+    console.log('Freeswitch sign-in: ' + userId + ':' + pwd + '->' + pos);
 
     return '<response xsi:schemaLocation="/xsd/signin.xsd">' +
       '<level0>' +
@@ -174,7 +181,7 @@ export class Freeswitch {
     return xml;
   }
 
-  
+
 
   directory(body: any): string {
     console.log('Freeswitch directory service');
@@ -185,7 +192,6 @@ export class Freeswitch {
     //console.log(body);
 
     if (reqDomain !== realm) {
-      console.log('domain !== realm, returning empty');
       return '';
     }
 
@@ -223,7 +229,7 @@ export class Freeswitch {
   }
 
   dialplan(body: any) {
-    console.log('Freeswitch directory service');
+    console.log('Freeswitch dialplan service');
     let context = 'default';
     let realm = this.voiceIP;
     let reqContext = body['Hunt-Context'];
@@ -253,47 +259,47 @@ export class Freeswitch {
   }
 
   private register(context: string, realm: string, params: any): string {
-    let password = '1234';
-    let domain = params['domain'];
-    let user = params['user'];
+    //let domain = params['domain'];
+    let user = this.users.get(params['user'], null);
+    if (!user) return '';
     return '<?xml version="1.0" encoding="utf-8"?>\r\n' +
       '<document type="freeswitch/xml">\r\n' +
       '<section name="directory" description="User Directory">\r\n' +
-      '<domain name="' + domain + '">\r\n' +
-      '<user id="' + user + '">\r\n' +
+      '<domain name="' + user.realm + '">\r\n' +
+      '<user id="' + user.id + '">\r\n' +
       '<params>\r\n' +
-      '<param name="password" value="' + password + '" />\r\n' +
-      '<param name="dial-string" value="{sip_contact_user=' + user + '}{presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}"/>\r\n' +
+      '<param name="password" value="' + user.password + '" />\r\n' +
+      '<param name="dial-string" value="{sip_contact_user=' + user.id + '}{presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}"/>\r\n' +
       '</params><variables>\r\n' +
       '<variable name="user_context" value="' + context + '" />\r\n' +
-      '<variable name="presence_id" value="' + user + '@' + domain + '"/>\r\n' +
+      '<variable name="presence_id" value="' + user.id + '@' + user.realm + '"/>\r\n' +
       '</variables></user></domain></section></document>\r\n';
   }
 
   private invite(context: string, realm: string, params: any): string {
-    let password = '1234';
-    let domain = params['domain'];
-    let user = params['user'];
+    //let domain = params['domain'];
+    let user = this.users.get(params['user'], null);
+    if (!user) return '';
     let sipRequestUser = params['sip_request_user'];
 
     return '<?xml version="1.0" encoding="utf-8"?>\r\n' +
       '<document type="freeswitch/xml">\r\n' +
       '<section name="directory" description="User Directory">\r\n' +
-      '<domain name="' + domain + '">\r\n' +
-      '<user id="' + user + '">\r\n' +
+      '<domain name="' + user.realm + '">\r\n' +
+      '<user id="' + user.id + '">\r\n' +
       '<params>\r\n' +
-      '<param name="password" value="' + password + '" />\r\n' +
-      '<param name="dial-string" value="{sip_contact_user=' + user + '}{presence_id=$' + user + '@${dialed_domain}}${sofia_contact($' + user + '@${dialed_domain})}"/>\r\n' +
+      '<param name="password" value="' + user.password + '" />\r\n' +
+      '<param name="dial-string" value="{sip_contact_user=' + user.id + '}{presence_id=$' + user.id + '@${dialed_domain}}${sofia_contact($' + user.id + '@${dialed_domain})}"/>\r\n' +
       '</params>\r\n' +
       '<variables>\r\n' +
       '<variable name="user_context" value="' + context + '" />\r\n' +
-      '<variable name="presence_id" value="' + user + '@$${domain}"/>\r\n' +
+      '<variable name="presence_id" value="' + user.id + '@$${domain}"/>\r\n' +
       '</variables>\r\n' +
       '</user>\r\n' +
       '<user id="' + sipRequestUser + '">\r\n' +
       '<params>\r\n' +
-      '<param name="password" value="' + password + '" />\r\n' +
-      '<param name="dial-string" value="{sip_contact_user=' + user + '}{presence_id=$' + sipRequestUser + '@${dialed_domain}}${sofia_contact($' + sipRequestUser + '@${dialed_domain})}"/>\r\n' +
+      '<param name="password" value="' + user.password + '" />\r\n' +
+      '<param name="dial-string" value="{sip_contact_user=' + user.id + '}{presence_id=$' + sipRequestUser + '@${dialed_domain}}${sofia_contact($' + sipRequestUser + '@${dialed_domain})}"/>\r\n' +
       '</params>\r\n' +
       '<variables>\r\n' +
       '<variable name="user_context" value="$context" />\r\n' +
@@ -302,19 +308,20 @@ export class Freeswitch {
   }
 
   private locateUser(realm: string, params: any): string {
-    let domain = params['domain'];
-    let user = params['user'];
+    //let domain = params['domain'];
+    let user = this.users.get(params['user'], null);
+    if (!user) return '';
     return '<?xml version="1.0" encoding="utf-8"?>' +
       '<document type="freeswitch/xml">' +
       '<section name="directory" description="User Directory">' +
-      '<domain name="' + domain + '">' +
+      '<domain name="' + user.realm + '">' +
       '<params>' +
       '<param name="dial-string" value="{sip_contact_user=${dialed_user}}{presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}"/>' +
       '</params>' +
-      '<user id="' + user + '">' +
+      '<user id="' + user.id + '">' +
       '<variables>' +
       '<variable name="default_gateway" value="$${default_provider}"/>' +
-      '<variable name="presence_id" value="' + user + '@$${domain}"/>' +
+      '<variable name="presence_id" value="' + user.id + '@$${domain}"/>' +
       '</variables>' +
       '</user></domain></section></document>';
   }

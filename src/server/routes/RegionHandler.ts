@@ -14,9 +14,7 @@ export interface ConsoleSettings {
   pass: string
 }
 
-import { isUser, isAdmin } from '.';
-
-export function RegionHandler(db: PersistanceLayer, config: Config): express.Router {
+export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAdmin): express.Router {
   let router = express.Router();
 
   let logger = new RegionLogs(config.mgm.log_dir);

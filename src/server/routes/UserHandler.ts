@@ -7,9 +7,7 @@ import { EmailMgr } from '../util/Email';
 import { UUIDString } from '../util/UUID';
 import { IUser, IPendingUser } from '../../common/messages';
 
-import { isUser, isAdmin } from '.';
-
-export function UserHandler(db: PersistanceLayer, templates: { [key: string]: string }): express.Router {
+export function UserHandler(db: PersistanceLayer, templates: { [key: string]: string }, isUser, isAdmin): express.Router {
   let router = express.Router();
 
   router.get('/', isUser, (req, res) => {

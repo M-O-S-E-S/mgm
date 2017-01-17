@@ -7,9 +7,7 @@ import { Config } from '../config';
 import { RegionLogs } from '../util/regionLogs';
 import { ConsoleCommand } from '../util/Console';
 
-import { isUser } from '.';
-
-export function ConsoleHandler(db: PersistanceLayer, config: Config): express.Router {
+export function ConsoleHandler(db: PersistanceLayer, config: Config, isUser: any): express.Router {
   let router = express.Router();
 
   let logger = new RegionLogs(config.mgm.log_dir);

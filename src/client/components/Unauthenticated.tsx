@@ -42,7 +42,7 @@ export class Unauthenticated extends React.Component<unauthenticatedProps, {}> {
                         </NavItem>
                         <NavItem
                             active={this.props.route === "/register"}
-                            onClick={this.handleNav.bind(this, "register") }>Register
+                            onClick={this.handleNav.bind(this, "/register") }>Register
                         </NavItem>
                     </Nav>
                 </Navbar.Collapse>

@@ -170,7 +170,6 @@ export class Password extends React.Component<{}, {}> {
                     {setErrorMsg}
                     {setSuccessMsg}
                 </Grid>
-
             </div>
         )
     }

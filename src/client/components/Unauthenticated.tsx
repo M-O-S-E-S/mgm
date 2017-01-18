@@ -8,6 +8,7 @@ import { Navbar, Nav, NavItem } from 'react-bootstrap';
 import { Register } from "./unauthenticated/Register";
 import { Password } from "./unauthenticated/Password";
 import { Login } from "./unauthenticated/Login";
+import { Footer } from './Footer';
 
 interface unauthenticatedProps {
     dispatch: (a: Action) => void,
@@ -55,6 +56,7 @@ export class Unauthenticated extends React.Component<unauthenticatedProps, {}> {
                     <div>
                         {navbar}
                         <Password />
+                        <Footer />
                     </div>
                 )
             case '/register':
@@ -62,6 +64,7 @@ export class Unauthenticated extends React.Component<unauthenticatedProps, {}> {
                     <div>
                         {navbar}
                         <Register />
+                        <Footer />
                     </div>
                 )
             default:
@@ -69,6 +72,7 @@ export class Unauthenticated extends React.Component<unauthenticatedProps, {}> {
                     <div>
                         {navbar}
                         <Login dispatch={this.props.dispatch} errorMsg={this.props.errorMsg}/>
+                        <Footer />
                     </div>
                 )
         }

@@ -88,7 +88,7 @@ export class EmailMgr {
   sendAuthResetToken(email: string, token: string): Promise<void> {
     return this.sendMail(email,
       this.gridName + ' Password Recovery',
-      'Your password reset request has been processed.  Please visit ' + this.uri + ', and using the forgot password button, complete the second form using the following token:<br>' + token
+      'Your password reset request has been processed.  Please visit ' + this.uri + '/password, and using the forgot password button, complete the second form using the following token:<br><br>' + token
     );
   }
 

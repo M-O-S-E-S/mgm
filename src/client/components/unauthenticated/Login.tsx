@@ -49,7 +49,7 @@ export class Login extends React.Component<loginProps, {}> {
                     .set('godLevel', res.accessLevel)
                     .set('email', res.email)
                 this.props.dispatch(createLoginAction(u));
-                if (window.location.pathname == "" || window.location.pathname == "/")
+                if (window.location.pathname == "" || window.location.pathname == "/" || window.location.pathname == '/login')
                     this.props.dispatch(createNavigateToAction('/account'));
             }).catch((err: Error) => {
                 console.log('auth failed');

@@ -143,31 +143,39 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
   });
 
   router.post('/resetCode', (req, res) => {
-    let email = req.body.email;
+    let email = req.body.email || '';
+
+    if (email === '') {
+      return res.send(JSON.stringify({ Success: false, Message: 'Email cannot be blank' }));
+    }
 
     db.Users.getByEmail(email).then((u: UserInstance) => {
+      if (!u || email !== u.email) throw new Error('User does not exist');
       console.log('User ' + u.UUID + ' requesting password reset token');
-      return new Promise<string>((resolve, reject) => {
-        jwt.sign({ email: email }, conf.mgm.tokenKey, {
-          expiresIn: '2d'
-        }, (err, token) => {
-          if (err) return reject(err);
-          resolve(token);
-        })
-      })
-    }).then((token: string) => {
-      return EmailMgr.instance().sendAuthResetToken(email, token);
-    }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
-    }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      return db.Jobs.create('ResetToken', u.UUID, '').then((j: JobInstance) => {
+        console.log('Password reset job created for ' + u.UUID + ' with ID ' + j.id);
+        return new Promise<string>((resolve, reject) => {
+          jwt.sign({ email: email }, conf.mgm.tokenKey, {
+            expiresIn: '2d' 
+          }, (err, token) => {
+            if (err) return reject(err);
+            resolve(token);
+          });
+        });
+      }).then((token: string) => {
+        return EmailMgr.instance().sendAuthResetToken(email, token);
+      }).then(() => {
+        res.send(JSON.stringify({ Success: true }));
+      }).catch((err: Error) => {
+        res.send(JSON.stringify({ Success: false, Message: err.message }));
+      });
     });
   });
 
   router.post('/resetPassword', (req, res) => {
-    let name: string = req.body.name;
-    let token = req.body.token;
-    let password = req.body.password;
+    let name: string = req.body.name || '';
+    let token = req.body.token || '';
+    let password = req.body.password || '';
 
     if (!password || password === '') {
       return res.send(JSON.stringify({ Success: false, Message: 'Blank passwords not permitted' }));

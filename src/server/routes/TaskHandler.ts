@@ -152,11 +152,11 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     db.Users.getByEmail(email).then((u: UserInstance) => {
       if (!u || email !== u.email) throw new Error('User does not exist');
       console.log('User ' + u.UUID + ' requesting password reset token');
-      return db.Jobs.create('ResetToken', u.UUID, '').then((j: JobInstance) => {
+      return db.Jobs.create('ResetToken', u.UUID, 'Token Requested').then((j: JobInstance) => {
         console.log('Password reset job created for ' + u.UUID + ' with ID ' + j.id);
         return new Promise<string>((resolve, reject) => {
           jwt.sign({ email: email }, conf.mgm.tokenKey, {
-            expiresIn: '2d' 
+            expiresIn: '2d'
           }, (err, token) => {
             if (err) return reject(err);
             resolve(token);
@@ -181,6 +181,8 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
       return res.send(JSON.stringify({ Success: false, Message: 'Blank passwords not permitted' }));
     }
 
+    let id = '';
+
     new Promise<string>((resolve, reject) => {
       jwt.verify(token, conf.mgm.tokenKey, (err, decoded) => {
         if (err) return reject(new Error('Invalid Token'));
@@ -189,11 +191,14 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     }).then((email: string) => {
       return db.Users.getByEmail(email);
     }).then((u: UserInstance) => {
+      id = u.UUID;
       if (u.username.toLowerCase() + ' ' + u.lastname.toLowerCase() === name.toLowerCase()) {
         u.passwordHash = Credential.fromPlaintext(password).hash;
-        return u.save;
+        return u.save();
       }
       throw new Error('Invalid submission');
+    }).then(() => {
+      return db.Jobs.create('ResetToken', id, 'Password Reset')
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
     }).catch((err: Error) => {

@@ -8,7 +8,7 @@ import { User } from '../Users';
 
 import { post } from '../../util/network';
 
-import { Form, FormGroup, FormControl, ControlLabel, Button, Alert } from "react-bootstrap"
+import { Grid, Row, Col, Form, FormGroup, FormControl, ControlLabel, Button, Alert } from "react-bootstrap"
 
 import { LoginResponse } from '../../../common/messages';
 
@@ -49,31 +49,42 @@ export class Login extends React.Component<loginProps, {}> {
                     .set('godLevel', res.accessLevel)
                     .set('email', res.email)
                 this.props.dispatch(createLoginAction(u));
-                if(window.location.pathname == "" || window.location.pathname == "/")
+                if (window.location.pathname == "" || window.location.pathname == "/")
                     this.props.dispatch(createNavigateToAction('/account'));
             }).catch((err: Error) => {
                 console.log('auth failed');
                 this.props.dispatch(createSetAuthErrorMessageAction(err.message));
-            })
+            });
     }
 
     render() {
         let errorMsg = <div></div>
         if (this.props.errorMsg) {
-            errorMsg = <Alert bsStyle="danger">{this.props.errorMsg}</Alert>
+            errorMsg = <Row><Alert bsStyle="danger">{this.props.errorMsg}</Alert></Row>
         }
         return (
             <div>
-                <Form inline={true} onSubmit={this.handleLogin.bind(this)}>
-                    <FormGroup>
-                        <ControlLabel>Username: </ControlLabel>
-                        <FormControl placeholder="username" onChange={this.onUsername.bind(this)} />
-                        <ControlLabel>Password: </ControlLabel>
-                        <FormControl type="password" placeholder="password" onChange={this.onPassword.bind(this)} />
-                        <Button type="submit">Login</Button>
-                        {errorMsg}
-                    </FormGroup>
-                </Form>
+                <Grid>
+                    <Row>
+                        <Form inline={true} onSubmit={this.handleLogin.bind(this)}>
+                            <Col md={4}>
+                                <ControlLabel>Username: </ControlLabel>
+                                <FormControl placeholder="username" onChange={this.onUsername.bind(this)} />
+                            </Col>
+                            <Col md={4}>
+                                <FormGroup>
+                                    <ControlLabel>Password: </ControlLabel>
+                                    <FormControl type="password" placeholder="password" onChange={this.onPassword.bind(this)} />
+                                </FormGroup>
+                            </Col>
+                            <Col md={4}>
+                                <Button type="submit">Login</Button>
+                            </Col>
+                        </Form>
+
+                    </Row>
+                    {errorMsg}
+                </Grid>
                 <Splash />
             </div>
         )

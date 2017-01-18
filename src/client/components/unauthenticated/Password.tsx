@@ -11,6 +11,7 @@ export class Password extends React.Component<{}, {}> {
         email: string
 
         setError: string
+        setSuccess: boolean
         name: string
         token: string
         password: string
@@ -25,6 +26,7 @@ export class Password extends React.Component<{}, {}> {
             email: '',
 
             setError: '',
+            setSuccess: false,
             name: '',
             token: '',
             password: '',
@@ -42,7 +44,6 @@ export class Password extends React.Component<{}, {}> {
         this.setState({ email: e.target.value })
     }
     requestPasswordReset(): Promise<void> {
-        console.log('request password reset goes here');
         this.setState({
             tokenError: '',
             tokenSuccess: false
@@ -74,9 +75,30 @@ export class Password extends React.Component<{}, {}> {
         this.setState({ passwordConfirm: e.target.value })
     }
     resetPassword() {
-        console.log('reset password goes here');
-        // /api/task/resetCode
-        return Promise.resolve();
+        if (this.state.password !== this.state.passwordConfirm) {
+            return this.setState({
+                setError: 'Passwords do not match'
+            });
+        }
+        this.setState({
+            setError: '',
+            setSuccess: false
+        });
+        return post('/api/task/resetPassword', {
+            name: this.state.name,
+            token: this.state.token,
+            password: this.state.password
+        })
+            .then(() => {
+                this.setState({
+                    setSuccess: true
+                })
+            }).catch((err: Error) => {
+                console.log('get token failed');
+                this.setState({
+                    setError: err.message
+                })
+            });
     }
 
     render() {
@@ -89,9 +111,13 @@ export class Password extends React.Component<{}, {}> {
             tokenSuccessMsg = <Row><Alert bsStyle="success">Token requested successfully.</Alert></Row>
         }
 
-        let setMsg = <div></div>
+        let setErrorMsg = <div></div>
         if (this.state.setError) {
-            setMsg = <Row><Alert bsStyle="danger">{this.state.setError}</Alert></Row>
+            setErrorMsg = <Row><Alert bsStyle="danger">{this.state.setError}</Alert></Row>
+        }
+        let setSuccessMsg = <div></div>
+        if (this.state.setSuccess) {
+            setSuccessMsg = <Row><Alert bsStyle="success">Password updated successfully.</Alert></Row>
         }
 
         return (
@@ -124,23 +150,25 @@ export class Password extends React.Component<{}, {}> {
                         <Form onSubmit={this.eatForm.bind(this)}>
                             <FormGroup>
                                 <ControlLabel>Avatar Name: </ControlLabel>
-                                <FormControl onChange={this.onEmail.bind(this)} />
+                                <FormControl onChange={this.onName.bind(this)} />
                             </FormGroup>
                             <FormGroup>
                                 <ControlLabel>Token: </ControlLabel>
-                                <FormControl onChange={this.onEmail.bind(this)} />
+                                <FormControl onChange={this.onToken.bind(this)} />
                             </FormGroup>
                             <FormGroup>
                                 <ControlLabel>New Password: </ControlLabel>
-                                <FormControl onChange={this.onEmail.bind(this)} />
+                                <FormControl onChange={this.onPassword.bind(this)} type="password"/>
                             </FormGroup>
                             <FormGroup>
                                 <ControlLabel>New Password again: </ControlLabel>
-                                <FormControl onChange={this.onEmail.bind(this)} />
+                                <FormControl onChange={this.onPasswordConfirm.bind(this)} type="password"/>
                             </FormGroup>
                             <BusyButton type="submit" onClick={this.resetPassword.bind(this)}>Update Password</BusyButton>
                         </Form>
                     </Row>
+                    {setErrorMsg}
+                    {setSuccessMsg}
                 </Grid>
 
             </div>

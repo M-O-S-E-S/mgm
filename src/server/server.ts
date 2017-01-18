@@ -9,6 +9,10 @@ import { SetupRoutes } from './routes';
 
 var conf = require('../../settings.js');
 
+//initialize singletons
+import { EmailMgr } from './util/Email';
+new EmailMgr(conf.mgm.mail);
+
 let app = express();
 
 var cookieParser = require('cookie-parser')

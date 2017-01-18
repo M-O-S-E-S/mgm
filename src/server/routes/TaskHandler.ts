@@ -31,7 +31,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     db.Jobs.getFor(req.cookies['uuid']).then((jobs: JobInstance[]) => {
       res.send(JSON.stringify({
         Success: true,
-        Tasks: jobs.map((j: JobInstance) => {
+        Jobs: jobs.map((j: JobInstance) => {
           let ij: IJob = {
             id: j.id,
             timestamp: j.timestamp,

@@ -3,6 +3,7 @@ import { StateModel } from '../redux/model';
 import { get } from './network';
 
 import {
+  IJob,
   IRegion,
   IEstate, IManager, IEstateMap,
   IGroup, IMembership, IRole,
@@ -20,10 +21,15 @@ import {
 import { Host, UpsertHostAction } from '../components/Hosts';
 import { User, UpsertUserBulkAction } from '../components/Users';
 import { PendingUser, UpsertPendingUserAction } from '../components/PendingUsers';
+import { Job, UpsertJobBulkAction } from '../components/Account';
 
 interface NetworkResult {
   Success: Boolean
   Message?: string
+}
+
+interface jobResult extends NetworkResult {
+  Jobs: IJob[]
 }
 interface regionResult extends NetworkResult {
   Regions: IRegion[]
@@ -58,6 +64,7 @@ export class Synchroniser {
   }
 
   sync() {
+    this.jobs();
     this.regions();
     this.estates();
     this.groups();
@@ -65,7 +72,14 @@ export class Synchroniser {
     this.users();
   }
 
-
+  private jobs() {
+    get('/api/task').then(( res: jobResult) => {
+      if(!res.Success) return;
+      this.store.dispatch(UpsertJobBulkAction(res.Jobs.map( (j: IJob) => {
+        return new Job(j);
+      })))
+    });
+  }
 
   private regions() {
     get('/api/region').then((res: regionResult) => {

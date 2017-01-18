@@ -180,7 +180,7 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
                             users={this.props.state.pendingUsers} />
                     </div>
                 )
-            default:
+            case '/account':
                 return (
                     <div>
                         {navbar}
@@ -190,6 +190,8 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
                             jobs={this.props.state.get('jobs')} />
                     </div>
                 )
+            default:
+                return <h3>Whoops: please navigate using the navbar above</h3>
         }
     }
 }

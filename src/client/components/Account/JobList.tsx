@@ -27,7 +27,7 @@ export class JobList extends React.Component<props, {}> {
     return (
       <Grid>
         <Row>
-          <Col md={1}>Task</Col>
+          <Col md={1}>Job ID</Col>
           <Col md={2}>Timestamp</Col>
           <Col md={2}>Description</Col>
           <Col md={7}>Status</Col>

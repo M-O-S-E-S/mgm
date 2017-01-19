@@ -12,7 +12,7 @@ import { ManageModal } from './Manage';
 import { ContentModal } from './Content';
 import { LogModal } from './Log';
 
-import { Grid, Row, Col } from 'react-bootstrap';
+import { Grid, Row, Col, Button, FormControl } from 'react-bootstrap';
 
 interface props {
     dispatch: (a: Action) => void,
@@ -27,6 +27,8 @@ interface state {
     showContent: boolean
     showLog: boolean
     selectedRegion: Region
+    regionSearch: string
+    estateSearch: string
 }
 
 export class RegionList extends React.Component<props, {}> {
@@ -38,12 +40,26 @@ export class RegionList extends React.Component<props, {}> {
             showManage: false,
             showContent: false,
             showLog: false,
-            selectedRegion: null
+            selectedRegion: null,
+            regionSearch: '',
+            estateSearch: ''
         }
     }
 
     shouldComponentUpdate(nextProps: props, nextState: state) {
         return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
+    }
+
+    onSearch(e: { target: { value: string } }) {
+        this.setState({
+            regionSearch: e.target.value
+        })
+    }
+
+    onEstate(e: { target: { value: string } }) {
+        this.setState({
+            estateSearch: e.target.value
+        })
     }
 
     onManageRegion(r: Region) {
@@ -88,31 +104,65 @@ export class RegionList extends React.Component<props, {}> {
     }
 
     render() {
-        let estates = this.props.estates.toArray().sort((a: Estate, b: Estate) => { return a.name.localeCompare(b.name) }).map((e: Estate) => {
-            let regions = this.props.regions.toArray().map((r: Region) => {
-                let estateId: number = this.props.estateMap.get(r.uuid);
-                if (estateId === e.id) {
-                    return <RegionView
-                        key={r.uuid}
-                        region={r}
-                        onManage={this.onManageRegion.bind(this, r)}
-                        onContent={this.onManageRegionContent.bind(this, r)}
-                        onLog={this.onDisplayLog.bind(this, r)} />
+        let estates = this.props.estates.toArray()
+            .filter((e: Estate) => { 
+                return this.state.estateSearch === '' || e.name === this.state.estateSearch;
+            })
+            .sort((a: Estate, b: Estate) => { return a.name.localeCompare(b.name) })
+            .map((e: Estate) => {
+                let regions = this.props.regions.toArray()
+                    // we only want regions for the current estate
+                    .filter((r: Region) => {
+                        let estateId: number = this.props.estateMap.get(r.uuid);
+                        return estateId === e.id;
+                    }, [])
+                    // we only want regions that match the current text search
+                    .filter((r: Region) => {
+                        return r.name.toLowerCase().indexOf(this.state.regionSearch.toLowerCase()) !== -1;
+                    }, [])
+                    // sort remaining regions by name
+                    .sort((a: Region, b: Region) => { return a.name.localeCompare(b.name) })
+                    //convert Region class instances to JSX
+                    .map((r: Region) => {
+                        return <RegionView
+                            key={r.uuid}
+                            region={r}
+                            onManage={this.onManageRegion.bind(this, r)}
+                            onContent={this.onManageRegionContent.bind(this, r)}
+                            onLog={this.onDisplayLog.bind(this, r)} />
+                    })
+                console.log(regions.length);
+                if (regions.length > 0) {
+                    return (
+                        <div key={e.id}>
+                            <h1>{e.name}</h1>
+                            {regions}
+                        </div>
+                    )
                 } else {
                     return null;
                 }
+            });
 
-            })
-            return (
-                <div key={e.id}>
-                    <h1>{e.name}</h1>
-                    {regions}
-                </div>
-            )
-        })
+        let estateSelect = this.props.estates.toList().sort((a, b) => {
+            return a.name.localeCompare(b.name);
+        }).map((e: Estate) => {
+            return <option key={e.id} value={e.name}>{e.name}</option>
+        });
 
         return (
             <Grid>
+                <Row>
+                    <Col md={2}><h3>Filter by:</h3></Col>
+                    <Col md={4}>Region Name <FormControl type="search" onChange={this.onSearch.bind(this)} /></Col>
+                    <Col md={4}>Estate
+                        <FormControl componentClass="select" placeholder="" onChange={this.onEstate.bind(this)}>
+                            <option value=''>all</option>
+                            {estateSelect}
+                        </FormControl>
+                    </Col>
+                    <Col md={2}><Button>Add Region</Button></Col>
+                </Row>
                 {estates}
                 {this.state.showManage ? <ManageModal
                     dismiss={this.dismissManage.bind(this)}

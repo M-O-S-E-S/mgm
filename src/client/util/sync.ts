@@ -12,7 +12,7 @@ import {
 } from '../../common/messages';
 
 import { Region, UpsertRegionBulkAction } from '../components/Regions';
-import { Estate, UpsertEstateBulkAction, UpsertManagerAction, AssignRegionEstateAction } from '../components/Estates';
+import { Estate, UpsertEstateBulkAction, UpsertManagerBulkAction, AssignRegionEstateAction } from '../components/Estates';
 import {
   Group, UpsertGroupAction,
   UpsertMemberAction,
@@ -98,9 +98,8 @@ export class Synchroniser {
           return new Estate(r);
         })
       ));
-      res.Managers.map((m: IManager) => {
-          this.store.dispatch(UpsertManagerAction(m));
-        })
+      this.store.dispatch(UpsertManagerBulkAction(res.Managers));
+      
       res.Map.map((m: IEstateMap) => {
           this.store.dispatch(AssignRegionEstateAction(m));
         })

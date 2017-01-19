@@ -3,26 +3,50 @@ import { Action } from 'redux';
 import { ESTATE_DELETED, EstateDeletedAction } from './EstatesRedux';
 import { IManager } from '../../../common/messages';
 
-const ADD_MANAGER = "ESTATES_ADD_MANAGER";
+const UPSERT_MANAGER = "ESTATES_UPSERT_MANAGER";
+const UPSERT_MANAGER_BULK = "ESTATES_UPSERT_MANAGER_BULK";
 
 interface ManagerAction extends Action {
   manager: IManager
 }
 
-export const UpsertManagerAction = function(m: IManager): Action {
+interface ManagerBulkAction extends Action {
+  managers: IManager[]
+}
+
+export const UpsertManagerAction = function (m: IManager): Action {
   let act: ManagerAction = {
-    type: ADD_MANAGER,
+    type: UPSERT_MANAGER,
     manager: m
   }
   return act;
 }
 
-export const ManagersReducer = function(state = Map<number, Set<string>>(), action: Action): Map<number, Set<string>> {
+export const UpsertManagerBulkAction = function (m: IManager[]): Action {
+  let act: ManagerBulkAction = {
+    type: UPSERT_MANAGER_BULK,
+    managers: m
+  }
+  return act;
+}
+
+function upsertManager(state = Map<number, Set<string>>(), m: IManager): Map<number, Set<string>> {
+  let managers = state.get(m.estate, Set<string>());
+  managers = managers.add(m.uuid);
+  return state.set(m.estate, managers);
+}
+
+export const ManagersReducer = function (state = Map<number, Set<string>>(), action: Action): Map<number, Set<string>> {
   switch (action.type) {
-    case ADD_MANAGER:
+    case UPSERT_MANAGER:
       let ma = <ManagerAction>action;
-      let managers = state.get(ma.manager.estate) || Set<string>()
-      return state.set(ma.manager.estate, managers.add(ma.manager.uuid))
+      return upsertManager(state, ma.manager);
+    case UPSERT_MANAGER_BULK:
+      let eb = <ManagerBulkAction>action;
+      eb.managers.map((e: IManager) => {
+        state = upsertManager(state, e);
+      });
+      return state;
     case ESTATE_DELETED:
       let da = <EstateDeletedAction>action;
       return state.delete(da.id);

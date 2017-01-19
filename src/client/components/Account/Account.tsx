@@ -10,7 +10,7 @@ import { post } from '../../util/network';
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 
 import { JobList } from './JobList';
-import { SetPasswordModal } from '../SetPassword';
+import { SetPasswordModal } from './SetPasswordModal';
 
 interface props {
     dispatch: (a: Action) => void,
@@ -36,15 +36,12 @@ export class Account extends React.Component<props, {}> {
         return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
     }
 
-    handleNewPassword(password: string) {
-        post('/api/auth/changePassword', { password: password }).then(() => {
+    handleNewPassword(password: string): Promise<void> {
+        return post('/api/auth/changePassword', { password: password }).then(() => {
             this.setState({
                 showPasswordModal: false
             })
-            alertify.success('password changed successfully');
-        }).catch((err:Error) => {
-            alertify.error('Password change failed: ' + err.message);
-        })
+        });
     }
 
     showNewPassword() {
@@ -60,15 +57,6 @@ export class Account extends React.Component<props, {}> {
     }
 
     render() {
-        let passwordReset = <div><Button onClick={this.showNewPassword.bind(this)}>Set Password</Button></div>
-        if (this.state.showPasswordModal) {
-            passwordReset = (
-                <div>
-                    <Button onClick={this.showNewPassword.bind(this)} disabled>Set Password</Button>
-                    <SetPasswordModal submit={this.handleNewPassword.bind(this)} cancel={this.cancelNewPassword.bind(this)} />
-                </div>
-            )
-        }
         return (
             <Grid>
                 <Row>
@@ -84,7 +72,8 @@ export class Account extends React.Component<props, {}> {
                     <Col md={6}>{this.props.user.email}</Col>
                 </Row>
                 <hr />
-                {passwordReset}
+                <Button onClick={this.showNewPassword.bind(this)} disabled={this.state.showPasswordModal}>Set Password</Button>
+                <SetPasswordModal show={this.state.showPasswordModal} submit={this.handleNewPassword.bind(this)} cancel={this.cancelNewPassword.bind(this)} />
                 <hr />
                 <JobList dispatch={this.props.dispatch} jobs={this.props.jobs} />
             </Grid>

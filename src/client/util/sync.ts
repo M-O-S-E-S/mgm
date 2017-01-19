@@ -14,9 +14,9 @@ import {
 import { Region, UpsertRegionBulkAction } from '../components/Regions';
 import { Estate, UpsertEstateBulkAction, UpsertManagerBulkAction, AssignRegionEstatBulkAction } from '../components/Estates';
 import {
-  Group, UpsertGroupAction,
-  UpsertMemberAction,
-  Role, UpsertRoleAction
+  Group, UpsertGroupBulkAction,
+  UpsertMemberBulkAction,
+  Role, UpsertRoleBulkAction
 } from '../components/Groups';
 import { Host, UpsertHostBulkAction } from '../components/Hosts';
 import { User, UpsertUserBulkAction } from '../components/Users';
@@ -106,41 +106,43 @@ export class Synchroniser {
   private groups() {
     get('/api/group').then((res: groupResult) => {
       if (!res.Success) return;
-      res.Groups.map((r: IGroup) => {
-        this.store.dispatch(UpsertGroupAction(new Group(r)));
-      });
-      res.Members.map((m: IMembership) => {
-        this.store.dispatch(UpsertMemberAction(m));
-      });
-      res.Roles.map((r: IRole) => {
-        this.store.dispatch(UpsertRoleAction(new Role(r)));
-      });
-    });
-  }
+      this.store.dispatch(UpsertGroupBulkAction(
+        res.Groups.map((r: IGroup) => {
+          return (new Group(r));
+        })
+      ));
+      this.store.dispatch(UpsertMemberBulkAction(res.Members));
+      this.store.dispatch(UpsertRoleBulkAction(
+        res.Roles.map((r: IRole) => {
+          return new Role(r);
+        })
+      ));
+  });
+}
 
   private hosts() {
-    get('/api/host').then((res: hostResult) => {
-      if (!res.Success) return;
-      this.store.dispatch(UpsertHostBulkAction(
-        res.Hosts.map((h: IHost) => {
-          return new Host(h);
-        })
-      ));
-    });
-  }
+  get('/api/host').then((res: hostResult) => {
+    if (!res.Success) return;
+    this.store.dispatch(UpsertHostBulkAction(
+      res.Hosts.map((h: IHost) => {
+        return new Host(h);
+      })
+    ));
+  });
+}
 
   private users() {
-    get('/api/user').then((res: userResult) => {
-      if (!res.Success) return;
-      this.store.dispatch(UpsertUserBulkAction(
-        res.Users.map((u: IUser) => {
-          return new User(u);
-        })
-      ));
-      res.Pending.map((u: IPendingUser) => {
-        this.store.dispatch(UpsertPendingUserAction(new PendingUser(u)));
-      });
+  get('/api/user').then((res: userResult) => {
+    if (!res.Success) return;
+    this.store.dispatch(UpsertUserBulkAction(
+      res.Users.map((u: IUser) => {
+        return new User(u);
+      })
+    ));
+    res.Pending.map((u: IPendingUser) => {
+      this.store.dispatch(UpsertPendingUserAction(new PendingUser(u)));
     });
-  }
+  });
+}
 
 }

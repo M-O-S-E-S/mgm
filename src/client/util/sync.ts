@@ -18,7 +18,7 @@ import {
   UpsertMemberAction,
   Role, UpsertRoleAction
 } from '../components/Groups';
-import { Host, UpsertHostAction } from '../components/Hosts';
+import { Host, UpsertHostBulkAction } from '../components/Hosts';
 import { User, UpsertUserBulkAction } from '../components/Users';
 import { PendingUser, UpsertPendingUserAction } from '../components/PendingUsers';
 import { Job, UpsertJobBulkAction } from '../components/Account';
@@ -121,9 +121,11 @@ export class Synchroniser {
   private hosts() {
     get('/api/host').then((res: hostResult) => {
       if (!res.Success) return;
-      res.Hosts.map((h: IHost) => {
-        this.store.dispatch(UpsertHostAction(new Host(h)));
-      });
+      this.store.dispatch(UpsertHostBulkAction(
+        res.Hosts.map((h: IHost) => {
+          return new Host(h);
+        })
+      ));
     });
   }
 

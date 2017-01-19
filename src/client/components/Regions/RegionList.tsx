@@ -131,7 +131,6 @@ export class RegionList extends React.Component<props, {}> {
                             onContent={this.onManageRegionContent.bind(this, r)}
                             onLog={this.onDisplayLog.bind(this, r)} />
                     })
-                console.log(regions.length);
                 if (regions.length > 0) {
                     return (
                         <div key={e.id}>
@@ -161,7 +160,7 @@ export class RegionList extends React.Component<props, {}> {
                             {estateSelect}
                         </FormControl>
                     </Col>
-                    <Col md={2}><Button>Add Region</Button></Col>
+                    <Col md={2}><h3><Button>Add Region</Button></h3></Col>
                 </Row>
                 {estates}
                 {this.state.showManage ? <ManageModal

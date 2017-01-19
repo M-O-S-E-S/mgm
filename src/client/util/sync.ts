@@ -12,7 +12,7 @@ import {
 } from '../../common/messages';
 
 import { Region, UpsertRegionBulkAction } from '../components/Regions';
-import { Estate, UpsertEstateAction, UpsertManagerAction, AssignRegionEstateAction } from '../components/Estates';
+import { Estate, UpsertEstateBulkAction, UpsertManagerAction, AssignRegionEstateAction } from '../components/Estates';
 import {
   Group, UpsertGroupAction,
   UpsertMemberAction,
@@ -73,9 +73,9 @@ export class Synchroniser {
   }
 
   private jobs() {
-    get('/api/task').then(( res: jobResult) => {
-      if(!res.Success) return;
-      this.store.dispatch(UpsertJobBulkAction(res.Jobs.map( (j: IJob) => {
+    get('/api/task').then((res: jobResult) => {
+      if (!res.Success) return;
+      this.store.dispatch(UpsertJobBulkAction(res.Jobs.map((j: IJob) => {
         return new Job(j);
       })))
     });
@@ -84,7 +84,7 @@ export class Synchroniser {
   private regions() {
     get('/api/region').then((res: regionResult) => {
       if (!res.Success) return;
-      this.store.dispatch(UpsertRegionBulkAction(res.Regions.map( (r: IRegion) => {
+      this.store.dispatch(UpsertRegionBulkAction(res.Regions.map((r: IRegion) => {
         return new Region(r);
       })));
     });
@@ -93,15 +93,17 @@ export class Synchroniser {
   private estates() {
     get('/api/estate').then((res: estateResult) => {
       if (!res.Success) return;
-      res.Estates.map((r: IEstate) => {
-        this.store.dispatch(UpsertEstateAction(new Estate(r)))
-      });
-      res.Managers.map( (m: IManager) => {
-        this.store.dispatch(UpsertManagerAction(m));
-      })
-      res.Map.map( (m: IEstateMap) => {
-        this.store.dispatch(AssignRegionEstateAction(m));
-      })
+      this.store.dispatch(UpsertEstateBulkAction(
+        res.Estates.map((r: IEstate) => {
+          return new Estate(r);
+        })
+      ));
+      res.Managers.map((m: IManager) => {
+          this.store.dispatch(UpsertManagerAction(m));
+        })
+      res.Map.map((m: IEstateMap) => {
+          this.store.dispatch(AssignRegionEstateAction(m));
+        })
     });
   }
 
@@ -133,7 +135,7 @@ export class Synchroniser {
     get('/api/user').then((res: userResult) => {
       if (!res.Success) return;
       this.store.dispatch(UpsertUserBulkAction(
-        res.Users.map( (u: IUser) => {
+        res.Users.map((u: IUser) => {
           return new User(u);
         })
       ));

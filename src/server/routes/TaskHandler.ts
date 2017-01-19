@@ -76,16 +76,19 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
 
   router.post('/delete/:id', isUser, (req, res) => {
     let taskID = parseInt(req.params.id);
+    console.log('deleting job ' + taskID);
 
     db.Jobs.getByID(taskID).then((j: JobInstance) => {
-      let datum = JSON.parse(j.data);
-      if (datum.File && datum.File !== '') {
-        fs.exists(datum.File, (exists) => {
-          if (exists) {
-            fs.unlink(datum.File);
-          }
-        });
-      }
+      try {
+        let datum = JSON.parse(j.data);
+        if (datum.File && datum.File !== '') {
+          fs.exists(datum.File, (exists) => {
+            if (exists) {
+              fs.unlink(datum.File);
+            }
+          });
+        }
+      } catch(e){/*not all jobs contain json*/}
       return j.destroy();
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));

@@ -3,6 +3,7 @@ import { Record, Map } from 'immutable';
 import { IJob } from '../../../common/messages';
 
 const UPSERT_JOB = "ACCOUNT_UPSERT_JOB";
+const DELETE_JOB = "ACCOUNT_DELETE_JOB";
 const UPSERT_JOB_BULK = "ACCOUNT_UPSERT_JOB_BULK";
 
 interface JobAction extends Action {
@@ -46,6 +47,14 @@ function upsertJob(state: Map<number, Job>, j: Job): Map<number, Job> {
   );
 }
 
+export const DeleteJobAction = function (job: Job): Action {
+  let act: JobAction = {
+    type: DELETE_JOB,
+    job: job
+  }
+  return act
+}
+
 export const UpsertJobAction = function (job: Job): Action {
   let act: JobAction = {
     type: UPSERT_JOB,
@@ -73,6 +82,9 @@ export const JobsReducer = function (state = Map<number, Job>(), action: Action)
         state = upsertJob(state, r);
       })
       return state;
+    case DELETE_JOB:
+      j = <JobAction>action;
+      return state.delete(j.job.id)
     default:
       return state;
   }

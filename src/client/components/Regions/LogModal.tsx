@@ -30,6 +30,12 @@ export class LogModal extends React.Component<props, {}> {
 
   componentWillReceiveProps(nextProps: props){
     if(!nextProps.region) return;
+    if(!nextProps.show) {
+      this.setState({
+        content: ''
+      });
+      return;
+    }
 
     get('/api/region/logs/' + nextProps.region.uuid).then((result: any) => {
       let logString: string = result.Message;

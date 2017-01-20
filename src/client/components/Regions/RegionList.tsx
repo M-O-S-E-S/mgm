@@ -11,6 +11,7 @@ import { Region, RegionStat } from '.';
 import { ManageModal } from './ManageModal';
 import { ContentModal } from './ContentModal';
 import { LogModal } from './LogModal';
+import { AddRegionModal } from './AddRegionModal';
 
 import { Grid, Row, Col, Button, FormControl } from 'react-bootstrap';
 
@@ -26,6 +27,7 @@ interface state {
     showManage: boolean
     showContent: boolean
     showLog: boolean
+    showAddRegion: boolean
     selectedRegion: Region
     regionSearch: string
     estateSearch: string
@@ -40,6 +42,7 @@ export class RegionList extends React.Component<props, {}> {
             showManage: false,
             showContent: false,
             showLog: false,
+            showAddRegion: false,
             selectedRegion: null,
             regionSearch: '',
             estateSearch: ''
@@ -50,16 +53,16 @@ export class RegionList extends React.Component<props, {}> {
         return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
     }
 
-    onSearch(e: { target: { value: string } }) {
+    // Search and Filter
+    onSearchChange(e: { target: { value: string } }) {
         this.setState({
             regionSearch: e.target.value
-        })
+        });
     }
-
-    onEstate(e: { target: { value: string } }) {
+    onEstateChange(e: { target: { value: string } }) {
         this.setState({
             estateSearch: e.target.value
-        })
+        });
     }
 
     onManageRegion(r: Region) {
@@ -67,13 +70,12 @@ export class RegionList extends React.Component<props, {}> {
             showManage: true,
             showContent: false,
             selectedRegion: r
-        })
+        });
     }
-
     dismissManage() {
         this.setState({
             showManage: false
-        })
+        });
     }
 
     onManageRegionContent(r: Region) {
@@ -81,31 +83,41 @@ export class RegionList extends React.Component<props, {}> {
             showManage: false,
             showContent: true,
             selectedRegion: r
-        })
+        });
     }
-
     dismissManageContent() {
         this.setState({
             showContent: false
-        })
+        });
     }
 
     onDisplayLog(r: Region) {
         this.setState({
             showLog: true,
             selectedRegion: r
-        })
+        });
     }
-
     disMissLog() {
         this.setState({
             showLog: false,
+        });
+    }
+
+    onAddRegion(){
+        this.setState({
+            showAddRegion: true
+        });
+    }
+    dismissAddRegion(){
+        this.setState({
+            showAddRegion: false
         })
     }
 
     render() {
+        // construct estate tree and region lists while filtering by estate and region name
         let estates = this.props.estates.toArray()
-            .filter((e: Estate) => { 
+            .filter((e: Estate) => {
                 return this.state.estateSearch === '' || e.name === this.state.estateSearch;
             })
             .sort((a: Estate, b: Estate) => { return a.name.localeCompare(b.name) })
@@ -153,14 +165,14 @@ export class RegionList extends React.Component<props, {}> {
             <Grid>
                 <Row>
                     <Col md={2}><h3>Filter by:</h3></Col>
-                    <Col md={4}>Region Name <FormControl type="search" onChange={this.onSearch.bind(this)} /></Col>
+                    <Col md={4}>Region Name <FormControl type="search" onChange={this.onSearchChange.bind(this)} /></Col>
                     <Col md={4}>Estate
-                        <FormControl componentClass="select" placeholder="" onChange={this.onEstate.bind(this)}>
+                        <FormControl componentClass="select" placeholder="" onChange={this.onEstateChange.bind(this)}>
                             <option value=''>all</option>
                             {estateSelect}
                         </FormControl>
                     </Col>
-                    <Col md={2}><h3><Button>Add Region</Button></h3></Col>
+                    <Col md={2}><h3><Button onClick={this.onAddRegion.bind(this)}>Add Region</Button></h3></Col>
                 </Row>
                 {estates}
                 <ManageModal
@@ -172,6 +184,12 @@ export class RegionList extends React.Component<props, {}> {
                     hosts={this.props.hosts} />
                 <ContentModal show={this.state.showContent} dismiss={this.dismissManageContent.bind(this)} region={this.state.selectedRegion} />
                 <LogModal show={this.state.showLog} dismiss={this.disMissLog.bind(this)} region={this.state.selectedRegion} />
+                <AddRegionModal
+                    show={this.state.showAddRegion}
+                    dismiss={this.dismissAddRegion.bind(this)}
+                    dispatch={this.props.dispatch}
+                    estates={this.props.estates} 
+                    regions={this.props.regions} />
             </Grid>
         )
     }

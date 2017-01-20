@@ -125,10 +125,21 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
   });
 
   router.post('/create', isAdmin, (req, res) => {
-    let estateID = parseInt(req.body.estate);
     let name = req.body.name;
-    let x = parseInt(req.body.x);
-    let y = parseInt(req.body.y);
+
+    if(!req.body.x || isNaN(parseInt(req.body.x, 10))) return res.send(JSON.stringify({ Success: false, Message: "Integer X coordinate required" }));
+    if(!req.body.y || isNaN(parseInt(req.body.y, 10))) return res.send(JSON.stringify({ Success: false, Message: "Integer Y coordinate required" }));
+    if(!name) return res.send(JSON.stringify({ Success: false, Message: "Region name cannot be blank" }));
+    if(!req.body.estate || isNaN(parseInt(req.body.estate,10))) return res.send(JSON.stringify({ Success: false, Message: "Invalid Estate Assignment" }));
+
+    let estateID = parseInt(req.body.estate, 10);
+    let x = parseInt(req.body.x, 10);
+    let y = parseInt(req.body.y, 10);
+
+    if(x < 0 || y < 0)
+      return res.send(JSON.stringify({ Success: false, Message: "Invalid region coordinates" }));
+
+    let newRegion: RegionInstance;
 
     // confirm estate exists
     db.Estates.getEstateByID(estateID).then((e: EstateInstance) => {
@@ -142,9 +153,10 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     }).then(() => {
       return db.Regions.create(name, x, y);
     }).then((r: RegionInstance) => {
+      newRegion = r;
       return db.Estates.setMapForRegion(estateID, r.uuid);
     }).then(() => {
-      return res.send(JSON.stringify({ Success: true }));
+      return res.send(JSON.stringify({ Success: true, Message: newRegion.uuid }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
       console.log(err);

@@ -84,7 +84,6 @@ class App extends React.Component<{}, {}> {
             st: store.getState(),
             loading: true
         }
-        console.log(this.state.st.auth)
         this.resumeSession();
     }
 

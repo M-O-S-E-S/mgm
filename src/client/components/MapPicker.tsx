@@ -14,6 +14,7 @@ interface Mouse extends Coordinate {
 
 interface props {
   regions: Map<string, Region>
+  onPick: (x: number, y: number, region?: string) => void
 }
 
 export class MapPicker extends React.Component<props, {}> {
@@ -124,9 +125,9 @@ export class MapPicker extends React.Component<props, {}> {
     let coords = this.pixelToTile(pos.x, pos.y);
     var coordstring = coords.x + ", " + coords.y;
     if(coordstring in this.regions){
-      console.log(this.regions[coordstring]);
+      this.props.onPick(coords.x, coords.y, this.regions[coordstring]);
     } else {
-      console.log(coordstring);
+      this.props.onPick(coords.x, coords.y);
     }
     this.redraw();
   }

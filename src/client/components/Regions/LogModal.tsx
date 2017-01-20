@@ -7,6 +7,7 @@ import { Modal, Form, FormGroup, ControlLabel, FormControl, Button } from 'react
 import { get, post } from '../../util/network';
 
 interface props {
+  show: boolean,
   region: Region,
   dismiss: () => void
 }
@@ -25,8 +26,12 @@ export class LogModal extends React.Component<props, {}> {
       loaded: false,
       content: ''
     }
+  }
 
-    get('/api/region/logs/' + this.props.region.uuid).then((result: any) => {
+  componentWillReceiveProps(nextProps: props){
+    if(!nextProps.region) return;
+
+    get('/api/region/logs/' + nextProps.region.uuid).then((result: any) => {
       let logString: string = result.Message;
       this.setState({
         loaded: true,
@@ -37,16 +42,16 @@ export class LogModal extends React.Component<props, {}> {
     }).catch((err: Error) => {
       this.setState({
         loaded: true,
-        content: <p>{'Could not get logs for ' + this.props.region.name + ': ' + err.message}</p>
+        content: <p>{'Could not get logs for ' + nextProps.region.name + ': ' + err.message}</p>
       });
     })
   }
 
   render() {
     return (
-      <Modal show={true} onHide={this.props.dismiss} bsSize="large">
+      <Modal show={this.props.show} onHide={this.props.dismiss} bsSize="large">
         <Modal.Header closeButton>
-          <Modal.Title>{this.props.region.name + ' '}Logs</Modal.Title>
+          <Modal.Title>{this.props.region ? this.props.region.name + ' ' : ''}Logs</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           { this.state.loaded? this.state.content : <p>Loading...</p>}

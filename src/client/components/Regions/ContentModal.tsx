@@ -5,6 +5,7 @@ import { Region } from '.';
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap';
 
 interface props {
+  show: boolean,
   region: Region,
   dismiss: () => void
 }
@@ -50,9 +51,9 @@ export class ContentModal extends React.Component<props, {}> {
 
   render() {
     return (
-      <Modal show={true} onHide={this.props.dismiss} bsSize="large">
+      <Modal show={this.props.show} onHide={this.props.dismiss} bsSize="large">
         <Modal.Header closeButton>
-          <Modal.Title>Managing Region {this.props.region.name}</Modal.Title>
+          <Modal.Title>Managing Region {this.props.region ? this.props.region.name : ''}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <p>Content Management</p>

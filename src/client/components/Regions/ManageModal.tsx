@@ -7,6 +7,7 @@ import { Host } from '../Hosts';
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Row, Col } from 'react-bootstrap';
 
 interface props {
+  show: boolean
   region: Region,
   estates: Map<number, Estate>
   estateMap: Map<string, number>,
@@ -52,20 +53,33 @@ export class ManageModal extends React.Component<props, {}> {
   // also, start, stop, kill
 
   render() {
+    // region may be null, assign fields
+    let regionName = '';
+    let regionId = '';
+    let selectDefault = '';
+    let node = '';
+
+    if(this.props.region){
+      regionName = this.props.region.name;
+      regionId = this.props.region.uuid;
+      selectDefault = this.props.estateMap.get(this.props.region.uuid).toString();
+      node = this.props.region.node;
+    }
+
     return (
-      <Modal show={true} onHide={this.props.dismiss} bsSize="large">
+      <Modal show={this.props.show} onHide={this.props.dismiss} bsSize="large">
         <Modal.Header closeButton>
-          <Modal.Title>Managing Region {this.props.region.name}</Modal.Title>
+          <Modal.Title>Managing Region {regionName}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Row>
-            <Button>Delete {this.props.region.name}</Button>
+            <Button>Delete {regionName}</Button>
           </Row>
           <Row>
             <Form>
               <FormGroup>
                 <ControlLabel>Change Estate</ControlLabel>
-                <FormControl componentClass="select" placeholder="select" defaultValue={this.props.estateMap.get(this.props.region.uuid).toString()}>
+                <FormControl componentClass="select" placeholder="select" defaultValue={selectDefault}>
                   {this.props.estates.toArray().map((e: Estate) => {
                     return (
                       <option
@@ -84,7 +98,7 @@ export class ManageModal extends React.Component<props, {}> {
             <Form>
               <FormGroup>
                 <ControlLabel>Change Host</ControlLabel>
-                <FormControl componentClass="select" placeholder="select" defaultValue={this.props.region.node}>
+                <FormControl componentClass="select" placeholder="select" defaultValue={node}>
                   {this.props.hosts.toArray().map((h: Host) => {
                     return <option
                       key={h.address}

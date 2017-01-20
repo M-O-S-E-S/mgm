@@ -8,9 +8,9 @@ import { Estate } from '../Estates';
 import { Host } from '../Hosts';
 import { Region, RegionStat } from '.';
 
-import { ManageModal } from './Manage';
-import { ContentModal } from './Content';
-import { LogModal } from './Log';
+import { ManageModal } from './ManageModal';
+import { ContentModal } from './ContentModal';
+import { LogModal } from './LogModal';
 
 import { Grid, Row, Col, Button, FormControl } from 'react-bootstrap';
 
@@ -163,14 +163,15 @@ export class RegionList extends React.Component<props, {}> {
                     <Col md={2}><h3><Button>Add Region</Button></h3></Col>
                 </Row>
                 {estates}
-                {this.state.showManage ? <ManageModal
+                <ManageModal
+                    show={this.state.showManage}
                     dismiss={this.dismissManage.bind(this)}
                     region={this.state.selectedRegion}
                     estates={this.props.estates}
                     estateMap={this.props.estateMap}
-                    hosts={this.props.hosts} /> : <span />}
-                {this.state.showContent ? <ContentModal dismiss={this.dismissManageContent.bind(this)} region={this.state.selectedRegion} /> : <span />}
-                {this.state.showLog ? <LogModal dismiss={this.disMissLog.bind(this)} region={this.state.selectedRegion} /> : <span />}
+                    hosts={this.props.hosts} />
+                <ContentModal show={this.state.showContent} dismiss={this.dismissManageContent.bind(this)} region={this.state.selectedRegion} />
+                <LogModal show={this.state.showLog} dismiss={this.disMissLog.bind(this)} region={this.state.selectedRegion} />
             </Grid>
         )
     }

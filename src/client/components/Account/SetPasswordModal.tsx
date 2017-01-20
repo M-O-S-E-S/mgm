@@ -27,10 +27,14 @@ export class SetPasswordModal extends React.Component<props, {}> {
   handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (this.state.p1 === '') {
-      return alertify.error('Password may not be blank');
+      this.setState({
+        error: 'Password may not be blank'
+      });
     }
     if (this.state.p1 !== this.state.p2) {
-      return alertify.error('Passwords do not match');
+      this.setState({
+        error: 'Passwords do not match'
+      });
     }
     this.props.submit(this.state.p1);
   }

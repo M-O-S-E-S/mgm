@@ -49,6 +49,14 @@ export class RegionList extends React.Component<props, {}> {
         }
     }
 
+    componentWillReceiveProps(nextProps: props) {
+        if (this.state.selectedRegion) {
+            this.setState({
+                selectedRegion: nextProps.regions.get(this.state.selectedRegion.uuid, null)
+            })
+        }
+    }
+
     shouldComponentUpdate(nextProps: props, nextState: state) {
         return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
     }
@@ -103,12 +111,12 @@ export class RegionList extends React.Component<props, {}> {
         });
     }
 
-    onAddRegion(){
+    onAddRegion() {
         this.setState({
             showAddRegion: true
         });
     }
-    dismissAddRegion(){
+    dismissAddRegion() {
         this.setState({
             showAddRegion: false
         })
@@ -182,14 +190,15 @@ export class RegionList extends React.Component<props, {}> {
                     region={this.state.selectedRegion}
                     estates={this.props.estates}
                     estateMap={this.props.estateMap}
-                    hosts={this.props.hosts} />
+                    hosts={this.props.hosts}
+                    regions={this.props.regions} />
                 <ContentModal show={this.state.showContent} dismiss={this.dismissManageContent.bind(this)} region={this.state.selectedRegion} />
                 <LogModal show={this.state.showLog} dismiss={this.disMissLog.bind(this)} region={this.state.selectedRegion} />
                 <AddRegionModal
                     show={this.state.showAddRegion}
                     dismiss={this.dismissAddRegion.bind(this)}
                     dispatch={this.props.dispatch}
-                    estates={this.props.estates} 
+                    estates={this.props.estates}
                     regions={this.props.regions} />
             </Grid>
         )

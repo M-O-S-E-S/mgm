@@ -10,6 +10,7 @@ import { Host } from '../Hosts';
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Row, Col, Alert, Button } from 'react-bootstrap';
 import { BusyButton } from '../../util/BusyButton';
 import { post } from '../../util/network';
+import { MapPicker } from '../MapPicker';
 
 
 interface props {
@@ -18,6 +19,7 @@ interface props {
   estates: Map<number, Estate>
   estateMap: Map<string, number>,
   hosts: Map<number, Host>,
+  regions: Map<string, Region>,
   dismiss: () => void,
   dispatch: (a: Action) => void
 }
@@ -33,6 +35,12 @@ export class ManageModal extends React.Component<props, {}> {
     selectedHost: string
     hostError: string
     hostSuccess: string
+    x: number
+    y: number
+    coordMessage: string
+    pickingCoords: boolean
+    coordsSuccess: string
+    coordsError: string
   }
 
   constructor(props: props) {
@@ -44,7 +52,22 @@ export class ManageModal extends React.Component<props, {}> {
       estateSuccess: '',
       selectedHost: '',
       hostError: '',
-      hostSuccess: ''
+      hostSuccess: '',
+      x: undefined,
+      y: undefined,
+      coordMessage: '',
+      pickingCoords: false,
+      coordsSuccess: '',
+      coordsError: ''
+    }
+  }
+
+  componentWillReceiveProps(nextProps: props){
+    if(nextProps.region){
+      this.setState({
+        x: nextProps.region.x,
+        y: nextProps.region.y
+      })
     }
   }
 
@@ -143,9 +166,63 @@ export class ManageModal extends React.Component<props, {}> {
     });
   }
 
+  openPick() {
+    this.setState({
+      pickingCoords: true
+    })
+  }
+  onCoordinatePick(x: number, y: number, region: string) {
+    if (region) {
+      this.setState({
+        x: undefined,
+        y: undefined,
+        coordMessage: region
+      })
+    } else {
+      this.setState({
+        x: x,
+        y: y,
+        coordMessage: ''
+      })
+    }
+  }
   onChangePosition(): Promise<void> {
+    if (this.props.region.isRunning) {
+      this.setState({
+        coordsSuccess: '',
+        coordsError: 'Refusing to change coordinates on running region'
+      });
+      return Promise.resolve();
+    }
+    if (this.props.region.x === this.state.x && this.props.region.y === this.state.y) {
+      this.setState({
+        coordsSuccess: '',
+        coordsError: 'No coordinate change detected, not updating'
+      });
+      return Promise.resolve();
+    }
 
-    return Promise.resolve();
+    this.setState({
+      pickingCoords: false,
+      coordsSuccess: '',
+      coordsError: ''
+    })
+
+    return post('/api/region/setXY/' + this.props.region.uuid, { x: this.state.x, y: this.state.y }).then(() => {
+      this.setState({
+        coordsSuccess: 'Coordinates Successfully Changed',
+        coordsError: ''
+      })
+
+      // update region in redux 
+      this.props.dispatch(UpsertRegionAction(this.props.region.set('x', this.state.x).set('y', this.state.y)));
+
+    }).catch((err: Error) => {
+      this.setState({
+        estateSuccess: '',
+        estateError: 'Cannot change estate: ' + err.message
+      })
+    });
   }
 
   render() {
@@ -215,13 +292,16 @@ export class ManageModal extends React.Component<props, {}> {
             </Form>
           </Row>
           <Row>
-            Change Position:
-              X:  <input />
-            Y:  <input />
-            <BusyButton onClick={this.onChangePosition.bind(this)}>Set</BusyButton>
-          </Row>
-          <Row>
-            <p>Perhaps here we should place a selection of console commands to run on button-press, as the rest console isn't as interactive as one would hope on halcyon.</p>
+            <FormGroup>
+              <ControlLabel>Region Coordinates ({this.state.coordMessage ? this.state.coordMessage : this.state.x + ', ' + this.state.y})</ControlLabel>
+              <BusyButton onClick={this.onChangePosition.bind(this)}>Set</BusyButton>
+              {this.state.pickingCoords ?
+                <MapPicker regions={this.props.regions} onPick={this.onCoordinatePick.bind(this)} /> :
+                <Button onClick={this.openPick.bind(this)}>Pick Coordinates</Button>
+              }
+              {this.state.coordsError ? <Alert bsStyle="danger">{this.state.coordsError}</Alert> : <div />}
+              {this.state.coordsSuccess ? <Alert bsStyle="success">{this.state.coordsSuccess}</Alert> : <div />}
+            </FormGroup>
           </Row>
         </Modal.Body>
         <Modal.Footer>

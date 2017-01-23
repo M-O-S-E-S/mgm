@@ -2,11 +2,13 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { DeleteRegionAction } from '.';
+import { UpsertRegionAction, DeleteRegionAction } from '.';
+import { AssignRegionEstateAction } from '../Estates';
 import { Region } from '.';
 import { Estate } from '../Estates';
 import { Host } from '../Hosts';
-import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Row, Col, Alert } from 'react-bootstrap';
+import { Modal, Form, FormGroup, ControlLabel, FormControl, Row, Col, Alert, Button } from 'react-bootstrap';
+import { BusyButton } from '../../util/BusyButton';
 import { post } from '../../util/network';
 
 
@@ -25,27 +27,31 @@ const ipRegExp = /(^127\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-
 export class ManageModal extends React.Component<props, {}> {
   state: {
     deleteError: string
+    selectedEstate: string
+    estateError: string
+    estateSuccess: string
   }
 
   constructor(props: props) {
     super(props);
     this.state = {
-      deleteError: ''
+      deleteError: '',
+      selectedEstate: '',
+      estateError: '',
+      estateSuccess: ''
     }
   }
 
   onDelete() {
     if (this.props.region.isRunning) {
-      this.setState({
+      return this.setState({
         deleteError: 'Cannot delete a running region'
       });
-      return;
     }
     if (this.props.region.node !== '') {
-      this.setState({
+      return this.setState({
         deleteError: 'Cannot delete a region that is still assigned a host'
-      })
-      return;
+      });
     }
     post('/api/region/destroy/'+this.props.region.uuid).then(() => {
       this.props.dispatch(DeleteRegionAction(this.props.region));
@@ -54,7 +60,53 @@ export class ManageModal extends React.Component<props, {}> {
       this.setState({
         deleteError: 'Cannot delete region: ' + err.message
       })
-    })
+    });
+  }
+
+  onSelectEstate(e: { target: { value: string } }){
+    this.setState({
+      selectedEstate: e.target.value
+    });
+  }
+  onChangeEstate(): Promise<void> {
+    if(this.state.selectedEstate === ''){
+      this.setState({
+        estateError: 'No estate change detected, not setting'
+      });
+      return Promise.resolve();
+    }
+    if(this.props.region.isRunning){
+      this.setState({
+        estateError: 'Refusing to change estate on running region'
+      });
+      return Promise.resolve();
+    }
+
+    return post('/api/region/estate/'+this.props.region.uuid, {estate: this.state.selectedEstate}).then(() => {
+      this.setState({
+        estateSuccess: 'Estate Successfully updated',
+        estateError: ''
+      })
+
+      // update region in redux 
+      this.props.dispatch(AssignRegionEstateAction(this.props.region.uuid, parseInt(this.state.selectedEstate,10)));
+
+    }).catch((err: Error) => {
+      this.setState({
+        estateSuccess: '',
+        estateError: 'Cannot change estate: ' + err.message
+      })
+    });
+  }
+
+  onChangeHost(): Promise<void> {
+
+    return Promise.resolve();
+  }
+
+  onChangePosition(): Promise<void> {
+
+    return Promise.resolve();
   }
 
   render() {
@@ -80,14 +132,14 @@ export class ManageModal extends React.Component<props, {}> {
         </Modal.Header>
         <Modal.Body>
           <Row>
-            <Button onClick={this.onDelete.bind(this)}>Delete {regionName}</Button>
+            <BusyButton onClick={this.onDelete.bind(this)}>Delete {regionName}</BusyButton>
             {this.state.deleteError ? <Alert bsStyle="danger">{this.state.deleteError}</Alert> : <div />}
           </Row>
           <Row>
             <Form>
               <FormGroup>
                 <ControlLabel>Change Estate</ControlLabel>
-                <FormControl componentClass="select" placeholder="select" defaultValue={selectDefault}>
+                <FormControl componentClass="select" placeholder="select" defaultValue={selectDefault} onChange={this.onSelectEstate.bind(this)}>
                   {this.props.estates.toArray().map((e: Estate) => {
                     return (
                       <option
@@ -98,7 +150,9 @@ export class ManageModal extends React.Component<props, {}> {
                     )
                   })}
                 </FormControl>
-                <Button>Set</Button>
+                <BusyButton onClick={this.onChangeEstate.bind(this)}>Set</BusyButton>
+                {this.state.estateError ? <Alert bsStyle="danger">{this.state.estateError}</Alert> : <div />}
+                {this.state.estateSuccess ? <Alert bsStyle="success">{this.state.estateSuccess}</Alert> : <div />}
               </FormGroup>
             </Form>
           </Row>
@@ -115,7 +169,7 @@ export class ManageModal extends React.Component<props, {}> {
                     </option>
                   })}
                 </FormControl>
-                <Button>Set</Button>
+                <BusyButton onClick={this.onChangeHost.bind(this)}>Set</BusyButton>
               </FormGroup>
             </Form>
           </Row>
@@ -123,7 +177,7 @@ export class ManageModal extends React.Component<props, {}> {
             Change Position:
               X:  <input />
             Y:  <input />
-            <Button>Set</Button>
+            <BusyButton onClick={this.onChangePosition.bind(this)}>Set</BusyButton>
           </Row>
           <Row>
             <p>Perhaps here we should place a selection of console commands to run on button-press, as the rest console isn't as interactive as one would hope on halcyon.</p>

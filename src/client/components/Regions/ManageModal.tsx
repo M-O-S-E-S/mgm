@@ -134,7 +134,7 @@ export class ManageModal extends React.Component<props, {}> {
     });
   }
   onChangeHost(): Promise<void> {
-    if (this.state.selectedHost === '') {
+    if (this.state.selectedHost === this.props.region.node) {
       this.setState({
         hostSuccess: '',
         hostError: 'No host change detected, not setting'
@@ -277,6 +277,7 @@ export class ManageModal extends React.Component<props, {}> {
               <FormGroup>
                 <ControlLabel>Change Host</ControlLabel>
                 <FormControl componentClass="select" placeholder="select" defaultValue={node} onChange={this.onSelectHost.bind(this)}>
+                  <option key={-1} value={''}>unassigned</option>
                   {this.props.hosts.toArray().map((h: Host) => {
                     return <option
                       key={h.address}

@@ -3,6 +3,8 @@ import * as React from "react";
 import { Region } from '.';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap';
+import { BusyButton } from '../../util/BusyButton';
+import { post, upload } from '../../util/network';
 
 interface props {
   show: boolean,
@@ -10,18 +12,32 @@ interface props {
   dismiss: () => void
 }
 
-const ipRegExp = /(^127\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^192\.168\.)/;
 
 export class ContentModal extends React.Component<props, {}> {
-  state: {
-    ip: string
-  }
 
-  constructor(props: props) {
-    super(props);
-    this.state = {
-       ip: ''
+  // a property to hang file uploads from
+  oarFile: any = null;
+
+
+  onUploadOar(): Promise<void> {
+    let file = this.oarFile.files[0];
+    if (file == undefined) {
+      // no selection was made
+      console.log('file object is empty...');
+      return;
     }
+
+    // Create an oar upload job for this user and region
+    return post('/api/task/loadOar/' + this.props.region.uuid)
+      .then((res: any) => {
+        let jobID = res.ID;
+        // todo: insert job into redux to make it appear before the next data refresh
+
+        // initiate the upload
+        return upload('/api/task/upload/'+ jobID, file);
+      }).catch((err: Error) => {
+        console.log(err.message);
+      });
   }
 
   render() {
@@ -31,7 +47,17 @@ export class ContentModal extends React.Component<props, {}> {
           <Modal.Title>Managing Region {this.props.region ? this.props.region.name : ''}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Content Management</p>
+          <h3>Load an OAR file</h3>
+          <p>input type file, and upload</p>
+          <input type="file" name="oarFile" ref={(ref) => this.oarFile = ref} />
+          <BusyButton onClick={this.onUploadOar.bind(this)}>Upload</BusyButton>
+
+          <h3>Download an OAR file</h3>
+          <p>trigger with warnong about asynchrounous nature</p>
+
+          <h3>Reset region to default</h3>
+          <p>trigger with warning about never going back</p>
+
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={this.props.dismiss}>Close</Button>

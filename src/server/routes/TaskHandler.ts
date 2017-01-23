@@ -262,6 +262,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     console.log('upload file received for job ' + taskID);
 
     db.Jobs.getByID(taskID).then((j: JobInstance) => {
+      if(!j) throw new Error('Job not found');
       switch (j.type) {
         case 'save_oar':
           let remoteIP: string = req.ip.split(':').pop();
@@ -282,6 +283,8 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
             return EmailMgr.instance().sendSaveOarComplete(u.email, fileName);
           })
         case 'load_oar':
+          console.log(req.file);
+
           let user = new UUIDString(req.cookies['uuid']);
           if (user.toString() !== j.user.toString()) {
             throw new Error('Permission Denied');

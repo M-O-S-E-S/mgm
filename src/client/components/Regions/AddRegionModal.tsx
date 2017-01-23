@@ -77,7 +77,6 @@ export class AddRegionModal extends React.Component<props, {}> {
       x: this.state.x,
       y: this.state.y
     }).then((res) => {
-      console.log(res);
       let r = new Region();
       r = r.set('uuid', res.Message)
         .set('name', this.state.name)

@@ -178,6 +178,7 @@ export class RegionList extends React.Component<props, {}> {
                 <ManageModal
                     show={this.state.showManage}
                     dismiss={this.dismissManage.bind(this)}
+                    dispatch={this.props.dispatch}
                     region={this.state.selectedRegion}
                     estates={this.props.estates}
                     estateMap={this.props.estateMap}

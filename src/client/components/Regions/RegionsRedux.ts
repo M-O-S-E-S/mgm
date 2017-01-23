@@ -5,9 +5,12 @@ import { IRegion, IRegionStat } from '../../../common/messages';
 
 const UPSERT_REGION = "REGIONS_UPSERT_REGION";
 const UPSERT_REGION_BULK = "REGIONS_UPSERT_REGION_BULK";
+const DELETE_REGION = "REGIONS_DELETE_REGION";
+
+
 const UPSERT_REGIONSTAT = "REGIONS_UPSERT_REGIONSTAT";
 
-interface UpsertRegion extends Action {
+interface RegionAction extends Action {
   region: Region
 }
 
@@ -70,7 +73,7 @@ export class Region extends RegionClass implements IRegion {
 }
 
 export const UpsertRegionAction = function (r: Region): Action {
-  let act: UpsertRegion = {
+  let act: RegionAction = {
     type: UPSERT_REGION,
     region: r
   }
@@ -85,9 +88,17 @@ export const UpsertRegionBulkAction = function (r: Region[]): Action {
   return act;
 }
 
+export const DeleteRegionAction = function (r: Region): Action {
+  let act: RegionAction = {
+    type: DELETE_REGION,
+    region: r
+  }
+  return act
+}
+
 // internal function to update the state with a single user
 function upsertRegion(state: Map<string, Region>, r: Region): Map<string, Region> {
-  let rec = state.get(r.uuid) || new Region();
+  let rec = state.get(r.uuid, new Region());
   return state.set(
     r.uuid,
     rec.set('uuid', r.uuid)
@@ -104,7 +115,9 @@ function upsertRegion(state: Map<string, Region>, r: Region): Map<string, Region
 export const RegionsReducer = function (state = Map<string, Region>(), action: Action): Map<string, Region> {
   switch (action.type) {
     case UPSERT_REGION:
-      let act = <UpsertRegion>action;
+      let act = <RegionAction>action;
+      console.log('upserting single region');
+      console.log(act.region);
       return upsertRegion(state, act.region);
     case UPSERT_REGION_BULK:
       let urb = <UpsertRegionBulk>action;
@@ -112,6 +125,9 @@ export const RegionsReducer = function (state = Map<string, Region>(), action: A
         state = upsertRegion(state, r);
       })
       return state;
+    case DELETE_REGION:
+      act = <RegionAction>action;
+      return state.remove(act.region.uuid);
     default:
       return state;
   }

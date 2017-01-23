@@ -30,6 +30,9 @@ export class ManageModal extends React.Component<props, {}> {
     selectedEstate: string
     estateError: string
     estateSuccess: string
+    selectedHost: string
+    hostError: string
+    hostSuccess: string
   }
 
   constructor(props: props) {
@@ -38,7 +41,10 @@ export class ManageModal extends React.Component<props, {}> {
       deleteError: '',
       selectedEstate: '',
       estateError: '',
-      estateSuccess: ''
+      estateSuccess: '',
+      selectedHost: '',
+      hostError: '',
+      hostSuccess: ''
     }
   }
 
@@ -53,7 +59,7 @@ export class ManageModal extends React.Component<props, {}> {
         deleteError: 'Cannot delete a region that is still assigned a host'
       });
     }
-    post('/api/region/destroy/'+this.props.region.uuid).then(() => {
+    post('/api/region/destroy/' + this.props.region.uuid).then(() => {
       this.props.dispatch(DeleteRegionAction(this.props.region));
       this.props.dismiss();
     }).catch((err: Error) => {
@@ -63,33 +69,33 @@ export class ManageModal extends React.Component<props, {}> {
     });
   }
 
-  onSelectEstate(e: { target: { value: string } }){
+  onSelectEstate(e: { target: { value: string } }) {
     this.setState({
       selectedEstate: e.target.value
     });
   }
   onChangeEstate(): Promise<void> {
-    if(this.state.selectedEstate === ''){
+    if (this.state.selectedEstate === '') {
       this.setState({
         estateError: 'No estate change detected, not setting'
       });
       return Promise.resolve();
     }
-    if(this.props.region.isRunning){
+    if (this.props.region.isRunning) {
       this.setState({
         estateError: 'Refusing to change estate on running region'
       });
       return Promise.resolve();
     }
 
-    return post('/api/region/estate/'+this.props.region.uuid, {estate: this.state.selectedEstate}).then(() => {
+    return post('/api/region/estate/' + this.props.region.uuid, { estate: this.state.selectedEstate }).then(() => {
       this.setState({
         estateSuccess: 'Estate Successfully updated',
         estateError: ''
       })
 
       // update region in redux 
-      this.props.dispatch(AssignRegionEstateAction(this.props.region.uuid, parseInt(this.state.selectedEstate,10)));
+      this.props.dispatch(AssignRegionEstateAction(this.props.region.uuid, parseInt(this.state.selectedEstate, 10)));
 
     }).catch((err: Error) => {
       this.setState({
@@ -99,9 +105,42 @@ export class ManageModal extends React.Component<props, {}> {
     });
   }
 
+  onSelectHost(e: { target: { value: string } }) {
+    this.setState({
+      selectedHost: e.target.value
+    });
+  }
   onChangeHost(): Promise<void> {
+    if (this.state.selectedHost === '') {
+      this.setState({
+        hostSuccess: '',
+        hostError: 'No host change detected, not setting'
+      });
+      return Promise.resolve();
+    }
+    if (this.props.region.isRunning) {
+      this.setState({
+        hostSuccess: '',
+        hostError: 'Refusing to change estate on running region'
+      });
+      return Promise.resolve();
+    }
 
-    return Promise.resolve();
+    return post('/api/region/host/' + this.props.region.uuid, { host: this.state.selectedHost }).then(() => {
+      this.setState({
+        hostSuccess: 'Host Successfully assigned',
+        hostError: ''
+      })
+
+      // update region in redux 
+      this.props.dispatch(UpsertRegionAction(this.props.region.set('node', this.state.selectedHost)));
+
+    }).catch((err: Error) => {
+      this.setState({
+        estateSuccess: '',
+        estateError: 'Cannot change estate: ' + err.message
+      })
+    });
   }
 
   onChangePosition(): Promise<void> {
@@ -160,7 +199,7 @@ export class ManageModal extends React.Component<props, {}> {
             <Form>
               <FormGroup>
                 <ControlLabel>Change Host</ControlLabel>
-                <FormControl componentClass="select" placeholder="select" defaultValue={node}>
+                <FormControl componentClass="select" placeholder="select" defaultValue={node} onChange={this.onSelectHost.bind(this)}>
                   {this.props.hosts.toArray().map((h: Host) => {
                     return <option
                       key={h.address}
@@ -170,6 +209,8 @@ export class ManageModal extends React.Component<props, {}> {
                   })}
                 </FormControl>
                 <BusyButton onClick={this.onChangeHost.bind(this)}>Set</BusyButton>
+                {this.state.hostError ? <Alert bsStyle="danger">{this.state.hostError}</Alert> : <div />}
+                {this.state.hostSuccess ? <Alert bsStyle="success">{this.state.hostSuccess}</Alert> : <div />}
               </FormGroup>
             </Form>
           </Row>

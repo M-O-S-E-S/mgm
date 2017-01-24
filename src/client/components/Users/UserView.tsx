@@ -3,7 +3,6 @@ const shallowequal = require('shallowequal');
 import { Action } from 'redux';
 
 import { User } from '.';
-import { DeleteUser } from './UsersRedux';
 
 import { Row, Col, Button } from 'react-bootstrap'
 
@@ -12,8 +11,7 @@ import { post } from '../../util/network';
 
 interface props {
     user: User,
-    manage: () => void,
-    dispatch: (a: Action) => void,
+    manage: () => void
 }
 
 interface state {
@@ -33,15 +31,6 @@ export class UserView extends React.Component<props, state> {
 
     shouldComponentUpdate(nextProps: props) {
         return !shallowequal(this.props, nextProps);
-    }
-
-    deleteUser(): Promise<void> {
-        return post('/api/user/destroy/'+ this.props.user.uuid).then(()=>{
-            alertify.success('User ' + this.props.user.name + ' deleted');
-            this.props.dispatch(DeleteUser(this.props.user));
-        }).catch((err:Error) => {
-            alertify.error('Error Deleting ' + this.props.user.name + ': ' + err.message);
-        })
     }
 
     render() {
@@ -68,10 +57,7 @@ export class UserView extends React.Component<props, state> {
         }
         return (
             <Row>
-                <Col md={3}>
-                    {this.props.user.name}
-                    {this.props.user.godLevel === 0 ? <BusyButton bsSize="xsmall" bsStyle="danger" onClick={this.deleteUser.bind(this)}>Delete</BusyButton> : <span />}
-                </Col>
+                <Col md={3}>{this.props.user.name}</Col>
                 <Col md={3}>{this.props.user.email}</Col>
                 <Col md={2}>{userType}</Col>
                 <Col md={4}>

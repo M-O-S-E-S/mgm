@@ -2,7 +2,7 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { UpsertUserAction } from '.';
+import { DeleteUser, UpsertUserAction } from './UsersRedux';
 import { User } from '../Users';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Grid, Row, Alert } from 'react-bootstrap';
@@ -88,6 +88,15 @@ export class ManageUserModal extends React.Component<props, state> {
     })
   }
 
+  deleteUser(): Promise<void> {
+    return post('/api/user/destroy/' + this.props.user.uuid).then(() => {
+      alertify.success('User ' + this.props.user.name + ' deleted');
+      this.props.dispatch(DeleteUser(this.props.user));
+    }).catch((err: Error) => {
+      alertify.error('Error Deleting ' + this.props.user.name + ': ' + err.message);
+    })
+  }
+
   render() {
     let userType = '';
     if (this.props.user) {
@@ -115,7 +124,10 @@ export class ManageUserModal extends React.Component<props, state> {
     return (
       <Modal show={this.props.show} onHide={this.props.cancel} >
         <Modal.Header>
-          <Modal.Title>Manage User: {this.props.user ? this.props.user.name : ''}</Modal.Title>
+          <Modal.Title>
+            Manage User: {this.props.user ? this.props.user.name : ''}
+            {this.props.user && this.props.user.godLevel < 2 ? <BusyButton bsSize="xsmall" bsStyle="danger" onClick={this.deleteUser.bind(this)}>Delete</BusyButton> : <span />}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <h3>Email: {this.props.user ? this.props.user.email : ''}</h3>

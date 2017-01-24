@@ -62,8 +62,7 @@ export class UserList extends React.Component<props, state> {
                 return <UserView
                     key={u.uuid}
                     user={u}
-                    manage={this.onShowManage.bind(this, u)}
-                    dispatch={this.props.dispatch} />
+                    manage={this.onShowManage.bind(this, u)} />
             })
 
         return (

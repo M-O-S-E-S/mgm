@@ -69,8 +69,8 @@ export function EstateHandler(db: PersistanceLayer, isUser: any, isAdmin: any): 
       return db.Users.getByID(owner);
     }).then((u: UserInstance) => {
       return db.Estates.create(estateName, owner);
-    }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+    }).then((e: EstateInstance) => {
+      res.send(JSON.stringify({ Success: true, ID: e.EstateID }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });

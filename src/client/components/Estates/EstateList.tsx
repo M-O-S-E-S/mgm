@@ -9,7 +9,7 @@ import { User } from '../Users';
 import { EstateView } from './EstateView';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap'
-import { EstateAddModal } from './EstateAdd';
+import { AddEstateModal } from './AddEstateModal';
 
 interface props {
     dispatch: (a: Action) => void,
@@ -33,20 +33,12 @@ export class EstateList extends React.Component<props, {}> {
     }
 
     shouldComponentUpdate(nextProps: props, nextState: state) {
-        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState) ;
+        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
     }
 
     showAddEstate() {
         this.setState({
             showAdd: true
-        })
-    }
-
-    onNewEstate(name: string, owner: string) {
-        //RequestCreateEstate(name, owner);
-        alertify.error('not implemented');
-        this.setState({
-            showAdd: false
         })
     }
     cancelNewEstate() {
@@ -64,23 +56,17 @@ export class EstateList extends React.Component<props, {}> {
                 regionCount[estateID] = 1;
             }
         })
-        let estates = this.props.estates.toList().map((e: Estate) => {
-            return <EstateView
-                key={e.id}
-                dispatch={this.props.dispatch}
-                users={this.props.users}
-                managers={this.props.managers.get(e.id)}
-                estate={e}
-                regionCount={regionCount[e.id] || 0} />
-        })
-        let addEstate = <span />
-        if (this.state.showAdd) {
-            addEstate = <EstateAddModal
-                cancel={this.cancelNewEstate.bind(this)}
-                submit={this.onNewEstate.bind(this)}
-                users={this.props.users}
-                estates={this.props.estates} />;
-        }
+        let estates = this.props.estates.toArray()
+            .sort((a: Estate, b: Estate) => { return a.name.localeCompare(b.name) })
+            .map((e: Estate) => {
+                return <EstateView
+                    key={e.id}
+                    dispatch={this.props.dispatch}
+                    users={this.props.users}
+                    managers={this.props.managers.get(e.id)}
+                    estate={e}
+                    regionCount={regionCount[e.id] || 0} />
+            })
         return (
             <Grid>
                 <h1>Estates</h1>
@@ -92,7 +78,12 @@ export class EstateList extends React.Component<props, {}> {
                     <Col md={1}><Button onClick={this.showAddEstate.bind(this)}>Add Estate</Button></Col>
                 </Row>
                 {estates}
-                {addEstate}
+                <AddEstateModal
+                    dispatch={this.props.dispatch}
+                    show={this.state.showAdd}
+                    cancel={this.cancelNewEstate.bind(this)}
+                    users={this.props.users}
+                    estates={this.props.estates} />
             </Grid>
         );
     }

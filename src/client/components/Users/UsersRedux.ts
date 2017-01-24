@@ -4,6 +4,7 @@ import { Action } from 'redux';
 
 const UPSERT_USER = "USERS_UPSERT_USER";
 const UPSERT_USER_BULK = "USERS_UPSERT_USER_BULK";
+const DELETE_USER = "USERS_DELETE_USER";
 
 const UserClass = Record({
   uuid: '',
@@ -23,7 +24,7 @@ export class User extends UserClass implements IUser {
   }
 }
 
-interface UpsertUser extends Action {
+interface UserAction extends Action {
   user: User
 }
 
@@ -32,7 +33,7 @@ interface UpsertUserBulk extends Action {
 }
 
 export const UpsertUserAction = function (u: User): Action {
-  let act: UpsertUser = {
+  let act: UserAction = {
     type: UPSERT_USER,
     user: u
   }
@@ -43,6 +44,14 @@ export const UpsertUserBulkAction = function (u: User[]): Action {
   let act: UpsertUserBulk = {
     type: UPSERT_USER_BULK,
     users: u
+  }
+  return act;
+}
+
+export const DeleteUser = function(u: User): Action {
+  let act: UserAction = {
+    type: DELETE_USER,
+    user: u
   }
   return act;
 }
@@ -61,7 +70,7 @@ function upsertUser(state: Map<string, User>, u: User): Map<string, User> {
 export const UsersReducer = function (state = Map<string, User>(), action: Action): Map<string, User> {
   switch (action.type) {
     case UPSERT_USER:
-      let act = <UpsertUser>action;
+      let act = <UserAction>action;
       return upsertUser(state, act.user);
     case UPSERT_USER_BULK:
       let uub = <UpsertUserBulk>action;
@@ -69,6 +78,9 @@ export const UsersReducer = function (state = Map<string, User>(), action: Actio
         state = upsertUser(state, u);
       })
       return state;
+    case DELETE_USER:
+      act = <UserAction>action;
+      return state.delete(act.user.uuid);
     default:
       return state;
   }

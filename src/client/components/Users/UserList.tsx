@@ -22,7 +22,7 @@ interface state {
 
 export class UserList extends React.Component<props, state> {
 
-    constructor(props:props){
+    constructor(props: props) {
         super(props);
         this.state = {
             selectedUser: null,
@@ -35,8 +35,8 @@ export class UserList extends React.Component<props, state> {
         return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
     }
 
-    componentWillReceiveProps(nextProps: props){
-        if(nextProps != this.props && this.state.selectedUser){
+    componentWillReceiveProps(nextProps: props) {
+        if (nextProps != this.props && this.state.selectedUser) {
             this.setState({
                 selectedUser: nextProps.users.get(this.state.selectedUser.uuid, null)
             });
@@ -59,7 +59,11 @@ export class UserList extends React.Component<props, state> {
         let users = this.props.users.toArray()
             .sort((a: User, b: User) => { return a.name.localeCompare(b.name) })
             .map((u: User) => {
-                return <UserView key={u.uuid} user={u} manage={this.onShowManage.bind(this, u)}/>
+                return <UserView
+                    key={u.uuid}
+                    user={u}
+                    manage={this.onShowManage.bind(this, u)}
+                    dispatch={this.props.dispatch} />
             })
 
         return (

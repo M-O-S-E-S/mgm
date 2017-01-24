@@ -78,6 +78,9 @@ export class ManageUserModal extends React.Component<props, state> {
     }
     return post('/api/user/password', { id: this.props.user.uuid, password: this.state.password }).then(() => {
       this.props.dispatch(UpsertUserAction(this.props.user.set('email', this.state.email)))
+      this.setState({
+        error: ''
+      });
     }).catch((err: Error) => {
       this.setState({
         error: 'Error changing ' + this.props.user.name + '\'s email: ' + err.message

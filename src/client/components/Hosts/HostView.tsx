@@ -8,6 +8,11 @@ import { Region } from '../Regions';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 import { HostStatView } from './HostStatView';
+import { HostDeletedAction } from '.';
+
+import { BusyButton } from '../../util/BusyButton';
+import { post } from '../../util/network';
+
 
 interface props {
   dispatch: (a: Action) => void,
@@ -21,19 +26,22 @@ export class HostView extends React.Component<props, {}> {
     return !shallowequal(this.props, nextProps);
   }
 
-  onRemoveHost() {
+  onRemoveHost(): Promise<void> {
     let regionCount = 0;
     this.props.regions.toList().map((r: Region) => {
       if (r.node === this.props.host.address)
         regionCount++;
     })
     if (regionCount != 0) {
-      return alertify.error('Cannot remove host ' + this.props.host.address + ', there are ' + regionCount + ' regions assigned');
+      alertify.error('Cannot remove host ' + this.props.host.address + ', there are ' + regionCount + ' regions assigned');
+      return Promise.resolve();
     }
-    alertify.confirm('Are you sure you want to remove host ' + this.props.host.address + '?', () => {
-      //RequestDeleteHost(this.props.host);
-      alertify.error('not implemented');
-    });
+    return post('/api/host/remove', { host: this.props.host.address }).then(() => {
+      alertify.success('Host ' + this.props.host.address + ' deleted');
+      this.props.dispatch(HostDeletedAction(this.props.host.id));
+    }).catch((err: Error) => {
+      alertify.error('Error deleting host ' + this.props.host.address + ': ' + err.message);
+    })
   }
 
   render() {
@@ -44,7 +52,7 @@ export class HostView extends React.Component<props, {}> {
     })
     return (
       <Row>
-        <Col md={2}><i className="fa fa-trash" aria-hidden="true" onClick={this.onRemoveHost.bind(this)}></i>   {this.props.host.name}</Col>
+        <Col md={2}><BusyButton bsSize="xsmall" onClick={this.onRemoveHost.bind(this)}><i className="fa fa-trash" aria-hidden="true"></i></BusyButton>   {this.props.host.name}</Col>
         <Col md={1}>{this.props.host.address}</Col>
         <Col md={1}>{regionCount}</Col>
         <Col md={8}><HostStatView status={this.props.host.status} /></Col>

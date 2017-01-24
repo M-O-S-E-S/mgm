@@ -54,6 +54,11 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
   router.post('/accessLevel', isAdmin, (req, res) => {
     let accessLevel = parseInt(req.body.accessLevel);
     let userID = new UUIDString(req.body.uuid);
+    let controllingUser = new UUIDString(req.cookies['uuid']);
+
+    if(userID.getShort() === controllingUser.getShort()){
+      return res.send(JSON.stringify({ Success: false, Message: 'You cannot change your own access level' }));
+    }
 
     if (accessLevel < 0 || accessLevel > 250) {
       return res.send(JSON.stringify({ Success: false, Message: 'Invalid access level' }));

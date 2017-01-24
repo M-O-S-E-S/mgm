@@ -1,5 +1,4 @@
 
-
 export interface Config {
   mgm: {
     db: {
@@ -10,6 +9,7 @@ export interface Config {
     }
     log_dir: string
     upload_dir: string
+    default_oar_path: string
     templates: { [key: string]: string }
     voiceIP: string
     internalUrl: string

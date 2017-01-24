@@ -12,6 +12,7 @@ settings.mgm.internalUrl = "http://127.0.0.1:3000/";
 
 settings.mgm.log_dir = "/opt/moses/mgm/logs";
 settings.mgm.upload_dir = "/opt/moses/mgm/uploads";
+settings.mgm.default_oar_path = "/var/www/html/mgm.militarymetaverse.org/serverFiles/default.oar";
 
 // Templates available for user creation
 settings.mgm.templates = {

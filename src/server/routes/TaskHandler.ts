@@ -18,6 +18,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
   let router = express.Router();
 
   let uploadDir = conf.mgm.upload_dir;
+  let defaultOar = conf.mgm.default_oar_path;
 
   //ensure the directory for logs exists
   if (!fs.existsSync(uploadDir)) {
@@ -25,6 +26,10 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
       if (err && err.code !== "EEXIST")
         throw new Error('Cannot create region log directory at ' + uploadDir);
     });
+  }
+
+  if(!fs.existsSync(defaultOar)) {
+    throw new Error('Default oar does not exist at ' + defaultOar);
   }
 
   router.get('/', isUser, (req, res) => {
@@ -88,7 +93,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
             }
           });
         }
-      } catch(e){/*not all jobs contain json*/}
+      } catch (e) {/*not all jobs contain json*/ }
       return j.destroy();
     }).then(() => {
       res.send(JSON.stringify({ Success: true }));
@@ -134,7 +139,39 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
   });
 
   router.post('/nukeContent/:uuid', isUser, (req, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    let regionID = new UUIDString(req.params.uuid);
+    let user = new UUIDString(req.cookies['uuid']);
+
+    let region: RegionInstance;
+    let host: HostInstance;
+
+    db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
+      console.log('User ' + user + ' requesting nuke for region ' + regionID);
+      if (!r.isRunning) {
+        throw new Error('Region is not running');
+      }
+      region = r;
+      return db.Hosts.getByAddress(r.slaveAddress);
+    }).then((h: HostInstance) => {
+      host = h;
+
+      console.log('TODO: User Permissions over ')
+      return db.Jobs.create(
+        'nuke',
+        user.toString(),
+        JSON.stringify({
+          Status: 'Pending...',
+          Region: regionID.toString()
+        })
+      )
+    }).then((j: JobInstance) => {
+      return LoadOar(region, host, j);
+    }).then(() => {
+      res.send(JSON.stringify({ Success: true }));
+    }).catch((err: Error) => {
+      res.send(JSON.stringify({ Success: false, Message: err.message }));
+    });
+
   });
 
   router.post('/loadIar', isUser, (req, res) => {
@@ -231,6 +268,12 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
             let datum = JSON.parse(j.data);
             res.sendFile(datum.File);
           });
+        case 'nuke':
+          remoteIP = req.ip.split(':').pop();
+          return db.Hosts.getByAddress(remoteIP).then((h: HostInstance) => {
+            //valid host, serve the blank file
+            res.sendFile(defaultOar);
+          });
       }
 
     }).catch((err) => {
@@ -262,7 +305,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     console.log('upload file received for job ' + taskID);
 
     db.Jobs.getByID(taskID).then((j: JobInstance) => {
-      if(!j) throw new Error('Job not found');
+      if (!j) throw new Error('Job not found');
       switch (j.type) {
         case 'save_oar':
           let remoteIP: string = req.ip.split(':').pop();

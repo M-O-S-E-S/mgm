@@ -94,7 +94,29 @@ export class ContentModal extends React.Component<props, state> {
         }).catch((err: Error) => {
             this.setState({
                 saveOarSuccess: '',
-                saveOarError: 'Error dsaving OAR file: ' + err.message
+                saveOarError: 'Error saving OAR file: ' + err.message
+            })
+        })
+    }
+
+    onNuke(): Promise<void> {
+        if (!this.props.region.isRunning) {
+            this.setState({
+                saveOarSuccess: '',
+                saveOarError: 'The region must be running for OAR operations'
+            });
+            return;
+        }
+
+        return post('/api/task/nukeContent/' + this.props.region.uuid).then(() => {
+            this.setState({
+                nukeSuccess: 'Region wipe scheduled',
+                nukeError: ''
+            })
+        }).catch((err: Error) => {
+            this.setState({
+                nukeSuccess: '',
+                nukeError: 'Error wiping region: ' + err.message
             })
         })
     }
@@ -121,7 +143,7 @@ export class ContentModal extends React.Component<props, state> {
 
                     <h3>Reset region to default</h3>
                     <p>Completely erase all terrain and content from this region, returning it to its original state.  If there is any content you wish to keep, please download an oar file first.</p>
-                    <Button>Nuke</Button>
+                    <BusyButton onClick={this.onNuke.bind(this)}>Nuke</BusyButton>
                     {this.state.nukeError ? <Alert bsStyle="danger">{this.state.nukeError}</Alert> : <div />}
                     {this.state.nukeSuccess ? <Alert bsStyle="success">{this.state.nukeSuccess}</Alert> : <div />}
 

@@ -18,6 +18,7 @@ interface state {
     selectedUser?: User
     showManage?: boolean
     showGroups?: boolean
+    nameFilter?: string
 }
 
 export class UserList extends React.Component<props, state> {
@@ -27,7 +28,8 @@ export class UserList extends React.Component<props, state> {
         this.state = {
             selectedUser: null,
             showManage: false,
-            showGroups: false
+            showGroups: false,
+            nameFilter: ''
         }
     }
 
@@ -55,8 +57,17 @@ export class UserList extends React.Component<props, state> {
         })
     }
 
+    onFilterName(e: { target: { value: string } }) {
+        this.setState({
+            nameFilter: e.target.value
+        })
+    }
+
     render() {
         let users = this.props.users.toArray()
+            .filter((u: User) => {
+                return u.name.toLowerCase().indexOf(this.state.nameFilter.toLowerCase()) !== -1;
+            }, [])
             .sort((a: User, b: User) => { return a.name.localeCompare(b.name) })
             .map((u: User) => {
                 return <UserView
@@ -68,7 +79,7 @@ export class UserList extends React.Component<props, state> {
         return (
             <Grid>
                 <Row>
-                    <Col md={3}>Name</Col>
+        <Col md={3}>Name<input type="text" placeholder="Filter Names" onChange={this.onFilterName.bind(this)}/></Col>
                     <Col md={3}>Email</Col>
                     <Col md={1}>Type</Col>
                 </Row>

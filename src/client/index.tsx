@@ -39,8 +39,8 @@ window.addEventListener('popstate', () => {
 let user: User = null;
 if (localStorage.getItem("user")) {
     user = new User(JSON.parse(localStorage.getItem("user")));
-    let token = localStorage.getItem("token")
     // do not do this here, we are not using tokens yet
+    //let token = localStorage.getItem("token")
     //store.dispatch(createLoginAction(user));
 }
 store.subscribe(() => {

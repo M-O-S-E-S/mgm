@@ -148,7 +148,7 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
                             groups={this.props.state.groups}
                             roles={this.props.state.roles}
                             members={this.props.state.members}
-                            users={this.props.state.get('users')} />
+                            users={this.props.state.users} />
                     </div>
                 )
             case '/hosts':
@@ -168,7 +168,10 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
                         {navbar}
                         <UserList
                             dispatch={this.props.dispatch}
-                            users={this.props.state.get('users')} />
+                            users={this.props.state.users}
+                            groups={this.props.state.groups}
+                            members={this.props.state.members}
+                            roles={this.props.state.roles}/>
                     </div>
                 )
             case '/pending':
@@ -186,8 +189,8 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
                         {navbar}
                         <Account
                             dispatch={this.props.dispatch}
-                            user={this.props.state.get('auth').user}
-                            jobs={this.props.state.get('jobs')} />
+                            user={this.props.state.auth.user}
+                            jobs={this.props.state.jobs} />
                     </div>
                 )
             default:

@@ -47,7 +47,7 @@ export interface IStateModel {
   users: Map<string, User>
   pendingUsers: Map<string, PendingUser>
   groups: Map<string, Group>
-  members: Map<string, Set<string>>
+  members: Map<string, Map<string, string>>
   roles: Map<string, Map<string, Role>>
   estates: Map<number, Estate>
   managers: Map<number, Set<string>>
@@ -65,7 +65,7 @@ const StateModelClass = Record({
   users: Map<string, User>(),
   pendingUsers: Map<string, PendingUser>(),
   groups: Map<string, Group>(),
-  members: Map<string, Set<string>>(),
+  members: Map<string, Map<string, string>>(),
   roles: Map<string, Map<string, Role>>(),
   estates: Map<number, Estate>(),
   managers: Map<number, Set<string>>(),
@@ -83,7 +83,7 @@ export class StateModel extends StateModelClass implements IStateModel {
   users: Map<string, User>
   pendingUsers: Map<string, PendingUser>
   groups: Map<string, Group>
-  members: Map<string, Set<string>>
+  members: Map<string, Map<string, string>>
   roles: Map<string, Map<string, Role>>
   estates: Map<number, Estate>
   managers: Map<number, Set<string>>
@@ -104,6 +104,7 @@ export class StateModel extends StateModelClass implements IStateModel {
       Map<number, Estate> |
       Map<string, Set<string>> |
       Map<number, Set<string>> |
+      Map<string, Map<string,string>> |
       Map<number, Job> | 
       Map<number, HostStat> |
       Map<string, RegionStat>

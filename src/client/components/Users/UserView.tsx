@@ -11,7 +11,8 @@ import { post } from '../../util/network';
 
 interface props {
     user: User,
-    manage: () => void
+    manage: () => void,
+    groups: () => void
 }
 
 interface state {
@@ -62,7 +63,7 @@ export class UserView extends React.Component<props, state> {
                 <Col md={2}>{userType}</Col>
                 <Col md={4}>
                     <Button bsSize="small" onClick={this.props.manage}>Manage</Button>
-                    <Button bsSize="small">Groups</Button>
+                    <Button bsSize="small" onClick={this.props.groups}>Groups</Button>
                 </Col>
             </Row>
         )

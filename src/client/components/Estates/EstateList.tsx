@@ -60,7 +60,7 @@ export class EstateList extends React.Component<props, {}> {
             .sort((a: Estate, b: Estate) => { return a.name.localeCompare(b.name) })
             .map((e: Estate) => {
                 return <EstateView
-                    key={e.id}
+                    key={e.id.toString()}
                     dispatch={this.props.dispatch}
                     users={this.props.users}
                     managers={this.props.managers.get(e.id)}

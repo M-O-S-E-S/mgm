@@ -47,11 +47,11 @@ export class EstateView extends React.Component<props, {}> {
     if (this.props.managers) {
       managers = this.props.managers.map((uuid) => {
         if (this.props.users.get(uuid)) {
-          return <span>{this.props.users.get(uuid).name}</span>
+          return <span key={this.props.estate.id + '_' + uuid}>{this.props.users.get(uuid).name}</span>
         }
       })
     }
-    console.log(this.props);
+
     return (
       <Row>
         <Col md={3}><BusyButton bsSize='xsmall' onClick={this.onRemoveEstate.bind(this)} >

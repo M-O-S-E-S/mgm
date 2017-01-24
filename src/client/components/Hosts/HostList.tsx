@@ -9,7 +9,7 @@ import { Region } from '../Regions';
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 
 import { HostView } from './HostView';
-import { HostAddModal } from './HostAdd';
+import { AddHostModal } from './AddHostModal';
 
 interface props {
     dispatch: (a: Action) => void,
@@ -32,20 +32,12 @@ export class HostList extends React.Component<props, {}> {
     }
 
     shouldComponentUpdate(nextProps: props, nextState: state) {
-        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState) ;
+        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
     }
 
     showAddHost() {
         this.setState({
             showAdd: true
-        })
-    }
-
-    onNewHost(address: string) {
-        //RequestCreateHost(address);
-        alertify.error('not implemented');
-        this.setState({
-            showAdd: false
         })
     }
     cancelNewHost() {
@@ -59,13 +51,6 @@ export class HostList extends React.Component<props, {}> {
         let hosts = this.props.hosts.toList().map((h: Host) => {
             return <HostView key={h.id} host={h} regions={this.props.regions} dispatch={this.props.dispatch} />
         });
-        let addHost = <span />
-        if (this.state.showAdd) {
-            addHost = <HostAddModal
-                cancel={this.cancelNewHost.bind(this)}
-                submit={this.onNewHost.bind(this)} />;
-        }
-
 
         return (
             <Grid>
@@ -78,7 +63,10 @@ export class HostList extends React.Component<props, {}> {
                     <Col md={1}><Button onClick={this.showAddHost.bind(this)}>Add Host</Button></Col>
                 </Row>
                 {hosts}
-                {addHost}
+                <AddHostModal
+                    show={this.state.showAdd}
+                    cancel={this.cancelNewHost.bind(this)}
+                    dispatch={this.props.dispatch} />
             </Grid >
         );
     }

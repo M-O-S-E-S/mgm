@@ -31,8 +31,8 @@ export function HostHandler(db: PersistanceLayer, isUser, isAdmin): express.Rout
       return;
     }
 
-    db.Hosts.create(host).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+    db.Hosts.create(host).then((h: HostInstance) => {
+      res.send(JSON.stringify({ Success: true, ID: h.id }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });

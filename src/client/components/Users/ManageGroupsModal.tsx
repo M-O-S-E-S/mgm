@@ -2,7 +2,7 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { DeleteUser, UpsertUserAction } from './UsersRedux';
+import { UpsertMemberAction } from '../Groups';
 import { User } from '../Users';
 import { Group, Role } from '../Groups';
 
@@ -22,8 +22,12 @@ interface props {
 
 interface state {
   error?: string
-  email?: string
-  password?: string
+  name?: string
+  memberGroups?: string[]
+  candidateGroups?: Group[]
+  candidateRoles?: Role[]
+  selectedGroup?: Group
+  selectedRole?: Role
 }
 
 export class ManageGroupsModal extends React.Component<props, state> {
@@ -31,59 +35,139 @@ export class ManageGroupsModal extends React.Component<props, state> {
   constructor(props: props) {
     super(props);
     this.state = {
+      name: '',
       error: '',
-      email: '',
-      password: ''
+      selectedGroup: null,
+      selectedRole: null,
+      candidateRoles: [],
+      candidateGroups: [],
+      memberGroups: []
     }
   }
 
-  onPasswordChange(e: { target: { value: string } }) {
+  componentWillReceiveProps(nextProps: props) {
+    if (!nextProps.user || !nextProps.show) {
+      // wipe state
+      this.setState({
+        name: '',
+        error: '',
+        selectedGroup: null,
+        selectedRole: null,
+        candidateRoles: [],
+        candidateGroups: [],
+        memberGroups: []
+      })
+      return;
+    }
+
+    // for an unknown reason, this early exist prevents repopulation
+    // if you open the same user twice in a row
+    //if (this.props.groups == nextProps.groups &&
+    //  this.props.members == nextProps.members &&
+    //  this.props.roles == nextProps.roles &&
+    //  this.props.user == nextProps.user)
+    //  return;
+
+    // Collect the groups that this user is and is not a member of
+    let memberGroups: string[] = [];
+    let candidateGroups: Group[] = [];
+    nextProps.groups.toArray()
+      .map((g: Group) => {
+        let members = nextProps.members.get(g.GroupID, Map<string, string>());
+        // if this user is a member of this group, it has a role
+        let roleId = members.get(nextProps.user.uuid, '');
+        if (roleId === '') {
+          candidateGroups.push(g);
+        } else {
+          let r = nextProps.roles.get(g.GroupID).get(roleId);
+          memberGroups.push(g.Name + ', role: ' + r.Name);
+        }
+      })
+
     this.setState({
-      password: e.target.value
+      name: nextProps.user.name,
+      memberGroups: memberGroups,
+      candidateGroups: candidateGroups
     })
   }
 
-  deleteUser(): Promise<void> {
-    return post('/api/user/destroy/' + this.props.user.uuid).then(() => {
-      alertify.success('User ' + this.props.user.name + ' deleted');
-      this.props.dispatch(DeleteUser(this.props.user));
+  onSelectGroup(e: { target: { value: string } }) {
+    let groupID = e.target.value;
+    let roles = this.props.roles.get(groupID).toArray();
+    this.setState({
+      selectedGroup: this.props.groups.get(groupID),
+      candidateRoles: roles
+    })
+  }
+  onSelectRole(e: { target: { value: string } }) {
+    this.setState({
+      selectedRole: this.props.roles.get(this.state.selectedGroup.GroupID).get(e.target.value, null)
+    })
+  }
+
+  onInsertMembership() {
+    console.log(this.state.selectedGroup.Name);
+    console.log(this.state.selectedRole.Name);
+    return post('/api/group/addUser/' + this.state.selectedGroup.GroupID, { user: this.props.user.uuid, role: this.state.selectedRole.RoleID }).then(() => {
+      this.props.dispatch(UpsertMemberAction({
+        GroupID: this.state.selectedGroup.GroupID,
+        AgentID: this.props.user.uuid,
+        SelectedRoleID: this.state.selectedRole.RoleID
+      }));
     }).catch((err: Error) => {
-      alertify.error('Error Deleting ' + this.props.user.name + ': ' + err.message);
+      this.setState({
+        error: 'Error assigning membership: ' + err.message
+      })
     })
   }
 
   render() {
-    let groups: string[] = [];
-
-    if (this.props.user) {
-      this.props.groups.toArray()
-        .map((g: Group) => {
-          let members = this.props.members.get(g.GroupID, Map<string, string>());
-          let roleId = members.get(this.props.user.uuid, '');
-          if (roleId !== '') {
-            let r = this.props.roles.get(g.GroupID).get(roleId);
-            console.log(g.Name + ': ' + r.Name);
-            return g.Name + ': ' + r.Name
-          } else {
-
-          }
-          return;
-        })
-    }
-
     return (
       <Modal show={this.props.show} onHide={this.props.cancel} >
         <Modal.Header>
-          <Modal.Title>User Groups: {this.props.user ? this.props.user.name : ''}</Modal.Title>
+          <Modal.Title>User Groups: {this.state.name}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>{this.props.user ? this.props.user.name : ''} is a member of these groups:</p>
+          <p>{this.state.name} is a member of these groups:</p>
 
           <div style={{ height: "10em", overflowY: "auto", border: "1px solid grey" }}>
-            {groups}
+            {this.state.memberGroups.map((s: string, idx: number) => {
+              return <p key={this.props.user.uuid + '_' + idx}>{s}</p>
+            })}
           </div>
 
+          <FormGroup>
+            <ControlLabel>Force user into Group</ControlLabel>
+            <FormControl componentClass="select" placeholder="select" onChange={this.onSelectGroup.bind(this)}>
+              <option key={-1} value="">select one</option>
+              {this.state.candidateGroups.map((g: Group) => {
+                return (
+                  <option
+                    key={g.GroupID}
+                    value={g.GroupID.toString()}>
+                    {g.Name}
+                  </option>
+                )
+              })}
+            </FormControl>
+          </FormGroup>
 
+          <FormGroup>
+            <ControlLabel>With Role</ControlLabel>
+            <FormControl componentClass="select" placeholder="select" onChange={this.onSelectRole.bind(this)}>
+              <option key={-1} value="">select one</option>
+              {this.state.candidateRoles.map((r: Role) => {
+                return (
+                  <option
+                    key={r.RoleID}
+                    value={r.RoleID}>
+                    {r.Name}
+                  </option>
+                )
+              })}
+            </FormControl>
+          </FormGroup>
+          <BusyButton onClick={this.onInsertMembership.bind(this)}>Insert Membership</BusyButton>
           {this.state.error ? <Alert bsStyle="danger">{this.state.error}</Alert> : <div />}
         </Modal.Body>
 

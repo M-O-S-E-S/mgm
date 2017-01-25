@@ -2,7 +2,7 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { UpsertMemberAction } from '../Groups';
+import { UpsertMemberAction, DeleteMemberAction } from '../Groups';
 import { User } from '../Users';
 import { Group, Role } from '../Groups';
 
@@ -23,7 +23,7 @@ interface props {
 interface state {
   error?: string
   name?: string
-  memberGroups?: string[]
+  memberGroups?: Group[]
   candidateGroups?: Group[]
   candidateRoles?: Role[]
   selectedGroup?: Group
@@ -69,7 +69,7 @@ export class ManageGroupsModal extends React.Component<props, state> {
     //  return;
 
     // Collect the groups that this user is and is not a member of
-    let memberGroups: string[] = [];
+    let memberGroups: Group[] = [];
     let candidateGroups: Group[] = [];
     nextProps.groups.toArray()
       .map((g: Group) => {
@@ -80,7 +80,7 @@ export class ManageGroupsModal extends React.Component<props, state> {
           candidateGroups.push(g);
         } else {
           let r = nextProps.roles.get(g.GroupID).get(roleId);
-          memberGroups.push(g.Name + ', role: ' + r.Name);
+          memberGroups.push(g);
         }
       })
 
@@ -106,8 +106,6 @@ export class ManageGroupsModal extends React.Component<props, state> {
   }
 
   onInsertMembership() {
-    console.log(this.state.selectedGroup.Name);
-    console.log(this.state.selectedRole.Name);
     return post('/api/group/addUser/' + this.state.selectedGroup.GroupID, { user: this.props.user.uuid, role: this.state.selectedRole.RoleID }).then(() => {
       this.props.dispatch(UpsertMemberAction({
         GroupID: this.state.selectedGroup.GroupID,
@@ -118,7 +116,21 @@ export class ManageGroupsModal extends React.Component<props, state> {
       this.setState({
         error: 'Error assigning membership: ' + err.message
       })
-    })
+    });
+  }
+
+  onEjectMembership(g: Group){
+    return post('/api/group/removeUser/' + g.GroupID, { user: this.props.user.uuid }).then(() => {
+      this.props.dispatch(DeleteMemberAction({
+        GroupID: g.GroupID,
+        AgentID: this.props.user.uuid,
+        SelectedRoleID: ''
+      }));
+    }).catch((err: Error) => {
+      this.setState({
+        error: 'Error ejecting membership: ' + err.message
+      })
+    });
   }
 
   render() {
@@ -131,8 +143,8 @@ export class ManageGroupsModal extends React.Component<props, state> {
           <p>{this.state.name} is a member of these groups:</p>
 
           <div style={{ height: "10em", overflowY: "auto", border: "1px solid grey" }}>
-            {this.state.memberGroups.map((s: string, idx: number) => {
-              return <p key={this.props.user.uuid + '_' + idx}>{s}</p>
+            {this.state.memberGroups.map((g: Group) => {
+              return <p key={g.GroupID}>{g.Name} <BusyButton bsStyle="danger" bsSize="xs" onClick={this.onEjectMembership.bind(this,g)}>Eject from group</BusyButton></p>
             })}
           </div>
 

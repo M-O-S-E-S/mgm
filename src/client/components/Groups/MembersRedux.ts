@@ -12,10 +12,19 @@ interface MembershipBulkAction extends Action {
 
 const ADD_MEMBER = "GROUPS_ADD_MEMBER";
 const ADD_MEMBER_BULK = 'GROUPS_ADD_MEMBER_BULK';
+const DELETE_MEMBER = "GROUPS_DELETE_MEMBER";
 
 export const UpsertMemberAction = function(m: IMembership): Action {
   let act: MembershipAction = {
     type: ADD_MEMBER,
+    member: m
+  }
+  return act;
+}
+
+export const DeleteMemberAction = function(m: IMembership): Action {
+  let act: MembershipAction = {
+    type: DELETE_MEMBER,
     member: m
   }
   return act;
@@ -42,6 +51,10 @@ export const MembersReducer = function(state = Map<string, Map<string, string>>(
         state = state.set(m.GroupID, members.set(m.AgentID, m.SelectedRoleID));
       });
       return state;
+    case DELETE_MEMBER:
+      ma = <MembershipAction>action;
+      members = state.get(ma.member.GroupID, Map<string, string>());
+      return state.set(ma.member.GroupID, members.delete(ma.member.AgentID));
     default:
       return state;
   }

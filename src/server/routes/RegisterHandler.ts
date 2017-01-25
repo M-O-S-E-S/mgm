@@ -54,6 +54,9 @@ export function RegisterHandler(db: PersistanceLayer, templates: { [key: string]
         if (u.name.toLowerCase() === name.toLowerCase()) {
           throw new Error('Name is already in use by an applicant user');
         }
+        if(u.email === email) {
+          throw new Error('registration emails must be unique');
+        }
       }
     }).then( () => {
       return db.PendingUsers.create(name, email, template, Credential.fromPlaintext(password), summary);
@@ -64,6 +67,7 @@ export function RegisterHandler(db: PersistanceLayer, templates: { [key: string]
     }).then(() => {
       EmailMgr.instance().notifyAdminUserPending(name, email);
     }).catch((err: Error) => {
+      console.log(err);
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
 

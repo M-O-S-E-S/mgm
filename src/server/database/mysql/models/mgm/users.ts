@@ -40,7 +40,7 @@ export function users(sequelize, DataTypes): PendingUserModel {
     registered: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: 'CURRENT_TIMESTAMP'
+      defaultValue: Sequelize.NOW
     },
     summary: {
       type: DataTypes.TEXT,

@@ -137,8 +137,8 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
     let password = req.body.password || '';
 
 
-    if (!fullname.trim().match('^[A-z]+ [A-z]+') || email === '' || template === '' || password === '') {
-      return res.send(JSON.stringify({ Success: false, Message: 'Missing form parts' }));
+    if (!fullname.trim().match('^[A-z]+ [A-z]+') || template === '' || password === '') {
+      return res.send(JSON.stringify({ Success: false, Message: 'Incomplete form submission' }));
     }
 
     let names: string[] = fullname.split(' ');
@@ -159,9 +159,10 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
       templateUser = t;
       //create the user account
       return db.Users.createUserFromTemplate(names[0], names[1], Credential.fromPlaintext(password), email, templateUser);
-    }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+    }).then((u: UserInstance) => {
+      res.send(JSON.stringify({ Success: true, Message: u.UUID }));
     }).catch((err: Error) => {
+      console.log(err);
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
   });

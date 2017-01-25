@@ -40,8 +40,8 @@ export class Users {
         username: nameParts[0],
         lastname: nameParts[1]
       }
-    }).then( (user: UserInstance) => {
-      if(user) return user;
+    }).then((user: UserInstance) => {
+      if (user) return user;
       throw new Error('User does not exist');
     })
   }
@@ -51,6 +51,10 @@ export class Users {
       where: {
         email: email
       }
+    }).then((u: UserInstance) => {
+      if (u)
+        return u;
+      throw new Error('User does not exist');
     })
   }
 
@@ -59,15 +63,21 @@ export class Users {
       where: {
         UUID: id
       }
+    }).then((u: UserInstance) => {
+      if (u)
+        return u;
+      throw new Error('User does not exist');
     })
   }
 
   createUserFromTemplate(fname: string, lname: string, cred: Credential, email: string, template: UserInstance): Promise<UserInstance> {
-    if(!template){
+    if (!template) {
       return Promise.reject('MGM only supports creating users from a template');
     }
 
     let newUser: UserInstance;
+
+    console.log('Creating new user account ' + fname + ' ' + lname);
 
     return this.user.create({
       UUID: UUIDString.random().toString(),
@@ -106,12 +116,13 @@ export class Users {
       wantToMask: 0,
       wantToText: '',
       languagesText: ''
-    }).then( (u: UserInstance) => {
+    }).then((u: UserInstance) => {
       newUser = u;
+      console.log('Cloning inventory for ' + fname + ' ' + lname);
       // clone inventory and appearance
       let t = new Inventory(template.UUID, this.items, this.folders, this.appearance);
       return t.cloneInventoryOnto(newUser.UUID);
-    }).then( () => {
+    }).then(() => {
       return newUser;
     })
   }

@@ -5,11 +5,12 @@ const shallowequal = require('shallowequal');
 
 import { UserView } from './UserView';
 import { User } from '.';
-import { Group, Role} from '../Groups';
+import { Group, Role } from '../Groups';
+import { AddUserModal } from './AddUserModal';
 import { ManageUserModal } from './ManageUserModal';
 import { ManageGroupsModal } from './ManageGroupsModal';
 
-import { Grid, Row, Col } from 'react-bootstrap'
+import { Grid, Row, Col, Button } from 'react-bootstrap'
 
 interface props {
     dispatch: (a: Action) => void,
@@ -23,6 +24,7 @@ interface state {
     selectedUser?: User
     showManage?: boolean
     showGroups?: boolean
+    showAdd?: boolean
     nameFilter?: string
 }
 
@@ -34,6 +36,7 @@ export class UserList extends React.Component<props, state> {
             selectedUser: null,
             showManage: false,
             showGroups: false,
+            showAdd: false,
             nameFilter: ''
         }
     }
@@ -48,6 +51,17 @@ export class UserList extends React.Component<props, state> {
                 selectedUser: nextProps.users.get(this.state.selectedUser.uuid, null)
             });
         }
+    }
+
+    onShowAdd(u: User) {
+        this.setState({
+            showAdd: true
+        })
+    }
+    onDismissAdd() {
+        this.setState({
+            showAdd: false
+        })
     }
 
     onShowManage(u: User) {
@@ -99,9 +113,15 @@ export class UserList extends React.Component<props, state> {
                 <Row>
                     <Col md={3}>Name<input type="text" placeholder="Filter Names" onChange={this.onFilterName.bind(this)} /></Col>
                     <Col md={3}>Email</Col>
-                    <Col md={1}>Type</Col>
+                    <Col md={2}>Type</Col>
+                    <Col md={4}><Button bsSize="xs" onClick={this.onShowAdd.bind(this)}>Admin Add User</Button></Col>
                 </Row>
                 {users}
+                <AddUserModal
+                    show={this.state.showAdd}
+                    dismiss={this.onDismissAdd.bind(this)} 
+                    dispatch={this.props.dispatch}
+                    users={this.props.users} />
                 <ManageUserModal
                     cancel={this.onDismissManage.bind(this)}
                     dispatch={this.props.dispatch}

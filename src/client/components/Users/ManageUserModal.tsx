@@ -92,6 +92,7 @@ export class ManageUserModal extends React.Component<props, state> {
     return post('/api/user/destroy/' + this.props.user.uuid).then(() => {
       alertify.success('User ' + this.props.user.name + ' deleted');
       this.props.dispatch(DeleteUser(this.props.user));
+      this.props.cancel();
     }).catch((err: Error) => {
       alertify.error('Error Deleting ' + this.props.user.name + ': ' + err.message);
     })

@@ -6,7 +6,7 @@ export interface PendingUserAttribute {
   email: string
   gender: string
   password: string
-  registered?: Date
+  registered?: string
   summary: string
 }
 

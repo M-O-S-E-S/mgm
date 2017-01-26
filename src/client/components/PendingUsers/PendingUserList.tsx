@@ -5,24 +5,49 @@ const shallowequal = require('shallowequal');
 
 import { PendingUser } from '.';
 import { PendingUserView } from './PendingUserView';
+import { ReviewPendingModal } from './ReviewPendingModal';
 
 import { Grid, Row, Col } from 'react-bootstrap';
 
 interface props {
     dispatch: (a: Action) => void,
-    users: Map<string,PendingUser>
+    users: Map<string, PendingUser>
 }
 
-export class PendingUserList extends React.Component<props, {}> {
+interface state {
+    showReview?: boolean
+    selectedUser?: PendingUser
+}
 
-    shouldComponentUpdate(nextProps: props) {
-        return !shallowequal(this.props, nextProps);
+export class PendingUserList extends React.Component<props, state> {
+
+    constructor(props: props){
+        super(props);
+        this.state = {
+            showReview: false,
+            selectedUser: null
+        }
     }
 
+    shouldComponentUpdate(nextProps: props, nextState: state) {
+        return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
+    }
+
+    onShowReview(u: PendingUser) {
+        this.setState({
+            showReview: true,
+            selectedUser: u
+        });
+    }
+    onDismissReview() {
+        this.setState({
+            showReview: false
+        });
+    }
 
     render() {
         let users = this.props.users.toList().map((u: PendingUser) => {
-            return <PendingUserView key={u.name} user={u}/>
+            return <PendingUserView key={u.name} user={u} onReview={this.onShowReview.bind(this, u)}/>
         })
 
         return (
@@ -31,9 +56,14 @@ export class PendingUserList extends React.Component<props, {}> {
                     <Col md={3}>Name</Col>
                     <Col md={3}>Email</Col>
                     <Col md={3}>Registered</Col>
-                    <Col md={3}>Summary</Col>
+                    <Col md={3}></Col>
                 </Row>
                 {users}
+                <ReviewPendingModal
+                    show={this.state.showReview} 
+                    cancel={this.onDismissReview.bind(this)} 
+                    dispatch={this.props.dispatch.bind(this)}
+                    user={this.state.selectedUser} />
             </Grid>
         )
     }

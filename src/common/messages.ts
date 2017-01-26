@@ -9,7 +9,7 @@ export interface IPendingUser {
     name: string
     email: string
     gender: string
-    registered: Date
+    registered: string
     summary: string
 }
 

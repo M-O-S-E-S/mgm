@@ -40,6 +40,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
           registered: u.registered,
           summary: u.summary
         }
+        return iu;
       })
     }).then(() => {
       res.send(JSON.stringify({
@@ -188,6 +189,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
   router.post('/approve', isAdmin, (req, res) => {
     let name = req.body.name;
     let pUser: PendingUserInstance
+    let newUser: UserInstance
     db.PendingUsers.getByName(name).then((u: PendingUserInstance) => {
       pUser = u;
       if (!(u.gender in templates)) {
@@ -203,14 +205,15 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
     }).then( (templateID: UUIDString) => {
       return db.Users.getByID(templateID.toString());
     }).then((t: UserInstance) => {
-      let names = pUser.name;
+      let names = pUser.name.trim().split(' ');
       return db.Users.createUserFromTemplate(names[0], names[1], Credential.fromHalcyon(pUser.password), pUser.email, t);
-    }).then(() => {
+    }).then((nu: UserInstance ) => {
+      newUser = nu;
       return pUser.destroy();
     }).then(() => {
       return EmailMgr.instance().accountApproved(pUser.name, pUser.email);
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.send(JSON.stringify({ Success: true, Message: newUser.UUID }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });

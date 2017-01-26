@@ -5,6 +5,7 @@ const shallowequal = require('shallowequal');
 
 import { Job } from '.';
 import { User } from '../Users';
+import { Region } from '../Regions';
 import { post } from '../../util/network';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';
@@ -15,7 +16,8 @@ import { SetPasswordModal } from './SetPasswordModal';
 interface props {
     dispatch: (a: Action) => void,
     user: User
-    jobs: Map<number, Job>
+    jobs: Map<number, Job>,
+    regions: Map<string, Region>
 }
 
 interface state {
@@ -60,22 +62,22 @@ export class Account extends React.Component<props, {}> {
         return (
             <Grid>
                 <Row>
-                    <Col md={6}>Avatar Name</Col>
+                    <Col md={2}>Avatar Name</Col>
                     <Col md={6}>{this.props.user.name}</Col>
                 </Row>
                 <Row>
-                    <Col md={6}>Avatar User Level</Col>
+                    <Col md={2}>Avatar User Level</Col>
                     <Col md={6}>{this.props.user.godLevel}</Col>
                 </Row>
                 <Row>
-                    <Col md={6}>User Email</Col>
+                    <Col md={2}>User Email</Col>
                     <Col md={6}>{this.props.user.email}</Col>
                 </Row>
                 <hr />
                 <Button onClick={this.showNewPassword.bind(this)} disabled={this.state.showPasswordModal}>Set Password</Button>
                 <SetPasswordModal show={this.state.showPasswordModal} submit={this.handleNewPassword.bind(this)} cancel={this.cancelNewPassword.bind(this)} />
                 <hr />
-                <JobList dispatch={this.props.dispatch} jobs={this.props.jobs} />
+                <JobList dispatch={this.props.dispatch} jobs={this.props.jobs} regions={this.props.regions}/>
             </Grid>
         )
     }

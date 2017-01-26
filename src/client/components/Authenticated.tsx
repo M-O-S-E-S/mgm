@@ -197,7 +197,8 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                         <Account
                             dispatch={this.props.dispatch}
                             user={this.props.state.auth.user}
-                            jobs={this.props.state.jobs} />
+                            jobs={this.props.state.jobs}
+                            regions={this.props.state.regions} />
                     </div>
                 )
             default:

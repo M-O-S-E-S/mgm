@@ -5,6 +5,7 @@ const shallowequal = require('shallowequal');
 
 import { JobView } from './JobView';
 import { Job } from '.';
+import { Region } from '../Regions';
 
 import { post } from '../../util/network';
 
@@ -15,13 +16,14 @@ import { DeleteJobAction } from './JobsRedux';
 
 interface props {
   dispatch: (a: Action) => void,
-  jobs: Map<number, Job>
+  jobs: Map<number, Job>,
+  regions: Map<string, Region>,
 }
 
 export class JobList extends React.Component<props, {}> {
 
   shouldComponentUpdate(nextProps: props) {
-    return !shallowequal(this.props.jobs, nextProps.jobs);
+    return !shallowequal(this.props, nextProps);
   }
 
   deleteJob(j: Job): Promise<void> {
@@ -42,7 +44,7 @@ export class JobList extends React.Component<props, {}> {
 
   render() {
     let jobs = this.props.jobs.toList().map((job: Job) => {
-      return <JobView key={job.id} job={job} deleteJob={this.deleteJob.bind(this)} />
+      return <JobView key={job.id} job={job} deleteJob={this.deleteJob.bind(this)} regions={this.props.regions}/>
     })
 
     return (
@@ -51,8 +53,8 @@ export class JobList extends React.Component<props, {}> {
           <Col md={1}><BusyButton bsSize='xsmall' onClick={this.deleteAllJobs.bind(this)}>Clear All</BusyButton></Col>
           <Col md={1}><strong>Job ID</strong></Col>
           <Col md={2}><strong>Timestamp</strong></Col>
-          <Col md={2}><strong>Description</strong></Col>
-          <Col md={6}><strong>Status</strong></Col>
+          <Col md={3}><strong>Description</strong></Col>
+          <Col md={5}><strong>Status</strong></Col>
         </Row>
         {jobs}
       </Grid>

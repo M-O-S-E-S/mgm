@@ -207,7 +207,7 @@ export function RegionINI(r: RegionInstance, conf: Config): { [key: string]: { [
 
   config['FreeSwitchVoice'] = {};
   config['FreeSwitchVoice']['enabled'] = 'true';
-  config['FreeSwitchVoice']['account_service'] = conf.mgm.internalUrl + '/fsapi';
+  config['FreeSwitchVoice']['account_service'] = conf.mgm.internalUrl + 'fsapi';
 
   return config;
 }

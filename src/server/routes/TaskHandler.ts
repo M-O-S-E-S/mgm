@@ -326,8 +326,6 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
             return EmailMgr.instance().sendSaveOarComplete(u.email, fileName);
           })
         case 'load_oar':
-          console.log(req.file);
-
           let user = new UUIDString(req.cookies['uuid']);
           if (user.toString() !== j.user.toString()) {
             throw new Error('Permission Denied');

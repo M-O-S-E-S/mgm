@@ -26,7 +26,9 @@ gulp && node dist/mgm.js
 to manually create users on the command line:
 node dist/cli.js createUser FNAME LNAME PASSWORD [EMAIL] [GODLEVEL]
 
-Initialize the mgm database by applying the sql files under doc in order.
+Initialize the mgm database by applying the sql files under serverFiles in order.
+
+MGM's server.js file does not serve static files.  Instead host this behind an nginx instance, an example config file for which is located inside serverFiles.
 
 # Other Information
 

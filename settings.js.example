@@ -2,7 +2,7 @@ var settings = {};
 
 // MGM component settings
 settings.mgm = {};
-settings.mgm.db = {};
+settings.mgm.db = {}
 settings.mgm.db.host = "devsql";
 settings.mgm.db.user = "mgm";
 settings.mgm.db.pass = "mgm";
@@ -12,6 +12,7 @@ settings.mgm.internalUrl = "http://127.0.0.1:3000/";
 
 settings.mgm.log_dir = "/opt/moses/mgm/logs";
 settings.mgm.upload_dir = "/opt/moses/mgm/uploads";
+settings.mgm.default_oar_path = "/var/www/html/mgm.militarymetaverse.org/serverFiles/default.oar";
 
 // Templates available for user creation
 settings.mgm.templates = {
@@ -45,7 +46,7 @@ settings.mgm.voiceIP = "Freeswitch IP";
 
 // Settings for MGM to communicate with the Halcyon databases
 settings.halcyon = {};
-settings.halcyon.db = {};
+settings.halcyon.db = {}
 settings.halcyon.db.host = "devsql";
 settings.halcyon.db.user = "inworldz";
 settings.halcyon.db.pass = "inworldz";

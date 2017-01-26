@@ -1,15 +1,34 @@
 {
   "name": "halcyonUtil",
   "globalDependencies": {
+    "alertify": "registry:dt/alertify#0.0.0+20160317120654",
     "bluebird": "registry:dt/bluebird#2.0.0+20160319051630",
-    "body-parser": "registry:dt/body-parser#0.0.0+20160317120654",
-    "express": "registry:dt/express#4.0.0+20160317120654",
+    "body-parser": "registry:dt/body-parser#0.0.0+20160619023215",
     "express-serve-static-core": "registry:dt/express-serve-static-core#0.0.0+20160322035842",
+    "lodash": "registry:dt/lodash#4.14.0+20160830145422",
+    "log4js": "registry:dt/log4js#0.0.0+20160608042355",
+    "md5": "registry:dt/md5#2.1.0+20160521153251",
     "mime": "registry:dt/mime#0.0.0+20160316155526",
     "multer": "registry:dt/multer#0.0.0+20160317120654",
     "mysql": "registry:dt/mysql#0.0.0+20160316155526",
-    "node": "registry:dt/node#6.0.0+20160514165920",
+    "node": "registry:dt/node#6.0.0+20160915134512",
+    "react": "registry:dt/react#0.14.0+20160829191040",
+    "react-bootstrap": "registry:dt/react-bootstrap#0.0.0+20160806072414",
+    "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
+    "redux": "registry:dt/redux#3.5.2+20160703092728",
+    "redux-actions": "registry:dt/redux-actions#0.8.0+20160521154116",
+    "reselect": "registry:dt/reselect#2.0.2+20160319031821",
+    "sequelize": "registry:dt/sequelize#3.4.1+20160815132916",
     "serve-static": "registry:dt/serve-static#0.0.0+20160501131543",
+    "shallowequal": "registry:dt/shallowequal#0.2.2+20160928205935",
+    "socket.io": "registry:dt/socket.io#1.4.4+20160909205835",
+    "socket.io-client": "registry:dt/socket.io-client#1.4.4+20160317120654",
+    "validator": "registry:dt/validator#5.7.0+20160914130311",
     "xml2js": "registry:dt/xml2js#0.0.0+20160317120654"
+  },
+  "dependencies": {
+    "express": "registry:npm/express#4.14.0+20160911114220",
+    "jsonwebtoken": "registry:npm/jsonwebtoken#7.1.8+20160811031426",
+    "react-redux": "registry:npm/react-redux#4.4.0+20160614222153"
   }
 }

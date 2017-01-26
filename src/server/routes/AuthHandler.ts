@@ -57,7 +57,7 @@ export function AuthHandler(db: PersistanceLayer, isUser: any): express.Router {
 
           res.send(JSON.stringify({
             Success: true,
-            username: u.username,
+            username: u.username + ' ' + u.lastname,
             accessLevel: u.godLevel,
             email: u.email
           }));

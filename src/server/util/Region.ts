@@ -63,15 +63,15 @@ export function SaveOar(r: RegionInstance, h: HostInstance, j: JobInstance): Pro
 }
 
 export function LoadOar(r: RegionInstance, h: HostInstance, j: JobInstance): Promise<void> {
-    console.log('triggering oar load for ' + r.uuid);
-    let url = 'http://' + h.address + ':' + h.port + '/loadOar/' + r.uuid + '/' + j.id;
-    return urllib.request(url).then((body) => {
-      let result = JSON.parse(body.data);
-      if (!result.Success) {
-        throw new Error(result.Message);
-      }
-    });
-  }
+  console.log('triggering oar load for ' + r.uuid);
+  let url = 'http://' + h.address + ':' + h.port + '/loadOar/' + r.uuid + '/' + j.id;
+  return urllib.request(url).then((body) => {
+    let result = JSON.parse(body.data);
+    if (!result.Success) {
+      throw new Error(result.Message);
+    }
+  });
+}
 
 export function RegionINI(r: RegionInstance, conf: Config): { [key: string]: { [key: string]: string } } {
   let connString: string = 'Data Source=' + conf.halcyon.db.host +
@@ -204,5 +204,10 @@ export function RegionINI(r: RegionInstance, conf: Config): { [key: string]: { [
 
   config['AvatarRemoteCommands'] = {};
   config['AvatarRemoteCommands']['Enabled'] = 'false';
+
+  config['FreeSwitchVoice'] = {};
+  config['FreeSwitchVoice']['enabled'] = 'true';
+  config['FreeSwitchVoice']['account_service'] = conf.mgm.internalUrl + '/fsapi';
+
   return config;
 }

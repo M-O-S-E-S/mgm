@@ -16,7 +16,8 @@ interface props {
     estates: Map<number, Estate>
     estateMap: Map<string, number>,
     managers: Map<number, Set<string>>,
-    users: Map<string, User>
+    users: Map<string, User>,
+    isAdmin: boolean
 }
 
 interface state {
@@ -61,6 +62,7 @@ export class EstateList extends React.Component<props, {}> {
             .map((e: Estate) => {
                 return <EstateView
                     key={e.id.toString()}
+                    isAdmin={this.props.isAdmin}
                     dispatch={this.props.dispatch}
                     users={this.props.users}
                     managers={this.props.managers.get(e.id)}
@@ -75,7 +77,12 @@ export class EstateList extends React.Component<props, {}> {
                     <Col md={1}>Regions</Col>
                     <Col md={3}>Owner</Col>
                     <Col md={4}>Managers</Col>
-                    <Col md={1}><Button onClick={this.showAddEstate.bind(this)}>Add Estate</Button></Col>
+                    <Col md={1}>
+                        {this.props.isAdmin ?
+                            <Button onClick={this.showAddEstate.bind(this)}>Add Estate</Button> :
+                            <span />
+                        }
+                    </Col>
                 </Row>
                 {estates}
                 <AddEstateModal

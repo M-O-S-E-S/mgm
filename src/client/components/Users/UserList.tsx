@@ -18,6 +18,7 @@ interface props {
     groups: Map<string, Group>,
     members: Map<string, Map<string, string>>,
     roles: Map<string, Map<string, Role>>,
+    isAdmin: boolean
 }
 
 interface state {
@@ -103,6 +104,7 @@ export class UserList extends React.Component<props, state> {
             .map((u: User) => {
                 return <UserView
                     key={u.uuid}
+                    isAdmin={this.props.isAdmin}
                     user={u}
                     manage={this.onShowManage.bind(this, u)}
                     groups={this.onShowGroups.bind(this, u)} />
@@ -114,12 +116,17 @@ export class UserList extends React.Component<props, state> {
                     <Col md={3}>Name<input type="text" placeholder="Filter Names" onChange={this.onFilterName.bind(this)} /></Col>
                     <Col md={3}>Email</Col>
                     <Col md={2}>Type</Col>
-                    <Col md={4}><Button bsSize="xs" onClick={this.onShowAdd.bind(this)}>Admin Add User</Button></Col>
+                    <Col md={4}>
+                        {this.props.isAdmin ?
+                            <Button bsSize="xs" onClick={this.onShowAdd.bind(this)}>Admin Add User</Button> :
+                            <span />
+                        }
+                    </Col>
                 </Row>
                 {users}
                 <AddUserModal
                     show={this.state.showAdd}
-                    dismiss={this.onDismissAdd.bind(this)} 
+                    dismiss={this.onDismissAdd.bind(this)}
                     dispatch={this.props.dispatch}
                     users={this.props.users} />
                 <ManageUserModal

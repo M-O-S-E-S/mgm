@@ -18,6 +18,7 @@ interface props {
   users: Map<string, User>
   managers: Set<string>
   regionCount: number
+  isAdmin: boolean
 }
 
 export class EstateView extends React.Component<props, {}> {
@@ -31,11 +32,11 @@ export class EstateView extends React.Component<props, {}> {
       alertify.error('Cannot remove Estate ' + this.props.estate.name + ', there are ' + this.props.regionCount + ' regions assigned');
       return Promise.resolve();
     }
-    return post('/api/estate/destroy/' + this.props.estate.id).then( () => {
+    return post('/api/estate/destroy/' + this.props.estate.id).then(() => {
       alertify.success('Estate ' + this.props.estate.name + ' deleted');
       this.props.dispatch(EstateDeletedAction(this.props.estate.id));
     }).catch((err: Error) => {
-      alertify.error('Error deleting '  +this.props.estate.name + ': ' + err.message);
+      alertify.error('Error deleting ' + this.props.estate.name + ': ' + err.message);
     });
   }
 
@@ -54,9 +55,15 @@ export class EstateView extends React.Component<props, {}> {
 
     return (
       <Row>
-        <Col md={3}><BusyButton bsSize='xsmall' onClick={this.onRemoveEstate.bind(this)} >
-          <i className="fa fa-trash" aria-hidden="true"></i>
-        </BusyButton>  {this.props.estate.name}</Col>
+        <Col md={3}>
+          {this.props.isAdmin ?
+            <BusyButton bsSize='xsmall' onClick={this.onRemoveEstate.bind(this)} >
+              <i className="fa fa-trash" aria-hidden="true"></i>
+            </BusyButton> :
+            <span />
+          }
+          {this.props.estate.name}
+        </Col>
         <Col md={1}>{this.props.regionCount}</Col>
         <Col md={3}>{estateOwner}</Col>
         <Col md={5}>{managers}</Col>

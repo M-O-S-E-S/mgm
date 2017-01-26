@@ -12,7 +12,8 @@ import { post } from '../../util/network';
 interface props {
     user: User,
     manage: () => void,
-    groups: () => void
+    groups: () => void,
+    isAdmin: boolean
 }
 
 interface state {
@@ -61,10 +62,15 @@ export class UserView extends React.Component<props, state> {
                 <Col md={3}>{this.props.user.name}</Col>
                 <Col md={3}>{this.props.user.email}</Col>
                 <Col md={2}>{userType}</Col>
-                <Col md={4}>
-                    <Button bsSize="small" onClick={this.props.manage}>Manage</Button>
-                    <Button bsSize="small" onClick={this.props.groups}>Groups</Button>
-                </Col>
+
+                {this.props.isAdmin ?
+                    <Col md={4}>
+                        <Button bsSize="small" onClick={this.props.manage}>Manage</Button>
+                        <Button bsSize="small" onClick={this.props.groups}>Groups</Button>
+                    </Col> :
+                    <span />
+                }
+
             </Row>
         )
     }

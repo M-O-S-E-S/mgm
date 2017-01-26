@@ -25,17 +25,19 @@ interface authenticatedProps {
 }
 
 interface state {
-    url: string
+    url?: string
+    isAdmin?: boolean
 }
 
-export class Authenticated extends React.Component<authenticatedProps, {}> {
+export class Authenticated extends React.Component<authenticatedProps, state> {
     state: state
     timerToken: number;
 
     constructor(props: authenticatedProps) {
         super(props);
         this.state = {
-            url: props.state.url
+            url: props.state.url,
+            isAdmin: this.props.state.auth.user.godLevel >= 250
         }
 
         this.timerToken = setInterval(this.props.synchronizer.sync.bind(this.props.synchronizer), 10000);
@@ -92,21 +94,23 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
                                 onClick={this.handleNav.bind(this, "/groups")}>
                                 Groups
                             </MenuItem>
-                            <MenuItem active={this.state.url === "/hosts"}
-                                onClick={this.handleNav.bind(this, "/hosts")}>
-                                Hosts
-                            </MenuItem>
+                            {this.state.isAdmin ?
+                                <MenuItem active={this.state.url === "/hosts"}
+                                    onClick={this.handleNav.bind(this, "/hosts")}>
+                                    Hosts
+                            </MenuItem> : <span />}
                         </NavDropdown>
                         <NavItem
                             active={this.state.url === "/users"}
                             onClick={this.handleNav.bind(this, "/users")}>
                             Users
                         </NavItem >
-                        <NavItem
-                            active={this.state.url === "/pending"}
-                            onClick={this.handleNav.bind(this, "/pending")}>
-                            Pending Users
-                        </NavItem >
+                        {this.state.isAdmin ?
+                            <NavItem
+                                active={this.state.url === "/pending"}
+                                onClick={this.handleNav.bind(this, "/pending")}>
+                                Pending Users
+                        </NavItem > : <span />}
                     </Nav >
                     <Nav pullRight>
                         <NavItem><Button bsSize="xsmall" onClick={this.handleLogout.bind(this)}>Log Out</Button></NavItem>
@@ -120,6 +124,7 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
                     <div>
                         {navbar}
                         <RegionList
+                            isAdmin={this.state.isAdmin}
                             dispatch={this.props.dispatch}
                             regions={this.props.state.regions}
                             estateMap={this.props.state.estateMap}
@@ -132,6 +137,7 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
                     <div>
                         {navbar}
                         <EstateList
+                            isAdmin={this.state.isAdmin}
                             dispatch={this.props.dispatch}
                             estates={this.props.state.estates}
                             estateMap={this.props.state.estateMap}
@@ -167,11 +173,12 @@ export class Authenticated extends React.Component<authenticatedProps, {}> {
                     <div>
                         {navbar}
                         <UserList
+                            isAdmin={this.state.isAdmin}
                             dispatch={this.props.dispatch}
                             users={this.props.state.users}
                             groups={this.props.state.groups}
                             members={this.props.state.members}
-                            roles={this.props.state.roles}/>
+                            roles={this.props.state.roles} />
                     </div>
                 )
             case '/pending':

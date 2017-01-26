@@ -16,7 +16,8 @@ interface regionProps {
   region: Region,
   onManage: () => void,
   onContent: () => void,
-  onLog: () => void
+  onLog: () => void,
+  isAdmin: boolean
 }
 
 export class RegionView extends React.Component<regionProps, {}> {
@@ -76,9 +77,12 @@ export class RegionView extends React.Component<regionProps, {}> {
         <Col xs={6} sm={6} md={6} lg={2}>
           <Row>
             <Col xs={1}>
-              <Button bsSize="xsmall" disabled={this.props.region.isRunning} onClick={this.props.onManage}>
-                <i className="fa fa-cog" aria-hidden="true" ></i>
-              </Button>
+              {this.props.isAdmin ?
+                <Button bsSize="xsmall" disabled={this.props.region.isRunning} onClick={this.props.onManage}>
+                  <i className="fa fa-cog" aria-hidden="true" ></i>
+                </Button> :
+                <span />
+              }
             </Col>
             <Col xs={8}>{this.props.region.name}</Col>
             <Col xs={1}>

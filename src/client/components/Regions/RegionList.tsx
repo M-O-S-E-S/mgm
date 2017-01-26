@@ -20,7 +20,8 @@ interface props {
     regions: Map<string, Region>,
     estateMap: Map<string, number>,
     estates: Map<number, Estate>,
-    hosts: Map<number, Host>
+    hosts: Map<number, Host>,
+    isAdmin: boolean
 }
 
 interface state {
@@ -146,6 +147,7 @@ export class RegionList extends React.Component<props, {}> {
                     .map((r: Region) => {
                         return <RegionView
                             key={r.uuid}
+                            isAdmin={this.props.isAdmin}
                             region={r}
                             onManage={this.onManageRegion.bind(this, r)}
                             onContent={this.onManageRegionContent.bind(this, r)}
@@ -180,7 +182,12 @@ export class RegionList extends React.Component<props, {}> {
                             {estateSelect}
                         </FormControl>
                     </Col>
-                    <Col md={2}><h3><Button onClick={this.onAddRegion.bind(this)}>Add Region</Button></h3></Col>
+                    <Col md={2}>
+                        {this.props.isAdmin ?
+                            <h3><Button onClick={this.onAddRegion.bind(this)}>Add Region</Button></h3> :
+                            <span />
+                        }
+                    </Col>
                 </Row>
                 {estates}
                 <ManageModal

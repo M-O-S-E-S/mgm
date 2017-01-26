@@ -56,7 +56,7 @@ export interface IStateModel {
 
 const StateModelClass = Record({
   auth: new Auth(),
-  url: '',
+  url: '/',
   hosts: Map<number, Host>(),
   hostStats: Map<number, HostStat>(),
   regions: Map<string, Region>(),

@@ -32,11 +32,6 @@ function auth(state = new Auth(), action: Action): Auth {
         .set('loggedIn', true)
         .set('errorMsg', '')
         .set('user', act.user);
-    case APP_LOGOUT:
-      return state
-        .set('loggedIn', false)
-        .set('errorMsg', '')
-        .set('user', null);
     case APP_AUTH_ERROR:
       let aca = <SetAuthMessage>action;
       return state
@@ -59,20 +54,26 @@ function url(state = "/", action: Action) {
 }
 
 export default function rootReducer(state = new StateModel(), action: Action): StateModel {
-  return state
-    .set('auth', auth(state.auth, action))
-    .set('url', url(state.url, action))
-    .set('hosts', HostsReducer(state.hosts, action))
-    .set('hostStats', HostStatReducer(state.hostStats, action))
-    .set('regions', RegionsReducer(state.regions, action))
-    .set('regionStats', RegionStatsReducer(state.regionStats, action))
-    .set('estateMap', EstateMapReducer(state.estateMap, action))
-    .set('users', UsersReducer(state.users, action))
-    .set('pendingUsers', PendingUsersReducer(state.pendingUsers, action))
-    .set('groups', GroupsReducer(state.groups, action))
-    .set('roles', RolesReducer(state.roles, action))
-    .set('members', MembersReducer(state.members, action))
-    .set('estates', EstatesReducer(state.estates, action))
-    .set('managers', ManagersReducer(state.managers, action))
-    .set('jobs', JobsReducer(state.jobs, action));
+  switch (action.type) {
+    case APP_LOGOUT:
+      return new StateModel();
+    default:
+      return state
+        .set('auth', auth(state.auth, action))
+        .set('url', url(state.url, action))
+        .set('hosts', HostsReducer(state.hosts, action))
+        .set('hostStats', HostStatReducer(state.hostStats, action))
+        .set('regions', RegionsReducer(state.regions, action))
+        .set('regionStats', RegionStatsReducer(state.regionStats, action))
+        .set('estateMap', EstateMapReducer(state.estateMap, action))
+        .set('users', UsersReducer(state.users, action))
+        .set('pendingUsers', PendingUsersReducer(state.pendingUsers, action))
+        .set('groups', GroupsReducer(state.groups, action))
+        .set('roles', RolesReducer(state.roles, action))
+        .set('members', MembersReducer(state.members, action))
+        .set('estates', EstatesReducer(state.estates, action))
+        .set('managers', ManagersReducer(state.managers, action))
+        .set('jobs', JobsReducer(state.jobs, action));
+  }
+
 }

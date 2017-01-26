@@ -74,7 +74,7 @@ export class Login extends React.Component<loginProps, {}> {
                             <Col md={4}>
                                 <FormGroup>
                                     <ControlLabel>Password: </ControlLabel>
-                                    <FormControl type="password" placeholder="password" onChange={this.onPassword.bind(this)} />
+                                    <FormControl type="password" onChange={this.onPassword.bind(this)} />
                                 </FormGroup>
                             </Col>
                             <Col md={4}>

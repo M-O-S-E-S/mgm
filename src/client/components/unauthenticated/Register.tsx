@@ -146,13 +146,13 @@ export class Register extends React.Component<{}, {}> {
                 <Row>
                     <FormGroup>
                         <ControlLabel>Applicant Password: </ControlLabel>
-                        <FormControl onChange={this.onPassword.bind(this)} />
+                        <FormControl type="password" onChange={this.onPassword.bind(this)} />
                     </FormGroup>
                 </Row>
                 <Row>
                     <FormGroup>
                         <ControlLabel>Applicant Password Confirm: </ControlLabel>
-                        <FormControl onChange={this.onPasswordConfirm.bind(this)} />
+                        <FormControl type="password" onChange={this.onPasswordConfirm.bind(this)} />
                     </FormGroup>
                 </Row>
                 <Row>

@@ -103,7 +103,7 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
       throw new Error('Requested region does not exist on the requesting host');
     }).then((r: RegionInstance) => {
       r.httpPort = httpPort;
-      r.slaveAddress = externalAddress;
+      r.externalAddress = externalAddress;
       r.save();
       return RegionINI(r, config);
     }).then((config: { [key: string]: { [key: string]: string } }) => {

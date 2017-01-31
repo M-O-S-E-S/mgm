@@ -51,9 +51,9 @@ settings.halcyon.db.host = "devsql";
 settings.halcyon.db.user = "inworldz";
 settings.halcyon.db.pass = "inworldz";
 settings.halcyon.db.name = "inworldz";
-settings.halcyon.grid_server = "http://yourfrontend:8001"
-settings.halcyon.user_server = "http://yourfrontend:8002"
-settings.halcyon.messaging_server = "http://yourfrontend:8006"
+settings.halcyon.grid_server = "http://[internalIP]:8001"
+settings.halcyon.user_server = "http://[externalIP]:8002"
+settings.halcyon.messaging_server = "http://[internalIP]:8006"
 settings.halcyon.whip = "whip://password@whipaddress:32700"
 
 // settings for the get_grid_info calls used by firestorm and other clients

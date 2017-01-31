@@ -10,9 +10,9 @@ export function FreeswitchHandler(fs: Freeswitch, isNode): express.Router {
    * Freeswitch APIS
    *****************************/
 
-  /*router.get('/', (req,res) => {
+  router.get('/', isNode, (req,res) => {
     res.send(fs.halcyonConfig());
-  });*/
+  });
 
   router.post('/freeswitch-config', (req, res) => {
     let remoteIP: string = req.ip.split(':').pop();

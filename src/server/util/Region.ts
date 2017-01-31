@@ -123,7 +123,7 @@ export function RegionINI(r: RegionInstance, conf: Config): { [key: string]: { [
   config['Network']['http_listener_port'] = '' + r.httpPort;
   config['Network']['default_location_x'] = '' + r.locX;
   config['Network']['default_location_y'] = '' + r.locY;
-  config['Network']['hostname'] = r.slaveAddress;
+  config['Network']['hostname'] = r.externalAddress;
   config['Network']['http_listener_ssl'] = 'false';
   config['Network']['grid_server_url'] = conf.halcyon.grid_server;
   config['Network']['grid_send_key'] = 'null';

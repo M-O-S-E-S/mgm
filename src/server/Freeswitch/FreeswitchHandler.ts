@@ -110,7 +110,7 @@ export function FreeswitchHandler(fs: Freeswitch, isNode): express.Router {
 */
 
   router.get('/getAccountInfo', isNode, (req, res) => {
-    let userAccount: FreeSwitchUser = fs.getAccountInfo(req.query.user);
+    let userAccount: FreeSwitchUser = fs.getAccountInfo(req.query.user, req.query.name);
     if(userAccount){
       let xml ='<Result><Account><UserID>'+
         userAccount.id+'</UserID><Password>'+

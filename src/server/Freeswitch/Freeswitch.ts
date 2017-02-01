@@ -20,11 +20,13 @@ export class FreeSwitchUser {
   public id: string
   public password: string
   public realm: string
+  public name: string
 
-  constructor(id: string, password: string, realm: string) {
+  constructor(id: string, name: string, password: string, realm: string) {
     this.id = id;
     this.password = password;
     this.realm = realm;
+    this.name = name;
   }
 }
 
@@ -46,22 +48,23 @@ export class Freeswitch {
 
   private directories: Map<string, FreeSwitchDirectory>
   private users: OrderedMap<string, FreeSwitchUser>
-  private voiceIP: string
+  private realm: string
+  private context: string = "default";
 
   constructor(voiceIP: string) {
-    this.voiceIP = voiceIP;
+    this.realm = voiceIP;
     this.directories = Map<string, FreeSwitchDirectory>();
     this.users = OrderedMap<string, FreeSwitchUser>();
   }
 
   // Create and return a new voice account
-  getAccountInfo(user: string): FreeSwitchUser {
-    console.log('Freeswitch: account request for ' + user);
+  getAccountInfo(id: string, name: string): FreeSwitchUser {
+    console.log('Freeswitch: account request for ' + name);
     this.users = this.users.set(
-      user,
-      new FreeSwitchUser(user, Math.random().toString(36).slice(2), this.voiceIP)
+      id,
+      new FreeSwitchUser(id, name, Math.random().toString(36).slice(2), this.realm)
     )
-    return this.users.get(user, null);
+    return this.users.get(id, null);
   }
 
   // test if directory already exists
@@ -99,28 +102,18 @@ export class Freeswitch {
 
   // response for SLVOICE viv_get_prelogin.php
   clientConfig(): string {
-    let context = 'default';
-    let realm = this.voiceIP;
-    let sipProxy = realm;
-    let attemptUseStun = false;
-    let echoServer = this.voiceIP;
-    let echoPort = 50505;
-    let defaultTimeout = 5000;
-    let resetUrl = '';
-    let privacyNoticeUrl = '';
-
     console.log('freeswitch prelogin');
     let result = '<?xml version="1.0" encoding="utf-8"?>' +
       '<VCConfiguration>' +
-      '<DefaultRealm>' + realm + '</DefaultRealm>' +
-      '<DefaultSIPProxy>' + sipProxy + '</DefaultSIPProxy>' +
-      '<DefaultAttemptUseSTUN>' + attemptUseStun + '</DefaultAttemptUseSTUN>' +
-      '<DefaultEchoServer>' + echoServer + '</DefaultEchoServer>' +
-      '<DefaultEchoPort>' + echoPort + '</DefaultEchoPort>' +
-      '<DefaultWellKnownIP>' + realm + '</DefaultWellKnownIP>' +
-      '<DefaultTimeout>' + defaultTimeout + '</DefaultTimeout>' +
-      '<UrlResetPassword>' + resetUrl + '</UrlResetPassword>' +
-      '<UrlPrivacyNotice>' + privacyNoticeUrl + '</UrlPrivacyNotice>' +
+      '<DefaultRealm>' + this.realm + '</DefaultRealm>' +
+      '<DefaultSIPProxy>' + this.realm + ':5060</DefaultSIPProxy>' +
+      '<DefaultAttemptUseSTUN>false</DefaultAttemptUseSTUN>' +
+      '<DefaultEchoServer>' + this.realm + '</DefaultEchoServer>' +
+      '<DefaultEchoPort>50505</DefaultEchoPort>' +
+      '<DefaultWellKnownIP>' + this.realm + '</DefaultWellKnownIP>' +
+      '<DefaultTimeout>5000</DefaultTimeout>' +
+      '<UrlResetPassword></UrlResetPassword>' +
+      '<UrlPrivacyNotice></UrlPrivacyNotice>' +
       '<UrlEulaNotice/>' +
       '<App.NoBottomLogo>false</App.NoBottomLogo>' +
       '</VCConfiguration>';
@@ -131,6 +124,7 @@ export class Freeswitch {
   // response for SLVOICE viv_signin.php
   signin(body: any) {
     let userId = body.userid;
+
     let user: FreeSwitchUser = this.users.get(userId, null);
     if (!user) {
       console.log('FreeSwitch login: user not found');
@@ -155,7 +149,7 @@ export class Freeswitch {
       '<auth_token>' + userId + ':' + pos + ':9303959503950::</auth_token>' +
       '<primary>1</primary>' +
       '<account_id>' + pos + '</account_id>' +
-      '<displayname>Avatar Name</displayname>' +
+      '<displayname>' + user.name + '</displayname>' +
       '<msg>auth successful</msg>' +
       '</body>' +
       '</level0>' +
@@ -170,15 +164,15 @@ export class Freeswitch {
   // requested on Halcyon startup to configure the FreeSwitch Region Module
   halcyonConfig(): string {
     let xml = '<config>' +
-      '<Realm>' + this.voiceIP + '</Realm>' +
-      '<SIPProxy>' + this.voiceIP + ":5060" + '</SIPProxy>' +
-      '<AttemptUseSTUN>' + 'false' + '</AttemptUseSTUN>' +
-      '<EchoServer>' + this.voiceIP + '</EchoServer>' +
-      '<EchoPort>' + 50505 + '</EchoPort>' +
-      '<DefaultWellKnownIP>' + this.voiceIP + '</DefaultWellKnownIP>' +
-      '<DefaultTimeout>' + 5000 + '</DefaultTimeout>' +
-      '<Context>' + 'default' + '</Context>' +
-      '<APIPrefix>' + '/fsapi' + '</APIPrefix>' +
+      '<Realm>' + this.realm + '</Realm>' +
+      //'<SIPProxy>' + this.realm + ":5060" + '</SIPProxy>' +
+      //'<AttemptUseSTUN>' + 'false' + '</AttemptUseSTUN>' +
+      //'<EchoServer>' + this.realm + '</EchoServer>' +
+      //'<EchoPort>' + 50505 + '</EchoPort>' +
+      //'<DefaultWellKnownIP>' + this.realm + '</DefaultWellKnownIP>' +
+      //'<DefaultTimeout>' + 5000 + '</DefaultTimeout>' +
+      //'<Context>' + this.context + '</Context>' +
+      //'<APIPrefix>' + '/fsapi' + '</APIPrefix>' +
       '</config>';
     console.log('freeswitch halcyon config');
     console.log(xml);
@@ -187,13 +181,11 @@ export class Freeswitch {
 
   // directory is a broad category of calls that freeswitch makes
   directory(body: any): string {
-    let context = 'default';
-    let realm = this.voiceIP;
     let reqDomain = body.domain;
 
     //console.log(body);
 
-    if (reqDomain !== realm) {
+    if (reqDomain !== this.realm) {
       return '';
     }
 
@@ -208,21 +200,21 @@ export class Freeswitch {
         let sipAuthMethod = body['sip_auth_method'];
         switch (sipAuthMethod) {
           case 'REGISTER':
-            return this.register(context, realm, body);
+            return this.register(this.context, this.realm, body);
           case 'INVITE':
-            return this.invite(context, realm, body);
+            return this.invite(this.context, this.realm, body);
           default:
             console.log('unknown sofia auth method ' + sipAuthMethod)
             return '';
         }
       case 'switch_xml_locate_user':
-        return this.locateUser(realm, body);
+        return this.locateUser(this.realm, body);
       case 'user_data_function':
-        return this.locateUser(realm, body);
+        return this.locateUser(this.realm, body);
       case 'user_outgoing_channel':
-        return this.register(context, realm, body);
+        return this.register(this.context, this.realm, body);
       case 'config_sofia':
-        return this.configSofia(context, realm, body);
+        return this.configSofia(this.context, this.realm, body);
       case 'switch_load_network_lists':
       case 'launch_sofia_worker_thread':
       default:
@@ -232,11 +224,9 @@ export class Freeswitch {
   }
 
   dialplan(body: any) {
-    let context = 'default';
-    let realm = this.voiceIP;
     let reqContext = body['Hunt-Context'];
 
-    if (reqContext !== context) {
+    if (reqContext !== this.context) {
       return '';
     }
 
@@ -247,12 +237,12 @@ export class Freeswitch {
       '<extension name="opensim_conferences">\r\n' +
       '<condition field="destination_number" expression="^confctl-(.*)$">\r\n' +
       '<action application="answer"/>\r\n' +
-      '<action application="conference" data="$1-' + realm + '@default"/>\r\n' +
+      '<action application="conference" data="$1-' + this.realm + '@' + this.context + '"/>\r\n' +
       '</condition></extension>\r\n' +
       '<extension name="opensim_conf">\r\n' +
       '<condition field="destination_number" expression="^conf-(.*)$">\r\n' +
       '<action application="answer"/>\r\n' +
-      '<action application="conference" data="$1-' + realm + '@default"/>\r\n' +
+      '<action application="conference" data="$1-' + this.realm + '@' + this.context + '"/>\r\n' +
       '</condition></extension>\r\n' +
       '<extension name="avatar">\r\n' +
       '<condition field="destination_number" expression="^(x.*)$">\r\n' +
@@ -264,23 +254,23 @@ export class Freeswitch {
   }
 
   private register(context: string, realm: string, params: any): string {
-    //let domain = params['domain'];
+    let domain = params['domain'];
     let user = this.users.get(params['user'], null);
-    if (!user){
-        console.log('Freeswitch registration failed, user is missing');
-        return '';
+    if (!user) {
+      console.log('Freeswitch registration failed, user is missing');
+      return '';
     }
     let xml = '<?xml version="1.0" encoding="utf-8"?>\r\n' +
       '<document type="freeswitch/xml">\r\n' +
       '<section name="directory" description="User Directory">\r\n' +
-      '<domain name="' + user.realm + '">\r\n' +
+      '<domain name="' + domain + '">\r\n' +
       '<user id="' + user.id + '">\r\n' +
       '<params>\r\n' +
       '<param name="password" value="' + user.password + '" />\r\n' +
       '<param name="dial-string" value="{sip_contact_user=' + user.id + '}{presence_id=${dialed_user}}@${dialed_domain}${sofia_contact(${dialed_user}@${dialed_domain})}"/>\r\n' +
       '</params><variables>\r\n' +
       '<variable name="user_context" value="' + context + '" />\r\n' +
-      '<variable name="presence_id" value="' + user.id + '@' + user.realm + '"/>\r\n' +
+      '<variable name="presence_id" value="' + user.id + '@' + realm + '"/>\r\n' +
       '</variables></user></domain></section></document>\r\n';
     console.log('freeswitch register');
     console.log(xml);
@@ -288,18 +278,18 @@ export class Freeswitch {
   }
 
   private invite(context: string, realm: string, params: any): string {
-    //let domain = params['domain'];
+    let domain = params['domain'];
     let user = this.users.get(params['user'], null);
-    if (!user){
-        console.log('Freeswitch invite failed, user is missing');
-        return '';
+    if (!user) {
+      console.log('Freeswitch invite failed, user is missing');
+      return '';
     }
     let sipRequestUser = params['sip_request_user'];
 
     let xml = '<?xml version="1.0" encoding="utf-8"?>\r\n' +
       '<document type="freeswitch/xml">\r\n' +
       '<section name="directory" description="User Directory">\r\n' +
-      '<domain name="' + user.realm + '">\r\n' +
+      '<domain name="' + domain + '">\r\n' +
       '<user id="' + user.id + '">\r\n' +
       '<params>\r\n' +
       '<param name="password" value="' + user.password + '" />\r\n' +
@@ -325,23 +315,20 @@ export class Freeswitch {
   }
 
   private locateUser(realm: string, params: any): string {
-    //let domain = params['domain'];
-    let user = this.users.get(params['user'], null);
-    if (!user){
-        console.log('Freeswitch locate user failed, missing user');
-        return '';
-    }
+    let domain = params['domain'];
+    let userId = params['user'];
+
     let xml = '<?xml version="1.0" encoding="utf-8"?>' +
       '<document type="freeswitch/xml">' +
       '<section name="directory" description="User Directory">' +
-      '<domain name="' + user.realm + '">' +
+      '<domain name="' + domain + '">' +
       '<params>' +
       '<param name="dial-string" value="{sip_contact_user=${dialed_user}}{presence_id=${dialed_user}@${dialed_domain}}${sofia_contact(${dialed_user}@${dialed_domain})}"/>' +
       '</params>' +
-      '<user id="' + user.id + '">' +
+      '<user id="' + userId + '">' +
       '<variables>' +
       '<variable name="default_gateway" value="$${default_provider}"/>' +
-      '<variable name="presence_id" value="' + user.id + '@$${domain}"/>' +
+      '<variable name="presence_id" value="' + userId + '@$${domain}"/>' +
       '</variables>' +
       '</user></domain></section></document>';
     console.log('freeswitch locate user');

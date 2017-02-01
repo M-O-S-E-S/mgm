@@ -145,7 +145,7 @@ export function RegionINI(r: RegionInstance, conf: Config): { [key: string]: { [
   config['Messaging']['InstantMessageModule'] = 'InstantMessageModule';
   config['Messaging']['MessageTransferModule'] = 'MessageTransferModule';
   config['Messaging']['OfflineMessageModule'] = 'OfflineMessageModule';
-  config['Messaging']['OfflineMessageURL'] = conf.mgm.internalUrl + '/offline';
+  config['Messaging']['OfflineMessageURL'] = conf.mgm.internalUrl + 'offline';
   config['Messaging']['MuteListModule'] = 'MuteListModule';
   config['Messaging']['MuteListURL'] = '127.0.0.1';
 

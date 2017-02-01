@@ -16,15 +16,12 @@ export function FreeswitchHandler(fs: Freeswitch, isNode): express.Router {
 
   router.post('/freeswitch-config', (req, res) => {
     let remoteIP: string = req.ip.split(':').pop();
-    console.log('post: /fsapi/freeswitch-config from ' + remoteIP);
     let section = req.body.section;
 
     switch (section) {
       case 'directory':
-        console.log('/freeswitch-config: directory');
         return res.send(fs.directory(req.body));
       case 'dialplan':
-        console.log('/freeswitch-config: dialplan');
         return res.send(fs.dialplan(req.body));
       default:
         console.log('unknown freeswitch config section: ' + section);
@@ -38,30 +35,27 @@ export function FreeswitchHandler(fs: Freeswitch, isNode): express.Router {
 
   router.post('/viv_get_prelogin.php', (req, res) => {
     let remoteIP: string = req.ip.split(':').pop();
-    console.log('post: /fsapi/viv_get_prelogin.php from ' + remoteIP);
-    let result = fs.clientConfig();
-    return res.send(result);
+    return res.send(fs.clientConfig());
   });
 
   router.post('/viv_signin.php', (req, res) => {
     let remoteIP: string = req.ip.split(':').pop();
-    console.log('post: /fsapi/viv_signin.php from ' + remoteIP);
-    let result = fs.signin(req.body);
-    return res.send(result);
+    res.send(fs.signin(req.body));
   });
 
   // giving empty responses to various unknown SLVoice.exe queries
-  router.post('/viv_signout.php', (req, res) => { console.log('viv_signout'); res.send('')});
-  router.post('/viv_session_fonts.php', (req, res) => { console.log('viv_session_fonts'); res.send('')});
-  router.post('/viv_template_fonts.php', (req, res) => { console.log('viv_template_fonts'); res.send('')});
-  router.post('/viv_buddy.php', (req, res) => { console.log('viv_buddy'); res.send('')});
-  router.post('/viv_watcher.php', (req, res) => { console.log('viv_watcher'); res.send('')});
+  //router.post('/viv_signout.php', (req, res) => { console.log('viv_signout stub'); res.send('')});
+  //router.post('/viv_session_fonts.php', (req, res) => { console.log('viv_session_fonts stub'); res.send('')});
+  //router.post('/viv_template_fonts.php', (req, res) => { console.log('viv_template_fonts stub'); res.send('')});
+  //router.post('/viv_buddy.php', (req, res) => { console.log('viv_buddy stub'); res.send('')});
+  //router.post('/viv_watcher.php', (req, res) => { console.log('viv_watcher stub'); res.send('')});
 
 
   /*****************************
    * Region APIS
    *****************************/
 
+/* These are currently not used
   router.get('/getDirectory', isNode, (req, res) => {
     // directory request from a region
     // TODO: validate that this is a region we are communicating with
@@ -113,21 +107,24 @@ export function FreeswitchHandler(fs: Freeswitch, isNode): express.Router {
     }
     return res.send('<Result></Result>');
   });
+*/
 
   router.get('/getAccountInfo', isNode, (req, res) => {
     let userAccount: FreeSwitchUser = fs.getAccountInfo(req.query.user);
     if(userAccount){
-      return res.send(
-        '<Result><Account><UserID>'+
+      let xml ='<Result><Account><UserID>'+
         userAccount.id+'</UserID><Password>'+
         userAccount.password+'</Password><Realm>'+
-        userAccount.realm+'</Realm></Account></Result>')
+        userAccount.realm+'</Realm></Account></Result>';
+      console.log('get account info')
+      console.log(xml);
+      return res.send(xml);
     }
     return res.send('<Result></Result>');
   });
 
   router.all('*', (req, res, next) => {
-    console.log('voice: ' + req.method + ': ' + req.originalUrl);
+    console.log('freeswitch: ' + req.method + ': ' + req.originalUrl + ' unhandled');
     next();
   });
 

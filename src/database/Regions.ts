@@ -2,7 +2,7 @@
 import * as Sequelize from 'sequelize';
 import { RegionInstance, RegionAttribute } from './mysql';
 import { IRegion } from '../common/messages';
-import { UUIDString } from '../util/UUID';
+import { UUIDString } from '../lib';
 
 export class Regions {
   private db: Sequelize.Model<RegionInstance, RegionAttribute>

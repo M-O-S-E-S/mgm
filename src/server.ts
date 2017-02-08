@@ -14,13 +14,10 @@ if (!Validate(conf)) {
 }
 
 //initialize singletons
-import { EmailMgr } from './util/Email';
+import { EmailMgr } from './lib';
 new EmailMgr(conf.mgm.mail);
 
 let app = express();
-
-var cookieParser = require('cookie-parser')
-app.use(cookieParser('super-secret-cookie-session-key!!!1!'));
 
 app.use(bodyParser.json({ limit: '1gb' }));       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
@@ -33,7 +30,7 @@ app.use(express.static(__dirname + '/public'));
 app.use('/api', SetupRoutes(conf));
 
 app.get('*', (req, res) => {
-  res.sendfile(__dirname + '/public/index.html');
+  res.sendFile(__dirname + '/public/index.html');
 })
 
 app.listen(3000, function () {

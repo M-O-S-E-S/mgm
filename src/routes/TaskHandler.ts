@@ -3,12 +3,10 @@ import * as express from 'express';
 import * as path from "path";
 
 import { PersistanceLayer, JobInstance, RegionInstance, HostInstance, UserInstance } from '../database';
-import { UUIDString } from '../util/UUID';
-import { Credential } from '../auth/Credential';
-import { EmailMgr } from '../util/Email';
+import { UUIDString, Credential, EmailMgr } from '../lib';
 import { Config } from '../Config';
 import { IJob } from '../common/messages';
-import { SaveOar, LoadOar } from '../util/Region';
+import { SaveOar, LoadOar } from '../lib/Region';
 
 import fs = require("fs");
 import * as multer from 'multer';

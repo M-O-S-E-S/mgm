@@ -2,9 +2,7 @@
 import * as express from 'express';
 
 import { PersistanceLayer, RegionInstance, HostInstance } from '../database';
-import { UUIDString } from '../util/UUID';
-import { RegionLogs } from '../util/regionLogs';
-import { RegionINI } from '../util/Region';
+import { UUIDString, RegionLogs, RegionINI } from '../lib'
 import { Config } from '../Config';
 
 export function DispatchHandler(db: PersistanceLayer, config: Config): express.Router {

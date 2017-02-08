@@ -5,9 +5,8 @@ import { PersistanceLayer, RegionInstance, HostInstance, EstateInstance, EstateM
 import { Config } from '../Config';
 
 import { IRegion } from '../common/messages';
-import { UUIDString } from '../util/UUID';
-import { RegionLogs } from '../util/regionLogs';
-import { RemoveRegionFromHost, PutRegionOnHost, StopRegion, KillRegion, StartRegion, RegionINI } from '../util/Region';
+import { UUIDString, RegionLogs } from '../lib';
+import { RemoveRegionFromHost, PutRegionOnHost, StopRegion, KillRegion, StartRegion, RegionINI } from '../lib/Region';
 
 export interface ConsoleSettings {
   user: string,

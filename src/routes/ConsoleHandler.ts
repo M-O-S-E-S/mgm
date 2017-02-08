@@ -1,11 +1,8 @@
 
 import * as express from 'express';
-import { UUIDString } from '../util/UUID';
+import { UUIDString,RegionLogs, ConsoleCommand } from '../lib';
 import { PersistanceLayer, RegionInstance, HostInstance } from '../database';
 import { Config } from '../Config'; 
-
-import { RegionLogs } from '../util/regionLogs';
-import { ConsoleCommand } from '../util/Console';
 
 export function ConsoleHandler(db: PersistanceLayer, config: Config, isUser: any): express.Router {
   let router = express.Router();

@@ -1,8 +1,9 @@
 
 import * as express from 'express';
-import { Credential } from '../auth/Credential';
-import { UUIDString } from '../util/UUID';
+import { Credential, UUIDString } from '../lib';
 import { PersistanceLayer, UserInstance } from '../database';
+
+import * as jwt from 'jsonwebtoken';
 
 export function AuthHandler(db: PersistanceLayer, isUser: any): express.Router {
   let router: express.Router = express.Router();

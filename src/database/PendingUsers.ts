@@ -2,7 +2,7 @@
 
 import * as Sequelize from 'sequelize';
 import { PendingUserInstance, PendingUserAttribute } from './mysql';
-import { Credential } from '../auth/Credential';
+import { Credential } from '../lib/Credential';
 
 export class PendingUsers {
   private db: Sequelize.Model<PendingUserInstance, PendingUserAttribute>

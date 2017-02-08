@@ -6,8 +6,7 @@ import {
   InventoryItemInstance, InventoryItemAttribute,
   InventoryFolderInstance, InventoryFolderAttribute
 } from './mysql';
-import { Credential } from '../auth/Credential';
-import { UUIDString } from '../util/UUID';
+import { Credential, UUIDString } from '../lib';
 
 import { Inventory } from './Inventory';
 

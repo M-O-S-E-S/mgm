@@ -1,6 +1,6 @@
 
 import * as express from 'express';
-import { UUIDString } from '../util/UUID';
+import { UUIDString } from '../lib';
 
 import { Parser } from 'xml2js';
 import { PersistanceLayer, OfflineMessageInstance } from '../database';

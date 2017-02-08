@@ -1,9 +1,7 @@
 
 import * as express from 'express';
 import { PersistanceLayer, PendingUserInstance, UserInstance } from '../database';
-import { UUIDString } from '../util/UUID';
-import { EmailMgr } from '../util/Email';
-import { Credential } from '../auth/Credential';
+import { UUIDString, EmailMgr, Credential } from '../lib';
 
 export function RegisterHandler(db: PersistanceLayer, templates: { [key: string]: string }): express.Router {
   let router: express.Router = express.Router();

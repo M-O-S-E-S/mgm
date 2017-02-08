@@ -2,9 +2,7 @@
 import * as express from 'express';
 
 import { PersistanceLayer, UserInstance, PendingUserInstance } from '../database';
-import { Credential } from '../auth/Credential';
-import { EmailMgr } from '../util/Email';
-import { UUIDString } from '../util/UUID';
+import { Credential, EmailMgr, UUIDString } from '../lib';
 import { IUser, IPendingUser } from '../common/messages';
 
 export function UserHandler(db: PersistanceLayer, templates: { [key: string]: string }, isUser, isAdmin): express.Router {

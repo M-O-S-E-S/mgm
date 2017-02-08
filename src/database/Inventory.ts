@@ -6,7 +6,7 @@ import {
   AvatarAppearanceInstance, AvatarAppearanceAttribute
 } from './mysql';
 
-import { UUIDString } from '../util/UUID';
+import { UUIDString } from '../lib/UUID';
 
 export class Inventory {
   private user: string;

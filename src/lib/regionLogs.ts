@@ -2,7 +2,7 @@
 import fs = require('fs');
 import * as path from "path";
 
-import { UUIDString } from '../util/UUID';
+import { UUIDString } from './UUID';
 
 export class RegionLogs {
   private dir: string = '';

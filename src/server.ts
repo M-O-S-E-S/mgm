@@ -1,5 +1,5 @@
 
-/// <reference path="../../typings/index.d.ts" />
+/// <reference path="../typings/index.d.ts" />
 
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
@@ -7,7 +7,7 @@ import * as path from "path";
 
 import { SetupRoutes } from './routes';
 
-var conf = require('../../settings.js');
+var conf = require('../settings.js');
 
 //initialize singletons
 import { EmailMgr } from './util/Email';
@@ -24,8 +24,14 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   limit: '1gb'
 }));
 
-app.use('/', SetupRoutes(conf));
+app.use(express.static(__dirname + '/public'));
 
-app.listen(3000, function() {
+app.use('/api', SetupRoutes(conf));
+
+app.get('*', (req, res) => {
+  res.sendfile(__dirname + '/public/index.html');
+})
+
+app.listen(3000, function () {
   console.log('MGM listening on port 3000!');
 });

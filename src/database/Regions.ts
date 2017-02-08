@@ -1,7 +1,7 @@
 
 import * as Sequelize from 'sequelize';
 import { RegionInstance, RegionAttribute } from './mysql';
-import { IRegion } from '../../common/messages';
+import { IRegion } from '../common/messages';
 import { UUIDString } from '../util/UUID';
 
 export class Regions {

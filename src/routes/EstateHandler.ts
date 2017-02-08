@@ -1,7 +1,7 @@
 import * as express from 'express';
 
 import { PersistanceLayer, UserInstance, EstateInstance, ManagerInstance, EstateMapInstance } from '../database';
-import { IEstate, IManager, IEstateMap } from '../../common/messages';
+import { IEstate, IManager, IEstateMap } from '../common/messages';
 
 export function EstateHandler(db: PersistanceLayer, isUser: any, isAdmin: any): express.Router {
   let router = express.Router();

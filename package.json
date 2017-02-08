@@ -42,6 +42,6 @@
     "start": "node dist/server.js",
     "build-client": "node_modules/.bin/webpack && cp -a src/static/* dist/public",
     "build-client-production": "node_modules/.bin/webpack -p --config ./webpack.production.config.js && cp -a src/static/* dist/public",
-    "build-server": "node_modules/.bin/tsc --project src/server/tsconfig.json"
+    "build-server": "node_modules/.bin/tsc --project src/tsconfig.json"
   }
 }

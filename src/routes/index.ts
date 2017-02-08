@@ -15,7 +15,7 @@ import { DispatchHandler } from './DispatchHandler';
 import { OfflineMessageHandler } from './OfflineMessageHandler';
 import { RegisterHandler } from './RegisterHandler';
 
-import { Config } from '../config';
+import { Config } from '../Config';
 
 class Authorizer {
   private db: PersistanceLayer

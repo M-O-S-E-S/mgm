@@ -1,7 +1,7 @@
 
 import * as express from 'express';
 import { PersistanceLayer, HostInstance } from '../database';
-import { IHost } from '../../common/messages';
+import { IHost } from '../common/messages';
 
 export function HostHandler(db: PersistanceLayer, isUser, isAdmin): express.Router {
   let router = express.Router();

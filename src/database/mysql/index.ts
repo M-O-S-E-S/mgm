@@ -1,5 +1,5 @@
 
-/// <reference path="../../../../typings/index.d.ts" />
+/// <reference path="../../../typings/index.d.ts" />
 
 import * as Sequelize from 'sequelize';
 

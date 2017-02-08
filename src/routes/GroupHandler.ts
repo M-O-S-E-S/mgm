@@ -3,7 +3,7 @@ import * as express from 'express';
 
 import { PersistanceLayer, GroupInstance, UserInstance, RoleInstance, MembershipInstance } from '../database';
 import { UUIDString } from '../util/UUID';
-import { IGroup, IRole, IMembership } from '../../common/messages';
+import { IGroup, IRole, IMembership } from '../common/messages';
 
 export function GroupHandler(db: PersistanceLayer, isUser: any, isAdmin): express.Router {
   let router = express.Router();

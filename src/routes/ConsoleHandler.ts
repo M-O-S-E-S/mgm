@@ -2,7 +2,7 @@
 import * as express from 'express';
 import { UUIDString } from '../util/UUID';
 import { PersistanceLayer, RegionInstance, HostInstance } from '../database';
-import { Config } from '../config'; 
+import { Config } from '../Config'; 
 
 import { RegionLogs } from '../util/regionLogs';
 import { ConsoleCommand } from '../util/Console';

@@ -5,7 +5,7 @@ import {
   RoleInstance, RoleAttribute,
   MembershipInstance, MembershipAttribute
 } from './mysql';
-import { IGroup, IRole, IMembership } from '../../common/messages';
+import { IGroup, IRole, IMembership } from '../common/messages';
 
 
 

@@ -6,8 +6,8 @@ import { PersistanceLayer, JobInstance, RegionInstance, HostInstance, UserInstan
 import { UUIDString } from '../util/UUID';
 import { Credential } from '../auth/Credential';
 import { EmailMgr } from '../util/Email';
-import { Config } from '../config';
-import { IJob } from '../../common/messages';
+import { Config } from '../Config';
+import { IJob } from '../common/messages';
 import { SaveOar, LoadOar } from '../util/Region';
 
 import fs = require("fs");

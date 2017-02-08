@@ -2,9 +2,9 @@
 import * as express from 'express';
 
 import { PersistanceLayer, RegionInstance, HostInstance, EstateInstance, EstateMapInstance } from '../database';
-import { Config } from '../config';
+import { Config } from '../Config';
 
-import { IRegion } from '../../common/messages';
+import { IRegion } from '../common/messages';
 import { UUIDString } from '../util/UUID';
 import { RegionLogs } from '../util/regionLogs';
 import { RemoveRegionFromHost, PutRegionOnHost, StopRegion, KillRegion, StartRegion, RegionINI } from '../util/Region';

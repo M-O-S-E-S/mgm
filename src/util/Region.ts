@@ -1,5 +1,5 @@
 import { RegionInstance, HostInstance, JobInstance } from '../database';
-import { Config } from '../config';
+import { Config } from '../Config';
 var urllib = require('urllib');
 
 export function RemoveRegionFromHost(r: RegionInstance, h: HostInstance): Promise<void> {

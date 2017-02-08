@@ -5,7 +5,7 @@ import { PersistanceLayer, UserInstance, PendingUserInstance } from '../database
 import { Credential } from '../auth/Credential';
 import { EmailMgr } from '../util/Email';
 import { UUIDString } from '../util/UUID';
-import { IUser, IPendingUser } from '../../common/messages';
+import { IUser, IPendingUser } from '../common/messages';
 
 export function UserHandler(db: PersistanceLayer, templates: { [key: string]: string }, isUser, isAdmin): express.Router {
   let router = express.Router();

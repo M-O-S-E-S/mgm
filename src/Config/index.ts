@@ -1,3 +1,3 @@
 
 
-export { Config } from './model';
+export { Config, Validate } from './model';

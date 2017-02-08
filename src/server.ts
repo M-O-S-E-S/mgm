@@ -6,8 +6,12 @@ import * as bodyParser from 'body-parser';
 import * as path from "path";
 
 import { SetupRoutes } from './routes';
+import { Validate } from './Config';
 
 var conf = require('../settings.js');
+if (!Validate(conf)) {
+  process.exit(1);
+}
 
 //initialize singletons
 import { EmailMgr } from './util/Email';

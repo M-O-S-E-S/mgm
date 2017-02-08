@@ -1,4 +1,6 @@
 
+var fs = require('fs');
+
 export interface Config {
   mgm: {
     db: {
@@ -38,4 +40,69 @@ export interface Config {
     user: string,
     pass: string
   }
+}
+
+export function Validate(config: Config): boolean {
+  /** MGM Validation */
+  if (!config.mgm) {
+    console.log('Error loading config: mgm section is missing');
+    return false;
+  }
+  if (!config.mgm.db) {
+    console.log('Error loading config: mgm database section is missing');
+    return false;
+  }
+  if (!config.mgm.db.host || !config.mgm.db.user || !config.mgm.db.pass || !config.mgm.db.name) {
+    console.log('Error loading config: mgm database section is invalid or incomplete');
+    return false;
+  }
+  if (!config.mgm.log_dir) {
+    console.log('Error loading config: mgm log_dir is missing, region logs cannot be collected');
+    return false;
+  } else {
+    if (!fs.existsSync(config.mgm.log_dir)) {
+      console.log('Error loading config: mgm log_dir is present, but the folder does not exist');
+      return false;
+    }
+  }
+  if (!config.mgm.upload_dir) {
+    console.log('Error loading config: mgm upload_dir is missing, oar functions will not work');
+    return false;
+  } else {
+    if (!fs.existsSync(config.mgm.upload_dir)) {
+      console.log('Error loading config: mgm upload_dir is present, but the folder does not exist');
+      return false;
+    }
+  }
+  if (!config.mgm.default_oar_path) {
+    console.log('Error loading config: mgm default oar path is missing, \'nuke\' functionality will not work');
+    return false;
+  } else {
+    if (!fs.existsSync(config.mgm.default_oar_path)) {
+      console.log('Error loading config: mgm default_oar_path is present, but the location does not exist');
+      return false;
+    }
+  }
+  if (!config.mgm.templates) {
+    console.log('Error loading config: templates section is missing');
+    return false;
+  }
+  if (!config.mgm.voiceIP) {
+    console.log('Error loading config: mgm voice IP is missing, voice will not work');
+    return false;
+  }
+  if (!config.mgm.internalUrl) {
+    console.log('Error loading config: mgm internal ip address is missing');
+    return false;
+  }
+  if (!config.mgm.mail) {
+    console.log('Error loading config: mgm mail is missing, email notifications may not work');
+    return false;
+  }
+  if (!config.mgm.tokenKey) {
+    console.log('Error loading config: JWT token string is missing');
+    return false;
+  }
+
+  return true;
 }

@@ -26,8 +26,9 @@ export interface UserDetail {
 
 class Authorizer {
   private db: PersistanceLayer
+  private tokenkey: string
 
-  constructor(database: PersistanceLayer) {
+  constructor(database: PersistanceLayer, tokenKey: string) {
     this.db = database;
   }
 
@@ -70,7 +71,7 @@ class Authorizer {
 export function SetupRoutes(conf: Config): express.Router {
   let db = new PersistanceLayer(conf.mgm.db, conf.halcyon.db);
 
-  let gatekeeper = new Authorizer(db);
+  let gatekeeper = new Authorizer(db, conf.mgm.tokenKey);
 
   let router = express.Router();
   let fs = new Freeswitch(conf.mgm.voiceIP);

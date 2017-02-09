@@ -63,7 +63,7 @@ export class ContentModal extends React.Component<props, state> {
                 // todo: insert job into redux to make it appear before the next data refresh
 
                 // initiate the upload
-                return upload('/api/task/upload/' + jobID, {file: file});
+                return post('/api/task/upload/' + jobID, {file: file});
             }).then(() => {
                 this.setState({
                     loadOarSuccess: 'File uploaded.  Further updates are on the jobs list on your account page.',

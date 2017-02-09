@@ -14,35 +14,17 @@ interface mgmResponse {
     Message?: string
 }
 
-function performCall(method: string, route: string, args?: any) {
-    /*return new Promise<any>((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
-        xhr.open(method, route, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-        xhr.onload = () => {
-            if (xhr.status !== 200) {
-                if(xhr.status === 404)
-                    reject(new Error('Request failed.  Does not exist'));
-                else
-                    reject(new Error('Request failed: server error'));
-            } else {
-                let res: mgmResponse = JSON.parse(xhr.response);
-                if (res.Success) {
-                    resolve(res);
-                } else {
-                    reject(new Error(res.Message));
-                }
-            }
-        };
-        if (args)
-            xhr.send(urlEncode(args));
-        else
-            xhr.send();
+let authToken: string = null;
 
-    });*/
+export function updateToken(token: string){
+    authToken = token;
+}
+
+function performCall(method: string, route: string, args?: any) {
     return new Promise<any>((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         let fd = new FormData();
+        if(authToken) fd.append('token', authToken);
         if(args){
             for(let key in args){
                 fd.append(key, args[key]);

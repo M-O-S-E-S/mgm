@@ -4,7 +4,7 @@ import { Map } from 'immutable';
 
 import { createStore, applyMiddleware, Store } from 'redux'
 
-import { post } from './util/network';
+import { post, updateToken } from './util/network';
 import { LoginResponse } from '../common/messages';
 
 import { Auth, StateModel } from "./redux/model";
@@ -41,18 +41,21 @@ let token: string = '';
 if (localStorage.getItem("user")) {
     user = new User(JSON.parse(localStorage.getItem("user")));
     token = localStorage.getItem("token")
-}
+    updateToken(token)
+;}
 store.subscribe(() => {
     let auth = store.getState().auth;
     if (auth.user !== user) {
         if (auth.user) {
             localStorage.setItem("user", JSON.stringify(auth.user));
             localStorage.setItem("token", auth.token);
+            updateToken(token);
         } else {
             localStorage.removeItem("user");
             localStorage.removeItem("token");
             user = null;
             token = '';
+            updateToken(null);
         }
     }
 })
@@ -94,7 +97,7 @@ class App extends React.Component<{}, {}> {
     }
 
     resumeSession() {
-        post('/api/auth', { token: token }).then((res: LoginResponse) => {
+        post('/api/auth').then((res: LoginResponse) => {
             console.log("session resume successfull");
             let u = new User()
                 .set('uuid', res.uuid)

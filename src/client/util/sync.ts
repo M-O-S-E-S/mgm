@@ -1,6 +1,6 @@
 import { Store } from 'redux';
 import { StateModel } from '../redux/model';
-import { get } from './network';
+import { post } from './network';
 
 import {
   IJob,
@@ -58,9 +58,13 @@ interface userResult extends NetworkResult {
 
 export class Synchroniser {
   private store: Store<StateModel>
+  private session: {
+    token: string
+  }
 
   constructor(store: Store<StateModel>) {
     this.store = store;
+    this.session = {token: this.store.getState().auth.token};
   }
 
   sync() {
@@ -73,7 +77,7 @@ export class Synchroniser {
   }
 
   private jobs() {
-    get('/api/task').then((res: jobResult) => {
+    post('/api/task', this.session).then((res: jobResult) => {
       if (!res.Success) return;
       this.store.dispatch(UpsertJobBulkAction(res.Jobs.map((j: IJob) => {
         return new Job(j);
@@ -82,7 +86,7 @@ export class Synchroniser {
   }
 
   private regions() {
-    get('/api/region').then((res: regionResult) => {
+    post('/api/region', this.session).then((res: regionResult) => {
       if (!res.Success) return;
       this.store.dispatch(UpsertRegionBulkAction(res.Regions.map((r: IRegion) => {
         return new Region(r);
@@ -91,7 +95,7 @@ export class Synchroniser {
   }
 
   private estates() {
-    get('/api/estate').then((res: estateResult) => {
+    post('/api/estate', this.session).then((res: estateResult) => {
       if (!res.Success) return;
       this.store.dispatch(UpsertEstateBulkAction(
         res.Estates.map((r: IEstate) => {
@@ -109,7 +113,7 @@ export class Synchroniser {
   }
 
   private groups() {
-    get('/api/group').then((res: groupResult) => {
+    post('/api/group', this.session).then((res: groupResult) => {
       if (!res.Success) return;
       this.store.dispatch(UpsertGroupBulkAction(
         res.Groups.map((r: IGroup) => {
@@ -126,7 +130,7 @@ export class Synchroniser {
 }
 
   private hosts() {
-  get('/api/host').then((res: hostResult) => {
+  post('/api/host', this.session).then((res: hostResult) => {
     if (!res.Success) return;
     this.store.dispatch(UpsertHostBulkAction(
       res.Hosts.map((h: IHost) => {
@@ -137,7 +141,7 @@ export class Synchroniser {
 }
 
   private users() {
-  get('/api/user').then((res: userResult) => {
+  post('/api/user', this.session).then((res: userResult) => {
     if (!res.Success) return;
     this.store.dispatch(UpsertUserBulkAction(
       res.Users.map((u: IUser) => {

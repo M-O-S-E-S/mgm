@@ -30,7 +30,18 @@ export class AddEstateModal extends React.Component<props, state> {
     super(props);
     this.state = {
       name: '',
-      owner: ''
+      owner: '',
+      error: ''
+    }
+  }
+
+  componentWillReceiveProps(nextProps: props) {
+    if (!nextProps.show) {
+      this.setState({
+        name: '',
+        owner: '',
+        error: ''
+      })
     }
   }
 
@@ -58,7 +69,7 @@ export class AddEstateModal extends React.Component<props, state> {
       return;
     }
 
-    return post('/api/estate/create', {name: this.state.name, owner: this.state.owner}).then( (res: any) => {
+    return post('/api/estate/create', { name: this.state.name, owner: this.state.owner }).then((res: any) => {
       // update redux
       let e = new Estate();
       e = e.set('id', res.ID)
@@ -67,7 +78,7 @@ export class AddEstateModal extends React.Component<props, state> {
       this.props.dispatch(UpsertEstateAction(e));
 
       this.props.cancel();
-    }).catch( (err: Error) => {
+    }).catch((err: Error) => {
       this.setState({
         error: 'Error creating estate: ' + err.message
       })

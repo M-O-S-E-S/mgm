@@ -38,6 +38,19 @@ export class ContentModal extends React.Component<props, state> {
         };
     }
 
+    componentWillReceiveProps(nextProps: props) {
+        if (!nextProps.show) {
+            this.setState({
+                loadOarError: '',
+                loadOarSuccess: '',
+                saveOarError: '',
+                saveOarSuccess: '',
+                nukeError: '',
+                nukeSuccess: '',
+            })
+        }
+    }
+
     onUploadOar(): Promise<void> {
         let file = this.oarFile.files[0];
         if (file == undefined) {
@@ -63,7 +76,7 @@ export class ContentModal extends React.Component<props, state> {
                 // todo: insert job into redux to make it appear before the next data refresh
 
                 // initiate the upload
-                return post('/api/task/upload/' + jobID, {file: file});
+                return post('/api/task/upload/' + jobID, { file: file });
             }).then(() => {
                 this.setState({
                     loadOarSuccess: 'File uploaded.  Further updates are on the jobs list on your account page.',

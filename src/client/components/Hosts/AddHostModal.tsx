@@ -30,6 +30,15 @@ export class AddHostModal extends React.Component<props, state> {
     }
   }
 
+  componentWillReceiveProps(nextProps: props) {
+    if (!nextProps.show) {
+      this.setState({
+        ip: '',
+        error: ''
+      })
+    }
+  }
+
   onAddHost(): Promise<void> {
     if (this.state.ip === '') {
       this.setState({

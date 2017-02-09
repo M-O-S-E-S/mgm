@@ -33,6 +33,16 @@ export class ManageUserModal extends React.Component<props, state> {
     }
   }
 
+  componentWillReceiveProps(nextProps: props) {
+    if (!nextProps.show) {
+      this.setState({
+        error: '',
+        email: '',
+        password: ''
+      })
+    }
+  }
+
   setGodLevel(level: number): Promise<void> {
     return post('/api/user/accessLevel', { uuid: this.props.user.uuid, accessLevel: level }).then(() => {
       this.props.dispatch(UpsertUserAction(this.props.user.set('godLevel', level)));

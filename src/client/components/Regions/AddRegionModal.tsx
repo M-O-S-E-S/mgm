@@ -42,6 +42,19 @@ export class AddRegionModal extends React.Component<props, {}> {
     }
   }
 
+  componentWillReceiveProps(nextProps: props) {
+    if (!nextProps.show) {
+      this.setState({
+        x: undefined,
+        y: undefined,
+        name: '',
+        estate: '',
+        coordMsg: '',
+        errorMsg: ''
+      })
+    }
+  }
+
   onNameChange(e: { target: { value: string } }) {
     this.setState({
       name: e.target.value

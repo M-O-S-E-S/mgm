@@ -32,6 +32,15 @@ export class ReviewPendingModal extends React.Component<props, state> {
     }
   }
 
+  componentWillReceiveProps(nextProps: props) {
+    if (!nextProps.show) {
+      this.setState({
+        reason: '',
+        error: ''
+      })
+    }
+  }
+
   onReason(e: { target: { value: string } }) {
     this.setState({ reason: e.target.value })
   }
@@ -55,7 +64,7 @@ export class ReviewPendingModal extends React.Component<props, state> {
     })
   }
   onReject(): Promise<void> {
-    return post('/api/user/deny', {name: this.props.user.name, reason: this.state.reason}).then((res) => {
+    return post('/api/user/deny', { name: this.props.user.name, reason: this.state.reason }).then((res) => {
       // remove pending user from redux
       this.props.dispatch(DeletePendingUserAction(this.props.user));
       this.props.cancel();

@@ -39,6 +39,19 @@ export class AddUserModal extends React.Component<props, state> {
     }
   }
 
+  componentWillReceiveProps(nextProps: props) {
+    if (!nextProps.show) {
+      this.setState({
+        name: '',
+        email: '',
+        password: '',
+        template: '',
+        error: '',
+        success: ''
+      })
+    }
+  }
+
   onNameChange(e: { target: { value: string } }) {
     this.setState({
       name: e.target.value

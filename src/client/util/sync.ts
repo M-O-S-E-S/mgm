@@ -1,6 +1,6 @@
 import { Store } from 'redux';
 import { StateModel } from '../redux/model';
-import { post } from './network';
+import { get } from './network';
 
 import {
   IJob,
@@ -77,7 +77,7 @@ export class Synchroniser {
   }
 
   private jobs() {
-    post('/api/task', this.session).then((res: jobResult) => {
+    get('/api/task', this.session).then((res: jobResult) => {
       if (!res.Success) return;
       this.store.dispatch(UpsertJobBulkAction(res.Jobs.map((j: IJob) => {
         return new Job(j);
@@ -86,7 +86,7 @@ export class Synchroniser {
   }
 
   private regions() {
-    post('/api/region', this.session).then((res: regionResult) => {
+    get('/api/region', this.session).then((res: regionResult) => {
       if (!res.Success) return;
       this.store.dispatch(UpsertRegionBulkAction(res.Regions.map((r: IRegion) => {
         return new Region(r);
@@ -95,7 +95,7 @@ export class Synchroniser {
   }
 
   private estates() {
-    post('/api/estate', this.session).then((res: estateResult) => {
+    get('/api/estate', this.session).then((res: estateResult) => {
       if (!res.Success) return;
       this.store.dispatch(UpsertEstateBulkAction(
         res.Estates.map((r: IEstate) => {
@@ -113,7 +113,7 @@ export class Synchroniser {
   }
 
   private groups() {
-    post('/api/group', this.session).then((res: groupResult) => {
+    get('/api/group', this.session).then((res: groupResult) => {
       if (!res.Success) return;
       this.store.dispatch(UpsertGroupBulkAction(
         res.Groups.map((r: IGroup) => {
@@ -130,7 +130,7 @@ export class Synchroniser {
 }
 
   private hosts() {
-  post('/api/host', this.session).then((res: hostResult) => {
+  get('/api/host', this.session).then((res: hostResult) => {
     if (!res.Success) return;
     this.store.dispatch(UpsertHostBulkAction(
       res.Hosts.map((h: IHost) => {
@@ -141,7 +141,7 @@ export class Synchroniser {
 }
 
   private users() {
-  post('/api/user', this.session).then((res: userResult) => {
+  get('/api/user', this.session).then((res: userResult) => {
     if (!res.Success) return;
     this.store.dispatch(UpsertUserBulkAction(
       res.Users.map((u: IUser) => {

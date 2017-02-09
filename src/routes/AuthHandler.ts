@@ -13,7 +13,7 @@ export function AuthHandler(db: PersistanceLayer, tokenKey: string, isUser: any)
   let router: express.Router = express.Router();
 
   //resume session and refresh token
-  router.post('/', isUser, (req, res) => {
+  router.get('/', isUser, (req, res) => {
     let userDetail: UserDetail;
 
     let ud: UserDetail = req.user;

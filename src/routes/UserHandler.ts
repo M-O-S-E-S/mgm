@@ -24,7 +24,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
       });
     }).then(() => {
       // only admins see pending users
-      if (req.cookies['userLevel'] >= 250) {
+      if (req.user.godLevel >= 250) {
         return db.PendingUsers.getAll();
       } else {
         return [];
@@ -53,7 +53,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
   router.post('/accessLevel', isAdmin, (req, res) => {
     let accessLevel = parseInt(req.body.accessLevel);
     let userID = new UUIDString(req.body.uuid);
-    let controllingUser = new UUIDString(req.cookies['uuid']);
+    let controllingUser = new UUIDString(req.user.uuid);
 
     if(userID.getShort() === controllingUser.getShort()){
       return res.send(JSON.stringify({ Success: false, Message: 'You cannot change your own access level' }));

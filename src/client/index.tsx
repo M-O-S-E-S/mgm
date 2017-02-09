@@ -4,7 +4,7 @@ import { Map } from 'immutable';
 
 import { createStore, applyMiddleware, Store } from 'redux'
 
-import { post, updateToken } from './util/network';
+import { get, updateToken } from './util/network';
 import { LoginResponse } from '../common/messages';
 
 import { Auth, StateModel } from "./redux/model";
@@ -98,7 +98,7 @@ class App extends React.Component<{}, {}> {
     }
 
     resumeSession() {
-        post('/api/auth').then((res: LoginResponse) => {
+        get('/api/auth').then((res: LoginResponse) => {
             console.log("session resume successfull");
             let u = new User()
                 .set('uuid', res.uuid)

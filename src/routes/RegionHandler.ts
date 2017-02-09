@@ -19,7 +19,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
   let logger = new RegionLogs(config.mgm.log_dir);
 
   router.get('/', isUser, (req, res) => {
-    let user = new UUIDString(req.cookies['uuid']);
+    let user = new UUIDString(req.user.uuid);
 
     // just send them all and let the client sort them.  They cant control them anyways,
     // and they can see them in-world anyways.  no need to be secret

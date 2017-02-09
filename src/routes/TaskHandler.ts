@@ -30,10 +30,8 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     throw new Error('Default oar does not exist at ' + defaultOar);
   }
 
-  router.post('/', isUser, (req, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'currently disabled' }));
-    /*
-    db.Jobs.getFor(req.cookies['uuid']).then((jobs: JobInstance[]) => {
+  router.get('/', isUser, (req, res) => {
+    db.Jobs.getFor(req.user.uuid).then((jobs: JobInstance[]) => {
       res.send(JSON.stringify({
         Success: true,
         Jobs: jobs.map((j: JobInstance) => {
@@ -49,13 +47,13 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
       }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
-    });*/
+    });
   });
 
   router.post('/loadOar/:uuid', isAdmin, (req, res) => {
     let merge = req.body.merge;
     let regionID = new UUIDString(req.params.uuid);
-    let user = new UUIDString(req.cookies['uuid']);
+    let user = new UUIDString(req.user.uuid);
 
     console.log('User ' + user + ' requesting load oar for region ' + regionID);
 
@@ -105,7 +103,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
   // we do not check per-user permissions, so nly admins may do this
   router.post('/saveOar/:uuid', isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
-    let user = new UUIDString(req.cookies['uuid']);
+    let user = new UUIDString(req.user.uuid);
 
     let region: RegionInstance;
     let host: HostInstance;
@@ -140,7 +138,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
 
   router.post('/nukeContent/:uuid', isUser, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
-    let user = new UUIDString(req.cookies['uuid']);
+    let user = new UUIDString(req.user.uuid);
 
     let region: RegionInstance;
     let host: HostInstance;
@@ -252,7 +250,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     db.Jobs.getByID(jobID).then((j: JobInstance) => {
       switch (j.type) {
         case 'save_oar':
-          let user = new UUIDString(req.cookies['uuid']);
+          let user = new UUIDString(req.user.uuid);
           if (j.user.toString() !== user.toString()) {
             throw new Error('Permission Denied');
           }
@@ -326,7 +324,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
             return EmailMgr.instance().sendSaveOarComplete(u.email, fileName);
           })
         case 'load_oar':
-          let user = new UUIDString(req.cookies['uuid']);
+          let user = new UUIDString(req.user.uuid);
           if (user.toString() !== j.user.toString()) {
             throw new Error('Permission Denied');
           }

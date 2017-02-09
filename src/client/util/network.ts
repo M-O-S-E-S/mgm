@@ -23,13 +23,6 @@ export function updateToken(token: string) {
 function performCall(method: string, route: string, args?: any) {
     return new Promise<any>((resolve, reject) => {
         let xhr = new XMLHttpRequest();
-        let fd = new FormData();
-        if (args) {
-            for (let key in args) {
-                fd.append(key, args[key]);
-            }
-        }
-
         xhr.open(method, route, true);
         xhr.onload = () => {
             if (xhr.status !== 200) {
@@ -47,10 +40,17 @@ function performCall(method: string, route: string, args?: any) {
             }
         };
         if (authToken) {
-            //fd.append('token', authToken);
             xhr.setRequestHeader('x-access-token', authToken);
         }
-        xhr.send(fd);
+        if (args) {
+            let fd = new FormData();
+            for (let key in args) {
+                fd.append(key, args[key]);
+            }
+            xhr.send(fd);
+        } else {
+            xhr.send();
+        }
     });
 }
 
@@ -62,7 +62,7 @@ export function get(path: string, args?: any): Promise<any> {
     return performCall('GET', path, args);
 }
 
-export function upload(path: string, file: any): Promise<any> {
+/*export function upload(path: string, file: any): Promise<any> {
     return new Promise<any>((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         let fd = new FormData();
@@ -87,4 +87,4 @@ export function upload(path: string, file: any): Promise<any> {
         };
         xhr.send(fd);
     });
-}
+}*/

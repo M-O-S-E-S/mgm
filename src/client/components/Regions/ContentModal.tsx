@@ -4,7 +4,7 @@ import { Region } from '.';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Alert } from 'react-bootstrap';
 import { BusyButton } from '../../util/BusyButton';
-import { post, upload } from '../../util/network';
+import { post } from '../../util/network';
 
 interface props {
     show: boolean,
@@ -63,7 +63,7 @@ export class ContentModal extends React.Component<props, state> {
                 // todo: insert job into redux to make it appear before the next data refresh
 
                 // initiate the upload
-                return upload('/api/task/upload/' + jobID, file);
+                return upload('/api/task/upload/' + jobID, {file: file});
             }).then(() => {
                 this.setState({
                     loadOarSuccess: 'File uploaded.  Further updates are on the jobs list on your account page.',

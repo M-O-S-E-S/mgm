@@ -17,6 +17,9 @@ import { RegisterHandler } from './RegisterHandler';
 
 import { Config } from '../Config';
 
+import * as jwt from 'jsonwebtoken';
+import * as multer from 'multer';
+
 export interface UserDetail {
   name: string
   uuid: string
@@ -26,10 +29,11 @@ export interface UserDetail {
 
 class Authorizer {
   private db: PersistanceLayer
-  private tokenkey: string
+  private tokenKey: string
 
   constructor(database: PersistanceLayer, tokenKey: string) {
     this.db = database;
+    this.tokenKey = tokenKey;
   }
 
   isUser() {
@@ -37,34 +41,46 @@ class Authorizer {
   }
 
   private _isUser(req, res, next) {
-    if (req.cookies['uuid']) {
+    let token = req.headers['x-access-token'];
+    jwt.verify(token, this.tokenKey, (err: Error, decoded: UserDetail) => {
+      if (err) {
+        return res.send(JSON.stringify({ Success: false, Message: err.message }));
+      }
+      req.user = decoded;
       return next();
-    }
-    return res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+    });
   }
 
-  isAdmin(){
+  isAdmin() {
     return this._isAdmin.bind(this);
   }
 
   private _isAdmin(req, res, next) {
-    if (req.cookies['userLevel'] >= 250) {
-      return next();
-    }
-    return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+    let token = req.headers['x-access-token'];
+    jwt.verify(token, this.tokenKey, (err: Error, decoded: UserDetail) => {
+      if (err) {
+        return res.send(JSON.stringify({ Success: false, Message: err.message }));
+      }
+      if (decoded.godLevel >= 250) {
+        req.user = decoded;
+        return next();
+      }
+
+      return res.send(JSON.stringify({ Success: false, Message: 'Access Denied' }));
+    });
   }
 
-  isNode(){
+  isNode() {
     return this._isNode.bind(this);
   }
 
   private _isNode(req, res, next) {
     let remoteIP: string = req.ip.split(':').pop();
-    this.db.Hosts.getByAddress(remoteIP).then( () => {
+    this.db.Hosts.getByAddress(remoteIP).then(() => {
       return next();
-    }).catch( () => {
+    }).catch(() => {
       return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
-    }); 
+    });
   }
 }
 
@@ -78,7 +94,7 @@ export function SetupRoutes(conf: Config): express.Router {
 
   router.use('/auth', AuthHandler(db, conf.mgm.tokenKey, gatekeeper.isUser()));
   router.use('/console', ConsoleHandler(db, conf, gatekeeper.isUser()));
-  router.use('/task', TaskHandler(db, conf, gatekeeper.isUser(), gatekeeper.isAdmin()));
+  router.use('/task', multer().array(''), TaskHandler(db, conf, gatekeeper.isUser(), gatekeeper.isAdmin()));
   router.use('/estate', EstateHandler(db, gatekeeper.isUser(), gatekeeper.isAdmin()));
   router.use('/host', HostHandler(db, gatekeeper.isUser(), gatekeeper.isAdmin()));
   router.use('/user', UserHandler(db, conf.mgm.templates, gatekeeper.isUser(), gatekeeper.isAdmin()));

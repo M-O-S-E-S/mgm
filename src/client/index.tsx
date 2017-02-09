@@ -89,6 +89,7 @@ class App extends React.Component<{}, {}> {
             }
             this.resumeSession();
         } else {
+            console.log('We dont have both a user and a token, skipping resume')
             this.state = {
                 st: store.getState(),
                 loading: false
@@ -111,7 +112,7 @@ class App extends React.Component<{}, {}> {
                 loading: false
             })
         }).catch((err: Error) => {
-            console.log('session resume failed')
+            console.log('session resume failed: ' + err.message)
             this.setState({
                 loading: false
             })

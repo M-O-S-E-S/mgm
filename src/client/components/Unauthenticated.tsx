@@ -49,7 +49,6 @@ export class Unauthenticated extends React.Component<unauthenticatedProps, {}> {
                 </Navbar.Collapse>
             </Navbar>
         )
-        console.log(this.props.route);
         switch (this.props.route) {
             case '/password':
                 return (

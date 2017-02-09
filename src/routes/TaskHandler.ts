@@ -30,7 +30,9 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     throw new Error('Default oar does not exist at ' + defaultOar);
   }
 
-  router.get('/', isUser, (req, res) => {
+  router.post('/', isUser, (req, res) => {
+    res.send(JSON.stringify({ Success: false, Message: 'currently disabled' }));
+    /*
     db.Jobs.getFor(req.cookies['uuid']).then((jobs: JobInstance[]) => {
       res.send(JSON.stringify({
         Success: true,
@@ -47,7 +49,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
       }));
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
-    });
+    });*/
   });
 
   router.post('/loadOar/:uuid', isAdmin, (req, res) => {

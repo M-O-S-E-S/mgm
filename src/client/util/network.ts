@@ -16,7 +16,7 @@ interface mgmResponse {
 
 let authToken: string = null;
 
-export function updateToken(token: string){
+export function updateToken(token: string) {
     authToken = token;
 }
 
@@ -24,9 +24,8 @@ function performCall(method: string, route: string, args?: any) {
     return new Promise<any>((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         let fd = new FormData();
-        if(authToken) fd.append('token', authToken);
-        if(args){
-            for(let key in args){
+        if (args) {
+            for (let key in args) {
                 fd.append(key, args[key]);
             }
         }
@@ -34,7 +33,7 @@ function performCall(method: string, route: string, args?: any) {
         xhr.open(method, route, true);
         xhr.onload = () => {
             if (xhr.status !== 200) {
-                if(xhr.status === 404)
+                if (xhr.status === 404)
                     reject(new Error('Request failed.  Does not exist'));
                 else
                     reject(new Error('Request failed: server error'));
@@ -47,6 +46,10 @@ function performCall(method: string, route: string, args?: any) {
                 }
             }
         };
+        if (authToken) {
+            //fd.append('token', authToken);
+            xhr.setRequestHeader('x-access-token', authToken);
+        }
         xhr.send(fd);
     });
 }
@@ -69,7 +72,7 @@ export function upload(path: string, file: any): Promise<any> {
         //xhr.setRequestHeader("Content-Type", undefined)
         xhr.onload = () => {
             if (xhr.status !== 200) {
-                if(xhr.status === 404)
+                if (xhr.status === 404)
                     reject(new Error('Request failed.  Does not exist'));
                 else
                     reject(new Error('Request failed: server error'));

@@ -13,44 +13,43 @@ export function AuthHandler(db: PersistanceLayer, tokenKey: string, isUser: any)
   let router: express.Router = express.Router();
 
   //resume session and refresh token
-  router.post('/', multer().array(''), (req, res) => {
-    let token = req.body.token || '';
+  router.post('/', isUser, (req, res) => {
     let userDetail: UserDetail;
-    new Promise((resolve, reject) => {
-      jwt.verify(token, tokenKey, (err: Error, decoded: UserDetail) => {
-        if (err) reject(err);
-        resolve(decoded);
-      });
-    }).then((ud: UserDetail) => {
-      userDetail = {
-        uuid: ud.uuid,
-        name: ud.name,
-        godLevel: ud.godLevel,
-        email: ud.email
-      };
-      return jwt.sign(
-        userDetail,
-        tokenKey,
-        {
-          expiresIn: '1d'
+
+    let ud: UserDetail = req.user;
+    // trim off extra jwt baggage
+    userDetail = {
+      uuid: ud.uuid,
+      name: ud.name,
+      godLevel: ud.godLevel,
+      email: ud.email
+    };
+    jwt.sign(
+      userDetail,
+      tokenKey,
+      {
+        expiresIn: '1d'
+      },
+      (err: Error, newToken: string) => {
+        if (err) {
+          console.log('Resume session failed: ' + err.message);
+          return res.send(JSON.stringify({
+            Success: false,
+            Message: err.message
+          }));
         }
-      );
-    }).then((newToken: string) => {
-      let resp: LoginResponse = {
-        Success: true,
-        uuid: userDetail.uuid,
-        username: userDetail.name,
-        accessLevel: userDetail.godLevel.toString(),
-        email: userDetail.email,
-        token: newToken
+
+        let resp: LoginResponse = {
+          Success: true,
+          uuid: userDetail.uuid,
+          username: userDetail.name,
+          accessLevel: userDetail.godLevel.toString(),
+          email: userDetail.email,
+          token: newToken
+        }
+        res.send(JSON.stringify(resp));
       }
-      res.send(JSON.stringify(resp));
-    }).catch((err: Error) => {
-      res.send(JSON.stringify({
-        Success: false
-      }));
-      console.log('Resume session failed: ' + err.message);
-    })
+    );
   });
 
   router.get('/logout', isUser, (req, res) => {

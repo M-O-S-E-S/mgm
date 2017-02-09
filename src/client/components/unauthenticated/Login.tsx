@@ -48,7 +48,7 @@ export class Login extends React.Component<loginProps, {}> {
                     .set('name', res.username)
                     .set('godLevel', res.accessLevel)
                     .set('email', res.email)
-                this.props.dispatch(createLoginAction(u));
+                this.props.dispatch(createLoginAction(u, res.token));
                 if (window.location.pathname === "" || window.location.pathname === "/" || window.location.pathname === '/login')
                     this.props.dispatch(createNavigateToAction('/account'));
             }).catch((err: Error) => {

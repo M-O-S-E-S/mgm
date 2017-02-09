@@ -31,12 +31,14 @@ function auth(state = new Auth(), action: Action): Auth {
       return state
         .set('loggedIn', true)
         .set('errorMsg', '')
-        .set('user', act.user);
+        .set('user', act.user)
+        .set('token', act.token);
     case APP_AUTH_ERROR:
       let aca = <SetAuthMessage>action;
       return state
         .set('loggedIn', false)
         .set('user', null)
+        .set('token', null)
         .set('errorMsg', aca.message);
     default: return state;
   }

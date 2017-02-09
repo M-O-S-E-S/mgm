@@ -100,8 +100,10 @@ export interface IRegionStat {
 }
 
 export interface LoginResponse {
+    Success?: boolean
     uuid: string
     username: string
     accessLevel: string
     email: string
+    token: string
 }

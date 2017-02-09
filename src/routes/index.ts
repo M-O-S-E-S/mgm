@@ -17,6 +17,13 @@ import { RegisterHandler } from './RegisterHandler';
 
 import { Config } from '../Config';
 
+export interface UserDetail {
+  name: string
+  uuid: string
+  godLevel: number
+  email: string
+}
+
 class Authorizer {
   private db: PersistanceLayer
 
@@ -68,7 +75,7 @@ export function SetupRoutes(conf: Config): express.Router {
   let router = express.Router();
   let fs = new Freeswitch(conf.mgm.voiceIP);
 
-  router.use('/auth', AuthHandler(db, gatekeeper.isUser()));
+  router.use('/auth', AuthHandler(db, conf.mgm.tokenKey, gatekeeper.isUser()));
   router.use('/console', ConsoleHandler(db, conf, gatekeeper.isUser()));
   router.use('/task', TaskHandler(db, conf, gatekeeper.isUser(), gatekeeper.isAdmin()));
   router.use('/estate', EstateHandler(db, gatekeeper.isUser(), gatekeeper.isAdmin()));

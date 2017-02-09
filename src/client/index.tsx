@@ -4,7 +4,7 @@ import { Map } from 'immutable';
 
 import { createStore, applyMiddleware, Store } from 'redux'
 
-import { get } from './util/network';
+import { post } from './util/network';
 import { LoginResponse } from '../common/messages';
 
 import { Auth, StateModel } from "./redux/model";
@@ -37,23 +37,22 @@ window.addEventListener('popstate', () => {
 
 // set up for local storage of authentication components
 let user: User = null;
+let token: string = '';
 if (localStorage.getItem("user")) {
     user = new User(JSON.parse(localStorage.getItem("user")));
-    // do not do this here, we are not using tokens yet
-    //let token = localStorage.getItem("token")
-    //store.dispatch(createLoginAction(user));
+    token = localStorage.getItem("token")
 }
 store.subscribe(() => {
     let auth = store.getState().auth;
     if (auth.user !== user) {
         if (auth.user) {
-            user = auth.user;
-            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("user", JSON.stringify(auth.user));
             localStorage.setItem("token", auth.token);
         } else {
             localStorage.removeItem("user");
             localStorage.removeItem("token");
             user = null;
+            token = '';
         }
     }
 })
@@ -80,23 +79,30 @@ class App extends React.Component<{}, {}> {
                 });
             }
         });
-        this.state = {
-            st: store.getState(),
-            loading: true
+        if (user && token) {
+            this.state = {
+                st: store.getState(),
+                loading: true
+            }
+            this.resumeSession();
+        } else {
+            this.state = {
+                st: store.getState(),
+                loading: false
+            }
         }
-        this.resumeSession();
     }
 
     resumeSession() {
-        get('/api/auth').then((res: LoginResponse) => {
+        post('/api/auth', { token: token }).then((res: LoginResponse) => {
             console.log("session resume successfull");
             let u = new User()
                 .set('uuid', res.uuid)
                 .set('name', res.username)
                 .set('godLevel', res.accessLevel)
                 .set('email', res.email)
-            store.dispatch(createLoginAction(u));
-            if(url == "" || url == "/")
+            store.dispatch(createLoginAction(u, res.token));
+            if (url == "" || url == "/")
                 store.dispatch(createNavigateToAction('/account'));
             this.setState({
                 loading: false

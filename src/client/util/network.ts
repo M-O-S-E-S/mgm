@@ -15,7 +15,7 @@ interface mgmResponse {
 }
 
 function performCall(method: string, route: string, args?: any) {
-    return new Promise<any>((resolve, reject) => {
+    /*return new Promise<any>((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         xhr.open(method, route, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
@@ -39,6 +39,33 @@ function performCall(method: string, route: string, args?: any) {
         else
             xhr.send();
 
+    });*/
+    return new Promise<any>((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        let fd = new FormData();
+        if(args){
+            for(let key in args){
+                fd.append(key, args[key]);
+            }
+        }
+
+        xhr.open(method, route, true);
+        xhr.onload = () => {
+            if (xhr.status !== 200) {
+                if(xhr.status === 404)
+                    reject(new Error('Request failed.  Does not exist'));
+                else
+                    reject(new Error('Request failed: server error'));
+            } else {
+                let res: mgmResponse = JSON.parse(xhr.response);
+                if (res.Success) {
+                    resolve(res);
+                } else {
+                    reject(new Error(res.Message));
+                }
+            }
+        };
+        xhr.send(fd);
     });
 }
 

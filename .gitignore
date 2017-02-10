@@ -4,6 +4,7 @@ dist
 .tmp
 .sass-cache
 .vscode
-settings.js
+**/*.js
 logs
 uploads
+certs

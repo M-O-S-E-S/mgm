@@ -3,15 +3,18 @@
 
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import * as path from "path";
+import * as path from 'path';
+import * as fs from 'fs';
 
 import { SetupRoutes } from './routes';
-import { Validate } from './Config';
+import { Config, Validate } from './Config';
 
-var conf = require('../settings.js');
+let conf: Config = require('../settings.js');
 if (!Validate(conf)) {
   process.exit(1);
 }
+conf.mgm.certificate = fs.readFileSync(conf.mgm.privateKeyPath)
+
 
 //initialize singletons
 import { EmailMgr } from './lib';

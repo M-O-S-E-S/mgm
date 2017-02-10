@@ -9,7 +9,7 @@ import * as multer from 'multer';
 
 import { UserDetail } from '.';
 
-export function AuthHandler(db: PersistanceLayer, tokenKey: string, isUser: any): express.Router {
+export function AuthHandler(db: PersistanceLayer, cert: Buffer, isUser: any): express.Router {
   let router: express.Router = express.Router();
 
   //resume session and refresh token
@@ -26,7 +26,7 @@ export function AuthHandler(db: PersistanceLayer, tokenKey: string, isUser: any)
     };
     jwt.sign(
       userDetail,
-      tokenKey,
+      cert,
       {
         expiresIn: '1d'
       },
@@ -83,7 +83,7 @@ export function AuthHandler(db: PersistanceLayer, tokenKey: string, isUser: any)
       }
       return jwt.sign(
         detail,
-        tokenKey,
+        cert,
         {
           expiresIn: '1d'
         }

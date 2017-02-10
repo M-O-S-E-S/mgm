@@ -29,11 +29,11 @@ export interface UserDetail {
 
 class Authorizer {
   private db: PersistanceLayer
-  private tokenKey: string
+  private cert: Buffer
 
-  constructor(database: PersistanceLayer, tokenKey: string) {
+  constructor(database: PersistanceLayer, cert: Buffer) {
     this.db = database;
-    this.tokenKey = tokenKey;
+    this.cert = cert;
   }
 
   isUser() {
@@ -42,7 +42,7 @@ class Authorizer {
 
   private _isUser(req, res, next) {
     let token = req.headers['x-access-token'];
-    jwt.verify(token, this.tokenKey, (err: Error, decoded: UserDetail) => {
+    jwt.verify(token, this.cert, (err: Error, decoded: UserDetail) => {
       if (err) {
         return res.send(JSON.stringify({ Success: false, Message: err.message }));
       }
@@ -57,7 +57,7 @@ class Authorizer {
 
   private _isAdmin(req, res, next) {
     let token = req.headers['x-access-token'];
-    jwt.verify(token, this.tokenKey, (err: Error, decoded: UserDetail) => {
+    jwt.verify(token, this.cert, (err: Error, decoded: UserDetail) => {
       if (err) {
         return res.send(JSON.stringify({ Success: false, Message: err.message }));
       }
@@ -87,12 +87,12 @@ class Authorizer {
 export function SetupRoutes(conf: Config): express.Router {
   let db = new PersistanceLayer(conf.mgm.db, conf.halcyon.db);
 
-  let gatekeeper = new Authorizer(db, conf.mgm.tokenKey);
+  let gatekeeper = new Authorizer(db, conf.mgm.certificate);
 
   let router = express.Router();
   let fs = new Freeswitch(conf.mgm.voiceIP);
 
-  router.use('/auth', AuthHandler(db, conf.mgm.tokenKey, gatekeeper.isUser()));
+  router.use('/auth', AuthHandler(db, conf.mgm.certificate, gatekeeper.isUser()));
   router.use('/console', ConsoleHandler(db, conf, gatekeeper.isUser()));
   router.use('/task', multer().array(''), TaskHandler(db, conf, gatekeeper.isUser(), gatekeeper.isAdmin()));
   router.use('/estate', EstateHandler(db, gatekeeper.isUser(), gatekeeper.isAdmin()));

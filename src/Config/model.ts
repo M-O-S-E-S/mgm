@@ -16,7 +16,8 @@ export interface Config {
     voiceIP: string
     internalUrl: string
     mail: any
-    tokenKey: string
+    privateKeyPath: string
+    certificate: Buffer
   },
   halcyon: {
     db: {
@@ -99,9 +100,14 @@ export function Validate(config: Config): boolean {
     console.log('Error loading config: mgm mail is missing, email notifications may not work');
     return false;
   }
-  if (!config.mgm.tokenKey) {
+  if (!config.mgm.privateKeyPath) {
     console.log('Error loading config: JWT token string is missing');
     return false;
+  }else {
+    if (!fs.existsSync(config.mgm.privateKeyPath)) {
+      console.log('Error loading config: mgm privateKeyPath is present, but the location does not exist');
+      return false;
+    }
   }
 
   return true;

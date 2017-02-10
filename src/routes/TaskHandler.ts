@@ -193,7 +193,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
       return db.Jobs.create('ResetToken', u.UUID, 'Token Requested').then((j: JobInstance) => {
         console.log('Password reset job created for ' + u.UUID + ' with ID ' + j.id);
         return new Promise<string>((resolve, reject) => {
-          jwt.sign({ email: email }, conf.mgm.tokenKey, {
+          jwt.sign({ email: email }, conf.mgm.certificate, {
             expiresIn: '2d'
           }, (err, token) => {
             if (err) return reject(err);
@@ -222,7 +222,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     let id = '';
 
     new Promise<string>((resolve, reject) => {
-      jwt.verify(token, conf.mgm.tokenKey, (err, decoded) => {
+      jwt.verify(token, conf.mgm.certificate, (err, decoded) => {
         if (err) return reject(new Error('Invalid Token'));
         resolve(decoded.email);
       });

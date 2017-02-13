@@ -5,6 +5,7 @@ import { IManager } from '../../../common/messages';
 
 const UPSERT_MANAGER = "ESTATES_UPSERT_MANAGER";
 const UPSERT_MANAGER_BULK = "ESTATES_UPSERT_MANAGER_BULK";
+const DELETE_MANAGER_BULK = "ESTATES_DELETE_MANAGER_BULK";
 
 interface ManagerAction extends Action {
   manager: IManager
@@ -12,6 +13,10 @@ interface ManagerAction extends Action {
 
 interface ManagerBulkAction extends Action {
   managers: IManager[]
+}
+
+interface ManagerDeletedBulkAction extends Action {
+  managers: number[]
 }
 
 export const UpsertManagerAction = function (m: IManager): Action {
@@ -25,6 +30,14 @@ export const UpsertManagerAction = function (m: IManager): Action {
 export const UpsertManagerBulkAction = function (m: IManager[]): Action {
   let act: ManagerBulkAction = {
     type: UPSERT_MANAGER_BULK,
+    managers: m
+  }
+  return act;
+}
+
+export const DeleteManagerBulkAction = function (m: number[]): Action {
+  let act: ManagerDeletedBulkAction = {
+    type: DELETE_MANAGER_BULK,
     managers: m
   }
   return act;
@@ -45,6 +58,12 @@ export const ManagersReducer = function (state = Map<number, Set<string>>(), act
       let eb = <ManagerBulkAction>action;
       eb.managers.map((e: IManager) => {
         state = upsertManager(state, e);
+      });
+      return state;
+    case DELETE_MANAGER_BULK:
+      let db = <ManagerDeletedBulkAction>action;
+      db.managers.map((m: number) => {
+        state = state.delete(m);
       });
       return state;
     case ESTATE_DELETED:

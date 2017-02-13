@@ -12,7 +12,10 @@ import {
 } from '../../common/messages';
 
 import { Region, UpsertRegionBulkAction, DeleteRegionBulkAction } from '../components/Regions';
-import { Estate, UpsertEstateBulkAction, UpsertManagerBulkAction, AssignRegionEstateBulkAction } from '../components/Estates';
+import { Estate, 
+  UpsertEstateBulkAction, UpsertManagerBulkAction, AssignRegionEstateBulkAction,
+  DeleteEstateBulkAction, DeleteManagerBulkAction, DeleteRegionEstateBulkAction
+} from '../components/Estates';
 import {
   Group, UpsertGroupBulkAction,
   UpsertMemberBulkAction,
@@ -98,7 +101,7 @@ export class Synchroniser {
       this.store.dispatch(UpsertRegionBulkAction(res.Regions.map((r: IRegion) => {
         stale = stale.delete(r.uuid);
         return new Region(r);
-      })));
+      })));DeleteEstateBulkAction
       if (stale.size > 0)
         this.store.dispatch(DeleteRegionBulkAction(stale.toArray()));
     });
@@ -107,18 +110,36 @@ export class Synchroniser {
   private estates() {
     get('/api/estate', this.session).then((res: estateResult) => {
       if (!res.Success) return;
+
+      let staleEstates = this.store.getState().estates.keySeq().toSet();
       this.store.dispatch(UpsertEstateBulkAction(
         res.Estates.map((r: IEstate) => {
+          staleEstates = staleEstates.delete(r.id);
           return new Estate(r);
         })
       ));
-      this.store.dispatch(UpsertManagerBulkAction(res.Managers));
+      if (staleEstates.size > 0)
+        this.store.dispatch(DeleteEstateBulkAction(staleEstates.toArray()));
+
+      let staleManagers = this.store.getState().managers.keySeq().toSet();
+      this.store.dispatch(UpsertManagerBulkAction(res.Managers.map((m) => {
+        staleManagers.delete(m.id);
+        return m;
+      })));
+      if (staleManagers.size > 0)
+        this.store.dispatch(DeleteManagerBulkAction(staleManagers.toArray()));
+
+      let staleMap = this.store.getState().estateMap.keySeq().toSet();
       this.store.dispatch(AssignRegionEstateBulkAction(res.Map.map((m: IEstateMap) => {
+        staleMap = staleMap.delete(m.region);
         return {
           region: m.region,
           estate: m.estate
         }
       })));
+      // This is super rare, as a region must always have an estate.  It should only trigger on region deletion
+      if(staleMap.size > 0)
+        this.store.dispatch(DeleteRegionEstateBulkAction(staleMap.toArray()));
     });
   }
 

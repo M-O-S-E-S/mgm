@@ -35,11 +35,6 @@ server {
                 proxy_redirect off;
         }
 
-        # this is for firestorm clients
-        location /get_grid_info {
-                proxy_pass http://127.0.0.1:3000/get_grid_info;
-        }
-
         # proxy for user server
         location /login {
                 proxy_pass http://127.0.0.1:8002;
@@ -69,6 +64,10 @@ server {
         # proxy for client aperture access
         location /CAPS {
                 proxy_pass http://127.0.0.1:8000/CAPS;
+        }
+
+        location /get_grid_info {
+                proxy_pass http://127.0.0.1:3000/get_grid_info;
         }
 
         location / {

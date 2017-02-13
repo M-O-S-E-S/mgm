@@ -1,6 +1,7 @@
 import { Store } from 'redux';
 import { StateModel } from '../redux/model';
 import { get } from './network';
+import { Map, Set } from 'immutable';
 
 import {
   IJob,
@@ -12,14 +13,15 @@ import {
 } from '../../common/messages';
 
 import { Region, UpsertRegionBulkAction, DeleteRegionBulkAction } from '../components/Regions';
-import { Estate, 
+import {
+  Estate,
   UpsertEstateBulkAction, UpsertManagerBulkAction, AssignRegionEstateBulkAction,
   DeleteEstateBulkAction, DeleteManagerBulkAction, DeleteRegionEstateBulkAction
 } from '../components/Estates';
 import {
-  Group, UpsertGroupBulkAction,
-  UpsertMemberBulkAction,
-  Role, UpsertRoleBulkAction
+  Group, UpsertGroupBulkAction, DeleteGroupBulkAction,
+  UpsertMemberBulkAction, DeleteMemberBulkAction,
+  Role, UpsertRoleBulkAction, DeleteRoleBulkAction
 } from '../components/Groups';
 import { Host, UpsertHostBulkAction } from '../components/Hosts';
 import { User, UpsertUserBulkAction } from '../components/Users';
@@ -79,7 +81,7 @@ export class Synchroniser {
     this.users();
   }
 
-  private jobs() {
+  private jobs() {DeleteMemberBulkAction
     get('/api/task', this.session).then((res: jobResult) => {
       if (!res.Success) return;
 
@@ -101,7 +103,7 @@ export class Synchroniser {
       this.store.dispatch(UpsertRegionBulkAction(res.Regions.map((r: IRegion) => {
         stale = stale.delete(r.uuid);
         return new Region(r);
-      })));DeleteEstateBulkAction
+      }))); DeleteEstateBulkAction
       if (stale.size > 0)
         this.store.dispatch(DeleteRegionBulkAction(stale.toArray()));
     });
@@ -121,13 +123,20 @@ export class Synchroniser {
       if (staleEstates.size > 0)
         this.store.dispatch(DeleteEstateBulkAction(staleEstates.toArray()));
 
-      let staleManagers = this.store.getState().managers.keySeq().toSet();
+      let staleManagers = Map<number, Set<string>>();
+      this.store.getState().estates.keySeq().toArray().map((id) => {
+        staleManagers = staleManagers.set(id, this.store.getState().managers.get(id, Set<string>()));
+      })
       this.store.dispatch(UpsertManagerBulkAction(res.Managers.map((m) => {
-        staleManagers.delete(m.id);
+        let managers = staleManagers.get(m.estate, Set<string>());
+        managers = managers.delete(m.uuid);
+        staleManagers = staleManagers.set(m.estate, managers);
         return m;
       })));
-      if (staleManagers.size > 0)
-        this.store.dispatch(DeleteManagerBulkAction(staleManagers.toArray()));
+      staleManagers.map((managers, group) => {
+        if (managers.size > 0)
+          this.store.dispatch(DeleteManagerBulkAction(group, managers.toArray()));
+      });
 
       let staleMap = this.store.getState().estateMap.keySeq().toSet();
       this.store.dispatch(AssignRegionEstateBulkAction(res.Map.map((m: IEstateMap) => {
@@ -138,7 +147,7 @@ export class Synchroniser {
         }
       })));
       // This is super rare, as a region must always have an estate.  It should only trigger on region deletion
-      if(staleMap.size > 0)
+      if (staleMap.size > 0)
         this.store.dispatch(DeleteRegionEstateBulkAction(staleMap.toArray()));
     });
   }
@@ -146,17 +155,50 @@ export class Synchroniser {
   private groups() {
     get('/api/group', this.session).then((res: groupResult) => {
       if (!res.Success) return;
+
+      let staleGroups = this.store.getState().groups.keySeq().toSet();
       this.store.dispatch(UpsertGroupBulkAction(
         res.Groups.map((r: IGroup) => {
+          staleGroups = staleGroups.delete(r.GroupID);
           return (new Group(r));
         })
       ));
-      this.store.dispatch(UpsertMemberBulkAction(res.Members));
+      if (staleGroups.size > 0)
+        this.store.dispatch(DeleteGroupBulkAction(staleGroups.toArray()));
+
+      let staleMembers = Map<string, Set<string>>();
+      this.store.getState().groups.keySeq().toArray().map((g) => {
+        staleMembers = staleMembers.set(g, this.store.getState().members.get(g, Map<string, string>()).keySeq().toSet());
+      })
+      this.store.dispatch(UpsertMemberBulkAction(res.Members.map((m) => {
+        let members = staleMembers.get(m.GroupID, Set<string>());
+        members = members.delete(m.AgentID);
+        staleMembers = staleMembers.set(m.GroupID, members);
+        return m;
+      })));
+      staleMembers.map((members, group) => {
+        if (members.size > 0)
+          this.store.dispatch(DeleteMemberBulkAction(group, members.toArray()));
+      });
+
+
+      // GrouptID -> RoleID
+      let staleRoles = Map<string, Set<string>>();
+      this.store.getState().groups.keySeq().toArray().map((g) => {
+        staleRoles = staleRoles.set(g, this.store.getState().roles.get(g, Map<string, Role>()).keySeq().toSet());
+      })
       this.store.dispatch(UpsertRoleBulkAction(
         res.Roles.map((r: IRole) => {
+          let roles = staleRoles.get(r.GroupID, Set<string>());
+          roles = roles.delete(r.RoleID);
+          staleRoles = staleRoles.set(r.GroupID, roles);
           return new Role(r);
         })
       ));
+      staleRoles.map((roles, group) => {
+        if (roles.size > 0)
+          this.store.dispatch(DeleteRoleBulkAction(group, roles.toArray()));
+      })
     });
   }
 

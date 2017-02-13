@@ -16,7 +16,8 @@ interface ManagerBulkAction extends Action {
 }
 
 interface ManagerDeletedBulkAction extends Action {
-  managers: number[]
+  group: number
+  managers: string[]
 }
 
 export const UpsertManagerAction = function (m: IManager): Action {
@@ -35,9 +36,10 @@ export const UpsertManagerBulkAction = function (m: IManager[]): Action {
   return act;
 }
 
-export const DeleteManagerBulkAction = function (m: number[]): Action {
+export const DeleteManagerBulkAction = function (g: number, m: string[]): Action {
   let act: ManagerDeletedBulkAction = {
     type: DELETE_MANAGER_BULK,
+    group: g,
     managers: m
   }
   return act;
@@ -62,10 +64,11 @@ export const ManagersReducer = function (state = Map<number, Set<string>>(), act
       return state;
     case DELETE_MANAGER_BULK:
       let db = <ManagerDeletedBulkAction>action;
-      db.managers.map((m: number) => {
-        state = state.delete(m);
+      let managers = state.get(db.group, Set<string>());
+      db.managers.map((m: string) => {
+        managers = managers.delete(m);
       });
-      return state;
+      return state.set(db.group, managers);
     case ESTATE_DELETED:
       let da = <EstateDeletedAction>action;
       return state.delete(da.id);

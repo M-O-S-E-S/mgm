@@ -11,8 +11,13 @@ interface GroupBulkAction extends Action {
   groups: Group[];
 }
 
+interface DeleteGroupBulkAction extends Action {
+  groups: string[]
+}
+
 const ADD_GROUP = 'GROUPS_ADD_GROUP';
 const ADD_GROUP_BULK = 'GROUPS_ADD_GROUP_BULK';
+const DELETE_GROUP_BULK = 'GROUPS_DELETE_GROUP_BULK';
 
 const GroupClass = Record({
   GroupID: '',
@@ -48,6 +53,14 @@ export function UpsertGroupBulkAction(g: Group[]): Action {
   return act;
 }
 
+export function DeleteGroupBulkAction(g: string[]): Action {
+  let act: DeleteGroupBulkAction = {
+    type: DELETE_GROUP_BULK,
+    groups: g
+  }
+  return act;
+}
+
 function upsertGroup(state: Map<string, Group>, g: Group): Map<string, Group> {
   let group = state.get(g.GroupID, new Group());
   group = group.set('GroupID', g.GroupID)
@@ -65,9 +78,15 @@ export const GroupsReducer = function (state = Map<string, Group>(), action: Act
       return upsertGroup(state, ga.group);
     case ADD_GROUP_BULK:
       let gb = <GroupBulkAction>action;
-      gb.groups.map( (g: Group) => {
+      gb.groups.map((g: Group) => {
         state = upsertGroup(state, g);
       })
+      return state;
+    case DELETE_GROUP_BULK:
+      let db = <DeleteGroupBulkAction>action;
+      db.groups.map((g) => {
+        state = state.delete(g);
+      });
       return state;
     default:
       return state

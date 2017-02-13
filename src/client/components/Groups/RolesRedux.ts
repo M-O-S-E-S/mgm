@@ -10,8 +10,14 @@ interface RoleBulkAction extends Action {
   roles: Role[]
 }
 
+interface DeleteRoleBulkaction extends Action {
+  group: string
+  roles: string[]
+}
+
 const ADD_ROLE = "GROUPS_ADD_ROLE";
 const ADD_ROLE_BULK = "GROUPS_ADD_ROLE_BULK";
+const DELETE_ROLE_BULK = 'GROUPS_DELETE_ROLE_BULK';
 
 const RoleClass = Record({
   GroupID: '',
@@ -51,6 +57,15 @@ export const UpsertRoleBulkAction = function (r: Role[]): Action {
   return act;
 }
 
+export const DeleteRoleBulkAction = function (group: string, roles: string[]): Action {
+  let act: DeleteRoleBulkaction = {
+    type: DELETE_ROLE_BULK,
+    group: group,
+    roles: roles
+  }
+  return act;
+}
+
 function upsertRole(state: Map<string, Map<string, Role>>, r: Role): Map<string, Map<string, Role>> {
   let roles = state.get(r.GroupID, Map<string, Role>());
   let role = roles.get(r.RoleID, new Role());
@@ -75,6 +90,13 @@ export const RolesReducer = function (state = Map<string, Map<string, Role>>(), 
         state = upsertRole(state, r);
       })
       return state;
+    case DELETE_ROLE_BULK:
+      let db = <DeleteRoleBulkaction>action;
+      let roles = state.get(db.group);
+      db.roles.map((r) => {
+        roles = roles.delete(r);
+      });
+      return state.set(db.group, roles);
     default:
       return state
   }

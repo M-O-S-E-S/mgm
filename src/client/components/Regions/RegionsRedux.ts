@@ -6,6 +6,7 @@ import { IRegion, IRegionStat } from '../../../common/messages';
 const UPSERT_REGION = "REGIONS_UPSERT_REGION";
 const UPSERT_REGION_BULK = "REGIONS_UPSERT_REGION_BULK";
 const DELETE_REGION = "REGIONS_DELETE_REGION";
+const DELETE_REGION_BULK = "REGIONS_DELETE_REGION_BULK";
 
 
 const UPSERT_REGIONSTAT = "REGIONS_UPSERT_REGIONSTAT";
@@ -16,6 +17,10 @@ interface RegionAction extends Action {
 
 interface UpsertRegionBulk extends Action {
   regions: Region[]
+}
+
+interface DeleteRegionBulk extends Action {
+  regions: string[]
 }
 
 interface UpsertRegionStat extends Action {
@@ -96,6 +101,14 @@ export const DeleteRegionAction = function (r: Region): Action {
   return act
 }
 
+export const DeleteRegionBulkAction = function(r: string[]): Action {
+  let act: DeleteRegionBulk = {
+    type: DELETE_REGION_BULK,
+    regions: r
+  }
+  return act;
+}
+
 // internal function to update the state with a single user
 function upsertRegion(state: Map<string, Region>, r: Region): Map<string, Region> {
   let rec = state.get(r.uuid, new Region());
@@ -128,6 +141,12 @@ export const RegionsReducer = function (state = Map<string, Region>(), action: A
     case DELETE_REGION:
       act = <RegionAction>action;
       return state.remove(act.region.uuid);
+    case DELETE_REGION_BULK:
+     let da = <DeleteRegionBulk>action;
+     da.regions.map( (r: string) => {
+       state = state.delete(r);
+     })
+     return state;
     default:
       return state;
   }

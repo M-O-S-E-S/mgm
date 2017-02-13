@@ -5,6 +5,7 @@ export {
   RegionStat, 
   UpsertRegionAction,
   UpsertRegionBulkAction, 
+  DeleteRegionBulkAction,
   DeleteRegionAction,
   RegionsReducer, 
   UpsertRegionStatAction,

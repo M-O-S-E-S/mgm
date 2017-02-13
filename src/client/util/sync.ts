@@ -11,7 +11,7 @@ import {
   IUser, IPendingUser
 } from '../../common/messages';
 
-import { Region, UpsertRegionBulkAction } from '../components/Regions';
+import { Region, UpsertRegionBulkAction, DeleteRegionBulkAction } from '../components/Regions';
 import { Estate, UpsertEstateBulkAction, UpsertManagerBulkAction, AssignRegionEstateBulkAction } from '../components/Estates';
 import {
   Group, UpsertGroupBulkAction,
@@ -64,7 +64,7 @@ export class Synchroniser {
 
   constructor(store: Store<StateModel>) {
     this.store = store;
-    this.session = {token: this.store.getState().auth.token};
+    this.session = { token: this.store.getState().auth.token };
   }
 
   sync() {
@@ -88,9 +88,17 @@ export class Synchroniser {
   private regions() {
     get('/api/region', this.session).then((res: regionResult) => {
       if (!res.Success) return;
+
+      let stale = this.store.getState().regions.keySeq().toSet();
       this.store.dispatch(UpsertRegionBulkAction(res.Regions.map((r: IRegion) => {
+        // remove updated records from stale
+        stale = stale.delete(r.uuid);
         return new Region(r);
       })));
+
+      // delete stale records from redux
+      if (stale.size > 0)
+        this.store.dispatch(DeleteRegionBulkAction(stale.toArray()));
     });
   }
 
@@ -103,7 +111,7 @@ export class Synchroniser {
         })
       ));
       this.store.dispatch(UpsertManagerBulkAction(res.Managers));
-      this.store.dispatch(AssignRegionEstateBulkAction(res.Map.map( (m: IEstateMap) => {
+      this.store.dispatch(AssignRegionEstateBulkAction(res.Map.map((m: IEstateMap) => {
         return {
           region: m.region,
           estate: m.estate
@@ -126,32 +134,32 @@ export class Synchroniser {
           return new Role(r);
         })
       ));
-  });
-}
+    });
+  }
 
   private hosts() {
-  get('/api/host', this.session).then((res: hostResult) => {
-    if (!res.Success) return;
-    this.store.dispatch(UpsertHostBulkAction(
-      res.Hosts.map((h: IHost) => {
-        return new Host(h);
-      })
-    ));
-  });
-}
+    get('/api/host', this.session).then((res: hostResult) => {
+      if (!res.Success) return;
+      this.store.dispatch(UpsertHostBulkAction(
+        res.Hosts.map((h: IHost) => {
+          return new Host(h);
+        })
+      ));
+    });
+  }
 
   private users() {
-  get('/api/user', this.session).then((res: userResult) => {
-    if (!res.Success) return;
-    this.store.dispatch(UpsertUserBulkAction(
-      res.Users.map((u: IUser) => {
-        return new User(u);
-      })
-    ));
-    res.Pending.map((u: IPendingUser) => {
-      this.store.dispatch(UpsertPendingUserAction(new PendingUser(u)));
+    get('/api/user', this.session).then((res: userResult) => {
+      if (!res.Success) return;
+      this.store.dispatch(UpsertUserBulkAction(
+        res.Users.map((u: IUser) => {
+          return new User(u);
+        })
+      ));
+      res.Pending.map((u: IPendingUser) => {
+        this.store.dispatch(UpsertPendingUserAction(new PendingUser(u)));
+      });
     });
-  });
-}
+  }
 
 }

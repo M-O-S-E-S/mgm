@@ -45,7 +45,7 @@ if (localStorage.getItem("user")) {
 ;}
 store.subscribe(() => {
     let auth = store.getState().auth;
-    if (auth.user !== user) {
+    if (auth.user !== user || auth.token !== token) {
         if (auth.user) {
             localStorage.setItem("user", JSON.stringify(auth.user));
             localStorage.setItem("token", auth.token);

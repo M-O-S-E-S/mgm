@@ -21,7 +21,7 @@ import {
 import { Host, UpsertHostBulkAction } from '../components/Hosts';
 import { User, UpsertUserBulkAction } from '../components/Users';
 import { PendingUser, UpsertPendingUserAction } from '../components/PendingUsers';
-import { Job, UpsertJobBulkAction } from '../components/Account';
+import { Job, UpsertJobBulkAction, DeleteJobBulkAction } from '../components/Account';
 
 interface NetworkResult {
   Success: Boolean
@@ -79,9 +79,14 @@ export class Synchroniser {
   private jobs() {
     get('/api/task', this.session).then((res: jobResult) => {
       if (!res.Success) return;
+
+      let stale = this.store.getState().jobs.keySeq().toSet();
       this.store.dispatch(UpsertJobBulkAction(res.Jobs.map((j: IJob) => {
+        stale = stale.delete(j.id);
         return new Job(j);
-      })))
+      })));
+      if (stale.size > 0)
+        this.store.dispatch(DeleteJobBulkAction(stale.toArray()));
     });
   }
 
@@ -91,12 +96,9 @@ export class Synchroniser {
 
       let stale = this.store.getState().regions.keySeq().toSet();
       this.store.dispatch(UpsertRegionBulkAction(res.Regions.map((r: IRegion) => {
-        // remove updated records from stale
         stale = stale.delete(r.uuid);
         return new Region(r);
       })));
-
-      // delete stale records from redux
       if (stale.size > 0)
         this.store.dispatch(DeleteRegionBulkAction(stale.toArray()));
     });

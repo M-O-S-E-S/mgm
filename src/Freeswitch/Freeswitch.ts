@@ -183,8 +183,6 @@ export class Freeswitch {
   directory(body: any): string {
     let reqDomain = body.domain;
 
-    //console.log(body);
-
     if (reqDomain !== this.realm) {
       return '';
     }

@@ -112,27 +112,6 @@ export function SetupRoutes(conf: Config): express.Router {
     res.send('MGM');
   });
 
-  let grid_info = conf.grid_info;
-  router.get('/get_grid_info', (req, res) => {
-    res.send('<?xml version="1.0"?><gridinfo><login>' +
-      grid_info.login +
-      '</login><register>' +
-      grid_info.mgm +
-      '</register><welcome>' +
-      grid_info.mgm + '\welcome.html' +
-      '</welcome><password>' +
-      grid_info.mgm +
-      '</password><gridname>' +
-      grid_info.gridName +
-      '</gridname><gridnick>' +
-      grid_info.gridNick +
-      '</gridnick><about>' +
-      grid_info.mgm +
-      '</about><economy>' +
-      grid_info.mgm +
-      '</economy></gridinfo>');
-  });
-
   router.get('/map/regions', (req, res) => {
     if (!req.cookies['uuid']) {
       res.send(JSON.stringify({ Success: false, Message: 'No session found' }));

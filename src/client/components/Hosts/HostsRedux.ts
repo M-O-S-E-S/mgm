@@ -6,6 +6,7 @@ const UPSERT_HOST = 'HOSTS_UPSERT_HOST';
 const UPSERT_HOST_BULK = 'HOSTS_UPSERT_HOST_BULK';
 const HOST_DELETED = 'HOSTS_HOST_DELETED';
 const UPSERT_HOSTSTAT = 'HOSTS_UPSERT_HOSTSTAT';
+const HOST_DELETED_BULK = 'HOSTS_HOST_DELETED_BULK';
 
 const HostClass = Record({
   id: 0,
@@ -64,6 +65,10 @@ export interface HostDeletedAction extends Action {
   id: number
 }
 
+export interface HostDeletedBulkAction extends Action {
+  hosts: number[]
+}
+
 export const UpsertHostStatAction = function (h: number, s: HostStat): Action {
   let act: UpsertHostStat = {
     type: UPSERT_HOSTSTAT,
@@ -97,6 +102,14 @@ export const HostDeletedAction = function (id: number): Action {
   return act;
 }
 
+export const DeleteHostBulkAction = function (h: number[]): Action {
+  let act: HostDeletedBulkAction = {
+    type: HOST_DELETED_BULK,
+    hosts: h
+  }
+  return act;
+}
+
 function upsertHost(state: Map<number, Host>, h: Host): Map<number, Host> {
   let host = state.get(h.id, new Host());
   host = host.set('id', h.id)
@@ -112,16 +125,22 @@ export const HostsReducer = function (state = Map<number, Host>(), action: Actio
   switch (action.type) {
     case UPSERT_HOST:
       let act = <UpsertHost>action;
-      return upsertHost(state,act.host);
+      return upsertHost(state, act.host);
     case UPSERT_HOST_BULK:
       let uhb = <UpsertHostBulk>action;
-      uhb.hosts.map( (h: Host) => {
+      uhb.hosts.map((h: Host) => {
         state = upsertHost(state, h);
       })
       return state;
     case HOST_DELETED:
       let rmvr = <HostDeletedAction>action;
       return state.delete(rmvr.id);
+    case HOST_DELETED_BULK:
+      let db = <HostDeletedBulkAction>action;
+      db.hosts.map((h) => {
+        state = state.delete(h);
+      });
+      return state;
     default:
       return state;
   }

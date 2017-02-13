@@ -23,7 +23,7 @@ import {
   UpsertMemberBulkAction, DeleteMemberBulkAction,
   Role, UpsertRoleBulkAction, DeleteRoleBulkAction
 } from '../components/Groups';
-import { Host, UpsertHostBulkAction } from '../components/Hosts';
+import { Host, UpsertHostBulkAction, DeleteHostBulkAction } from '../components/Hosts';
 import { User, UpsertUserBulkAction } from '../components/Users';
 import { PendingUser, UpsertPendingUserAction } from '../components/PendingUsers';
 import { Job, UpsertJobBulkAction, DeleteJobBulkAction } from '../components/Account';
@@ -205,11 +205,16 @@ export class Synchroniser {
   private hosts() {
     get('/api/host', this.session).then((res: hostResult) => {
       if (!res.Success) return;
+
+      let staleHosts = this.store.getState().hosts.keySeq().toSet();
       this.store.dispatch(UpsertHostBulkAction(
         res.Hosts.map((h: IHost) => {
+          staleHosts = staleHosts.delete(h.id);
           return new Host(h);
         })
       ));
+      if(staleHosts.size > 0)
+        this.store.dispatch(DeleteHostBulkAction(staleHosts.toArray()));
     });
   }
 

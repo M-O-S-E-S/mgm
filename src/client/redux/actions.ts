@@ -13,8 +13,9 @@ export const APP_CHANGE_PASSWORD = "APP_CHANGE_PASSWORD";
 
 
 export interface LoginAction extends Action {
-  user: User
+  user: string
   token: string
+  isAdmin: boolean
 }
 
 export interface MyPasswordAction extends Action {
@@ -29,11 +30,12 @@ export interface NavigateTo extends Action {
   url: string
 }
 
-export function createLoginAction(user: User, token: string): Action {
+export function createLoginAction(user: string, isAdmin: boolean, token: string): Action {
   let act: LoginAction = {
     type: APP_LOGIN,
     user: user,
-    token: token
+    token: token,
+    isAdmin: isAdmin
   }
   return act;
 }

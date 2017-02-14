@@ -10,24 +10,27 @@ import { Job } from '../components/Account';
 
 /** AUTH */
 interface IAuth {
-  user: User,
+  user: string,
+  isAdmin: boolean,
   loggedIn: boolean,
   errorMsg: string,
   token: string
 }
 
 const AuthClass = Record({
-  user: new User(),
+  user: '',
   loggedIn: false,
   errorMsg: '',
-  token: ''
+  token: '',
+  isAdmin: false
 })
 
 export class Auth extends AuthClass implements IAuth {
-  user: User
+  user: string
   loggedIn: boolean
   errorMsg: string
   token: string
+  isAdmin: boolean
 
   set(key: string, value: string | boolean | User): Auth {
     return <Auth>super.set(key, value);

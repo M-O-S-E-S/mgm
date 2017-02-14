@@ -15,7 +15,7 @@ import { RegionList } from "./Regions";
 import { EstateList } from './Estates';
 import { GroupList } from './Groups';
 import { HostList } from './Hosts';
-import { UserList } from "./Users";
+import { User, UserList } from "./Users";
 import { PendingUserList } from "./PendingUsers";
 
 interface authenticatedProps {
@@ -26,7 +26,6 @@ interface authenticatedProps {
 
 interface state {
     url?: string
-    isAdmin?: boolean
 }
 
 export class Authenticated extends React.Component<authenticatedProps, state> {
@@ -36,8 +35,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
     constructor(props: authenticatedProps) {
         super(props);
         this.state = {
-            url: props.state.url,
-            isAdmin: this.props.state.auth.user.godLevel >= 250
+            url: props.state.url
         }
 
         this.timerToken = setInterval(this.props.synchronizer.sync.bind(this.props.synchronizer), 10000);
@@ -83,7 +81,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                         <NavItem
                             active={this.state.url === "/regions"}
                             onClick={this.handleNav.bind(this, "/regions")}>
-                            Regions
+                            RegionsisAdmin
                         </NavItem>
                         <NavDropdown id="grid-dropdown" title="Grid">
                             <MenuItem active={this.state.url === "/estates"}
@@ -94,23 +92,21 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                                 onClick={this.handleNav.bind(this, "/groups")}>
                                 Groups
                             </MenuItem>
-                            {this.state.isAdmin ?
-                                <MenuItem active={this.state.url === "/hosts"}
-                                    onClick={this.handleNav.bind(this, "/hosts")}>
-                                    Hosts
-                            </MenuItem> : <span />}
+                            <MenuItem active={this.state.url === "/hosts"}
+                                onClick={this.handleNav.bind(this, "/hosts")}>
+                                Hosts
+                            </MenuItem>
                         </NavDropdown>
                         <NavItem
                             active={this.state.url === "/users"}
                             onClick={this.handleNav.bind(this, "/users")}>
                             Users
                         </NavItem >
-                        {this.state.isAdmin ?
-                            <NavItem
-                                active={this.state.url === "/pending"}
-                                onClick={this.handleNav.bind(this, "/pending")}>
-                                Pending Users
-                        </NavItem > : <span />}
+                        <NavItem
+                            active={this.state.url === "/pending"}
+                            onClick={this.handleNav.bind(this, "/pending")}>
+                            Pending Users
+                        </NavItem >
                     </Nav >
                     <Nav pullRight>
                         <NavItem><Button bsSize="xsmall" onClick={this.handleLogout.bind(this)}>Log Out</Button></NavItem>
@@ -124,7 +120,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                     <div>
                         {navbar}
                         <RegionList
-                            isAdmin={this.state.isAdmin}
+                            isAdmin={this.props.state.auth.isAdmin}
                             dispatch={this.props.dispatch}
                             regions={this.props.state.regions}
                             estateMap={this.props.state.estateMap}
@@ -137,7 +133,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                     <div>
                         {navbar}
                         <EstateList
-                            isAdmin={this.state.isAdmin}
+                            isAdmin={this.props.state.auth.isAdmin}
                             dispatch={this.props.dispatch}
                             estates={this.props.state.estates}
                             estateMap={this.props.state.estateMap}
@@ -173,7 +169,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                     <div>
                         {navbar}
                         <UserList
-                            isAdmin={this.state.isAdmin}
+                            isAdmin={this.props.state.auth.isAdmin}
                             dispatch={this.props.dispatch}
                             users={this.props.state.users}
                             groups={this.props.state.groups}
@@ -197,6 +193,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                         <Account
                             dispatch={this.props.dispatch}
                             user={this.props.state.auth.user}
+                            users={this.props.state.users}
                             jobs={this.props.state.jobs}
                             regions={this.props.state.regions} />
                     </div>

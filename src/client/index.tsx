@@ -36,23 +36,27 @@ window.addEventListener('popstate', () => {
 
 
 // set up for local storage of authentication components
-let user: User = null;
+let user: string = '';
 let token: string = '';
+let isAdmin: boolean = false;
 if (localStorage.getItem("user")) {
-    user = new User(JSON.parse(localStorage.getItem("user")));
-    token = localStorage.getItem("token")
+    user = localStorage.getItem("user");
+    token = localStorage.getItem("token");
+    isAdmin = localStorage.getItem("isAdmin") === 'true';
     updateToken(token)
 ;}
 store.subscribe(() => {
     let auth = store.getState().auth;
     if (auth.user !== user || auth.token !== token) {
         if (auth.user) {
-            localStorage.setItem("user", JSON.stringify(auth.user));
+            localStorage.setItem("user", auth.user);
             localStorage.setItem("token", auth.token);
+            localStorage.setItem("isAdmin", auth.isAdmin? 'true' : 'false');
             updateToken(token);
         } else {
             localStorage.removeItem("user");
             localStorage.removeItem("token");
+            localStorage.removeItem("isAdmin");
             user = null;
             token = '';
             updateToken(null);
@@ -100,12 +104,7 @@ class App extends React.Component<{}, {}> {
     resumeSession() {
         get('/api/auth').then((res: LoginResponse) => {
             console.log("session resume successfull");
-            let u = new User()
-                .set('uuid', res.uuid)
-                .set('name', res.username)
-                .set('godLevel', res.accessLevel)
-                .set('email', res.email)
-            store.dispatch(createLoginAction(u, res.token));
+            store.dispatch(createLoginAction(res.uuid, res.isAdmin, res.token));
             if (url == "" || url == "/")
                 store.dispatch(createNavigateToAction('/account'));
             this.setState({

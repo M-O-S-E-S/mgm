@@ -32,6 +32,7 @@ function auth(state = new Auth(), action: Action): Auth {
         .set('loggedIn', true)
         .set('errorMsg', '')
         .set('user', act.user)
+        .set('isAdmin', act.isAdmin)
         .set('token', act.token);
     case APP_AUTH_ERROR:
       let aca = <SetAuthMessage>action;
@@ -39,6 +40,7 @@ function auth(state = new Auth(), action: Action): Auth {
         .set('loggedIn', false)
         .set('user', null)
         .set('token', null)
+        .set('isAdmin', false)
         .set('errorMsg', aca.message);
     default: return state;
   }

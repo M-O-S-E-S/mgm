@@ -15,13 +15,15 @@ import { SetPasswordModal } from './SetPasswordModal';
 
 interface props {
     dispatch: (a: Action) => void,
-    user: User
+    user: string,
+    users: Map<string,User>,
     jobs: Map<number, Job>,
     regions: Map<string, Region>
 }
 
 interface state {
-    showPasswordModal: boolean
+    showPasswordModal?: boolean
+    user: User
 }
 
 export class Account extends React.Component<props, {}> {
@@ -30,12 +32,21 @@ export class Account extends React.Component<props, {}> {
     constructor(props: props) {
         super(props);
         this.state = {
-            showPasswordModal: false
+            showPasswordModal: false,
+            user: new User()
         }
     }
 
     shouldComponentUpdate(nextProps: props, nextState: state) {
         return !shallowequal(this.props, nextProps) || !shallowequal(this.state, nextState);
+    }
+
+    componentWillReceiveProps(newProps: props) {
+        if (this.state.user !== newProps.users.get(newProps.user, this.state.user)) {
+            this.setState({
+                user: newProps.users.get(newProps.user)
+            })
+        }
     }
 
     handleNewPassword(password: string): Promise<void> {
@@ -63,15 +74,15 @@ export class Account extends React.Component<props, {}> {
             <Grid>
                 <Row>
                     <Col md={2}>Avatar Name</Col>
-                    <Col md={6}>{this.props.user.name}</Col>
+                    <Col md={6}>{this.state.user.name}</Col>
                 </Row>
                 <Row>
                     <Col md={2}>Avatar User Level</Col>
-                    <Col md={6}>{this.props.user.godLevel}</Col>
+                    <Col md={6}>{this.state.user.godLevel}</Col>
                 </Row>
                 <Row>
                     <Col md={2}>User Email</Col>
-                    <Col md={6}>{this.props.user.email}</Col>
+                    <Col md={6}>{this.state.user.email}</Col>
                 </Row>
                 <hr />
                 <Button onClick={this.showNewPassword.bind(this)} disabled={this.state.showPasswordModal}>Set Password</Button>

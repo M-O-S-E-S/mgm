@@ -49,14 +49,13 @@ export function AuthHandler(db: PersistanceLayer, cert: Buffer, isUser: any): ex
             allowRegions = allowRegions.add(emap.RegionID);
         });
       }).then(() => {
-        console.log(allowRegions.size);
         return {
           uuid: user.UUID,
           name: user.username + ' ' + user.lastname,
           isAdmin: user.isAdmin(),
           email: user.email,
-          estates: allowEstates.toArray(),
-          regions: allowRegions.toArray()
+          estates: allowEstates,
+          regions: allowRegions
         }
       });
   }
@@ -91,7 +90,7 @@ export function AuthHandler(db: PersistanceLayer, cert: Buffer, isUser: any): ex
           res.send(JSON.stringify(resp));
         }
       );
-    }).catch((err:Error) => {
+    }).catch((err: Error) => {
       res.send(JSON.stringify({
         Success: false,
         Message: err.message
@@ -130,7 +129,7 @@ export function AuthHandler(db: PersistanceLayer, cert: Buffer, isUser: any): ex
       }
     }).then(() => {
       return getUserPermissions(candidateUser.UUID);
-    }).then( (ud: UserDetail) => {
+    }).then((ud: UserDetail) => {
       return jwt.sign(
         ud,
         cert,

@@ -19,6 +19,7 @@ import { Config } from '../Config';
 
 import * as jwt from 'jsonwebtoken';
 import * as multer from 'multer';
+import { Set } from 'immutable';
 
 /**
  * The user detail is the body of the JWT tokens.
@@ -31,8 +32,8 @@ export interface UserDetail {
   uuid: string
   isAdmin: boolean
   email: string
-  estates: number[]
-  regions: string[]
+  estates: Set<number>
+  regions: Set<string>
 }
 
 export interface AuthenticatedRequest extends express.Request {
@@ -54,13 +55,16 @@ class Authorizer {
     return this._isUser.bind(this);
   }
 
-  private _isUser(req, res, next) {
+  private _isUser(req: AuthenticatedRequest, res, next) {
     let token = req.headers['x-access-token'];
     jwt.verify(token, this.cert, (err: Error, decoded: UserDetail) => {
       if (err) {
         return res.send(JSON.stringify({ Success: false, Message: err.message }));
       }
       req.user = decoded;
+      // convert javascript arrays into Sets
+      req.user.estates = Set<number>(req.user.estates);
+      req.user.regions = Set<string>(req.user.regions);
       return next();
     });
   }

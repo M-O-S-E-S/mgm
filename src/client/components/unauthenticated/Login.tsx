@@ -43,12 +43,7 @@ export class Login extends React.Component<loginProps, {}> {
         post('/api/auth/login', { username: this.state.username, password: this.state.password })
             .then((res: LoginResponse) => {
                 console.log('auth succeeded');
-                let u = new User()
-                    .set('uuid', res.uuid)
-                    .set('name', res.username)
-                    .set('godLevel', res.accessLevel)
-                    .set('email', res.email)
-                this.props.dispatch(createLoginAction(u, res.token));
+                this.props.dispatch(createLoginAction(res.uuid, res.isAdmin, res.token));
                 if (window.location.pathname === "" || window.location.pathname === "/" || window.location.pathname === '/login')
                     this.props.dispatch(createNavigateToAction('/account'));
             }).catch((err: Error) => {

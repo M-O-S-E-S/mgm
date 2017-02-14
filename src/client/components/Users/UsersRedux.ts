@@ -23,6 +23,10 @@ export class User extends UserClass implements IUser {
   set(key: string, value: string | number): User {
     return <User>super.set(key, value);
   }
+
+  isAdmin(): boolean {
+    return this.godLevel >= 250;
+  }
 }
 
 interface UserAction extends Action {

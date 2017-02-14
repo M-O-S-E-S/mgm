@@ -33,7 +33,7 @@ export class Account extends React.Component<props, {}> {
         super(props);
         this.state = {
             showPasswordModal: false,
-            user: new User()
+            user: props.users.get(props.user, new User()) 
         }
     }
 
@@ -74,7 +74,7 @@ export class Account extends React.Component<props, {}> {
             <Grid>
                 <Row>
                     <Col md={2}>Avatar Name</Col>
-                    <Col md={6}>{this.state.user.name}</Col>
+                    <Col md={6}>{this.state.user.username} {this.state.user.lastname}</Col>
                 </Row>
                 <Row>
                     <Col md={2}>Avatar User Level</Col>

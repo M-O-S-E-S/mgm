@@ -49,7 +49,7 @@ export class UserList extends React.Component<props, state> {
     componentWillReceiveProps(nextProps: props) {
         if (nextProps != this.props && this.state.selectedUser) {
             this.setState({
-                selectedUser: nextProps.users.get(this.state.selectedUser.uuid, null)
+                selectedUser: nextProps.users.get(this.state.selectedUser.UUID, null)
             });
         }
     }
@@ -98,12 +98,12 @@ export class UserList extends React.Component<props, state> {
     render() {
         let users = this.props.users.toArray()
             .filter((u: User) => {
-                return u.name.toLowerCase().indexOf(this.state.nameFilter.toLowerCase()) !== -1;
+                return u.name().toLowerCase().indexOf(this.state.nameFilter.toLowerCase()) !== -1;
             }, [])
-            .sort((a: User, b: User) => { return a.name.localeCompare(b.name) })
+            .sort((a: User, b: User) => { return a.lastname.localeCompare(b.lastname) })
             .map((u: User) => {
                 return <UserView
-                    key={u.uuid}
+                    key={u.UUID}
                     isAdmin={this.props.isAdmin}
                     user={u}
                     manage={this.onShowManage.bind(this, u)}

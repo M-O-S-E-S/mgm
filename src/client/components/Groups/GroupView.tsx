@@ -29,7 +29,7 @@ export class GroupView extends React.Component<props, {}> {
     }
     let founder: string = this.props.group.FounderID;
     if( this.props.users.get(founder) )
-      founder = this.props.users.get(founder).name;
+      founder = this.props.users.get(founder).name();
     return (
       <Row>
         <Col md={3}>{this.props.group.Name}</Col>

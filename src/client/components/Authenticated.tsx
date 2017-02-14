@@ -81,7 +81,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                         <NavItem
                             active={this.state.url === "/regions"}
                             onClick={this.handleNav.bind(this, "/regions")}>
-                            RegionsisAdmin
+                            Regions
                         </NavItem>
                         <NavDropdown id="grid-dropdown" title="Grid">
                             <MenuItem active={this.state.url === "/estates"}

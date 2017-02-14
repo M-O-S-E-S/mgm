@@ -75,7 +75,7 @@ export class ManageGroupsModal extends React.Component<props, state> {
       .map((g: Group) => {
         let members = nextProps.members.get(g.GroupID, Map<string, string>());
         // if this user is a member of this group, it has a role
-        let roleId = members.get(nextProps.user.uuid, '');
+        let roleId = members.get(nextProps.user.UUID, '');
         if (roleId === '') {
           candidateGroups.push(g);
         } else {
@@ -85,7 +85,7 @@ export class ManageGroupsModal extends React.Component<props, state> {
       })
 
     this.setState({
-      name: nextProps.user.name,
+      name: nextProps.user.name(),
       memberGroups: memberGroups,
       candidateGroups: candidateGroups
     })
@@ -106,10 +106,10 @@ export class ManageGroupsModal extends React.Component<props, state> {
   }
 
   onInsertMembership() {
-    return post('/api/group/addUser/' + this.state.selectedGroup.GroupID, { user: this.props.user.uuid, role: this.state.selectedRole.RoleID }).then(() => {
+    return post('/api/group/addUser/' + this.state.selectedGroup.GroupID, { user: this.props.user.UUID, role: this.state.selectedRole.RoleID }).then(() => {
       this.props.dispatch(UpsertMemberAction({
         GroupID: this.state.selectedGroup.GroupID,
-        AgentID: this.props.user.uuid,
+        AgentID: this.props.user.UUID,
         SelectedRoleID: this.state.selectedRole.RoleID
       }));
     }).catch((err: Error) => {
@@ -120,10 +120,10 @@ export class ManageGroupsModal extends React.Component<props, state> {
   }
 
   onEjectMembership(g: Group){
-    return post('/api/group/removeUser/' + g.GroupID, { user: this.props.user.uuid }).then(() => {
+    return post('/api/group/removeUser/' + g.GroupID, { user: this.props.user.UUID }).then(() => {
       this.props.dispatch(DeleteMemberAction({
         GroupID: g.GroupID,
-        AgentID: this.props.user.uuid,
+        AgentID: this.props.user.UUID,
         SelectedRoleID: ''
       }));
     }).catch((err: Error) => {

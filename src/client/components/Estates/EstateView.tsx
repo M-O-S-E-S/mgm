@@ -43,7 +43,7 @@ export class EstateView extends React.Component<props, {}> {
   render() {
     let estateOwner = '';
     if (this.props.estate.owner && this.props.users.get(this.props.estate.owner))
-      estateOwner = this.props.users.get(this.props.estate.owner).name;
+      estateOwner = this.props.users.get(this.props.estate.owner).name();
     let managers: Iterable<string, JSX.Element>;
     if (this.props.managers) {
       managers = this.props.managers.map((uuid) => {

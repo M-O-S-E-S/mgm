@@ -1,5 +1,4 @@
 import { Map, Record } from 'immutable';
-import { IUser } from '../../../common/messages';
 import { Action } from 'redux';
 
 const UPSERT_USER = "USERS_UPSERT_USER";
@@ -8,20 +7,26 @@ const DELETE_USER = "USERS_DELETE_USER";
 const DELETE_USER_BULK = "USERS_DELETE_USER_BULK";
 
 const UserClass = Record({
-  uuid: '',
-  name: '',
+  UUID: '',
+  username: '',
+  lastname: '',
   email: '',
   godLevel: 0
 })
 
-export class User extends UserClass implements IUser {
-  readonly uuid: string
-  readonly name: string
+export class User extends UserClass {
+  readonly UUID: string
+  readonly username: string
+  readonly lastname: string
   readonly email: string
   readonly godLevel: number
 
   set(key: string, value: string | number): User {
     return <User>super.set(key, value);
+  }
+
+  name(): string {
+    return this.username + ' ' + this.lastname;
   }
 
   isAdmin(): boolean {
@@ -74,11 +79,12 @@ export const DeleteUserBulkAction = function (u: string[]): Action {
 }
 
 function upsertUser(state: Map<string, User>, u: User): Map<string, User> {
-  let rec = state.get(u.uuid) || new User();
+  let rec = state.get(u.UUID) || new User();
   return state.set(
-    u.uuid,
-    rec.set('uuid', u.uuid)
-      .set('name', u.name)
+    u.UUID,
+    rec.set('UUID', u.UUID)
+      .set('username', u.username)
+      .set('lastname', u.lastname)
       .set('email', u.email)
       .set('godLevel', u.godLevel)
   );
@@ -97,7 +103,7 @@ export const UsersReducer = function (state = Map<string, User>(), action: Actio
       return state;
     case DELETE_USER:
       act = <UserAction>action;
-      return state.delete(act.user.uuid);
+      return state.delete(act.user.UUID);
     case DELETE_USER_BULK:
       let db = <DeleteUserBulk>action;
       db.users.map((u) => {

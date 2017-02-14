@@ -1,10 +1,3 @@
-export interface IUser {
-    uuid: string
-    name: string
-    email: string
-    godLevel: number
-}
-
 export interface IPendingUser {
     name: string
     email: string

@@ -86,7 +86,7 @@ export class AddUserModal extends React.Component<props, state> {
       return Promise.resolve();
     }
     let users = this.props.users.toArray().filter((u: User) => {
-      return this.state.name.trim() === u.name;
+      return this.state.name.trim() === u.name();
     });
     if (users.length !== 0) {
       this.setState({

@@ -1,5 +1,5 @@
 
-import { IHost, IRegion, IPendingUser, IUser, IGroup, IRole, IMembership, IEstate, IManager, IEstateMap, IJob } from '../common/messages';
+import { IHost, IRegion, IPendingUser, IGroup, IRole, IMembership, IEstate, IManager, IEstateMap, IJob } from '../common/messages';
 
 import { Config, Sql, MGMDB, HALCYONDB } from './mysql';
 

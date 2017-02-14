@@ -59,7 +59,7 @@ export class UserView extends React.Component<props, state> {
         }
         return (
             <Row>
-                <Col md={3}>{this.props.user.name}</Col>
+                <Col md={3}>{this.props.user.name()}</Col>
                 <Col md={3}>{this.props.user.email}</Col>
                 <Col md={2}>{userType}</Col>
 

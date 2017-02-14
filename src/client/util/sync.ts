@@ -9,7 +9,7 @@ import {
   IEstate, IManager, IEstateMap,
   IGroup, IMembership, IRole,
   IHost,
-  IUser, IPendingUser
+  IPendingUser
 } from '../../common/messages';
 
 import { Region, UpsertRegionBulkAction, DeleteRegionBulkAction } from '../components/Regions';
@@ -57,7 +57,7 @@ interface hostResult extends NetworkResult {
 }
 
 interface userResult extends NetworkResult {
-  Users: IUser[]
+  Users: User[]
   Pending: IPendingUser[]
 }
 
@@ -225,14 +225,15 @@ export class Synchroniser {
 
       let staleUsers = this.store.getState().users.keySeq().toSet();
       this.store.dispatch(UpsertUserBulkAction(
-        res.Users.map((u: IUser) => {
-          staleUsers = staleUsers.delete(u.uuid);
+        res.Users.map((u: User) => {
+          staleUsers = staleUsers.delete(u.UUID);
+          // convert the User object into an immutablejs Record
           return new User(u);
         })
       ));
       if (staleUsers.size > 0)
         this.store.dispatch(DeleteUserBulkAction(staleUsers.toArray()));
-
+      console.log(res.Users[0]);
 
         res.Pending.map((u: IPendingUser) => {
           this.store.dispatch(UpsertPendingUserAction(new PendingUser(u)));

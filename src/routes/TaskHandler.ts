@@ -7,6 +7,7 @@ import { UUIDString, Credential, EmailMgr } from '../lib';
 import { Config } from '../Config';
 import { IJob } from '../common/messages';
 import { SaveOar, LoadOar } from '../lib/Region';
+import { AuthenticatedRequest } from '.';
 
 import fs = require("fs");
 import * as multer from 'multer';
@@ -30,7 +31,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     throw new Error('Default oar does not exist at ' + defaultOar);
   }
 
-  router.get('/', isUser, (req, res) => {
+  router.get('/', isUser, (req: AuthenticatedRequest, res) => {
     db.Jobs.getFor(req.user.uuid).then((jobs: JobInstance[]) => {
       res.send(JSON.stringify({
         Success: true,
@@ -50,7 +51,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     });
   });
 
-  router.post('/loadOar/:uuid', isAdmin, (req, res) => {
+  router.post('/loadOar/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let merge = req.body.merge;
     let regionID = new UUIDString(req.params.uuid);
     let user = new UUIDString(req.user.uuid);
@@ -77,7 +78,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     });
   });
 
-  router.post('/delete/:id', isUser, (req, res) => {
+  router.post('/delete/:id', isUser, (req: AuthenticatedRequest, res) => {
     let taskID = parseInt(req.params.id);
     console.log('deleting job ' + taskID);
 
@@ -101,7 +102,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
   });
 
   // we do not check per-user permissions, only admins may do this
-  router.post('/saveOar/:uuid', isAdmin, (req, res) => {
+  router.post('/saveOar/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let user = new UUIDString(req.user.uuid);
 
@@ -136,7 +137,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     });
   });
 
-  router.post('/nukeContent/:uuid', isUser, (req, res) => {
+  router.post('/nukeContent/:uuid', isUser, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let user = new UUIDString(req.user.uuid);
 
@@ -172,11 +173,11 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
 
   });
 
-  router.post('/loadIar', isUser, (req, res) => {
+  router.post('/loadIar', isUser, (req: AuthenticatedRequest, res) => {
     res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
   });
 
-  router.post('/saveIar', isUser, (req, res) => {
+  router.post('/saveIar', isUser, (req: AuthenticatedRequest, res) => {
     res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
   });
 

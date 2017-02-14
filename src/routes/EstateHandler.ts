@@ -2,11 +2,12 @@ import * as express from 'express';
 
 import { PersistanceLayer, UserInstance, EstateInstance, ManagerInstance, EstateMapInstance } from '../database';
 import { IEstate, IManager, IEstateMap } from '../common/messages';
+import { AuthenticatedRequest } from '.';
 
 export function EstateHandler(db: PersistanceLayer, isUser: any, isAdmin: any): express.Router {
   let router = express.Router();
 
-  router.get('/', isUser, (req, res) => {
+  router.get('/', isUser, (req: AuthenticatedRequest, res) => {
     let iEstates: IEstate[] = [];
     let iManagers: IManager[] = [];
     let estateMap: IEstateMap[] = [];
@@ -51,7 +52,7 @@ export function EstateHandler(db: PersistanceLayer, isUser: any, isAdmin: any): 
     })
   });
 
-  router.post('/create', isAdmin, (req, res) => {
+  router.post('/create', isAdmin, (req: AuthenticatedRequest, res) => {
     let estateName = req.body.name;
     let owner = req.body.owner;
 
@@ -76,7 +77,7 @@ export function EstateHandler(db: PersistanceLayer, isUser: any, isAdmin: any): 
     });
   });
 
-  router.post('/destroy/:id', isAdmin, (req, res) => {
+  router.post('/destroy/:id', isAdmin, (req: AuthenticatedRequest, res) => {
     let estateID = req.params.id;
 
     db.Estates.destroy(estateID).then(() => {

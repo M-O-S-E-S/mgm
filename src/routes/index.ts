@@ -20,11 +20,25 @@ import { Config } from '../Config';
 import * as jwt from 'jsonwebtoken';
 import * as multer from 'multer';
 
+/**
+ * The user detail is the body of the JWT tokens.
+ * Nothing secret or secure should be in here.
+ * 
+ * This token also contains the estate IDs and region UUIDs that they have permission over.
+ */
 export interface UserDetail {
   name: string
   uuid: string
-  godLevel: number
+  isAdmin: boolean
   email: string
+  estates: number[]
+  regions: string[]
+}
+
+export interface AuthenticatedRequest extends express.Request {
+  user: UserDetail
+  body?: any
+  params: any
 }
 
 class Authorizer {
@@ -61,7 +75,7 @@ class Authorizer {
       if (err) {
         return res.send(JSON.stringify({ Success: false, Message: err.message }));
       }
-      if (decoded.godLevel >= 250) {
+      if (decoded.isAdmin) {
         req.user = decoded;
         return next();
       }
@@ -131,11 +145,6 @@ export function SetupRoutes(conf: Config): express.Router {
     }).catch((err: Error) => {
       res.send(JSON.stringify({ Success: false, Message: err.message }));
     });
-  });
-
-  router.post('/register/submit', (req, res) => {
-    console.log('Received registration request.  Not Implemented');
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
   });
 
   return router;

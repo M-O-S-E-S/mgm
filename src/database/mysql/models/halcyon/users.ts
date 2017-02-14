@@ -42,6 +42,7 @@ export interface UserAttribute {
 
 export interface UserInstance extends Sequelize.Instance<UserAttribute>, UserAttribute {
   isSuspended():boolean
+  isAdmin():boolean
 }
 
 export interface UserModel extends Sequelize.Model<UserInstance, UserAttribute> {
@@ -213,6 +214,9 @@ export function users(sequelize, DataTypes): UserModel {
     instanceMethods: {
       isSuspended: function(): boolean {
         return this.godLevel < 1;
+      },
+      isAdmin: function(): boolean {
+        return this.godLevel >= 250;
       }
     }
   });

@@ -4,11 +4,12 @@ import * as express from 'express';
 import { PersistanceLayer, GroupInstance, UserInstance, RoleInstance, MembershipInstance } from '../database';
 import { UUIDString } from '../lib';
 import { IGroup, IRole, IMembership } from '../common/messages';
+import { AuthenticatedRequest } from '.';
 
 export function GroupHandler(db: PersistanceLayer, isUser: any, isAdmin): express.Router {
   let router = express.Router();
 
-  router.get('/', isUser, (req, res) => {
+  router.get('/', isUser, (req: AuthenticatedRequest, res) => {
     let iGroups: IGroup[] = [];
     let iRoles: IRole[] = [];
     let iMembers: IMembership[] = [];
@@ -60,7 +61,7 @@ export function GroupHandler(db: PersistanceLayer, isUser: any, isAdmin): expres
     })
   });
 
-  router.post('/removeUser/:id', isAdmin, (req, res) => {
+  router.post('/removeUser/:id', isAdmin, (req: AuthenticatedRequest, res) => {
     let groupID = new UUIDString(req.params.id);
     let userID = new UUIDString(req.body.user);
 
@@ -78,7 +79,7 @@ export function GroupHandler(db: PersistanceLayer, isUser: any, isAdmin): expres
     })
   });
 
-  router.post('/addUser/:id', isAdmin, (req, res) => {
+  router.post('/addUser/:id', isAdmin, (req: AuthenticatedRequest, res) => {
     let groupID = new UUIDString(req.params.id);
     let userID = new UUIDString(req.body.user);
     let roleID = new UUIDString(req.body.role);

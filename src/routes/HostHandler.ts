@@ -2,11 +2,12 @@
 import * as express from 'express';
 import { PersistanceLayer, HostInstance } from '../database';
 import { IHost } from '../common/messages';
+import { AuthenticatedRequest } from '.';
 
 export function HostHandler(db: PersistanceLayer, isUser, isAdmin): express.Router {
   let router = express.Router();
 
-  router.get('/', isAdmin, (req, res) => {
+  router.get('/', isAdmin, (req: AuthenticatedRequest, res) => {
     db.Hosts.getAll().then((hosts: HostInstance[]) => {
       res.send(JSON.stringify({
         Success: true,
@@ -24,7 +25,7 @@ export function HostHandler(db: PersistanceLayer, isUser, isAdmin): express.Rout
     });
   });
 
-  router.post('/add', isAdmin, (req, res) => {
+  router.post('/add', isAdmin, (req: AuthenticatedRequest, res) => {
     let host: string = req.body.host || '';
     if (host === '') {
       res.send(JSON.stringify({ Success: false, Message: 'Invalid host' }));
@@ -38,7 +39,7 @@ export function HostHandler(db: PersistanceLayer, isUser, isAdmin): express.Rout
     });
   });
 
-  router.post('/remove', isAdmin, (req, res) => {
+  router.post('/remove', isAdmin, (req: AuthenticatedRequest, res) => {
     let host: string = req.body.host || '';
 
     db.Hosts.getByAddress(host).then( (h: HostInstance) => {

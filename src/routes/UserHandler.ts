@@ -4,11 +4,12 @@ import * as express from 'express';
 import { PersistanceLayer, UserInstance, PendingUserInstance } from '../database';
 import { Credential, EmailMgr, UUIDString } from '../lib';
 import { IUser, IPendingUser } from '../common/messages';
+import { AuthenticatedRequest } from '.';
 
 export function UserHandler(db: PersistanceLayer, templates: { [key: string]: string }, isUser, isAdmin): express.Router {
   let router = express.Router();
 
-  router.get('/', isUser, (req, res) => {
+  router.get('/', isUser, (req: AuthenticatedRequest, res) => {
     let outUsers: any[] = [];
     let outPUsers: any[] = [];
     db.Users.getAll().then((users: UserInstance[]) => {
@@ -24,7 +25,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
       });
     }).then(() => {
       // only admins see pending users
-      if (req.user.godLevel >= 250) {
+      if (req.user.isAdmin) {
         return db.PendingUsers.getAll();
       } else {
         return [];
@@ -50,7 +51,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
   });
 
 
-  router.post('/accessLevel', isAdmin, (req, res) => {
+  router.post('/accessLevel', isAdmin, (req: AuthenticatedRequest, res) => {
     let accessLevel = parseInt(req.body.accessLevel);
     let userID = new UUIDString(req.body.uuid);
     let controllingUser = new UUIDString(req.user.uuid);
@@ -74,7 +75,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
     });
   });
 
-  router.post('/email', isAdmin, (req, res) => {
+  router.post('/email', isAdmin, (req: AuthenticatedRequest, res) => {
     let email = req.body.email;
     let userID = new UUIDString(req.body.id);
 
@@ -92,7 +93,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
     });
   });
 
-  router.post('/password', isAdmin, (req, res) => {
+  router.post('/password', isAdmin, (req: AuthenticatedRequest, res) => {
     let password = req.body.password;
     let userID = new UUIDString(req.body.id);
 
@@ -110,11 +111,11 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
     });
   });
 
-  router.post('/suspend', isAdmin, (req, res) => {
+  router.post('/suspend', isAdmin, (req: AuthenticatedRequest, res) => {
     res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
   });
 
-  router.post('/destroy/:id', isAdmin, (req, res) => {
+  router.post('/destroy/:id', isAdmin, (req: AuthenticatedRequest, res) => {
     let userID = new UUIDString(req.params.id);
     
     // TODO: dont delete user if they own an estate or group, unless empty, then cascade
@@ -129,7 +130,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
     });
   });
 
-  router.post('/create', isAdmin, (req, res) => {
+  router.post('/create', isAdmin, (req: AuthenticatedRequest, res) => {
     let fullname: string = req.body.name.trim() || '';
     let email = req.body.email || '';
     let template: string = req.body.template || '';
@@ -167,7 +168,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
   });
 
   //deny a pending user
-  router.post('/deny', isAdmin, (req, res) => {
+  router.post('/deny', isAdmin, (req: AuthenticatedRequest, res) => {
     let name = req.body.name;
     let reason = req.body.reason;
     let user: PendingUserInstance
@@ -184,7 +185,7 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
   });
 
   //approve a pending user, creating their halcyon account
-  router.post('/approve', isAdmin, (req, res) => {
+  router.post('/approve', isAdmin, (req: AuthenticatedRequest, res) => {
     let name = req.body.name;
     let pUser: PendingUserInstance
     let newUser: UserInstance

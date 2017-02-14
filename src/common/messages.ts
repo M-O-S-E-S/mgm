@@ -103,7 +103,7 @@ export interface LoginResponse {
     Success?: boolean
     uuid: string
     username: string
-    accessLevel: string
+    isAdmin: boolean
     email: string
     token: string
 }

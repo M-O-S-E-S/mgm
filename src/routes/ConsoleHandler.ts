@@ -3,6 +3,7 @@ import * as express from 'express';
 import { UUIDString } from '../lib';
 import { PersistanceLayer, RegionInstance, HostInstance, UserInstance } from '../database';
 import { Config } from '../Config';
+import { AuthenticatedRequest } from '.';
 
 import * as jwt from 'jsonwebtoken';
 import * as dateFormat from 'dateformat';
@@ -36,10 +37,10 @@ export function GetConsoleToken(u: UserInstance, cert: Buffer): Promise<string> 
 export function ConsoleHandler(db: PersistanceLayer, config: Config, isUser: any): express.Router {
   let router = express.Router();
 
-  router.post('/open/:uuid', isUser, (req, res) => {
+  router.post('/open/:uuid', isUser, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let region: RegionInstance;
-    if (req.user.godLevel < 250) {
+    if (req.user.isAdmin) {
       res.send(JSON.stringify({ Success: false, Message: 'Console is restricted to admin' }));
       return;
     }

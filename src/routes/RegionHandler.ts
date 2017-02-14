@@ -3,6 +3,7 @@ import * as express from 'express';
 
 import { PersistanceLayer, RegionInstance, HostInstance, EstateInstance, EstateMapInstance } from '../database';
 import { Config } from '../Config';
+import { AuthenticatedRequest } from '.';
 
 import { IRegion } from '../common/messages';
 import { UUIDString, RegionLogs } from '../lib';
@@ -18,7 +19,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
 
   let logger = new RegionLogs(config.mgm.log_dir);
 
-  router.get('/', isUser, (req, res) => {
+  router.get('/', isUser, (req: AuthenticatedRequest, res) => {
     let user = new UUIDString(req.user.uuid);
 
     // just send them all and let the client sort them.  They cant control them anyways,
@@ -44,7 +45,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     });
   });
 
-  router.get('/logs/:uuid', isAdmin, (req, res) => {
+  router.get('/logs/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
 
     db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
@@ -59,7 +60,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     });
   });
 
-  router.post('/destroy/:uuid', isAdmin, (req, res) => {
+  router.post('/destroy/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
 
     db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
@@ -77,7 +78,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     });
   });
 
-  router.post('/estate/:uuid', isAdmin, (req, res) => {
+  router.post('/estate/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let estateID: number = parseInt(req.body.estate);
 
@@ -99,7 +100,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     });
   });
 
-  router.post('/setXY/:uuid', isAdmin, (req, res) => {
+  router.post('/setXY/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let x = parseInt(req.body.x);
     let y = parseInt(req.body.y);
@@ -123,7 +124,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     });
   });
 
-  router.post('/create', isAdmin, (req, res) => {
+  router.post('/create', isAdmin, (req: AuthenticatedRequest, res) => {
     let name = req.body.name;
 
     if(!req.body.x || isNaN(parseInt(req.body.x, 10))) return res.send(JSON.stringify({ Success: false, Message: "Integer X coordinate required" }));
@@ -162,7 +163,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     });
   });
 
-  router.post('/host/:regionID', isAdmin, (req, res) => {
+  router.post('/host/:regionID', isAdmin, (req: AuthenticatedRequest, res) => {
     //moving a region to a new host
 
     //get region
@@ -225,7 +226,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     });
   });
 
-  router.post('/stop/:uuid', isAdmin, (req, res) => {
+  router.post('/stop/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let target: RegionInstance;
     db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
@@ -246,7 +247,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     });
   });
 
-  router.post('/kill/:uuid', isAdmin, (req, res) => {
+  router.post('/kill/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let target: RegionInstance;
     db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
@@ -265,7 +266,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     });
   });
 
-  router.post('/start/:regionID', isAdmin, (req, res) => {
+  router.post('/start/:regionID', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.regionID);
     let r: RegionInstance
 
@@ -283,7 +284,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     })
   });
 
-  router.get('/config/:uuid?', isAdmin, (req, res) => {
+  router.get('/config/:uuid?', isAdmin, (req: AuthenticatedRequest, res) => {
     /*let regionID = req.params.uuid;
     db.Regions.getByUUID(regionID.toString()).then( (r: RegionInstance) => {
       let confs = RegionINI()

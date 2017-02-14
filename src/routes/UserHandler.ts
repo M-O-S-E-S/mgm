@@ -12,42 +12,33 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
   router.get('/', isUser, (req: AuthenticatedRequest, res) => {
     let outUsers: any[] = [];
     let outPUsers: any[] = [];
-    db.Users.getAll().then((users: UserInstance[]) => {
-      //map these to simian appearing users for current MGM front-end
-      outUsers = users.map( (u: UserInstance) => {
-        let iu: IUser = {
-          uuid: u.UUID,
-          name: u.username + ' ' + u.lastname,
-          email: u.email,
-          godLevel: u.godLevel
+    return db.Users.getAll()
+      .then((users: UserInstance[]) => {
+        outUsers = users;
+        // only admins see pending users
+        if (req.user.isAdmin) {
+          return db.PendingUsers.getAll();
+        } else {
+          return [];
         }
-        return iu;
-      });
-    }).then(() => {
-      // only admins see pending users
-      if (req.user.isAdmin) {
-        return db.PendingUsers.getAll();
-      } else {
-        return [];
-      }
-    }).then((users: PendingUserInstance[]) => {
-      outPUsers = users.map( (u: PendingUserInstance) => {
-        let iu: IPendingUser = {
-          name: u.name,
-          email: u.email,
-          gender: u.gender,
-          registered: u.registered,
-          summary: u.summary
-        }
-        return iu;
+      }).then((users: PendingUserInstance[]) => {
+        outPUsers = users.map((u: PendingUserInstance) => {
+          let iu: IPendingUser = {
+            name: u.name,
+            email: u.email,
+            gender: u.gender,
+            registered: u.registered,
+            summary: u.summary
+          }
+          return iu;
+        })
+      }).then(() => {
+        res.json({
+          Success: true,
+          Users: outUsers,
+          Pending: outPUsers
+        });
       })
-    }).then(() => {
-      res.send(JSON.stringify({
-        Success: true,
-        Users: outUsers,
-        Pending: outPUsers
-      }));
-    })
   });
 
 
@@ -56,12 +47,12 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
     let userID = new UUIDString(req.body.uuid);
     let controllingUser = new UUIDString(req.user.uuid);
 
-    if(userID.getShort() === controllingUser.getShort()){
-      return res.send(JSON.stringify({ Success: false, Message: 'You cannot change your own access level' }));
+    if (userID.getShort() === controllingUser.getShort()) {
+      return res.json({ Success: false, Message: 'You cannot change your own access level' });
     }
 
     if (accessLevel < 0 || accessLevel > 250) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Invalid access level' }));
+      return res.json({ Success: false, Message: 'Invalid access level' });
     }
 
     db.Users.getByID(userID.toString()).then((u: UserInstance) => {
@@ -69,9 +60,9 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
       u.godLevel = accessLevel;
       return u.save();
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -80,16 +71,16 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
     let userID = new UUIDString(req.body.id);
 
     if (!/(.+)@(.+){2,}\.(.+){2,}/.test(email)) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Invalid Email' }));
+      return res.json({ Success: false, Message: 'Invalid Email' });
     }
 
     db.Users.getByID(userID.toString()).then((u: UserInstance) => {
       u.email = email;
       return u.save();
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -98,35 +89,35 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
     let userID = new UUIDString(req.body.id);
 
     if (!password || password === '') {
-      return res.send(JSON.stringify({ Success: false, Message: 'Password cannot be blank' }));
+      return res.json({ Success: false, Message: 'Password cannot be blank' });
     }
 
     db.Users.getByID(userID.toString()).then((u: UserInstance) => {
       u.passwordHash = Credential.fromPlaintext(password).hash;
       return u.save();
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
   router.post('/suspend', isAdmin, (req: AuthenticatedRequest, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    res.json({ Success: false, Message: 'Not Implemented' });
   });
 
   router.post('/destroy/:id', isAdmin, (req: AuthenticatedRequest, res) => {
     let userID = new UUIDString(req.params.id);
-    
+
     // TODO: dont delete user if they own an estate or group, unless empty, then cascade
     // delete users inventory, appearance, memberships, etc.
 
     db.Users.getByID(userID.toString()).then((u: UserInstance) => {
       return u.destroy();
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -138,20 +129,20 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
 
 
     if (!fullname.trim().match('^[A-z]+ [A-z]+') || template === '' || password === '') {
-      return res.send(JSON.stringify({ Success: false, Message: 'Incomplete form submission' }));
+      return res.json({ Success: false, Message: 'Incomplete form submission' });
     }
 
     let names: string[] = fullname.split(' ');
 
     if (!(template in templates)) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Invalid template selector' }));
+      return res.json({ Success: false, Message: 'Invalid template selector' });
     }
 
     let templateID: UUIDString;
     try {
       templateID = new UUIDString(templates[template]);
     } catch (e) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Selected template does not contain a user uuid' }));
+      return res.json({ Success: false, Message: 'Selected template does not contain a user uuid' });
     }
 
     let templateUser: UserInstance;
@@ -160,10 +151,10 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
       //create the user account
       return db.Users.createUserFromTemplate(names[0], names[1], Credential.fromPlaintext(password), email, templateUser);
     }).then((u: UserInstance) => {
-      res.send(JSON.stringify({ Success: true, Message: u.UUID }));
+      res.json({ Success: true, Message: u.UUID });
     }).catch((err: Error) => {
       console.log(err);
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -178,9 +169,9 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
     }).then(() => {
       return user.destroy();
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });;
   });
 
@@ -198,23 +189,23 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
       try {
         templateID = new UUIDString(templates[u.gender]);
       } catch (e) {
-        return res.send(JSON.stringify({ Success: false, Message: 'Selected template does not contain a user uuid' }));
+        return res.json({ Success: false, Message: 'Selected template does not contain a user uuid' });
       }
       return templateID;
-    }).then( (templateID: UUIDString) => {
+    }).then((templateID: UUIDString) => {
       return db.Users.getByID(templateID.toString());
     }).then((t: UserInstance) => {
       let names = pUser.name.trim().split(' ');
       return db.Users.createUserFromTemplate(names[0], names[1], Credential.fromHalcyon(pUser.password), pUser.email, t);
-    }).then((nu: UserInstance ) => {
+    }).then((nu: UserInstance) => {
       newUser = nu;
       return pUser.destroy();
     }).then(() => {
       return EmailMgr.instance().accountApproved(pUser.name, pUser.email);
     }).then(() => {
-      res.send(JSON.stringify({ Success: true, Message: newUser.UUID }));
+      res.json({ Success: true, Message: newUser.UUID });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
 
   });

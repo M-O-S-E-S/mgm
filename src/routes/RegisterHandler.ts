@@ -15,27 +15,27 @@ export function RegisterHandler(db: PersistanceLayer, templates: { [key: string]
 
     // FORM VALIDATION
     if (!name || !email || !template || !password || !summary) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Incomplete Registration Form' }));
+      return res.json({ Success: false, Message: 'Incomplete Registration Form' });
     }
 
     if (name.split(' ').length != 2) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Invalid username' }));
+      return res.json({ Success: false, Message: 'Invalid username' });
     }
 
     if (!/(.+)@(.+){2,}\.(.+){2,}/.test(email)) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Invalid email' }));
+      return res.json({ Success: false, Message: 'Invalid email' });
     }
 
     if (!(template in templates)) {
-      return res.send(JSON.stringify({ Success: false, Message: 'Invalid template selector' }));
+      return res.json({ Success: false, Message: 'Invalid template selector' });
     }
 
     if (password === '') {
-      return res.send(JSON.stringify({ Success: false, Message: 'Empty password is not allowed' }));
+      return res.json({ Success: false, Message: 'Empty password is not allowed' });
     }
 
     if (summary === '') {
-      return res.send(JSON.stringify({ Success: false, Message: 'Empty summary is not allowed' }));
+      return res.json({ Success: false, Message: 'Empty summary is not allowed' });
     }
 
     //ensure no duplicate names
@@ -61,12 +61,12 @@ export function RegisterHandler(db: PersistanceLayer, templates: { [key: string]
     }).then( () => {
       return EmailMgr.instance().registrationSuccessfull(name, email);
     }).then( () => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).then(() => {
       EmailMgr.instance().notifyAdminUserPending(name, email);
     }).catch((err: Error) => {
       console.log(err);
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
 
   });

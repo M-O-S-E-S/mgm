@@ -50,14 +50,14 @@ export function GroupHandler(db: PersistanceLayer, isUser: any, isAdmin): expres
         return im;
       })
     }).then(() => {
-      res.send(JSON.stringify({
+      res.json({
         Success: true,
         Groups: iGroups,
         Members: iMembers,
         Roles: iRoles
-      }));
+      });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     })
   });
 
@@ -73,9 +73,9 @@ export function GroupHandler(db: PersistanceLayer, isUser: any, isAdmin): expres
       }))
 
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     })
   });
 
@@ -96,9 +96,9 @@ export function GroupHandler(db: PersistanceLayer, isUser: any, isAdmin): expres
       // role exists
       return db.Groups.addUserToGroup(groupID.toString(), userID.toString(), roleID.toString());
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     })
   });
 

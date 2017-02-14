@@ -17,10 +17,10 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
       let logs: string[] = JSON.parse(req.body.log);
       return logger.append(new UUIDString(r.uuid), logs);
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
       console.log('Error handling logs for host ' + remoteIP + ': ' + err.message);
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -55,7 +55,7 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
       });
 
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -70,7 +70,7 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
       }
       throw new Error('Requested region does not exist on the requesting host');
     }).then((r: RegionInstance) => {
-      res.send(JSON.stringify({
+      res.json({
         Success: true,
         Region: {
           Name: r.name,
@@ -80,9 +80,9 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
           InternalPort: r.httpPort,
           ExternalHostName: r.slaveAddress
         }
-      }));
+      });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
       return;
     });
   });
@@ -105,9 +105,9 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
       r.save();
       return RegionINI(r, config);
     }).then((config: { [key: string]: { [key: string]: string } }) => {
-      res.send(JSON.stringify({ Success: true, Region: config }));
+      res.json({ Success: true, Region: config });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
       return;
     });
   });
@@ -134,13 +134,13 @@ export function DispatchHandler(db: PersistanceLayer, config: Config): express.R
           locY: r.locY
         });
       }
-      return res.send(JSON.stringify({
+      return res.json({
         Success: true,
         Regions: result
-      }));
+      });
     }).catch((err: Error) => {
       console.log('Error with host registration from ' + remoteIP);
-      return res.send(JSON.stringify({ Success: false, Message: err.message }));
+      return res.json({ Success: false, Message: err.message });
     });
   });
 

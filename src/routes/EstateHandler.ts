@@ -43,12 +43,12 @@ export function EstateHandler(db: PersistanceLayer, isUser: any, isAdmin: any): 
         return region;
       });
     }).then(() => {
-      res.send(JSON.stringify({
+      res.json({
         Success: true,
         Estates: iEstates,
         Managers: iManagers,
         Map: estateMap
-      }));
+      });
     })
   });
 
@@ -57,7 +57,7 @@ export function EstateHandler(db: PersistanceLayer, isUser: any, isAdmin: any): 
     let owner = req.body.owner;
 
     if (estateName === '') {
-      return res.send(JSON.stringify({ Success: false, Message: 'Estate name cannot be blank' }));
+      return res.json({ Success: false, Message: 'Estate name cannot be blank' });
     }
 
     db.Estates.getAll().then((estates: EstateInstance[]) => {
@@ -71,9 +71,9 @@ export function EstateHandler(db: PersistanceLayer, isUser: any, isAdmin: any): 
     }).then((u: UserInstance) => {
       return db.Estates.create(estateName, owner);
     }).then((e: EstateInstance) => {
-      res.send(JSON.stringify({ Success: true, ID: e.EstateID }));
+      res.json({ Success: true, ID: e.EstateID });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -81,9 +81,9 @@ export function EstateHandler(db: PersistanceLayer, isUser: any, isAdmin: any): 
     let estateID = req.params.id;
 
     db.Estates.destroy(estateID).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 

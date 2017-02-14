@@ -73,10 +73,10 @@ export function AuthHandler(db: PersistanceLayer, cert: Buffer, isUser: any): ex
         (err: Error, newToken: string) => {
           if (err) {
             console.log('Resume session failed: ' + err.message);
-            return res.send(JSON.stringify({
+            return res.json({
               Success: false,
               Message: err.message
-            }));
+            });
           }
 
           let resp: LoginResponse = {
@@ -87,21 +87,21 @@ export function AuthHandler(db: PersistanceLayer, cert: Buffer, isUser: any): ex
             email: userDetail.email,
             token: newToken
           }
-          res.send(JSON.stringify(resp));
+          res.json(resp);
         }
       );
     }).catch((err: Error) => {
-      res.send(JSON.stringify({
+      res.json({
         Success: false,
         Message: err.message
-      }));
+      });
     });
   });
 
   router.get('/logout', isUser, (req: AuthenticatedRequest, res) => {
-    res.send(JSON.stringify({
+    res.json({
       Success: true
-    }));
+    });
   });
 
   /**
@@ -146,9 +146,9 @@ export function AuthHandler(db: PersistanceLayer, cert: Buffer, isUser: any): ex
         email: candidateUser.email,
         token: token
       }
-      res.send(JSON.stringify(resp));
+      res.json(resp);
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -156,7 +156,7 @@ export function AuthHandler(db: PersistanceLayer, cert: Buffer, isUser: any): ex
     let password: string = req.body.password || '';
 
     if (password === '') {
-      return res.send(JSON.stringify({ Success: false, Message: 'Password cannot be blank' }));
+      return res.json({ Success: false, Message: 'Password cannot be blank' });
     }
 
     let credential = Credential.fromPlaintext(password);
@@ -165,10 +165,10 @@ export function AuthHandler(db: PersistanceLayer, cert: Buffer, isUser: any): ex
       u.passwordHash = credential.hash;
       return u.save();
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
       console.log('Error updating user password: ' + err.message);
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 

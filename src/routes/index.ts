@@ -59,7 +59,7 @@ class Authorizer {
     let token = req.headers['x-access-token'];
     jwt.verify(token, this.cert, (err: Error, decoded: UserDetail) => {
       if (err) {
-        return res.send(JSON.stringify({ Success: false, Message: err.message }));
+        return res.json({ Success: false, Message: err.message });
       }
       req.user = decoded;
       // convert javascript arrays into Sets
@@ -77,14 +77,14 @@ class Authorizer {
     let token = req.headers['x-access-token'];
     jwt.verify(token, this.cert, (err: Error, decoded: UserDetail) => {
       if (err) {
-        return res.send(JSON.stringify({ Success: false, Message: err.message }));
+        return res.json({ Success: false, Message: err.message });
       }
       if (decoded.isAdmin) {
         req.user = decoded;
         return next();
       }
 
-      return res.send(JSON.stringify({ Success: false, Message: 'Access Denied' }));
+      return res.json({ Success: false, Message: 'Access Denied' });
     });
   }
 
@@ -97,7 +97,7 @@ class Authorizer {
     this.db.Hosts.getByAddress(remoteIP).then(() => {
       return next();
     }).catch(() => {
-      return res.send(JSON.stringify({ Success: false, Message: 'Permission Denied' }));
+      return res.json({ Success: false, Message: 'Permission Denied' });
     });
   }
 }
@@ -132,7 +132,7 @@ export function SetupRoutes(conf: Config): express.Router {
 
   router.get('/map/regions', (req, res) => {
     if (!req.cookies['uuid']) {
-      res.send(JSON.stringify({ Success: false, Message: 'No session found' }));
+      res.json({ Success: false, Message: 'No session found' });
       return;
     }
 
@@ -145,9 +145,9 @@ export function SetupRoutes(conf: Config): express.Router {
           y: r.locY
         })
       }
-      res.send(JSON.stringify(result));
+      res.json(result);
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 

@@ -9,7 +9,7 @@ export function HostHandler(db: PersistanceLayer, isUser, isAdmin): express.Rout
 
   router.get('/', isAdmin, (req: AuthenticatedRequest, res) => {
     db.Hosts.getAll().then((hosts: HostInstance[]) => {
-      res.send(JSON.stringify({
+      res.json({
         Success: true,
         Hosts: hosts.map(host => {
           let ih: IHost = {
@@ -21,21 +21,21 @@ export function HostHandler(db: PersistanceLayer, isUser, isAdmin): express.Rout
           }
           return ih;
         })
-      }));
+      });
     });
   });
 
   router.post('/add', isAdmin, (req: AuthenticatedRequest, res) => {
     let host: string = req.body.host || '';
     if (host === '') {
-      res.send(JSON.stringify({ Success: false, Message: 'Invalid host' }));
+      res.json({ Success: false, Message: 'Invalid host' });
       return;
     }
 
     db.Hosts.create(host).then((h: HostInstance) => {
-      res.send(JSON.stringify({ Success: true, ID: h.id }));
+      res.json({ Success: true, ID: h.id });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -45,9 +45,9 @@ export function HostHandler(db: PersistanceLayer, isUser, isAdmin): express.Rout
     db.Hosts.getByAddress(host).then( (h: HostInstance) => {
       return h.destroy();
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 

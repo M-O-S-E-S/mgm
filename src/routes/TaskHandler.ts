@@ -33,7 +33,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
 
   router.get('/', isUser, (req: AuthenticatedRequest, res) => {
     db.Jobs.getFor(req.user.uuid).then((jobs: JobInstance[]) => {
-      res.send(JSON.stringify({
+      res.json({
         Success: true,
         Jobs: jobs.map((j: JobInstance) => {
           let ij: IJob = {
@@ -45,9 +45,9 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
           }
           return ij;
         })
-      }));
+      });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -72,9 +72,9 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
         })
       );
     }).then((j: JobInstance) => {
-      res.send(JSON.stringify({ Success: true, ID: j.id }));
+      res.json({ Success: true, ID: j.id });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -95,9 +95,9 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
       } catch (e) {/*not all jobs contain json*/ }
       return j.destroy();
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -131,9 +131,9 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     }).then((j: JobInstance) => {
       return SaveOar(region, host, j);
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -166,26 +166,26 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     }).then((j: JobInstance) => {
       return LoadOar(region, host, j);
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
 
   });
 
   router.post('/loadIar', isUser, (req: AuthenticatedRequest, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    res.json({ Success: false, Message: 'Not Implemented' });
   });
 
   router.post('/saveIar', isUser, (req: AuthenticatedRequest, res) => {
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    res.json({ Success: false, Message: 'Not Implemented' });
   });
 
   router.post('/resetCode', (req, res) => {
     let email = req.body.email || '';
 
     if (email === '') {
-      return res.send(JSON.stringify({ Success: false, Message: 'Email cannot be blank' }));
+      return res.json({ Success: false, Message: 'Email cannot be blank' });
     }
 
     db.Users.getByEmail(email).then((u: UserInstance) => {
@@ -204,9 +204,9 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
       }).then((token: string) => {
         return EmailMgr.instance().sendAuthResetToken(email, token);
       }).then(() => {
-        res.send(JSON.stringify({ Success: true }));
+        res.json({ Success: true });
       }).catch((err: Error) => {
-        res.send(JSON.stringify({ Success: false, Message: err.message }));
+        res.json({ Success: false, Message: err.message });
       });
     });
   });
@@ -217,7 +217,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     let password = req.body.password || '';
 
     if (!password || password === '') {
-      return res.send(JSON.stringify({ Success: false, Message: 'Blank passwords not permitted' }));
+      return res.json({ Success: false, Message: 'Blank passwords not permitted' });
     }
 
     let id = '';
@@ -239,9 +239,9 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     }).then(() => {
       return db.Jobs.create('ResetToken', id, 'Password Reset')
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -350,10 +350,10 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
           throw new Error('invalid upload for job type: ' + j.type);
       }
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
       console.log(err);
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 

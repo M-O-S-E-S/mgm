@@ -41,7 +41,7 @@ export function ConsoleHandler(db: PersistanceLayer, config: Config, isUser: any
     let regionID = new UUIDString(req.params.uuid);
     let region: RegionInstance;
     if (req.user.isAdmin) {
-      res.send(JSON.stringify({ Success: false, Message: 'Console is restricted to admin' }));
+      res.json({ Success: false, Message: 'Console is restricted to admin' });
       return;
     }
     db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
@@ -53,13 +53,13 @@ export function ConsoleHandler(db: PersistanceLayer, config: Config, isUser: any
     }).then((u: UserInstance) => {
       return GetConsoleToken(u, config.mgm.certificate);
     }).then((t: string) => {
-      res.send(JSON.stringify({
+      res.json({
         Success: true,
         Token: t,
         URL: 'http://' + region.externalAddress + ':' + region.httpPort
-      }));
+      });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 

@@ -25,7 +25,7 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     // just send them all and let the client sort them.  They cant control them anyways,
     // and they can see them in-world anyways.  no need to be secret
     db.Regions.getAll().then((regions: RegionInstance[]) => {
-      res.send(JSON.stringify({
+      res.json({
         Success: true,
         Regions: regions.map((r: RegionInstance) => {
           let ir: IRegion = {
@@ -39,9 +39,9 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
           }
           return ir;
         })
-      }));
+      });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -51,12 +51,12 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
       return logger.getLogs(regionID);
     }).then( (log: string) => {
-      res.send(JSON.stringify({
+      res.json({
         Success: true,
         Message: log
-      }))
+      });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -65,16 +65,16 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
 
     db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
       if (r.isRunning) {
-        return res.send(JSON.stringify({ Success: false, Message: 'cannot delete a running region' }));
+        return res.json({ Success: false, Message: 'cannot delete a running region' });
       }
       if (r.slaveAddress !== null && r.slaveAddress !== '') {
-        return res.send(JSON.stringify({ Success: false, Message: 'region is still allocated a host' }));
+        return res.json({ Success: false, Message: 'region is still allocated a host' });
       }
       return r.destroy();
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -94,9 +94,9 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     }).then(() => {
       return db.Estates.setMapForRegion(estateID, regionID.toString());
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -118,26 +118,26 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
       r.locY = y;
       return r.save();
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
   router.post('/create', isAdmin, (req: AuthenticatedRequest, res) => {
     let name = req.body.name;
 
-    if(!req.body.x || isNaN(parseInt(req.body.x, 10))) return res.send(JSON.stringify({ Success: false, Message: "Integer X coordinate required" }));
-    if(!req.body.y || isNaN(parseInt(req.body.y, 10))) return res.send(JSON.stringify({ Success: false, Message: "Integer Y coordinate required" }));
-    if(!name) return res.send(JSON.stringify({ Success: false, Message: "Region name cannot be blank" }));
-    if(!req.body.estate || isNaN(parseInt(req.body.estate,10))) return res.send(JSON.stringify({ Success: false, Message: "Invalid Estate Assignment" }));
+    if(!req.body.x || isNaN(parseInt(req.body.x, 10))) return res.json({ Success: false, Message: "Integer X coordinate required" });
+    if(!req.body.y || isNaN(parseInt(req.body.y, 10))) return res.json({ Success: false, Message: "Integer Y coordinate required" });
+    if(!name) return res.json({ Success: false, Message: "Region name cannot be blank" });
+    if(!req.body.estate || isNaN(parseInt(req.body.estate,10))) return res.json({ Success: false, Message: "Invalid Estate Assignment" });
 
     let estateID = parseInt(req.body.estate, 10);
     let x = parseInt(req.body.x, 10);
     let y = parseInt(req.body.y, 10);
 
     if(x < 0 || y < 0)
-      return res.send(JSON.stringify({ Success: false, Message: "Invalid region coordinates" }));
+      return res.json({ Success: false, Message: "Invalid region coordinates" });
 
     let newRegion: RegionInstance;
 
@@ -156,9 +156,9 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
       newRegion = r;
       return db.Estates.setMapForRegion(estateID, r.uuid);
     }).then(() => {
-      return res.send(JSON.stringify({ Success: true, Message: newRegion.uuid }));
+      return res.json({ Success: true, Message: newRegion.uuid });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
       console.log(err);
     });
   });
@@ -220,9 +220,9 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
       //we are removed from the old host
       return PutRegionOnHost(region, newHost);
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -241,9 +241,9 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     }).then((h: HostInstance) => {
       return StopRegion(target, h);
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -260,9 +260,9 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     }).then((h: HostInstance) => {
       return KillRegion(target, h);
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     });
   });
 
@@ -278,9 +278,9 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     }).then((h: HostInstance) => {
       return StartRegion(r, h);
     }).then(() => {
-      res.send(JSON.stringify({ Success: true }));
+      res.json({ Success: true });
     }).catch((err: Error) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     })
   });
 
@@ -299,11 +299,11 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
       p = Promise.resolve({});
     }
     p.then((configs) => {
-      res.send(JSON.stringify({ Success: true, Config: configs }));
+      res.json({ Success: true, Config: configs });
     }).catch((err) => {
-      res.send(JSON.stringify({ Success: false, Message: err.message }));
+      res.json({ Success: false, Message: err.message });
     })*/
-    res.send(JSON.stringify({ Success: false, Message: 'Not Implemented' }));
+    res.json({ Success: false, Message: 'Not Implemented' });
   });
 
   return router;

@@ -5,6 +5,7 @@ import { Action } from 'redux';
 const UPSERT_USER = "USERS_UPSERT_USER";
 const UPSERT_USER_BULK = "USERS_UPSERT_USER_BULK";
 const DELETE_USER = "USERS_DELETE_USER";
+const DELETE_USER_BULK = "USERS_DELETE_USER_BULK";
 
 const UserClass = Record({
   uuid: '',
@@ -32,6 +33,10 @@ interface UpsertUserBulk extends Action {
   users: User[]
 }
 
+interface DeleteUserBulk extends Action {
+  users: string[]
+}
+
 export const UpsertUserAction = function (u: User): Action {
   let act: UserAction = {
     type: UPSERT_USER,
@@ -48,10 +53,18 @@ export const UpsertUserBulkAction = function (u: User[]): Action {
   return act;
 }
 
-export const DeleteUser = function(u: User): Action {
+export const DeleteUser = function (u: User): Action {
   let act: UserAction = {
     type: DELETE_USER,
     user: u
+  }
+  return act;
+}
+
+export const DeleteUserBulkAction = function (u: string[]): Action {
+  let act: DeleteUserBulk = {
+    type: DELETE_USER_BULK,
+    users: u
   }
   return act;
 }
@@ -81,6 +94,12 @@ export const UsersReducer = function (state = Map<string, User>(), action: Actio
     case DELETE_USER:
       act = <UserAction>action;
       return state.delete(act.user.uuid);
+    case DELETE_USER_BULK:
+      let db = <DeleteUserBulk>action;
+      db.users.map((u) => {
+        state = state.delete(u);
+      });
+      return state;
     default:
       return state;
   }

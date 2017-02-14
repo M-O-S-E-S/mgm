@@ -1,2 +1,2 @@
 export { UserList } from './UserList';
-export { User, UpsertUserAction, UpsertUserBulkAction, UsersReducer } from './UsersRedux';
+export { User, UpsertUserAction, UpsertUserBulkAction, DeleteUserBulkAction, UsersReducer } from './UsersRedux';

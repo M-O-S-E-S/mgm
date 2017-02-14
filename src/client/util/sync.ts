@@ -24,7 +24,7 @@ import {
   Role, UpsertRoleBulkAction, DeleteRoleBulkAction
 } from '../components/Groups';
 import { Host, UpsertHostBulkAction, DeleteHostBulkAction } from '../components/Hosts';
-import { User, UpsertUserBulkAction } from '../components/Users';
+import { User, UpsertUserBulkAction, DeleteUserBulkAction } from '../components/Users';
 import { PendingUser, UpsertPendingUserAction } from '../components/PendingUsers';
 import { Job, UpsertJobBulkAction, DeleteJobBulkAction } from '../components/Account';
 
@@ -81,7 +81,8 @@ export class Synchroniser {
     this.users();
   }
 
-  private jobs() {DeleteMemberBulkAction
+  private jobs() {
+    DeleteMemberBulkAction
     get('/api/task', this.session).then((res: jobResult) => {
       if (!res.Success) return;
 
@@ -213,7 +214,7 @@ export class Synchroniser {
           return new Host(h);
         })
       ));
-      if(staleHosts.size > 0)
+      if (staleHosts.size > 0)
         this.store.dispatch(DeleteHostBulkAction(staleHosts.toArray()));
     });
   }
@@ -221,14 +222,21 @@ export class Synchroniser {
   private users() {
     get('/api/user', this.session).then((res: userResult) => {
       if (!res.Success) return;
+
+      let staleUsers = this.store.getState().users.keySeq().toSet();
       this.store.dispatch(UpsertUserBulkAction(
         res.Users.map((u: IUser) => {
+          staleUsers = staleUsers.delete(u.uuid);
           return new User(u);
         })
       ));
-      res.Pending.map((u: IPendingUser) => {
-        this.store.dispatch(UpsertPendingUserAction(new PendingUser(u)));
-      });
+      if (staleUsers.size > 0)
+        this.store.dispatch(DeleteUserBulkAction(staleUsers.toArray()));
+
+
+        res.Pending.map((u: IPendingUser) => {
+          this.store.dispatch(UpsertPendingUserAction(new PendingUser(u)));
+        });
     });
   }
 

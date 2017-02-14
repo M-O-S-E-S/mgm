@@ -41,7 +41,7 @@ export interface UserAttribute {
 }
 
 export interface UserInstance extends Sequelize.Instance<UserAttribute>, UserAttribute {
-
+  isSuspended():boolean
 }
 
 export interface UserModel extends Sequelize.Model<UserInstance, UserAttribute> {
@@ -209,6 +209,11 @@ export function users(sequelize, DataTypes): UserModel {
     }
   }, {
     tableName: 'users',
-    timestamps: false
+    timestamps: false,
+    instanceMethods: {
+      isSuspended: function(): boolean {
+        return this.godLevel < 1;
+      }
+    }
   });
 };

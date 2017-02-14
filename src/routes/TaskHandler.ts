@@ -100,7 +100,7 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
     });
   });
 
-  // we do not check per-user permissions, so nly admins may do this
+  // we do not check per-user permissions, only admins may do this
   router.post('/saveOar/:uuid', isAdmin, (req, res) => {
     let regionID = new UUIDString(req.params.uuid);
     let user = new UUIDString(req.user.uuid);

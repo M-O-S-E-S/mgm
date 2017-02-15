@@ -52,8 +52,13 @@ apiRouter.get('/user', middleware.isUser(), GetUsersHandler(store));
 import { GetRegionsHandler } from './Network';
 apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
 
-clientApp.use('/api', apiRouter);
+// Estate
+import { GetEstatesHander } from './Network';
+apiRouter.get('/estate', middleware.isUser(), GetEstatesHander(store));
 
+
+
+clientApp.use('/api', apiRouter);
 
 clientApp.get('/get_grid_info', (req, res) => {
   let grid_info = conf.grid_info;

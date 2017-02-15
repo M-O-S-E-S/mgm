@@ -14,3 +14,6 @@ export {
 export {
   GetRegionsHandler
 } from './RegionHandler';
+export {
+  GetEstatesHander
+} from './EstateHandler';

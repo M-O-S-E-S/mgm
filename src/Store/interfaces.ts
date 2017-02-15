@@ -1,4 +1,16 @@
-export interface IPendingUser {
+
+export interface User {
+    UUID: string
+    username: string
+    lastname: string
+    email: string
+
+    name(): string
+    isSuspended():boolean
+    isAdmin():boolean
+}
+
+export interface PendingUser {
     name: string
     email: string
     gender: string
@@ -6,17 +18,17 @@ export interface IPendingUser {
     summary: string
 }
 
-export interface IRegion {
-    readonly uuid: string
-    readonly name: string
-    readonly x: number
-    readonly y: number
-    readonly status: string
-    readonly node: string
-    readonly isRunning: Boolean
+export interface Region {
+    uuid: string
+    name: string
+    x: number
+    y: number
+    status: string
+    node: string
+    isRunning: Boolean
 }
 
-export interface IHost {
+export interface Host {
     id: number
     address: string
     name: string
@@ -24,14 +36,14 @@ export interface IHost {
     status: string
 }
 
-export interface IGroup {
+export interface Group {
     GroupID: string
     Name: string
     FounderID: string
     OwnerRoleID: string
 }
 
-export interface IRole {
+export interface Role {
     GroupID: string
     RoleID: string
     Name: string
@@ -40,30 +52,29 @@ export interface IRole {
     Powers: number
 }
 
-export interface IMembership {
+export interface Membership {
     GroupID: string
     AgentID: string
     SelectedRoleID: string
 }
 
-export interface IEstate {
-    id: number
-    name: string
-    owner: string
+export interface Estate {
+    EstateID: number
+    EstateName: string
+    EstateOwner: string
 }
 
-export interface IManager {
-    estate: number
+export interface Manager {
+    EstateID: number
     uuid: string
-    id: number
 }
 
-export interface IEstateMap {
-    region: string
-    estate: number
+export interface EstateMap {
+    RegionID: string
+    EstateID: number
 }
 
-export interface IJob {
+export interface Job {
     id: number
     timestamp: string
     type: string
@@ -71,7 +82,7 @@ export interface IJob {
     data: string
 }
 
-export interface IHostStat {
+export interface HostStat {
     memPercent: number
     memKB: number
     cpuPercent: number[]
@@ -80,7 +91,7 @@ export interface IHostStat {
     netRecvPer: number
 }
 
-export interface IRegionStat {
+export interface RegionStat {
     id: string
     running: boolean
     stats: {
@@ -90,13 +101,4 @@ export interface IRegionStat {
         memKB: number
         cpuPercent: number
     }
-}
-
-export interface LoginResponse {
-    Success?: boolean
-    uuid: string
-    username: string
-    isAdmin: boolean
-    email: string
-    token: string
 }

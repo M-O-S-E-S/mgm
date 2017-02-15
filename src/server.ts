@@ -6,34 +6,49 @@ import * as bodyParser from 'body-parser';
 import * as path from 'path';
 import * as fs from 'fs';
 
-import { SetupRoutes } from './routes';
+//import { SetupRoutes } from './routes';
 import { Config, Validate } from './Config';
 
 let conf: Config = require('../settings.js');
 if (!Validate(conf)) {
   process.exit(1);
 }
-conf.mgm.certificate = fs.readFileSync(conf.mgm.privateKeyPath)
-
 
 //initialize singletons
-import { EmailMgr } from './lib';
-new EmailMgr(conf.mgm.mail);
+//import { EmailMgr } from './lib';
+//new EmailMgr(conf.mgm.mail);
 
-let app = express();
+let certificate = fs.readFileSync(conf.mgm.privateKeyPath)
 
-app.use(bodyParser.json({ limit: '1gb' }));       // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+import { getStore, Store } from './Store';
+let store: Store = getStore(conf.mgm.db,conf.halcyon.db);
+
+let clientApp = express();
+clientApp.use(bodyParser.json({ limit: '1gb' }));       // to support JSON-encoded bodies
+clientApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true,
   limit: '1gb'
 }));
 
-app.use(express.static(__dirname + '/public'));
+clientApp.use(express.static(__dirname + '/public'));
 
-app.use('/api', SetupRoutes(conf));
+import { Authorizer } from './Network';
+let middleware: Authorizer = new Authorizer(store, certificate);
+let apiRouter = express.Router();
+
+// Auth
+import { RenewTokenHandler } from './Network';
+apiRouter.get('/auth', middleware.isUser(), RenewTokenHandler(store, certificate));
+
+// User
+import { GetUsersHandler } from './Network';
+apiRouter.get('/user', middleware.isUser(), GetUsersHandler(store))
 
 
-app.get('/get_grid_info', (req, res) => {
+clientApp.use('/api', apiRouter);
+
+
+clientApp.get('/get_grid_info', (req, res) => {
   let grid_info = conf.grid_info;
   res.send('<?xml version="1.0"?><gridinfo><login>' +
     grid_info.login +
@@ -54,10 +69,21 @@ app.get('/get_grid_info', (req, res) => {
     '</economy></gridinfo>');
 });
 
-app.get('*', (req, res) => {
+clientApp.get('*', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 })
 
-app.listen(3000, function () {
-  console.log('MGM listening on port 3000!');
+clientApp.listen(3000, function () {
+  console.log('MGM listening for clients on port 3000!');
 });
+
+
+
+
+
+let clusterApp = express();
+clientApp.listen(3001, function () {
+  console.log('MGM listening for nodes on port 3001!');
+});
+
+

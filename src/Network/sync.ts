@@ -1,18 +1,18 @@
 import { Store } from 'redux';
-import { StateModel } from '../redux/model';
-import { get } from './network';
+import { StateModel } from '../View/redux/model';
+import { ClientStack } from '.';
 import { Map, Set } from 'immutable';
 
 import {
-  IJob,
-  IRegion,
-  IEstate, IManager, IEstateMap,
-  IGroup, IMembership, IRole,
-  IHost,
-  IPendingUser
-} from '../../common/messages';
+  Job,
+  Region,
+  Estate, Manager, EstateMap,
+  Group, Membership, Role,
+  Host,
+  PendingUser
+} from '../Store';
 
-import { Region, UpsertRegionBulkAction, DeleteRegionBulkAction } from '../components/Regions';
+import { Region, UpsertRegionBulkAction, DeleteRegionBulkAction } from '../View/components/Regions';
 import {
   Estate,
   UpsertEstateBulkAction, UpsertManagerBulkAction, AssignRegionEstateBulkAction,

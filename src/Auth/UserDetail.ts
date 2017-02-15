@@ -1,5 +1,6 @@
 
 import { User } from '../Store';
+import { Set } from 'immutable';
 
 /**
  * The user detail is the body of the JWT tokens.

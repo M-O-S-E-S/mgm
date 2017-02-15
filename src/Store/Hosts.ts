@@ -1,6 +1,13 @@
 
 import { IPool } from 'mysql';
-import { Host } from '.';
+
+export interface Host {
+  id: number
+  address: string
+  name: string
+  slots: number
+  status: string
+}
 
 interface hosts_row {
   id: number
@@ -33,7 +40,7 @@ export class Hosts {
       this.db.query('SELECT * FROM hosts WHERE address=?', [address], (err: Error, rows: hosts_row[]) => {
         if (err)
           return reject(err);
-        if(rows.length == 0)
+        if (rows.length == 0)
           return reject(new Error('Host ' + address + ' does not exist'));
         resolve(rows[0]);
       });

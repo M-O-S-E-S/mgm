@@ -4,10 +4,10 @@ import { NetworkResponse, AuthenticatedRequest } from './messages';
 
 
 export function GetUsersHandler(store: Store): RequestHandler {
-  return function(req: AuthenticatedRequest, res) {
+  return function (req: AuthenticatedRequest, res) {
     let outUsers: any[] = [];
     let outPUsers: any[] = [];
-    return store.Users.getAll()
+    store.Users.getAll()
       .then((users: User[]) => {
         outUsers = users;
         // only admins see pending users
@@ -22,6 +22,11 @@ export function GetUsersHandler(store: Store): RequestHandler {
           Users: outUsers,
           Pending: pending
         });
-      })
-  });
+      }).catch((err: Error) => {
+        res.json({
+          Success: false,
+          Message: err.message
+        });
+      });
+  }
 }

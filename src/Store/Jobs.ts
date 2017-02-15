@@ -1,23 +1,39 @@
 
-import * as Sequelize from 'sequelize';
-import { JobInstance, JobAttribute } from './mysql';
+import { IPool } from 'mysql';
+
+export interface Job {
+  id: number
+  timestamp: Date
+  type: string
+  user: string
+  data: string
+}
+
+interface job_row {
+  id: number
+  timestamp: Date
+  type: string
+  user: string
+  data: string
+}
 
 export class Jobs {
-  private db: Sequelize.Model<JobInstance, JobAttribute>
+  private db: IPool
 
-  constructor(ui: Sequelize.Model<JobInstance, JobAttribute>) {
-    this.db = ui;
+  constructor(db: IPool) {
+    this.db = db;
   }
 
-  getFor(uuid: string): Promise<JobInstance[]> {
-    return this.db.findAll({
-      where: {
-        user: uuid
-      }
-    });
+  getFor(uuid: string): Promise<Job[]> {
+    return new Promise<Job[]>((resolve, reject) => {
+      this.db.query('SELECT * FROM jobs WHERE user=?', [uuid], (err: Error, rows: job_row[]) => {
+        if (err) return reject(err);
+        resolve(rows);
+      })
+    })
   }
 
-  getByID(id: number): Promise<JobInstance> {
+  /*getByID(id: number): Promise<JobInstance> {
     return this.db.findOne({
       where: {
         id: id
@@ -32,5 +48,5 @@ export class Jobs {
       timestamp: new Date().toISOString(),
       data: data
     });
-  }
+  }*/
 }

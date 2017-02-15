@@ -1,5 +1,6 @@
 import * as express from 'express';
 import { UserDetail } from '../Auth';
+import { Set } from 'immutable';
 
 export interface NetworkResponse {
     Success: boolean

@@ -1,6 +1,16 @@
 
 import { IPool } from 'mysql';
-import { User } from '.';
+
+export interface User {
+  UUID: string
+  username: string
+  lastname: string
+  email: string
+
+  name(): string
+  isSuspended(): boolean
+  isAdmin(): boolean
+}
 
 interface user_row {
   UUID: string
@@ -87,16 +97,16 @@ export class Users {
   }
 
   getByID(uuid: string): Promise<User> {
-      return new Promise<User>((resolve, reject) => {
+    return new Promise<User>((resolve, reject) => {
       this.db.query('SELECT * FROM users WHERE UUID=?', [uuid], (err: Error, rows: user_row[]) => {
         if (err)
           return reject(err);
-        if(rows.length == 0)
+        if (rows.length == 0)
           return reject(new Error('User ' + uuid + ' does not exist'));
         resolve(new UserObj(rows[0]));
       })
     })
-    }
+  }
 
   /*
     getByName(name: string): Promise<UserInstance> {

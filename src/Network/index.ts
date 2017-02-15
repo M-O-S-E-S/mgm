@@ -8,3 +8,9 @@ export {
 export {
   GetUsersHandler
 } from './UserHandler';
+export {
+  GetJobsHandler
+} from './JobHandler';
+export {
+  GetRegionsHandler
+} from './RegionHandler';

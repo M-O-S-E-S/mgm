@@ -40,10 +40,17 @@ let apiRouter = express.Router();
 import { RenewTokenHandler } from './Network';
 apiRouter.get('/auth', middleware.isUser(), RenewTokenHandler(store, certificate));
 
+// Jobs
+import { GetJobsHandler } from './Network';
+apiRouter.get('/job', middleware.isUser(), GetJobsHandler(store));
+
 // User
 import { GetUsersHandler } from './Network';
-apiRouter.get('/user', middleware.isUser(), GetUsersHandler(store))
+apiRouter.get('/user', middleware.isUser(), GetUsersHandler(store));
 
+// Region
+import { GetRegionsHandler } from './Network';
+apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
 
 clientApp.use('/api', apiRouter);
 

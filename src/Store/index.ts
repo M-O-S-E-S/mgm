@@ -1,15 +1,22 @@
+import { User, Users } from './Users';
+import { Host, Hosts } from './Hosts';
+import { Region, Regions } from './Regions';
+import { Estate, Manager, EstateMap, Estates } from './Estates';
+import { PendingUser, PendingUsers } from './PendingUsers';
+import { Job, Jobs } from './Jobs';
 
-export { User, PendingUser, Host, Estate, Manager, EstateMap } from './interfaces';
+export { User, PendingUser, Job, Host, Region, Estate, Manager, EstateMap };
 export { GetUserPermissions } from './permissions';
 
 import { IPool, createPool } from 'mysql';
-
-import { User, PendingUser, Host, Estate, Manager, EstateMap } from './interfaces';
 
 export interface Store {
   Hosts: {
     getByAddress(address: string): Promise<Host>
   },
+  Regions: {
+    getAll(): Promise<Region[]>
+  }
   Users: {
     getAll(): Promise<User[]>
     getByID(uuid: string): Promise<User>
@@ -17,6 +24,9 @@ export interface Store {
   PendingUsers: {
     getAll(): Promise<PendingUser[]>
   },
+  Jobs: {
+    getFor(string): Promise<Job[]>
+  }
   Estates: {
     getAll(): Promise<Estate[]>
     getManagers(): Promise<Manager[]>
@@ -30,10 +40,6 @@ interface DatabaseCredentials {
   pass: string
   name: string
 }
-
-import { Users } from './Users';
-import { Hosts } from './Hosts';
-import { Estates } from './Estates';
 
 export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials: DatabaseCredentials): Store {
   let mgmDB: IPool = createPool({
@@ -64,12 +70,13 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
     console.log('connected to the Halcyon database');
   })
 
-
-
   return {
     Hosts: new Hosts(mgmDB),
+    Regions: new Regions(mgmDB),
     Users: new Users(halDB),
-    Estates: new Estates(halDB)
+    PendingUsers: new PendingUsers(mgmDB),
+    Estates: new Estates(halDB),
+    Jobs: new Jobs(mgmDB)
   };
 }
 

@@ -1,21 +1,43 @@
 
+import { IPool } from 'mysql';
+import { PendingUser } from '.';
 
-import * as Sequelize from 'sequelize';
-import { PendingUserInstance, PendingUserAttribute } from './mysql';
-import { Credential } from '../lib/Credential';
+export interface PendingUser {
+  name: string
+  email: string
+  gender: string
+  password: string
+  registered: string
+  summary: string
+}
+
+interface pending_user_row {
+  name: string
+  email: string
+  gender: string
+  password: string
+  registered: string
+  summary: string
+}
 
 export class PendingUsers {
-  private db: Sequelize.Model<PendingUserInstance, PendingUserAttribute>
+  private db: IPool
 
-  constructor(ui: Sequelize.Model<PendingUserInstance, PendingUserAttribute>) {
-    this.db = ui;
+  constructor(db: IPool) {
+    this.db = db;
   }
 
-  getAll(): Promise<PendingUserInstance[]> {
-    return this.db.findAll();
+  getAll(): Promise<PendingUser[]> {
+    return new Promise<PendingUser[]>((resolve, reject) => {
+      this.db.query('SELECT * FROM users', (err, rows: pending_user_row[]) => {
+        if (err) return reject(err);
+        resolve(rows);
+      })
+    });
   }
 
-  getByName(name: string): Promise<PendingUserInstance> {
+  /*
+  getByName(name: string): Promise<PendingUser> {
     return this.db.findOne({
       where: {
         Name: name
@@ -32,4 +54,5 @@ export class PendingUsers {
       summary: summary
     });
   }
+  */
 }

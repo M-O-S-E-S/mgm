@@ -1,5 +1,21 @@
 import { IPool } from 'mysql';
-import { Estate, Manager, EstateMap } from '.';
+import { Manager, EstateMap } from '.';
+
+export interface Estate {
+  EstateID: number
+  EstateName: string
+  EstateOwner: string
+}
+
+export interface Manager {
+    EstateID: number
+    uuid: string
+}
+
+export interface EstateMap {
+    RegionID: string
+    EstateID: number
+}
 
 interface estate_row {
   EstateID: number

@@ -1,20 +1,59 @@
 
-import * as Sequelize from 'sequelize';
-import { RegionInstance, RegionAttribute } from './mysql';
-import { IRegion } from '../common/messages';
-import { UUIDString } from '../lib';
+import { IPool } from 'mysql';
+
+export interface Region {
+  uuid: string
+  name: string
+  x: number
+  y: number
+  status: string
+  node: string
+  isRunning: Boolean
+}
+
+interface region_row {
+  uuid: string
+  name: string
+  size: number
+  httpPort: number
+  consolePort: number
+  consoleUname: string
+  consolePass: string
+  locX: number
+  locY: number
+  externalAddress: string
+  slaveAddress: string
+  isRunning: boolean
+  status: string
+}
 
 export class Regions {
-  private db: Sequelize.Model<RegionInstance, RegionAttribute>
+  private db: IPool
 
-  constructor(ui: Sequelize.Model<RegionInstance, RegionAttribute>) {
-    this.db = ui;
+  constructor(db: IPool) {
+    this.db = db;
   }
 
-  getAll(): Promise<RegionInstance[]> {
-    return this.db.findAll();
+  getAll(): Promise<Region[]> {
+    return new Promise<Region[]>((resolve, reject) => {
+      this.db.query('SELECT * FROM regions WHERE 1', (err: Error, rows: region_row[]) => {
+        if (err) return reject(err);
+        resolve(rows.map((r: region_row): Region => {
+          return {
+            uuid: r.uuid,
+            name: r.name,
+            x: r.locX,
+            y: r.locY,
+            status: r.status,
+            node: r.slaveAddress,
+            isRunning: r.isRunning
+          }
+        }));
+      });
+    });
   }
 
+  /*
   create(name: string, x: number, y: number): Promise<RegionInstance> {
     return this.db.create({
       uuid: UUIDString.random().toString(),
@@ -52,4 +91,5 @@ export class Regions {
       return regions[0];
     })
   }
+  */
 }

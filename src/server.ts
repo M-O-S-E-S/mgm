@@ -56,6 +56,10 @@ apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
 import { GetEstatesHander } from './Network';
 apiRouter.get('/estate', middleware.isUser(), GetEstatesHander(store));
 
+// Group
+import { GetGroupsHander } from './Network';
+apiRouter.get('/group', middleware.isUser(), GetGroupsHander(store));
+
 
 
 clientApp.use('/api', apiRouter);

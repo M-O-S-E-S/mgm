@@ -4,8 +4,9 @@ import { Region, Regions } from './Regions';
 import { Estate, Manager, EstateMap, Estates } from './Estates';
 import { PendingUser, PendingUsers } from './PendingUsers';
 import { Job, Jobs } from './Jobs';
+import { Group, Role, Member, Groups } from './Groups';
 
-export { User, PendingUser, Job, Host, Region, Estate, Manager, EstateMap };
+export { User, PendingUser, Job, Host, Region, Estate, Manager, EstateMap, Group, Role, Member };
 export { GetUserPermissions } from './permissions';
 
 import { IPool, createPool } from 'mysql';
@@ -21,6 +22,11 @@ export interface Store {
     getAll(): Promise<User[]>
     getByID(uuid: string): Promise<User>
   },
+  Groups: {
+    getAll(): Promise<Group[]>
+    getRoles(): Promise<Role[]>
+    getMembers(): Promise<Member[]>
+  }
   PendingUsers: {
     getAll(): Promise<PendingUser[]>
   },
@@ -74,6 +80,7 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
     Hosts: new Hosts(mgmDB),
     Regions: new Regions(mgmDB),
     Users: new Users(halDB),
+    Groups: new Groups(halDB),
     PendingUsers: new PendingUsers(mgmDB),
     Estates: new Estates(halDB),
     Jobs: new Jobs(mgmDB)

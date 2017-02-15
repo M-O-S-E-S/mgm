@@ -17,3 +17,6 @@ export {
 export {
   GetEstatesHander
 } from './EstateHandler';
+export {
+  GetGroupsHander
+} from './GroupHandler';

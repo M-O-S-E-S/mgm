@@ -1,64 +1,101 @@
 
-import * as Sequelize from 'sequelize';
-import {
-  GroupInstance, GroupAttribute,
-  RoleInstance, RoleAttribute,
-  MembershipInstance, MembershipAttribute
-} from './mysql';
-import { IGroup, IRole, IMembership } from '../common/messages';
+import { IPool } from 'mysql';
 
+export interface Group {
+  GroupID: string
+  Name: string
+  FounderID: string
+  OwnerRoleID: string
+}
 
+export interface Role {
+  GroupID: string
+  RoleID: string
+  Name: string
+  Description: string
+  Title: string
+  Powers: number
+}
+
+export interface Member {
+  GroupID: string
+  AgentID: string
+  SelectedRoleID: string
+}
+
+interface group_row {
+  GroupID: string
+  Name: string
+  Charter: string
+  InsigniaID: string
+  FounderID: string
+  MembershipFee: number
+  OpenEnrollment: string
+  ShowInList: boolean
+  AllowPublish: boolean
+  MaturePublish: boolean
+  OwnerRoleID: string
+}
+
+interface member_row {
+  GroupID: string
+  AgentID: string
+  SelectedRoleID: string
+  Contribution: number
+  ListInProfile: number
+  AcceptNotices: number
+}
+
+interface role_row {
+  GroupID: string
+  RoleID: string
+  Name: string
+  Description: string
+  Title: string
+  Powers: number
+}
 
 export class Groups {
-  private groups: Sequelize.Model<GroupInstance, GroupAttribute>
-  private roles: Sequelize.Model<RoleInstance, RoleAttribute>
-  private membership: Sequelize.Model<MembershipInstance, MembershipAttribute>
+  private db: IPool
 
-  constructor(
-    groups: Sequelize.Model<GroupInstance, GroupAttribute>,
-    roles: Sequelize.Model<RoleInstance, RoleAttribute>,
-    membership: Sequelize.Model<MembershipInstance, MembershipAttribute>
-  ) {
-    this.groups = groups;
-    this.roles = roles;
-    this.membership = membership;
+
+  constructor(db: IPool) {
+    this.db = db;
   }
 
-  getGroups(): Promise<IGroup[]> {
-    return this.groups.findAll().then((groups: GroupInstance[]) => {
-      return groups.map((g: GroupInstance) => {
-        let group: IGroup = {
-          GroupID: g.GroupID,
-          Name: g.Name,
-          FounderID: g.FounderID,
-          OwnerRoleID: g.OwnerRoleID
-        }
-        return group;
+  getAll(): Promise<Group[]> {
+    return new Promise<Group[]>((resolve, reject) => {
+      this.db.query('SELECT * FROM osgroup WHERE 1', (err: Error, rows: group_row[]) => {
+        if (err) return reject(err);
+        resolve(rows);
       });
     });
   }
 
+  getMembers(): Promise<Member[]> {
+    return new Promise<Member[]>((resolve, reject) => {
+      this.db.query('SELECT * FROM osgroupmembership WHERE 1', (err: Error, rows: member_row[]) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
+    });
+  }
+
+  getRoles(): Promise<Role[]> {
+    return new Promise<Role[]>((resolve, reject) => {
+      this.db.query('SELECT * FROM osrole WHERE 1', (err: Error, rows: role_row[]) => {
+        if (err) return reject(err);
+        resolve(rows);
+      })
+    });
+  }
+
+  /*
   getGroupByID(id: string): Promise<GroupInstance> {
     return this.groups.findOne({
       where: {
         GroupID: id
       }
-    })
-  }
-
-  getRoles(): Promise<IRole[]> {
-    return this.roles.findAll().then((roles: RoleInstance[]) => {
-      return roles.map((r: IRole) => {
-        let role: IRole = {
-          Name: r.Name,
-          Description: r.Description,
-          Title: r.Title,
-          GroupID: r.GroupID,
-          RoleID: r.RoleID,
-          Powers: r.Powers
-        }
-        return role;
-      })
     })
   }
 
@@ -69,19 +106,6 @@ export class Groups {
         GroupID: group
       }
     })
-  }
-
-  getMembers(): Promise<IMembership[]> {
-    return this.membership.findAll().then((members: MembershipInstance[]) => {
-      return members.map((member: MembershipInstance) => {
-        let mi: IMembership = {
-          GroupID: member.GroupID,
-          AgentID: member.AgentID,
-          SelectedRoleID: member.SelectedRoleID
-        }
-        return mi;
-      });
-    });
   }
 
   getMembershipForUser(group: string, user: string): Promise<MembershipInstance[]> {
@@ -103,5 +127,5 @@ export class Groups {
       AcceptNotices: 1
     });
   }
-
+  */
 }

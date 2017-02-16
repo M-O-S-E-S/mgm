@@ -1,43 +1,43 @@
-import { User, Users } from './Users';
-import { Host, Hosts } from './Hosts';
-import { Region, Regions } from './Regions';
-import { Estate, Manager, EstateMap, Estates } from './Estates';
-import { PendingUser, PendingUsers } from './PendingUsers';
-import { Job, Jobs } from './Jobs';
-import { Group, Role, Member, Groups } from './Groups';
+import { IUser, Users } from './Users';
+import { IHost, Hosts } from './Hosts';
+import { IRegion, Regions } from './Regions';
+import { IEstate, IManager, IEstateMap, Estates } from './Estates';
+import { IPendingUser, PendingUsers } from './PendingUsers';
+import { IJob, Jobs } from './Jobs';
+import { IGroup, IRole, IMember, Groups } from './Groups';
 
-export { User, PendingUser, Job, Host, Region, Estate, Manager, EstateMap, Group, Role, Member };
+export { IUser, IPendingUser, IJob, IHost, IRegion, IEstate, IManager, IEstateMap, IGroup, IRole, IMember };
 export { GetUserPermissions } from './permissions';
 
 import { IPool, createPool } from 'mysql';
 
 export interface Store {
   Hosts: {
-    getAll(): Promise<Host[]>
-    getByAddress(address: string): Promise<Host>
+    getAll(): Promise<IHost[]>
+    getByAddress(address: string): Promise<IHost>
   },
   Regions: {
-    getAll(): Promise<Region[]>
+    getAll(): Promise<IRegion[]>
   }
   Users: {
-    getAll(): Promise<User[]>
-    getByID(uuid: string): Promise<User>
+    getAll(): Promise<IUser[]>
+    getByID(uuid: string): Promise<IUser>
   },
   Groups: {
-    getAll(): Promise<Group[]>
-    getRoles(): Promise<Role[]>
-    getMembers(): Promise<Member[]>
+    getAll(): Promise<IGroup[]>
+    getRoles(): Promise<IRole[]>
+    getMembers(): Promise<IMember[]>
   }
   PendingUsers: {
-    getAll(): Promise<PendingUser[]>
+    getAll(): Promise<IPendingUser[]>
   },
   Jobs: {
-    getFor(string): Promise<Job[]>
+    getFor(uuid: string): Promise<IJob[]>
   }
   Estates: {
-    getAll(): Promise<Estate[]>
-    getManagers(): Promise<Manager[]>
-    getMapping(): Promise<EstateMap[]>
+    getAll(): Promise<IEstate[]>
+    getManagers(): Promise<IManager[]>
+    getMapping(): Promise<IEstateMap[]>
   }
 }
 

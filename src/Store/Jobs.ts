@@ -1,7 +1,7 @@
 
 import { IPool } from 'mysql';
 
-export interface Job {
+export interface IJob {
   id: number
   timestamp: Date
   type: string
@@ -24,8 +24,8 @@ export class Jobs {
     this.db = db;
   }
 
-  getFor(uuid: string): Promise<Job[]> {
-    return new Promise<Job[]>((resolve, reject) => {
+  getFor(uuid: string): Promise<IJob[]> {
+    return new Promise<IJob[]>((resolve, reject) => {
       this.db.query('SELECT * FROM jobs WHERE user=?', [uuid], (err: Error, rows: job_row[]) => {
         if (err) return reject(err);
         resolve(rows);

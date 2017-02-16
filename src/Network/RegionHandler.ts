@@ -1,17 +1,19 @@
-import { Response, RequestHandler } from 'express';
-import { Region, Store } from '../Store';
-import { NetworkResponse, AuthenticatedRequest } from './messages';
+import { RequestHandler } from 'express';
+import { IRegion, Store } from '../Store';
+import { AuthenticatedRequest } from './Authorizer';
 import { Set } from 'immutable';
 
+import { Response, GetRegionsResponse } from './ClientStack';
+
 export function GetRegionsHandler(store: Store): RequestHandler {
-  return function (req: AuthenticatedRequest, res) {
+  return function (req: AuthenticatedRequest, res: Response) {
     store.Regions.getAll()
-      .then((regions: Region[]) => {
-        return regions.filter( (r: Region) => {
+      .then((regions: IRegion[]) => {
+        return regions.filter( (r: IRegion) => {
           return req.user.regions.has(r.uuid);
         });
-      }).then((regions: Region[]) => {
-        res.json({
+      }).then((regions: IRegion[]) => {
+        res.json(<GetRegionsResponse>{
           Success: true,
           Regions: regions
         });

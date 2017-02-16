@@ -1,7 +1,7 @@
 
 import { IPool } from 'mysql';
 
-export interface User {
+export interface IUser {
   UUID: string
   username: string
   lastname: string
@@ -51,7 +51,7 @@ interface user_row {
   languagesText: string
 }
 
-class UserObj implements User {
+class UserObj implements IUser {
   UUID: string
   username: string
   lastname: string
@@ -84,20 +84,20 @@ export class Users {
     this.db = db;
   }
 
-  getAll(): Promise<User[]> {
-    return new Promise<User[]>((resolve, reject) => {
+  getAll(): Promise<IUser[]> {
+    return new Promise<IUser[]>((resolve, reject) => {
       this.db.query('SELECT * FROM users WHERE 1', (err: Error, rows: user_row[]) => {
         if (err)
           return reject(err);
-        resolve(rows.map((row: user_row): User => {
+        resolve(rows.map((row: user_row): IUser => {
           return new UserObj(row);
         }));
       })
     })
   }
 
-  getByID(uuid: string): Promise<User> {
-    return new Promise<User>((resolve, reject) => {
+  getByID(uuid: string): Promise<IUser> {
+    return new Promise<IUser>((resolve, reject) => {
       this.db.query('SELECT * FROM users WHERE UUID=?', [uuid], (err: Error, rows: user_row[]) => {
         if (err)
           return reject(err);

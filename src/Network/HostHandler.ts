@@ -1,13 +1,14 @@
-import { Response, RequestHandler } from 'express';
-import { Host, Store } from '../Store';
-import { NetworkResponse, AuthenticatedRequest } from './messages';
+import { RequestHandler } from 'express';
+import { IHost, Store } from '../Store';
+import { AuthenticatedRequest } from './Authorizer';
 
+import { Response, GetHostsResponse } from './ClientStack';
 
 export function GetHostHandler(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res) {
     store.Hosts.getAll()
-      .then((hosts: Host[]) => {
-        res.json({
+      .then((hosts: IHost[]) => {
+        res.json(<GetHostsResponse>{
           Success: true,
           Hosts: hosts
         });

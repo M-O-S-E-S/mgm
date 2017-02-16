@@ -1,10 +1,15 @@
 import * as jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from './messages';
 
 import { Store } from '../Store';
 import { UserDetail } from '../Auth';
 import { Set } from 'immutable';
+
+export interface AuthenticatedRequest extends Request {
+  user: UserDetail
+  body?: any
+  params: any
+}
 
 export class Authorizer {
   private store: Store

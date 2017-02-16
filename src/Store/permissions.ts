@@ -1,5 +1,5 @@
 
-import { User, Estate, Manager, EstateMap } from '.';
+import { IUser, IEstate, IManager, IEstateMap } from '.';
 import { UserDetail } from '../Auth';
 
 import { Set } from 'immutable';
@@ -10,32 +10,32 @@ import { Store } from '.';
  * User validity and suspension is also checked here, as this is used more often than in Auth.
  */
 export function GetUserPermissions(store: Store, uuid: string): Promise<UserDetail> {
-  let user: User;
+  let user: IUser;
   let isAdmin: boolean = false;
   let allowEstates = Set<number>();
   let allowRegions = Set<string>();
   return store.Users.getByID(uuid)
-    .then((u: User) => {
+    .then((u: IUser) => {
       if (!u || u.isSuspended())
         throw new Error('Invalid user for permissions');
       if (u.isAdmin())
         isAdmin = true;
       user = u;
       return store.Estates.getAll();
-    }).then((estates: Estate[]) => {
-      estates.map((e: Estate) => {
+    }).then((estates: IEstate[]) => {
+      estates.map((e: IEstate) => {
         if (isAdmin || e.EstateOwner === user.UUID)
           allowEstates = allowEstates.add(e.EstateID);
       });
       return store.Estates.getManagers();
-    }).then((managers: Manager[]) => {
-      managers.map((manager: Manager) => {
+    }).then((managers: IManager[]) => {
+      managers.map((manager: IManager) => {
         if (manager.uuid === user.UUID)
           allowEstates = allowEstates.add(manager.EstateID);
       });
       return store.Estates.getMapping();
-    }).then((mapping: EstateMap[]) => {
-      mapping.map((emap: EstateMap) => {
+    }).then((mapping: IEstateMap[]) => {
+      mapping.map((emap: IEstateMap) => {
         if (allowEstates.contains(emap.EstateID))
           allowRegions = allowRegions.add(emap.RegionID);
       });

@@ -1,14 +1,15 @@
-import { Response, RequestHandler } from 'express';
-import { User, PendingUser, Store } from '../Store';
-import { NetworkResponse, AuthenticatedRequest } from './messages';
+import { RequestHandler } from 'express';
+import { IUser, IPendingUser, Store } from '../Store';
+import { AuthenticatedRequest } from './Authorizer';
 
+import { Response, GetUsersResponse} from './ClientStack';
 
 export function GetUsersHandler(store: Store): RequestHandler {
-  return function (req: AuthenticatedRequest, res) {
-    let outUsers: any[] = [];
-    let outPUsers: any[] = [];
+  return function (req: AuthenticatedRequest, res: Response) {
+    let outUsers: IUser[] = [];
+    let outPUsers: IPendingUser[] = [];
     store.Users.getAll()
-      .then((users: User[]) => {
+      .then((users: IUser[]) => {
         outUsers = users;
         // only admins see pending users
         if (req.user.isAdmin) {
@@ -16,8 +17,8 @@ export function GetUsersHandler(store: Store): RequestHandler {
         } else {
           return [];
         }
-      }).then((pending: PendingUser[]) => {
-        res.json({
+      }).then((pending: IPendingUser[]) => {
+        res.json(<GetUsersResponse>{
           Success: true,
           Users: outUsers,
           Pending: pending

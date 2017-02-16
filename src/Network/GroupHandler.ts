@@ -1,23 +1,24 @@
-import { Response, RequestHandler } from 'express';
-import { Group, Role, Member, Store } from '../Store';
-import { NetworkResponse, AuthenticatedRequest } from './messages';
+import { RequestHandler } from 'express';
+import { IGroup, IRole, IMember, Store } from '../Store';
+import { AuthenticatedRequest } from './Authorizer';
 
+import { Response, GetGroupsResponse } from './ClientStack';
 
 export function GetGroupsHander(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res) {
-    let outGroups: Group[] = [];
-    let outRoles: Role[] = [];
-    let outMembers: Member[] = [];
+    let outGroups: IGroup[] = [];
+    let outRoles: IRole[] = [];
+    let outMembers: IMember[] = [];
 
-    store.Groups.getAll().then((groups: Group[]) => {
+    store.Groups.getAll().then((groups: IGroup[]) => {
       outGroups = groups;
       return store.Groups.getRoles();
-    }).then((roles: Role[]) => {
+    }).then((roles: IRole[]) => {
       outRoles = roles;
       return store.Groups.getMembers();
-    }).then((members: Member[]) => {
+    }).then((members: IMember[]) => {
       outMembers = members
-      res.json({
+      res.json(<GetGroupsResponse>{
         Success: true,
         Groups: outGroups,
         Members: outMembers,

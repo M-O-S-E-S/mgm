@@ -1,6 +1,8 @@
 
-
-export { ClientStack } from './ClientStack'
+export { 
+  ClientStack,
+  LoginResponse
+ } from './ClientStack'
 export { Authorizer } from './Authorizer';
 export {
   RenewTokenHandler

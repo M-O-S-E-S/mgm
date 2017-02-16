@@ -1,7 +1,7 @@
 
 import { IPool } from 'mysql';
 
-export interface Host {
+export interface IHost {
   id: number
   address: string
   name: string
@@ -25,8 +25,8 @@ export class Hosts {
     this.db = db;
   }
 
-  getAll(): Promise<Host[]> {
-    return new Promise<Host[]>((resolve, reject) => {
+  getAll(): Promise<IHost[]> {
+    return new Promise<IHost[]>((resolve, reject) => {
       this.db.query('SELECT * FROM hosts WHERE 1', (err: Error, rows: hosts_row[]) => {
         if (err)
           return reject(err);
@@ -35,8 +35,8 @@ export class Hosts {
     });
   }
 
-  getByAddress(address: string): Promise<Host> {
-    return new Promise<Host>((resolve, reject) => {
+  getByAddress(address: string): Promise<IHost> {
+    return new Promise<IHost>((resolve, reject) => {
       this.db.query('SELECT * FROM hosts WHERE address=?', [address], (err: Error, rows: hosts_row[]) => {
         if (err)
           return reject(err);

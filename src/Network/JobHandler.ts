@@ -1,16 +1,21 @@
-import { Response, RequestHandler } from 'express';
-import { Job, Store } from '../Store';
-import { NetworkResponse, AuthenticatedRequest } from './messages';
+import { RequestHandler } from 'express';
+import { IJob, Store } from '../Store';
+import { AuthenticatedRequest } from './Authorizer';
 
+import { Response, GetJobsResponse } from './ClientStack';
 
 export function GetJobsHandler(store: Store): RequestHandler {
-  return function(req: AuthenticatedRequest, res) {
-    let outUsers: any[] = [];
-    let outPUsers: any[] = [];
-    store.Jobs.getFor(req.user.uuid).then( (jobs: Job[]) => {
-
-    }).catch( (err: Error) => {
-
+  return function (req: AuthenticatedRequest, res) {
+    store.Jobs.getFor(req.user.uuid).then((jobs: IJob[]) => {
+      res.json(<GetJobsResponse>{
+        Success: true,
+        Jobs: jobs
+      });
+    }).catch((err: Error) => {
+      res.json({
+        Success: false,
+        Message: err.message
+      });
     });
   };
 }

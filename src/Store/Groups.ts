@@ -1,14 +1,14 @@
 
 import { IPool } from 'mysql';
 
-export interface Group {
+export interface IGroup {
   GroupID: string
   Name: string
   FounderID: string
   OwnerRoleID: string
 }
 
-export interface Role {
+export interface IRole {
   GroupID: string
   RoleID: string
   Name: string
@@ -17,7 +17,7 @@ export interface Role {
   Powers: number
 }
 
-export interface Member {
+export interface IMember {
   GroupID: string
   AgentID: string
   SelectedRoleID: string
@@ -63,8 +63,8 @@ export class Groups {
     this.db = db;
   }
 
-  getAll(): Promise<Group[]> {
-    return new Promise<Group[]>((resolve, reject) => {
+  getAll(): Promise<IGroup[]> {
+    return new Promise<IGroup[]>((resolve, reject) => {
       this.db.query('SELECT * FROM osgroup WHERE 1', (err: Error, rows: group_row[]) => {
         if (err) return reject(err);
         resolve(rows);
@@ -72,8 +72,8 @@ export class Groups {
     });
   }
 
-  getMembers(): Promise<Member[]> {
-    return new Promise<Member[]>((resolve, reject) => {
+  getMembers(): Promise<IMember[]> {
+    return new Promise<IMember[]>((resolve, reject) => {
       this.db.query('SELECT * FROM osgroupmembership WHERE 1', (err: Error, rows: member_row[]) => {
         if (err) return reject(err);
         resolve(rows);
@@ -81,8 +81,8 @@ export class Groups {
     });
   }
 
-  getRoles(): Promise<Role[]> {
-    return new Promise<Role[]>((resolve, reject) => {
+  getRoles(): Promise<IRole[]> {
+    return new Promise<IRole[]>((resolve, reject) => {
       this.db.query('SELECT * FROM osrole WHERE 1', (err: Error, rows: role_row[]) => {
         if (err) return reject(err);
         resolve(rows);

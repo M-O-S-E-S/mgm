@@ -1,7 +1,7 @@
 
 import { IPool } from 'mysql';
 
-export interface Region {
+export interface IRegion {
   uuid: string
   name: string
   x: number
@@ -34,11 +34,11 @@ export class Regions {
     this.db = db;
   }
 
-  getAll(): Promise<Region[]> {
-    return new Promise<Region[]>((resolve, reject) => {
+  getAll(): Promise<IRegion[]> {
+    return new Promise<IRegion[]>((resolve, reject) => {
       this.db.query('SELECT * FROM regions WHERE 1', (err: Error, rows: region_row[]) => {
         if (err) return reject(err);
-        resolve(rows.map((r: region_row): Region => {
+        resolve(rows.map((r: region_row): IRegion => {
           return {
             uuid: r.uuid,
             name: r.name,

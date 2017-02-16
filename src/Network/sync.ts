@@ -1,8 +1,8 @@
 import { Store } from 'redux';
-import { StateModel } from '../View/redux/model';
+import { StateModel } from '../Redux/model';
 import { ClientStack } from '.';
 import { Map, Set } from 'immutable';
-
+/*
 import {
   Job,
   Region,
@@ -17,21 +17,16 @@ import {
   Estate,
   UpsertEstateBulkAction, UpsertManagerBulkAction, AssignRegionEstateBulkAction,
   DeleteEstateBulkAction, DeleteManagerBulkAction, DeleteRegionEstateBulkAction
-} from '../components/Estates';
+} from '../View/Estates';
 import {
   Group, UpsertGroupBulkAction, DeleteGroupBulkAction,
   UpsertMemberBulkAction, DeleteMemberBulkAction,
   Role, UpsertRoleBulkAction, DeleteRoleBulkAction
-} from '../components/Groups';
+} from '../View/Groups';
 import { Host, UpsertHostBulkAction, DeleteHostBulkAction } from '../components/Hosts';
 import { User, UpsertUserBulkAction, DeleteUserBulkAction } from '../components/Users';
 import { PendingUser, UpsertPendingUserAction } from '../components/PendingUsers';
 import { Job, UpsertJobBulkAction, DeleteJobBulkAction } from '../components/Account';
-
-interface NetworkResult {
-  Success: Boolean
-  Message?: string
-}
 
 interface jobResult extends NetworkResult {
   Jobs: IJob[]
@@ -241,4 +236,21 @@ export class Synchroniser {
     });
   }
 
+}
+*/
+
+export class Synchroniser {
+  private store: Store<StateModel>
+  private session: {
+    token: string
+  }
+
+  constructor(store: Store<StateModel>) {
+    this.store = store;
+    this.session = { token: this.store.getState().auth.token };
+  }
+
+  sync() {
+    console.log('Client sync not currently implemented')
+  }
 }

@@ -1,20 +1,19 @@
 import { IPool } from 'mysql';
-import { Manager, EstateMap } from '.';
 
-export interface Estate {
+export interface IEstate {
   EstateID: number
   EstateName: string
   EstateOwner: string
 }
 
-export interface Manager {
-    EstateID: number
-    uuid: string
+export interface IManager {
+  EstateID: number
+  uuid: string
 }
 
-export interface EstateMap {
-    RegionID: string
-    EstateID: number
+export interface IEstateMap {
+  RegionID: string
+  EstateID: number
 }
 
 interface estate_row {
@@ -54,7 +53,7 @@ interface estate_map_row {
   EstateID: number
 }
 
-class EstateObj implements Estate {
+class Estate implements IEstate {
   EstateID: number
   EstateName: string
   EstateOwner: string
@@ -73,20 +72,20 @@ export class Estates {
     this.db = db;
   }
 
-  getAll(): Promise<Estate[]> {
+  getAll(): Promise<IEstate[]> {
     return new Promise<Estate[]>((resolve, reject) => {
       this.db.query('SELECT * FROM estate_settings WHERE 1', (err, rows: estate_row[]) => {
         if (err)
           return reject(err);
         resolve(rows.map((row) => {
-          return new EstateObj(row);
+          return new Estate(row);
         }));
       });
     });
   }
 
-  getManagers(): Promise<Manager[]> {
-    return new Promise<Manager[]>((resolve, reject) => {
+  getManagers(): Promise<IManager[]> {
+    return new Promise<IManager[]>((resolve, reject) => {
       this.db.query('SELECT * FROM estate_managers WHERE 1', (err, rows: manager_row[]) => {
         if (err)
           return reject(err);
@@ -95,8 +94,8 @@ export class Estates {
     });
   }
 
-  getMapping(): Promise<EstateMap[]> {
-    return new Promise<EstateMap[]>((resolve, reject) => {
+  getMapping(): Promise<IEstateMap[]> {
+    return new Promise<IEstateMap[]>((resolve, reject) => {
       this.db.query('SELECT * FROM estate_map WHERE 1', (err: Error, rows: estate_map_row[]) => {
         if (err)
           return reject(err);

@@ -1,18 +1,11 @@
-import { Response, RequestHandler} from 'express';
+import { RequestHandler} from 'express';
 import { sign } from 'jsonwebtoken';
 
 import { Store } from '../Store';
-import { NetworkResponse, AuthenticatedRequest } from './messages';
+import { Response, LoginResponse } from './ClientStack';
+import { AuthenticatedRequest } from './Authorizer';
 import { UserDetail } from '../Auth';
 import { GetUserPermissions } from '../Store';
-
-export interface LoginResponse extends NetworkResponse {
-    uuid: string
-    username: string
-    isAdmin: boolean
-    email: string
-    token: string
-}
 
 export function RenewTokenHandler(store: Store, cert: Buffer): RequestHandler {
   return function RenewTokenHandler(req: AuthenticatedRequest, res: Response) {

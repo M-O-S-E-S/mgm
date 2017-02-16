@@ -1,5 +1,5 @@
 import { Record } from 'immutable';
-import { IRegion } from '../../Store';
+import { IRegion } from '../../Types';
 
 const RegionClass = Record({
   uuid: '',

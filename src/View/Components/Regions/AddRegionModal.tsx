@@ -2,9 +2,7 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { Region } from '.';
-import { Estate } from '../Estates';
-import { Host } from '../Hosts';
+import { Region, Estate, Host } from '../../Immutable';
 import { MapPicker } from '../MapPicker';
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Grid, Row, Col, Alert } from 'react-bootstrap';
 import { BusyButton } from '../BusyButton';
@@ -122,9 +120,9 @@ export class AddRegionModal extends React.Component<props, {}> {
                 {this.props.estates.toArray().map((e: Estate) => {
                   return (
                     <option
-                      key={e.id.toString()}
-                      value={e.id.toString()}>
-                      {e.name}
+                      key={e.EstateID.toString()}
+                      value={e.EstateID.toString()}>
+                      {e.EstateName}
                     </option>
                   )
                 })}

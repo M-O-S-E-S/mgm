@@ -1,12 +1,13 @@
-import { IUser, Users } from './Users';
-import { IHost, Hosts } from './Hosts';
-import { IRegion, Regions } from './Regions';
-import { IEstate, IManager, IEstateMap, Estates } from './Estates';
-import { IPendingUser, PendingUsers } from './PendingUsers';
-import { IJob, Jobs } from './Jobs';
-import { IGroup, IRole, IMember, Groups } from './Groups';
+import { Users } from './Users';
+import { Hosts } from './Hosts';
+import { Regions } from './Regions';
+import { Estates } from './Estates';
+import { PendingUsers } from './PendingUsers';
+import { Jobs } from './Jobs';
+import { Groups } from './Groups';
 
-export { IUser, IPendingUser, IJob, IHost, IRegion, IEstate, IManager, IEstateMap, IGroup, IRole, IMember };
+import { IUser, IHost, IRegion, IEstate, IManager, IEstateMap, IPendingUser, IJob, IGroup, IRole, IMember } from '../Types';
+
 export { GetUserPermissions } from './permissions';
 
 import { IPool, createPool } from 'mysql';
@@ -58,7 +59,7 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
   });
 
   mgmDB.getConnection((err, connection) => {
-    if(err)
+    if (err)
       throw err;
     console.log('connected to the MGM database');
   });
@@ -72,7 +73,7 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
   });
 
   halDB.getConnection((err, connection) => {
-    if(err)
+    if (err)
       throw err;
     console.log('connected to the Halcyon database');
   })

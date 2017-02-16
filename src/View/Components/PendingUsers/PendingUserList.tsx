@@ -3,14 +3,16 @@ import { Action } from 'redux';
 import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
-import { PendingUser } from '.';
+import { PendingUser } from '../../Immutable';
 import { PendingUserView } from './PendingUserView';
 import { ReviewPendingModal } from './ReviewPendingModal';
 
 import { Grid, Row, Col } from 'react-bootstrap';
 
+import { ReduxStore } from '../../Redux';
+
 interface props {
-    dispatch: (a: Action) => void,
+    store: ReduxStore,
     users: Map<string, PendingUser>
 }
 
@@ -62,7 +64,7 @@ export class PendingUserList extends React.Component<props, state> {
                 <ReviewPendingModal
                     show={this.state.showReview} 
                     cancel={this.onDismissReview.bind(this)} 
-                    dispatch={this.props.dispatch.bind(this)}
+                    store={this.props.store}
                     user={this.state.selectedUser} />
             </Grid>
         )

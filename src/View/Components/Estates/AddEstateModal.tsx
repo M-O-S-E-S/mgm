@@ -2,9 +2,7 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { UpsertEstateAction } from '.';
-import { Estate } from '.'
-import { User } from '../Users';
+import { Estate, User } from '../../Immutable'
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Alert } from 'react-bootstrap';
 import { BusyButton } from '../BusyButton';
@@ -55,7 +53,7 @@ export class AddEstateModal extends React.Component<props, state> {
     }
     //make sure the name does not collide with another estate
     let duplicates = this.props.estates.filter((e: Estate) => {
-      return e.name === this.state.name;
+      return e.EstateName === this.state.name;
     });
     if (duplicates.size > 0) {
       this.setState({

@@ -1,6 +1,6 @@
 import { Map, Record } from 'immutable';
 import { Action } from 'redux';
-import { Region } from '../../Immutable';
+import { Region } from '../Immutable';
 
 const UPSERT_REGION = "REGIONS_UPSERT_REGION";
 const UPSERT_REGION_BULK = "REGIONS_UPSERT_REGION_BULK";

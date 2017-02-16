@@ -7,7 +7,6 @@ import { Host, Region } from '../../Immutable';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 import { HostStatView } from './HostStatView';
-import { HostDeletedAction } from '.';
 
 import { BusyButton } from '../BusyButton';
 import { ClientStack } from '../..';

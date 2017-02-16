@@ -2,11 +2,10 @@ import * as React from "react";
 import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
-import { Job } from '.';
-import { Region } from '../Regions';
+import { Job, Region } from '../../Immutable';
 
 import { Row, Col, Button } from 'react-bootstrap';
-import { BusyButton } from '../../util/BusyButton';
+import { BusyButton } from '../BusyButton';
 
 const monthNames: string[] = [
     'Jan',
@@ -35,8 +34,8 @@ export class JobView extends React.Component<props, {}> {
         return !shallowequal(this.props, nextProps);
     }
 
-    timestamptoDate(timestamp: string): string {
-        let date = new Date(timestamp);
+    timestamptoDate(timestamp: Date): string {
+        let date = timestamp;//new Date(timestamp);
         return monthNames[date.getMonth()] + ' ' + date.getDate() + ' ' + date.getFullYear() + ' ' +
             ('00' + date.getHours()).slice(-2) + ':' +
             ('00' + date.getMinutes()).slice(-2);

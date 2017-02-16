@@ -1,6 +1,6 @@
 import { Record, Map, Set } from 'immutable'
 import { Action } from 'redux'
-import { Estate } from '../../Immutable';
+import { Estate } from '../Immutable';
 
 export const ESTATE_DELETED = "ESTATES_ESTATE_DELETED";
 const UPSERT_ESTATE = "ESTATES_UPSERT_ESTATE";

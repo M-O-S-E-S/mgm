@@ -1,2 +1,2 @@
 
-export { ClientStack, LoginResponse } from '../Network';
+export { ClientStack, LoginResponse } from './ClientStack';

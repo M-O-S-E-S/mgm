@@ -1,10 +1,10 @@
 import * as React from "react";
 
-import { Region } from '.';
+import { Region } from '../../Immutable';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap';
 
-import { get, post } from '../../util/network';
+import { ClientStack } from '../..';
 
 interface props {
   show: boolean,
@@ -37,7 +37,7 @@ export class LogModal extends React.Component<props, {}> {
       return;
     }
 
-    get('/api/region/logs/' + nextProps.region.uuid).then((result: any) => {
+    ClientStack.Region.GetLog(nextProps.region).then((result: any) => {
       let logString: string = result.Message;
       this.setState({
         loaded: true,

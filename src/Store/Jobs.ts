@@ -1,13 +1,7 @@
 
 import { IPool } from 'mysql';
 
-export interface IJob {
-  id: number
-  timestamp: Date
-  type: string
-  user: string
-  data: string
-}
+import { IJob } from '../Types';
 
 interface job_row {
   id: number

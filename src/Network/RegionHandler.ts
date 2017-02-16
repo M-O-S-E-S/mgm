@@ -1,9 +1,10 @@
 import { RequestHandler } from 'express';
-import { IRegion, Store } from '../Store';
+import { Store } from '../Store';
+import { IRegion } from '../Types';
 import { AuthenticatedRequest } from './Authorizer';
 import { Set } from 'immutable';
 
-import { Response, GetRegionsResponse } from './ClientStack';
+import { Response, GetRegionsResponse } from '../View/ClientStack';
 
 export function GetRegionsHandler(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {

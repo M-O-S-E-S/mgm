@@ -1,15 +1,17 @@
 import * as React from "react";
 
-import { Region } from '.';
+import { Region, Job } from '../../Immutable';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Alert } from 'react-bootstrap';
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
+import { BusyButton } from '../BusyButton';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux';
 
 interface props {
     show: boolean,
     region: Region,
-    dismiss: () => void
+    dismiss: () => void,
+    store: ReduxStore
 }
 
 interface state {
@@ -70,24 +72,23 @@ export class ContentModal extends React.Component<props, state> {
         }
 
         // Create an oar upload job for this user and region
-        return post('/api/task/loadOar/' + this.props.region.uuid)
-            .then((res: any) => {
-                let jobID = res.ID;
-                // todo: insert job into redux to make it appear before the next data refresh
-
-                // initiate the upload
-                return post('/api/task/upload/' + jobID, { file: file });
-            }).then(() => {
-                this.setState({
-                    loadOarSuccess: 'File uploaded.  Further updates are on the jobs list on your account page.',
-                    loadOarError: ''
-                });
-            }).catch((err: Error) => {
-                this.setState({
-                    loadOarSuccess: '',
-                    loadOarError: 'Error queuing OAR load: ' + err.message
-                });
+        return ClientStack.Job.LoadOar(this.props.region).then((id: number) => {
+            let j: Job = new Job();
+            j = j.set('id', id).set('type', 'load_oar');
+            this.props.store.Job.Update(j);
+            // initiate the upload
+            return ClientStack.Job.Upload(j, file);
+        }).then(() => {
+            this.setState({
+                loadOarSuccess: 'File uploaded.  Further updates are on the jobs list on your account page.',
+                loadOarError: ''
             });
+        }).catch((err: Error) => {
+            this.setState({
+                loadOarSuccess: '',
+                loadOarError: 'Error queuing OAR load: ' + err.message
+            });
+        });
     }
 
     onSaveOar(): Promise<void> {
@@ -99,7 +100,10 @@ export class ContentModal extends React.Component<props, state> {
             return;
         }
 
-        return post('/api/task/saveOar/' + this.props.region.uuid).then(() => {
+        return ClientStack.Job.SaveOar(this.props.region).then((id: number) => {
+            let j: Job = new Job();
+            j = j.set('id', id).set('type', 'save_oar');
+            this.props.store.Job.Update(j);
             this.setState({
                 saveOarSuccess: 'OAR save scheduled',
                 saveOarError: ''
@@ -121,7 +125,10 @@ export class ContentModal extends React.Component<props, state> {
             return;
         }
 
-        return post('/api/task/nukeContent/' + this.props.region.uuid).then(() => {
+        return ClientStack.Job.NukeRegion(this.props.region).then((id: number) => {
+            let j: Job = new Job();
+            j = j.set('id', id).set('type', 'nuke');
+            this.props.store.Job.Update(j);
             this.setState({
                 nukeSuccess: 'Region wipe scheduled',
                 nukeError: ''

@@ -2,8 +2,7 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { DeleteUser, UpsertUserAction } from './UsersRedux';
-import { User } from '../Users';
+import { User } from '../../Immutable';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Grid, Row, Alert } from 'react-bootstrap';
 import { BusyButton } from '../BusyButton';

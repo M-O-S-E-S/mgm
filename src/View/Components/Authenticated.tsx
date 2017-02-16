@@ -5,6 +5,7 @@ import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
 import { ClientStack } from '..';
+import { User } from '../Immutable';
 
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem, Button } from 'react-bootstrap';
 
@@ -13,7 +14,7 @@ import { RegionList } from "./Regions";
 import { EstateList } from './Estates';
 import { GroupList } from './Groups';
 import { HostList } from './Hosts';
-import { User, UserList } from "./Users";
+import { UserList } from "./Users";
 import { PendingUserList } from "./PendingUsers";
 
 interface authenticatedProps {

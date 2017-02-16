@@ -1,8 +1,9 @@
 import { RequestHandler } from 'express';
-import { IJob, Store } from '../Store';
+import { Store } from '../Store';
+import { IJob } from '../Types';
 import { AuthenticatedRequest } from './Authorizer';
 
-import { Response, GetJobsResponse } from './ClientStack';
+import { Response, GetJobsResponse } from '../View/ClientStack';
 
 export function GetJobsHandler(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res) {

@@ -1,18 +1,18 @@
 import { Map, Set } from 'immutable';
 import { Action } from 'redux';
-import { ESTATE_DELETED, EstateDeletedAction } from './EstatesRedux';
-import { IManager } from '../../../common/messages';
+import { ESTATE_DELETED, EstateDeletedAction } from './Estates';
+import { Manager } from '../Immutable';
 
 const UPSERT_MANAGER = "ESTATES_UPSERT_MANAGER";
 const UPSERT_MANAGER_BULK = "ESTATES_UPSERT_MANAGER_BULK";
 const DELETE_MANAGER_BULK = "ESTATES_DELETE_MANAGER_BULK";
 
 interface ManagerAction extends Action {
-  manager: IManager
+  manager: Manager
 }
 
 interface ManagerBulkAction extends Action {
-  managers: IManager[]
+  managers: Manager[]
 }
 
 interface ManagerDeletedBulkAction extends Action {
@@ -20,7 +20,7 @@ interface ManagerDeletedBulkAction extends Action {
   managers: string[]
 }
 
-export const UpsertManagerAction = function (m: IManager): Action {
+export const UpsertManagerAction = function (m: Manager): Action {
   let act: ManagerAction = {
     type: UPSERT_MANAGER,
     manager: m
@@ -28,7 +28,7 @@ export const UpsertManagerAction = function (m: IManager): Action {
   return act;
 }
 
-export const UpsertManagerBulkAction = function (m: IManager[]): Action {
+export const UpsertManagerBulkAction = function (m: Manager[]): Action {
   let act: ManagerBulkAction = {
     type: UPSERT_MANAGER_BULK,
     managers: m
@@ -45,10 +45,10 @@ export const DeleteManagerBulkAction = function (g: number, m: string[]): Action
   return act;
 }
 
-function upsertManager(state = Map<number, Set<string>>(), m: IManager): Map<number, Set<string>> {
-  let managers = state.get(m.estate, Set<string>());
+function upsertManager(state = Map<number, Set<string>>(), m: Manager): Map<number, Set<string>> {
+  let managers = state.get(m.EstateID, Set<string>());
   managers = managers.add(m.uuid);
-  return state.set(m.estate, managers);
+  return state.set(m.EstateID, managers);
 }
 
 export const ManagersReducer = function (state = Map<number, Set<string>>(), action: Action): Map<number, Set<string>> {
@@ -58,7 +58,7 @@ export const ManagersReducer = function (state = Map<number, Set<string>>(), act
       return upsertManager(state, ma.manager);
     case UPSERT_MANAGER_BULK:
       let eb = <ManagerBulkAction>action;
-      eb.managers.map((e: IManager) => {
+      eb.managers.map((e: Manager) => {
         state = upsertManager(state, e);
       });
       return state;

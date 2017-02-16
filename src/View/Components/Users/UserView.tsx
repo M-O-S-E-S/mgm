@@ -2,12 +2,11 @@ import * as React from "react";
 const shallowequal = require('shallowequal');
 import { Action } from 'redux';
 
-import { User } from '.';
+import { User } from '../../Immutable';
 
 import { Row, Col, Button } from 'react-bootstrap'
 
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
+import { BusyButton } from '../BusyButton';
 
 interface props {
     user: User,

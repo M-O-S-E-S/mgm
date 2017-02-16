@@ -5,7 +5,7 @@ import reducer from "./reducer";
 
 export { StateModel }
 
-import { Region, Estate, Host, User, Group, Role } from '../Immutable';
+import { Region, Estate, Host, User, Group, Role, Job, PendingUser } from '../Immutable';
 
 export interface ReduxStore {
   Subscribe(cb: () => void): void
@@ -18,6 +18,13 @@ export interface ReduxStore {
   User: {
     Update(user: User): void
     Destroy(user: User): void
+  }
+  Job: {
+    Update(job: Job): void
+    Destroy(job: Job): void
+  }
+  PendingUser: {
+    Destroy(user: PendingUser): void
   }
   Group: {
     AddUser(group: Group, role: Role, user: User): void

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Store } from 'redux'
-import { PendingUser } from '.';
+import { PendingUser } from '../../Immutable';
 const shallowequal = require('shallowequal');
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';

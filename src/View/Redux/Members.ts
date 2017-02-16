@@ -1,13 +1,13 @@
 import { Action } from 'redux';
-import { IMembership } from '../../../common/messages';
+import { Member } from '../Immutable';
 import { Record, Map, Set } from 'immutable';
 
 interface MembershipAction extends Action {
-  member: IMembership
+  member: Member
 }
 
 interface MembershipBulkAction extends Action {
-  members: IMembership[]
+  members: Member[]
 }
 
 interface DeleteMembershipBulkAction extends Action {
@@ -20,7 +20,7 @@ const ADD_MEMBER_BULK = 'GROUPS_ADD_MEMBER_BULK';
 const DELETE_MEMBER = "GROUPS_DELETE_MEMBER";
 const DELETE_MEMBER_BULK = 'GROUPS_DELETE_MEMBER_BULK';
 
-export const UpsertMemberAction = function (m: IMembership): Action {
+export const UpsertMemberAction = function (m: Member): Action {
   let act: MembershipAction = {
     type: ADD_MEMBER,
     member: m
@@ -28,7 +28,7 @@ export const UpsertMemberAction = function (m: IMembership): Action {
   return act;
 }
 
-export const DeleteMemberAction = function (m: IMembership): Action {
+export const DeleteMemberAction = function (m: Member): Action {
   let act: MembershipAction = {
     type: DELETE_MEMBER,
     member: m
@@ -36,7 +36,7 @@ export const DeleteMemberAction = function (m: IMembership): Action {
   return act;
 }
 
-export const UpsertMemberBulkAction = function (m: IMembership[]): Action {
+export const UpsertMemberBulkAction = function (m: Member[]): Action {
   let act: MembershipBulkAction = {
     type: ADD_MEMBER_BULK,
     members: m
@@ -61,7 +61,7 @@ export const MembersReducer = function (state = Map<string, Map<string, string>>
       return state.set(ma.member.GroupID, members.set(ma.member.AgentID, ma.member.SelectedRoleID));
     case ADD_MEMBER_BULK:
       let mb = <MembershipBulkAction>action;
-      mb.members.map((m: IMembership) => {
+      mb.members.map((m: Member) => {
         let members = state.get(m.GroupID, Map<string, string>());
         state = state.set(m.GroupID, members.set(m.AgentID, m.SelectedRoleID));
       });

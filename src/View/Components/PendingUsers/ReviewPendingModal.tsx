@@ -2,19 +2,19 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { User, UpsertUserAction } from '../Users'
-import { PendingUser } from '.';
-import { DeletePendingUserAction } from './PendingUsersRedux';
+import { User } from '../../Immutable'
+import { PendingUser } from '../../Immutable';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Row, Button, Alert } from 'react-bootstrap';
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
+import { BusyButton } from '../BusyButton';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux';
 
 interface props {
   show: boolean
   cancel: () => void
   user: PendingUser
-  dispatch: (a: Action) => void
+  store: ReduxStore
 }
 
 interface state {
@@ -46,16 +46,16 @@ export class ReviewPendingModal extends React.Component<props, state> {
   }
 
   onApprove(): Promise<void> {
-    return post('/api/user/approve', { name: this.props.user.name }).then((res) => {
+    return ClientStack.PendingUser.Approve(this.props.user).then((uuid) => {
       // place user into redux
       let u = new User();
       u = u.set('name', this.props.user.name)
         .set('email', this.props.user.email)
-        .set('uuid', res.Message)
+        .set('uuid', uuid)
         .set('godLevel', 1);
-      this.props.dispatch(UpsertUserAction(u));
+      this.props.store.User.Update(u);
       // remove pending user from redux
-      this.props.dispatch(DeletePendingUserAction(this.props.user));
+      this.props.store.PendingUser.Destroy(this.props.user);
       this.props.cancel();
     }).catch((err: Error) => {
       this.setState({
@@ -64,9 +64,9 @@ export class ReviewPendingModal extends React.Component<props, state> {
     })
   }
   onReject(): Promise<void> {
-    return post('/api/user/deny', { name: this.props.user.name, reason: this.state.reason }).then((res) => {
+    return ClientStack.PendingUser.Deny(this.props.user, this.state.reason).then(() => {
       // remove pending user from redux
-      this.props.dispatch(DeletePendingUserAction(this.props.user));
+      this.props.store.PendingUser.Destroy(this.props.user);
       this.props.cancel();
     }).catch((err: Error) => {
       this.setState({

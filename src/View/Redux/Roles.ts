@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 import { Record, Map } from 'immutable';
-import { Role } from '../../Immutable';
+import { Role } from '../Immutable';
 
 interface RoleAction extends Action {
   role: Role

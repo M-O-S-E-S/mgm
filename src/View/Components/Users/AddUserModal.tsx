@@ -2,13 +2,11 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { User } from '.';
+import { User } from '../../Immutable';
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Grid, Row, Col, Alert, Radio } from 'react-bootstrap';
 import { BusyButton } from '../BusyButton';
 import { ClientStack } from '../..';
 import { ReduxStore } from '../../Redux';
-
-import { UpsertUserAction } from '.';
 
 interface props {
   show: boolean

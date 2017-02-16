@@ -1,16 +1,7 @@
 
 import { IPool } from 'mysql';
 
-export interface IUser {
-  UUID: string
-  username: string
-  lastname: string
-  email: string
-
-  name(): string
-  isSuspended(): boolean
-  isAdmin(): boolean
-}
+import { IUser } from '../Types';
 
 interface user_row {
   UUID: string

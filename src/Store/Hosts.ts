@@ -1,13 +1,7 @@
 
 import { IPool } from 'mysql';
 
-export interface IHost {
-  id: number
-  address: string
-  name: string
-  slots: number
-  status: string
-}
+import { IHost } from '../Types';
 
 interface hosts_row {
   id: number

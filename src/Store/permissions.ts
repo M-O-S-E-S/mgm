@@ -1,5 +1,5 @@
 
-import { IUser, IEstate, IManager, IEstateMap } from '.';
+import { IUser, IEstate, IManager, IEstateMap } from '../Types';
 import { UserDetail } from '../Auth';
 
 import { Set } from 'immutable';

@@ -1,14 +1,7 @@
 
 import { IPool } from 'mysql';
 
-export interface IPendingUser {
-  name: string
-  email: string
-  gender: string
-  password: string
-  registered: string
-  summary: string
-}
+import { IPendingUser } from '../Types';
 
 interface pending_user_row {
   name: string

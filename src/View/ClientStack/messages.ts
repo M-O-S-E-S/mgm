@@ -8,14 +8,14 @@ export interface LoginResponse extends NetworkResponse {
     token: string
 }
 
-import { IEstate, IManager, IEstateMap } from '../../Store';
+import { IEstate, IManager, IEstateMap } from '../../Types';
 export interface GetEstatesResponse extends NetworkResponse {
     Estates: IEstate[]
     Managers: IManager[]
     Map: IEstateMap[]
 }
 
-import { IGroup, IMember, IRole } from '../../Store';
+import { IGroup, IMember, IRole } from '../../Types';
 export interface GetGroupsResponse extends NetworkResponse {
     Groups: IGroup[]
     Members: IMember[]
@@ -23,23 +23,23 @@ export interface GetGroupsResponse extends NetworkResponse {
 }
 
 
-import { IHost } from '../../Store';
+import { IHost } from '../../Types';
 export interface GetHostsResponse extends NetworkResponse {
     Hosts: IHost[]
 }
 
-import { IJob } from '../../Store';
+import { IJob } from '../../Types';
 export interface GetJobsResponse extends NetworkResponse {
     Jobs: IJob[]
 }
 
-import { IRegion } from '../../Store';
+import { IRegion } from '../../Types';
 export interface GetRegionsResponse extends NetworkResponse {
     Success: boolean
     Regions: IRegion[]
 }
 
-import { IUser, IPendingUser } from '../../Store';
+import { IUser, IPendingUser } from '../../Types';
 export interface GetUsersResponse extends NetworkResponse {
     Success: boolean
     Users: IUser[]

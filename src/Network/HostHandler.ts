@@ -1,8 +1,9 @@
 import { RequestHandler } from 'express';
-import { IHost, Store } from '../Store';
+import { Store } from '../Store';
+import { IHost } from '../Types';
 import { AuthenticatedRequest } from './Authorizer';
 
-import { Response, GetHostsResponse } from './ClientStack';
+import { Response, GetHostsResponse } from '../View/ClientStack';
 
 export function GetHostHandler(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res) {

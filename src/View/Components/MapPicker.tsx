@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Map } from 'immutable';
 
-import { Region } from './Regions';
+import { Region } from '../Immutable';
 
 interface Coordinate {
   x: number,

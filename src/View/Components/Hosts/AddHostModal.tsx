@@ -5,7 +5,7 @@ import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Alert } from
 import { BusyButton } from '../BusyButton';
 import { ClientStack } from '../..';
 import { ReduxStore } from '../../Redux';
-import { Host } from '.';
+import { Host } from '../../Immutable';
 
 interface props {
   show: boolean

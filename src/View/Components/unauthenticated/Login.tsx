@@ -4,7 +4,7 @@ import { Action } from 'redux'
 import { Splash } from "../Splash";
 
 import { ReduxStore } from '../../Redux';
-import { User } from '../Users';
+import { User } from '../../Immutable';
 
 import { ClientStack, LoginResponse } from '../..';
 

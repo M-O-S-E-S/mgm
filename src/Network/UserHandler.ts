@@ -1,8 +1,9 @@
 import { RequestHandler } from 'express';
-import { IUser, IPendingUser, Store } from '../Store';
+import { IUser, IPendingUser } from '../Types';
+import { Store } from '../Store';
 import { AuthenticatedRequest } from './Authorizer';
 
-import { Response, GetUsersResponse} from './ClientStack';
+import { Response, GetUsersResponse} from '../View/ClientStack';
 
 export function GetUsersHandler(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {

@@ -1,5 +1,5 @@
 import { Record } from 'immutable';
-import { IUser } from '../../Store';
+import { IUser } from '../../Types';
 
 const UserClass = Record({
   UUID: '',

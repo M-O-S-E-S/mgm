@@ -1,12 +1,9 @@
 import * as React from "react";
 import { Store } from 'redux'
-import { Estate } from '../Estates';
-import { Region, RegionStat } from '.';
+import { Region, Estate } from '../../Immutable';
 const shallowequal = require('shallowequal');
 
-import { BusyButton } from '../../util/BusyButton';
-
-import { post } from '../../util/network';
+import { BusyButton } from '../BusyButton';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 import { RegionStatView } from './RegionStatView';

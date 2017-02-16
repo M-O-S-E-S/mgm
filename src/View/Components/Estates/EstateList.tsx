@@ -58,7 +58,7 @@ export class EstateList extends React.Component<props, {}> {
             }
         })
         let estates = this.props.estates.toArray()
-            .sort((a: Estate, b: Estate) => { return a.name.localeCompare(b.name) })
+            .sort((a: Estate, b: Estate) => { return a.EstateName.localeCompare(b.EstateName) })
             .map((e: Estate) => {
                 return <EstateView
                     key={e.EstateID.toString()}

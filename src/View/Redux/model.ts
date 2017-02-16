@@ -1,12 +1,6 @@
 
 import { Map, Record, Set } from 'immutable';
-import { User } from '../Components/Users';
-import { Region, RegionStat } from '../Components/Regions';
-import { Host, HostStat } from '../Components/Hosts';
-import { Estate } from '../Components/Estates';
-import { Group, Role } from '../Components/Groups';
-import { PendingUser } from '../Components/PendingUsers';
-import { Job } from '../Components/Account';
+import { User, Region, Host, Estate, Group, Role, PendingUser, Job } from '../Immutable';
 
 /** AUTH */
 interface IAuth {
@@ -43,9 +37,7 @@ export interface IStateModel {
   auth: Auth
   url: string
   hosts: Map<number, Host>
-  hostStats: Map<number, HostStat>
   regions: Map<string, Region>
-  regionStats: Map<string, RegionStat>
   estateMap: Map<string, number>
   users: Map<string, User>
   pendingUsers: Map<string, PendingUser>
@@ -61,9 +53,7 @@ const StateModelClass = Record({
   auth: new Auth(),
   url: '/',
   hosts: Map<number, Host>(),
-  hostStats: Map<number, HostStat>(),
   regions: Map<string, Region>(),
-  regionStats: Map<string, RegionStat>(),
   estateMap: Map<string, number>(),
   users: Map<string, User>(),
   pendingUsers: Map<string, PendingUser>(),
@@ -79,9 +69,7 @@ export class StateModel extends StateModelClass implements IStateModel {
   auth: Auth
   url: string
   hosts: Map<number, Host>
-  hostStats: Map<number, HostStat>
   regions: Map<string, Region>
-  regionStats: Map<string, RegionStat>
   estateMap: Map<string, number>
   users: Map<string, User>
   pendingUsers: Map<string, PendingUser>
@@ -108,9 +96,7 @@ export class StateModel extends StateModelClass implements IStateModel {
       Map<string, Set<string>> |
       Map<number, Set<string>> |
       Map<string, Map<string,string>> |
-      Map<number, Job> | 
-      Map<number, HostStat> |
-      Map<string, RegionStat>
+      Map<number, Job>
   ): StateModel {
     return <StateModel>super.set(key, value);
   }

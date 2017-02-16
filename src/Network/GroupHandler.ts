@@ -1,8 +1,9 @@
 import { RequestHandler } from 'express';
-import { IGroup, IRole, IMember, Store } from '../Store';
+import { IGroup, IRole, IMember } from '../Types';
+import { Store } from '../Store'
 import { AuthenticatedRequest } from './Authorizer';
 
-import { Response, GetGroupsResponse } from './ClientStack';
+import { Response, GetGroupsResponse } from '../View/ClientStack';
 
 export function GetGroupsHander(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res) {

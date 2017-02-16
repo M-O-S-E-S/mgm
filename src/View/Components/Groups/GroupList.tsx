@@ -3,9 +3,8 @@ import { Action } from "redux";
 import { Map, Set } from 'immutable';
 const shallowequal = require('shallowequal');
 
-import { Group, Role } from '.';
+import { Group, Role, User } from '../../Immutable';
 import { GroupView } from './GroupView';
-import { User } from '../Users';
 
 import { Grid, Row, Col } from 'react-bootstrap';
 

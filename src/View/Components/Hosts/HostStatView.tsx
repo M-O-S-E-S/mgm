@@ -2,8 +2,7 @@ import * as React from "react";
 import { Action } from 'redux';
 import { Map } from 'immutable';
 
-import { Host, HostStat } from '.'
-import { Region } from '../Regions';
+import { Host, Region } from '../../Immutable'
 
 import { Col } from 'react-bootstrap';
 

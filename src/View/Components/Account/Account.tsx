@@ -3,10 +3,9 @@ import { Action } from 'redux';
 import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
-import { Job } from '.';
-import { User } from '../Users';
-import { Region } from '../Regions';
-import { post } from '../../util/network';
+import { Job, User, Region } from '../../Immutable';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 
@@ -14,9 +13,9 @@ import { JobList } from './JobList';
 import { SetPasswordModal } from './SetPasswordModal';
 
 interface props {
-    dispatch: (a: Action) => void,
+    store: ReduxStore,
     user: string,
-    users: Map<string,User>,
+    users: Map<string, User>,
     jobs: Map<number, Job>,
     regions: Map<string, Region>
 }
@@ -33,7 +32,7 @@ export class Account extends React.Component<props, {}> {
         super(props);
         this.state = {
             showPasswordModal: false,
-            user: props.users.get(props.user, new User()) 
+            user: props.users.get(props.user, new User())
         }
     }
 
@@ -50,7 +49,7 @@ export class Account extends React.Component<props, {}> {
     }
 
     handleNewPassword(password: string): Promise<void> {
-        return post('/api/auth/changePassword', { password: password }).then(() => {
+        return ClientStack.User.SetPassword(this.state.user, password).then(() => {
             this.setState({
                 showPasswordModal: false
             })
@@ -88,7 +87,7 @@ export class Account extends React.Component<props, {}> {
                 <Button onClick={this.showNewPassword.bind(this)} disabled={this.state.showPasswordModal}>Set Password</Button>
                 <SetPasswordModal show={this.state.showPasswordModal} submit={this.handleNewPassword.bind(this)} cancel={this.cancelNewPassword.bind(this)} />
                 <hr />
-                <JobList dispatch={this.props.dispatch} jobs={this.props.jobs} regions={this.props.regions}/>
+                <JobList store={this.props.store} jobs={this.props.jobs} regions={this.props.regions} />
             </Grid>
         )
     }

@@ -1,8 +1,8 @@
 
 export { Job } from './Job';
 export { Region } from './Region';
-export { Estate } from './Estate';
+export { Estate, Manager, EstateMap } from './Estate';
 export { User } from './User';
 export { Host } from './Host';
-export { Group } from './Group';
-export { Role } from './Role';
+export { Group, Member, Role } from './Group';
+export { PendingUser } from './PendingUser';

@@ -1,27 +1,7 @@
 
 import { IPool } from 'mysql';
 
-export interface IGroup {
-  GroupID: string
-  Name: string
-  FounderID: string
-  OwnerRoleID: string
-}
-
-export interface IRole {
-  GroupID: string
-  RoleID: string
-  Name: string
-  Description: string
-  Title: string
-  Powers: number
-}
-
-export interface IMember {
-  GroupID: string
-  AgentID: string
-  SelectedRoleID: string
-}
+import { IGroup, IMember, IRole } from '../Types';
 
 interface group_row {
   GroupID: string

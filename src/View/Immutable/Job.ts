@@ -1,5 +1,5 @@
 import { Record } from 'immutable';
-import { IJob } from '../../Store';
+import { IJob } from '../../Types';
 
 const JobClass = Record({
   id: 0,
@@ -16,7 +16,7 @@ export class Job extends JobClass implements IJob {
   user: string
   data: string
 
-  set(key: string, value: string | number): Job {
+  set(key: string, value: string | number | Date): Job {
     return <Job>super.set(key, value);
   }
 }

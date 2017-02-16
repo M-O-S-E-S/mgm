@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 import { Record, Map } from 'immutable';
-import { IJob } from '../../../common/messages';
+import { Job } from '../Immutable';
 
 const UPSERT_JOB = "ACCOUNT_UPSERT_JOB";
 const DELETE_JOB = "ACCOUNT_DELETE_JOB";

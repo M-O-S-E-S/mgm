@@ -2,11 +2,7 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { UpsertRegionAction, DeleteRegionAction } from '.';
-import { AssignRegionEstateAction } from '../Estates';
-import { Region } from '../../Immutable';
-import { Estate } from '../Estates';
-import { Host } from '../Hosts';
+import { Region, Estate, Host } from '../../Immutable';
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Row, Col, Alert, Button } from 'react-bootstrap';
 import { BusyButton } from '../BusyButton';
 import { ClientStack } from '../..';
@@ -83,7 +79,7 @@ export class ManageModal extends React.Component<props, {}> {
         deleteError: 'Cannot delete a region that is still assigned a host'
       });
     }
-    ClientStack.Region.Destroy(this.props.region.uuid).then(() => {
+    ClientStack.Region.Destroy(this.props.region).then(() => {
       this.props.store.Region.Destroy(this.props.region);
       this.props.dismiss();
     }).catch((err: Error) => {
@@ -112,7 +108,7 @@ export class ManageModal extends React.Component<props, {}> {
       return Promise.resolve();
     }
 
-    return ClientStack.Region.AssignEstate(this.props.region.uuid, this.state.selectedEstate).then(() => {
+    return ClientStack.Region.AssignEstate(this.props.region, this.props.estates.get(parseInt(this.state.selectedEstate))).then(() => {
       this.setState({
         estateSuccess: 'Estate Successfully updated',
         estateError: ''
@@ -150,7 +146,7 @@ export class ManageModal extends React.Component<props, {}> {
       return Promise.resolve();
     }
 
-    return ClientStack.Region.AssignHost(this.props.region.uuid, this.state.selectedHost).then(() => {
+    return ClientStack.Region.AssignHost(this.props.region, this.props.hosts.get(parseInt(this.state.selectedHost))).then(() => {
       this.setState({
         hostSuccess: 'Host Successfully assigned',
         hostError: ''
@@ -209,7 +205,7 @@ export class ManageModal extends React.Component<props, {}> {
       coordsError: ''
     })
 
-    return ClientStack.Region.SetCoordinates(this.props.region.uuid, this.state.x, this.state.y).then(() => {
+    return ClientStack.Region.SetCoordinates(this.props.region, this.state.x, this.state.y).then(() => {
       this.setState({
         coordsSuccess: 'Coordinates Successfully Changed',
         coordsError: ''
@@ -260,9 +256,9 @@ export class ManageModal extends React.Component<props, {}> {
                   {this.props.estates.toArray().map((e: Estate) => {
                     return (
                       <option
-                        key={e.id.toString()}
-                        value={e.id.toString()}>
-                        {e.name}
+                        key={e.EstateID.toString()}
+                        value={e.EstateID.toString()}>
+                        {e.EstateName}
                       </option>
                     )
                   })}
@@ -282,7 +278,7 @@ export class ManageModal extends React.Component<props, {}> {
                   {this.props.hosts.toArray().map((h: Host) => {
                     return <option
                       key={h.address}
-                      value={h.address}>
+                      value={h.id.toString()}>
                       {h.name}
                     </option>
                   })}

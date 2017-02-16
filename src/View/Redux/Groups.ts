@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 import { Record, Map } from 'immutable';
-import { Group } from '../../Immutable';
+import { Group } from '../Immutable';
 
 interface GroupAction extends Action {
   group: Group

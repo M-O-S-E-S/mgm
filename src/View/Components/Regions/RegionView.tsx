@@ -1,12 +1,11 @@
 import * as React from "react";
 import { Store } from 'redux'
-import { Estate } from '../Estates';
-import { Region, RegionStat } from '.';
+import { Estate, Region } from '../../Immutable';
 const shallowequal = require('shallowequal');
 
-import { BusyButton } from '../../util/BusyButton';
+import { BusyButton } from '../BusyButton';
 
-import { get, post } from '../../util/network';
+import { ClientStack } from '../..';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 import { RegionStatView } from './RegionStatView';
@@ -35,7 +34,7 @@ export class RegionView extends React.Component<regionProps, {}> {
       alertify.error(this.props.region.name + " is already running");
       return Promise.resolve();
     }
-    return post('/api/region/start/' + this.props.region.uuid).then(() => {
+    return ClientStack.Region.Start(this.props.region).then(() => {
       alertify.success(this.props.region.name + ' signalled START');
     }).catch((err: Error) => {
       alertify.error('Could not start ' + this.props.region.name + ': ' + err.message);
@@ -47,7 +46,7 @@ export class RegionView extends React.Component<regionProps, {}> {
       alertify.error('Cannot stop a region that is not running');
       return Promise.resolve();
     }
-    return post('/api/region/stop/' + this.props.region.uuid).then(() => {
+    return ClientStack.Region.Stop(this.props.region).then(() => {
       alertify.success(this.props.region.name + ' signalled STOP');
     }).catch((err: Error) => {
       alertify.error('Could not stop ' + this.props.region.name + ': ' + err.message);
@@ -59,7 +58,7 @@ export class RegionView extends React.Component<regionProps, {}> {
       alertify.error('Cannot kill a region that is not running');
       return Promise.resolve();
     }
-    return post('/api/region/kill/' + this.props.region.uuid).then(() => {
+    return ClientStack.Region.Kill(this.props.region).then(() => {
       alertify.success(this.props.region.name + ' signalled KILL');
     }).catch((err: Error) => {
       alertify.error('Could not kill ' + this.props.region.name + ': ' + err.message);

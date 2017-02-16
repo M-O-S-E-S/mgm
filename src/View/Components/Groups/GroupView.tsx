@@ -2,8 +2,7 @@ import * as React from "react";
 import { Map, Set, Iterable } from 'immutable';
 const shallowequal = require('shallowequal');
 
-import { Group, Role } from '.';
-import { User } from '../Users';
+import { Group, Role, User } from '../../Immutable';
 
 import { Grid, Row, Col } from 'react-bootstrap';
 

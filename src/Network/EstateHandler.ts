@@ -1,8 +1,9 @@
 import { RequestHandler } from 'express';
-import { IEstate, IManager, IEstateMap, Store } from '../Store';
+import { IEstate, IManager, IEstateMap } from '../Types';
+import { Store } from '../Store';
 import { AuthenticatedRequest } from './Authorizer';
 
-import { Response, GetEstatesResponse } from './ClientStack';
+import { Response, GetEstatesResponse } from '../View/ClientStack';
 
 export function GetEstatesHander(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res) {

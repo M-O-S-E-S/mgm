@@ -4,9 +4,7 @@ import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
 import { RegionView } from './RegionView';
-import { Estate } from '../Estates';
-import { Host } from '../Hosts';
-import { Region, RegionStat } from '.';
+import { Estate, Host, Region } from '../../Immutable';
 
 import { ManageModal } from './ManageModal';
 import { ContentModal } from './ContentModal';
@@ -129,15 +127,15 @@ export class RegionList extends React.Component<props, {}> {
         // construct estate tree and region lists while filtering by estate and region name
         let estates = this.props.estates.toArray()
             .filter((e: Estate) => {
-                return this.state.estateSearch === '' || e.name === this.state.estateSearch;
+                return this.state.estateSearch === '' || e.EstateName === this.state.estateSearch;
             })
-            .sort((a: Estate, b: Estate) => { return a.name.localeCompare(b.name) })
+            .sort((a: Estate, b: Estate) => { return a.EstateName.localeCompare(b.EstateName) })
             .map((e: Estate) => {
                 let regions = this.props.regions.toArray()
                     // we only want regions for the current estate
                     .filter((r: Region) => {
                         let estateId: number = this.props.estateMap.get(r.uuid);
-                        return estateId === e.id;
+                        return estateId === e.EstateID;
                     }, [])
                     // we only want regions that match the current text search
                     .filter((r: Region) => {
@@ -157,8 +155,8 @@ export class RegionList extends React.Component<props, {}> {
                     })
                 if (regions.length > 0) {
                     return (
-                        <div key={e.id}>
-                            <h1>{e.name}</h1>
+                        <div key={e.EstateID}>
+                            <h1>{e.EstateName}</h1>
                             {regions}
                         </div>
                     )
@@ -168,9 +166,9 @@ export class RegionList extends React.Component<props, {}> {
             });
 
         let estateSelect = this.props.estates.toList().sort((a, b) => {
-            return a.name.localeCompare(b.name);
+            return a.EstateName.localeCompare(b.EstateName);
         }).map((e: Estate) => {
-            return <option key={e.id} value={e.name}>{e.name}</option>
+            return <option key={e.EstateID} value={e.EstateName}>{e.EstateName}</option>
         });
 
         return (
@@ -201,7 +199,11 @@ export class RegionList extends React.Component<props, {}> {
                     estateMap={this.props.estateMap}
                     hosts={this.props.hosts}
                     regions={this.props.regions} />
-                <ContentModal show={this.state.showContent} dismiss={this.dismissManageContent.bind(this)} region={this.state.selectedRegion} />
+                <ContentModal
+                    show={this.state.showContent}
+                    dismiss={this.dismissManageContent.bind(this)}
+                    region={this.state.selectedRegion}
+                    store={this.props.store} />
                 <LogModal show={this.state.showLog} dismiss={this.disMissLog.bind(this)} region={this.state.selectedRegion} />
                 <AddRegionModal
                     show={this.state.showAddRegion}

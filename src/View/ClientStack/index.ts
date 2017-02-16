@@ -8,7 +8,7 @@ export interface Response {
     json(msg: NetworkResponse): void
 }
 
-import { Region, Estate, Host, User, Group, Role } from '../../View/Immutable';
+import { Region, Estate, Host, User, Group, Role, Job, PendingUser } from '../../View/Immutable';
 
 class UserStack {
     static Create(name: string, email: string, template: string, password: string): Promise<string> {
@@ -37,10 +37,45 @@ class UserStack {
 
 class GroupStack {
     static AddUser(group: Group, user: User, role: Role): Promise<void> {
-        return performCall('POST',  '/api/group/addUser/' + group.GroupID, { user: user.UUID, role: role.RoleID });
+        return performCall('POST', '/api/group/addUser/' + group.GroupID, { user: user.UUID, role: role.RoleID });
     }
     static RemoveUser(group: Group, user: User): Promise<void> {
         return performCall('POST', '/api/group/removeUser/' + group.GroupID, { user: user.UUID })
+    }
+}
+
+class JobStack {
+    static Destroy(job: Job): Promise<void> {
+        return performCall('POST', '/api/task/delete/' + job.id);
+    }
+    static LoadOar(region: Region): Promise<number> {
+        return performCall('POST', '/api/task/loadOar/' + region.uuid).then((res: NetworkResponse) => {
+            return parseInt(res.Message, 10);
+        });
+    }
+    static Upload(job: Job, file: any): Promise<void> {
+        return performCall('POST', '/api/task/upload/' + job.id, { file: file });
+    }
+    static SaveOar(region: Region): Promise<number> {
+        return performCall('POST', '/api/task/saveOar/' + region.uuid).then((res: NetworkResponse) => {
+            return parseInt(res.Message, 10);
+        });
+    }
+    static NukeRegion(region: Region): Promise<number> {
+        return performCall('POST', '/api/task/nukeContent/' + region.uuid).then((res: NetworkResponse) => {
+            return parseInt(res.Message, 10);
+        });
+    }
+}
+
+class PendingUserStack {
+    static Approve(user: PendingUser): Promise<string> {
+        return performCall('POST', '/api/user/approve', { name: user.name }).then((res: NetworkResponse) => {
+            return res.Message;
+        })
+    }
+    static Deny(user: PendingUser, reason: string): Promise<string> {
+        return performCall('POST', '/api/user/deny', { name: user.name, reason: reason });
     }
 }
 
@@ -66,6 +101,20 @@ class RegionStack {
     }
     static SetCoordinates(region: Region, x: number, y: number): Promise<void> {
         return performCall('POST', '/api/region/setXY/' + region.uuid, { x: x, y: y });
+    }
+    static GetLog(region: Region): Promise<string> {
+        return performCall('GET', '/api/region/logs/' + region.uuid).then((res: NetworkResponse) => {
+            return res.Message;
+        })
+    }
+    static Start(region: Region): Promise<void> {
+        return performCall('POST', '/api/region/start/' + region.uuid);
+    }
+    static Stop(region: Region): Promise<void> {
+        return performCall('POST', '/api/region/stop/' + region.uuid);
+    }
+    static Kill(region: Region): Promise<void> {
+        return performCall('POST',  '/api/region/kill/' + region.uuid);
     }
 }
 
@@ -126,6 +175,8 @@ export class ClientStack {
     }
 
     static User = UserStack;
+    static Job = JobStack;
+    static PendingUser = PendingUserStack;
     static Group = GroupStack;
     static Region = RegionStack;
     static Estate = EstateStack;

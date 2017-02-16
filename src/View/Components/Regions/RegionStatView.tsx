@@ -2,7 +2,7 @@ import * as React from "react";
 import { Action } from 'redux';
 import { Map } from 'immutable';
 
-import { Region, RegionStat } from '.';
+import { Region } from '../../Immutable';
 
 import { Col } from 'react-bootstrap';
 

@@ -4,18 +4,16 @@ import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
 import { JobView } from './JobView';
-import { Job } from '.';
-import { Region } from '../Regions';
+import { Job, Region } from '../../Immutable';
 
-import { post } from '../../util/network';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux'
 
 import { Grid, Row, Col } from 'react-bootstrap'
-import { BusyButton } from '../../util/BusyButton';
-
-import { DeleteJobAction } from './JobsRedux';
+import { BusyButton } from '../BusyButton';
 
 interface props {
-  dispatch: (a: Action) => void,
+  store: ReduxStore,
   jobs: Map<number, Job>,
   regions: Map<string, Region>,
 }
@@ -27,9 +25,8 @@ export class JobList extends React.Component<props, {}> {
   }
 
   deleteJob(j: Job): Promise<void> {
-    console.log('delete job ' + j.id);
-    return post('/api/task/delete/' + j.id).then(() => {
-      this.props.dispatch(DeleteJobAction(j));
+    return ClientStack.Job.Destroy(j).then(() => {
+      this.props.store.Job.Destroy(j);
     })
   }
 

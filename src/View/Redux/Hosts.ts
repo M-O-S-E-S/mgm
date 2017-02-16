@@ -1,6 +1,6 @@
 import { Record, Map } from 'immutable';
 import { Action } from 'redux';
-import { Host } from '../../Immutable';
+import { Host } from '../Immutable';
 
 const UPSERT_HOST = 'HOSTS_UPSERT_HOST';
 const UPSERT_HOST_BULK = 'HOSTS_UPSERT_HOST_BULK';

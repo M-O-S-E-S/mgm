@@ -1,7 +1,7 @@
 import { Map, Record } from 'immutable';
 import { Action } from 'redux';
 
-import { User } from '../../Immutable';
+import { User } from '../Immutable';
 
 const UPSERT_USER = "USERS_UPSERT_USER";
 const UPSERT_USER_BULK = "USERS_UPSERT_USER_BULK";

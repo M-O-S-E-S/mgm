@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 
-import { User } from '../Components/Users';
+import { User } from '../Immutable';
 
 export const APP_LOGIN = "APP_LOGIN";
 export const APP_LOGOUT = "APP_LOGOUT";

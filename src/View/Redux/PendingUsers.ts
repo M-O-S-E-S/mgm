@@ -1,32 +1,12 @@
 import { Action } from 'redux';
 import { Record, Map } from 'immutable';
-import { IPendingUser } from '../../../common/messages';
+import { PendingUser } from '../Immutable';
 
 const UPSERT_USER = "PENDINGUSERS_UPSERT_USER";
 const DELETE_USER = "PENDINGUSERS_DELETE_USER";
 
-const PendingUserClass = Record({
-  name: '',
-  email: '',
-  gender: '',
-  registered: '',
-  summary: ''
-})
-
 interface PendingUserAction extends Action {
   user: PendingUser
-}
-
-export class PendingUser extends PendingUserClass implements IPendingUser {
-  name: string
-  email: string
-  gender: string
-  registered: string
-  summary: string
-
-  set(key: string, value: string): PendingUser {
-    return <PendingUser>super.set(key, value);
-  }
 }
 
 export const UpsertPendingUserAction = function (u: PendingUser): Action {

@@ -1,15 +1,7 @@
 
 import { IPool } from 'mysql';
 
-export interface IRegion {
-  uuid: string
-  name: string
-  x: number
-  y: number
-  status: string
-  node: string
-  isRunning: Boolean
-}
+import { IRegion } from '../Types';
 
 interface region_row {
   uuid: string

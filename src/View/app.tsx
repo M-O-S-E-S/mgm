@@ -3,10 +3,10 @@ import * as ReactDOM from "react-dom";
 import { Unsubscribe } from 'redux';
 import { Map } from 'immutable';
 
-import { ClientStack, LoginResponse } from '../Network';
+import { ClientStack, LoginResponse } from './ClientStack';
 
 import { ReduxStore, getStore, StateModel } from "./Redux";
-import { User } from './Components/Users';
+import { User } from './Immutable';
 
 //create the redux store, using our websocket middleware for MGM async
 let store = getStore();

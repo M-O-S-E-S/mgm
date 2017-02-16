@@ -1,5 +1,5 @@
 import { Record } from 'immutable';
-import { IHost } from '../../Store';
+import { IHost } from '../../Types';
 
 const HostClass = Record({
   id: 0,

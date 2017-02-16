@@ -1,20 +1,6 @@
 import { IPool } from 'mysql';
 
-export interface IEstate {
-  EstateID: number
-  EstateName: string
-  EstateOwner: string
-}
-
-export interface IManager {
-  EstateID: number
-  uuid: string
-}
-
-export interface IEstateMap {
-  RegionID: string
-  EstateID: number
-}
+import { IEstate, IManager, IEstateMap } from '../Types';
 
 interface estate_row {
   EstateID: number

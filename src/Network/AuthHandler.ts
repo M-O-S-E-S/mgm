@@ -2,7 +2,7 @@ import { RequestHandler} from 'express';
 import { sign } from 'jsonwebtoken';
 
 import { Store } from '../Store';
-import { Response, LoginResponse } from './ClientStack';
+import { Response, LoginResponse } from '../View/ClientStack';
 import { AuthenticatedRequest } from './Authorizer';
 import { UserDetail } from '../Auth';
 import { GetUserPermissions } from '../Store';

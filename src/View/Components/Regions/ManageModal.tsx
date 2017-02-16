@@ -4,12 +4,13 @@ import { Action } from 'redux';
 
 import { UpsertRegionAction, DeleteRegionAction } from '.';
 import { AssignRegionEstateAction } from '../Estates';
-import { Region } from '.';
+import { Region } from '../../Immutable';
 import { Estate } from '../Estates';
 import { Host } from '../Hosts';
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Row, Col, Alert, Button } from 'react-bootstrap';
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
+import { BusyButton } from '../BusyButton';
+import { ClientStack } from '../..';
+import { ReduxStore, StateModel } from '../../Redux';
 import { MapPicker } from '../MapPicker';
 
 
@@ -21,7 +22,7 @@ interface props {
   hosts: Map<number, Host>,
   regions: Map<string, Region>,
   dismiss: () => void,
-  dispatch: (a: Action) => void
+  store: ReduxStore
 }
 
 const ipRegExp = /(^127\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^192\.168\.)/;
@@ -62,8 +63,8 @@ export class ManageModal extends React.Component<props, {}> {
     }
   }
 
-  componentWillReceiveProps(nextProps: props){
-    if(nextProps.region){
+  componentWillReceiveProps(nextProps: props) {
+    if (nextProps.region) {
       this.setState({
         x: nextProps.region.x,
         y: nextProps.region.y
@@ -82,8 +83,8 @@ export class ManageModal extends React.Component<props, {}> {
         deleteError: 'Cannot delete a region that is still assigned a host'
       });
     }
-    post('/api/region/destroy/' + this.props.region.uuid).then(() => {
-      this.props.dispatch(DeleteRegionAction(this.props.region));
+    ClientStack.Region.Destroy(this.props.region.uuid).then(() => {
+      this.props.store.Region.Destroy(this.props.region);
       this.props.dismiss();
     }).catch((err: Error) => {
       this.setState({
@@ -111,14 +112,14 @@ export class ManageModal extends React.Component<props, {}> {
       return Promise.resolve();
     }
 
-    return post('/api/region/estate/' + this.props.region.uuid, { estate: this.state.selectedEstate }).then(() => {
+    return ClientStack.Region.AssignEstate(this.props.region.uuid, this.state.selectedEstate).then(() => {
       this.setState({
         estateSuccess: 'Estate Successfully updated',
         estateError: ''
       })
 
       // update region in redux 
-      this.props.dispatch(AssignRegionEstateAction(this.props.region.uuid, parseInt(this.state.selectedEstate, 10)));
+      this.props.store.Region.AssignEstate(this.props.region, parseInt(this.state.selectedEstate, 10));
 
     }).catch((err: Error) => {
       this.setState({
@@ -149,14 +150,14 @@ export class ManageModal extends React.Component<props, {}> {
       return Promise.resolve();
     }
 
-    return post('/api/region/host/' + this.props.region.uuid, { host: this.state.selectedHost }).then(() => {
+    return ClientStack.Region.AssignHost(this.props.region.uuid, this.state.selectedHost).then(() => {
       this.setState({
         hostSuccess: 'Host Successfully assigned',
         hostError: ''
       })
 
       // update region in redux 
-      this.props.dispatch(UpsertRegionAction(this.props.region.set('node', this.state.selectedHost)));
+      this.props.store.Region.Update(this.props.region.set('node', this.state.selectedHost));
 
     }).catch((err: Error) => {
       this.setState({
@@ -208,14 +209,14 @@ export class ManageModal extends React.Component<props, {}> {
       coordsError: ''
     })
 
-    return post('/api/region/setXY/' + this.props.region.uuid, { x: this.state.x, y: this.state.y }).then(() => {
+    return ClientStack.Region.SetCoordinates(this.props.region.uuid, this.state.x, this.state.y).then(() => {
       this.setState({
         coordsSuccess: 'Coordinates Successfully Changed',
         coordsError: ''
       })
 
       // update region in redux 
-      this.props.dispatch(UpsertRegionAction(this.props.region.set('x', this.state.x).set('y', this.state.y)));
+      this.props.store.Region.Update(this.props.region.set('x', this.state.x).set('y', this.state.y));
 
     }).catch((err: Error) => {
       this.setState({

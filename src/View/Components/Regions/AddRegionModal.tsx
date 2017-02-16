@@ -7,17 +7,16 @@ import { Estate } from '../Estates';
 import { Host } from '../Hosts';
 import { MapPicker } from '../MapPicker';
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Grid, Row, Col, Alert } from 'react-bootstrap';
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
-
-import { UpsertRegionAction } from './RegionsRedux';
+import { BusyButton } from '../BusyButton';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux';
 
 interface props {
   show: boolean
   estates: Map<number, Estate>
   regions: Map<string, Region>
   dismiss: () => void,
-  dispatch: (a: Action) => void
+  store: ReduxStore
 }
 
 export class AddRegionModal extends React.Component<props, {}> {
@@ -84,18 +83,13 @@ export class AddRegionModal extends React.Component<props, {}> {
   }
 
   onAddRegion(): Promise<void> {
-    return post('/api/region/create', {
-      estate: this.state.estate,
-      name: this.state.name,
-      x: this.state.x,
-      y: this.state.y
-    }).then((res) => {
+    return ClientStack.Region.Create(this.state.name,this.state.x,this.state.y,this.state.estate).then((uuid: string) => {
       let r = new Region();
-      r = r.set('uuid', res.Message)
+      r = r.set('uuid', uuid)
         .set('name', this.state.name)
         .set('x', this.state.x)
         .set('y', this.state.y);
-      this.props.dispatch(UpsertRegionAction(r));
+      this.props.store.Region.Update(r);
       this.props.dismiss();
     }).catch((err: Error) => {
       this.setState({

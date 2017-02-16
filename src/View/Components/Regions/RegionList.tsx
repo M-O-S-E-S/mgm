@@ -13,10 +13,12 @@ import { ContentModal } from './ContentModal';
 import { LogModal } from './LogModal';
 import { AddRegionModal } from './AddRegionModal';
 
+import { ReduxStore, StateModel } from '../../Redux';
+
 import { Grid, Row, Col, Button, FormControl } from 'react-bootstrap';
 
 interface props {
-    dispatch: (a: Action) => void,
+    store: ReduxStore,
     regions: Map<string, Region>,
     estateMap: Map<string, number>,
     estates: Map<number, Estate>,
@@ -193,7 +195,7 @@ export class RegionList extends React.Component<props, {}> {
                 <ManageModal
                     show={this.state.showManage}
                     dismiss={this.dismissManage.bind(this)}
-                    dispatch={this.props.dispatch}
+                    store={this.props.store}
                     region={this.state.selectedRegion}
                     estates={this.props.estates}
                     estateMap={this.props.estateMap}
@@ -204,7 +206,7 @@ export class RegionList extends React.Component<props, {}> {
                 <AddRegionModal
                     show={this.state.showAddRegion}
                     dismiss={this.dismissAddRegion.bind(this)}
-                    dispatch={this.props.dispatch}
+                    store={this.props.store}
                     estates={this.props.estates}
                     regions={this.props.regions} />
             </Grid>

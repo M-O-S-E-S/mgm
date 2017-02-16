@@ -8,6 +8,31 @@ export interface Response {
     json(msg: NetworkResponse): void
 }
 
+class Region {
+    static Create(name: string, x: number, y: number, estate: string): Promise<string> {
+        return performCall('POST', '/api/region/create', {
+            estate: estate,
+            name: name,
+            x: x,
+            y: y
+        }).then((resp: NetworkResponse) => {
+            return resp.Message;
+        });
+    }
+    static Destroy(uuid: string): Promise<void> {
+        return performCall('POST', '/api/region/destroy/' + uuid);
+    }
+    static AssignEstate(uuid: string, estate: string): Promise<void> {
+        return performCall('POST', '/api/region/estate/' + uuid, { estate: estate });
+    }
+    static AssignHost(uuid: string, host: string): Promise<void> {
+        return performCall('POST', '/api/region/host/' + uuid, { host: host });
+    }
+    static SetCoordinates(uuid: string, x: number, y: number): Promise<void> {
+        return performCall('POST', '/api/region/setXY/' + uuid, { x: x, y: y });
+    }
+}
+
 /**
  * A utility class to locate all client urls and definitions within a single module
  */
@@ -43,4 +68,6 @@ export class ClientStack {
             summary: summary
         })
     }
+
+    static Region = Region;
 }

@@ -13,6 +13,7 @@ import { IPool, createPool } from 'mysql';
 
 export interface Store {
   Hosts: {
+    getAll(): Promise<Host[]>
     getByAddress(address: string): Promise<Host>
   },
   Regions: {

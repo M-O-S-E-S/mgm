@@ -20,3 +20,6 @@ export {
 export {
   GetGroupsHander
 } from './GroupHandler';
+export {
+  GetHostHandler
+} from './HostHandler';

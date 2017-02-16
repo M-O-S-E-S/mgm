@@ -60,6 +60,9 @@ apiRouter.get('/estate', middleware.isUser(), GetEstatesHander(store));
 import { GetGroupsHander } from './Network';
 apiRouter.get('/group', middleware.isUser(), GetGroupsHander(store));
 
+// Host
+import { GetHostHandler } from './Network';
+apiRouter.get('/host', middleware.isAdmin(), GetHostHandler(store));
 
 
 clientApp.use('/api', apiRouter);

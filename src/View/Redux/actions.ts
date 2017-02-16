@@ -1,8 +1,6 @@
 import { Action } from 'redux';
 
-import { IMembership, IManager, IEstateMap } from '../../common/messages';
-
-import { User } from '../components/Users';
+import { User } from '../Components/Users';
 
 export const APP_LOGIN = "APP_LOGIN";
 export const APP_LOGOUT = "APP_LOGOUT";

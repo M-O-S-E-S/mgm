@@ -1,36 +1,31 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import { Unsubscribe } from 'redux';
 import { Map } from 'immutable';
 
-import { createStore, applyMiddleware, Store } from 'redux'
+import { ClientStack, LoginResponse } from '../Network';
 
-import { get, updateToken } from './util/network';
-import { LoginResponse } from '../common/messages';
-
-import { Auth, StateModel } from "./redux/model";
-import { User } from './components/Users';
-
-import reducer from "./redux/reducer";
-import { createNavigateToAction, createLoginAction } from "./redux/actions"
+import { ReduxStore, getStore, StateModel } from "./Redux";
+import { User } from './Components/Users';
 
 //create the redux store, using our websocket middleware for MGM async
-let store = createStore<StateModel>(reducer);
+let store = getStore();
 
 
 // Update url to match internal state
 let url = window.location.pathname;
-store.subscribe(() => {
-    if (store.getState().url !== url) {
-        url = store.getState().url;
+store.Subscribe(() => {
+    if (store.GetState().url !== url) {
+        url = store.GetState().url;
         window.history.pushState(null, null, url)
     }
 })
-store.dispatch(createNavigateToAction(window.location.pathname));
+store.NavigateTo(window.location.pathname);
 //watch for url changes that arent frome state, such as user back button
 window.addEventListener('popstate', () => {
     if (url !== window.location.pathname) {
         url = window.location.pathname;
-        store.dispatch(createNavigateToAction(window.location.pathname));
+        store.NavigateTo(window.location.pathname);
     }
 })
 
@@ -43,35 +38,35 @@ if (localStorage.getItem("user")) {
     user = localStorage.getItem("user");
     token = localStorage.getItem("token");
     isAdmin = localStorage.getItem("isAdmin") === 'true';
-    updateToken(token)
-;}
-store.subscribe(() => {
-    let auth = store.getState().auth;
+    ClientStack.updateToken(token);
+    ;
+}
+store.Subscribe(() => {
+    let auth = store.GetState().auth;
     if (auth.user !== user || auth.token !== token) {
         if (auth.user) {
             localStorage.setItem("user", auth.user);
             localStorage.setItem("token", auth.token);
-            localStorage.setItem("isAdmin", auth.isAdmin? 'true' : 'false');
-            updateToken(token);
+            localStorage.setItem("isAdmin", auth.isAdmin ? 'true' : 'false');
+            ClientStack.updateToken(token);
         } else {
             localStorage.removeItem("user");
             localStorage.removeItem("token");
             localStorage.removeItem("isAdmin");
             user = null;
             token = '';
-            updateToken(null);
+            ClientStack.updateToken(null);
         }
     }
 })
 
-import { Synchroniser } from './util/sync';
-let syncer = new Synchroniser(store);
+//import { Synchroniser } from '../Network/sync';
+//let syncer = new Synchroniser(store);
 
-import { Authenticated } from "./components/Authenticated";
-import { Unauthenticated } from "./components/Unauthenticated";
+import { Authenticated } from "./Components/Authenticated";
+import { Unauthenticated } from "./Components/Unauthenticated";
 
 class App extends React.Component<{}, {}> {
-    private sub: Redux.Unsubscribe;
     state: {
         st: StateModel
         loading: Boolean
@@ -79,34 +74,34 @@ class App extends React.Component<{}, {}> {
 
     constructor(props: any) {
         super(props);
-        this.sub = store.subscribe(() => {
-            if (this.state.st !== store.getState()) {
+        store.Subscribe(() => {
+            if (this.state.st !== store.GetState()) {
                 this.setState({
-                    st: store.getState()
+                    st: store.GetState()
                 });
             }
         });
         if (user && token) {
             this.state = {
-                st: store.getState(),
+                st: store.GetState(),
                 loading: true
             }
             this.resumeSession();
         } else {
             console.log('We dont have both a user and a token, skipping resume')
             this.state = {
-                st: store.getState(),
+                st: store.GetState(),
                 loading: false
             }
         }
     }
 
     resumeSession() {
-        get('/api/auth').then((res: LoginResponse) => {
+        ClientStack.resumeSession().then((res: LoginResponse) => {
             console.log("session resume successfull");
-            store.dispatch(createLoginAction(res.uuid, res.isAdmin, res.token));
+            store.Login(res.uuid, res.isAdmin, res.token);
             if (url == "" || url == "/")
-                store.dispatch(createNavigateToAction('/account'));
+                store.NavigateTo('/account');
             this.setState({
                 loading: false
             })
@@ -125,10 +120,10 @@ class App extends React.Component<{}, {}> {
 
         if (this.state.st.auth.loggedIn) {
             // show authenticated tree
-            return <Authenticated state={this.state.st} dispatch={store.dispatch} synchronizer={syncer} />
+            return <Authenticated state={this.state.st} store={store} />
         } else {
             // show splash, login, registration tree
-            return <Unauthenticated route={this.state.st.url} dispatch={store.dispatch} errorMsg={this.state.st.auth.errorMsg} />
+            return <Unauthenticated route={this.state.st.url} store={store} errorMsg={this.state.st.auth.errorMsg} />
         }
     }
 }

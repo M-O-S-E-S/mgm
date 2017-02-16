@@ -2,8 +2,8 @@ import * as React from "react";
 
 import { Grid, Row, Col, Form, FormGroup, ControlLabel, FormControl, Alert, Button, Radio } from 'react-bootstrap';
 
-import { post } from '../../util/network';
-import { BusyButton } from '../../util/BusyButton';
+import { ClientStack } from '../..';
+import { BusyButton } from '../BusyButton';
 
 export class Register extends React.Component<{}, {}> {
     state: {
@@ -76,22 +76,21 @@ export class Register extends React.Component<{}, {}> {
         this.setState({
             error: ''
         });
-        return post('/api/register/submit', {
-            name: this.state.fName + ' ' + this.state.lName,
-            email: this.state.email,
-            gender: this.state.gender,
-            password: this.state.password,
-            summary: this.state.summary
-        })
-            .then(() => {
-                this.setState({
-                    stage: 'success'
-                })
-            }).catch((err: Error) => {
-                this.setState({
-                    error: err.message
-                })
-            });
+        return ClientStack.SubmitRegistration(
+            this.state.fName + ' ' + this.state.lName,
+            this.state.email,
+            this.state.gender,
+            this.state.password,
+            this.state.summary
+        ).then(() => {
+            this.setState({
+                stage: 'success'
+            })
+        }).catch((err: Error) => {
+            this.setState({
+                error: err.message
+            })
+        });
     }
 
     eupa = (

@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Grid, Row, Col, Form, FormGroup, ControlLabel, FormControl, Alert } from 'react-bootstrap';
 
-import { post } from '../../util/network';
-import { BusyButton } from '../../util/BusyButton';
+import { ClientStack } from '../..';
+import { BusyButton } from '../BusyButton';
 
 export class Password extends React.Component<{}, {}> {
     state: {
@@ -48,7 +48,7 @@ export class Password extends React.Component<{}, {}> {
             tokenError: '',
             tokenSuccess: false
         });
-        return post('/api/task/resetCode', { email: this.state.email })
+        return ClientStack.PasswordResetToken(this.state.email)
             .then(() => {
                 this.setState({
                     tokenSuccess: true
@@ -84,11 +84,7 @@ export class Password extends React.Component<{}, {}> {
             setError: '',
             setSuccess: false
         });
-        return post('/api/task/resetPassword', {
-            name: this.state.name,
-            token: this.state.token,
-            password: this.state.password
-        })
+        return ClientStack.SetPasswordWithToken(this.state.name,this.state.token,this.state.password)
             .then(() => {
                 this.setState({
                     setSuccess: true
@@ -158,11 +154,11 @@ export class Password extends React.Component<{}, {}> {
                             </FormGroup>
                             <FormGroup>
                                 <ControlLabel>New Password: </ControlLabel>
-                                <FormControl onChange={this.onPassword.bind(this)} type="password"/>
+                                <FormControl onChange={this.onPassword.bind(this)} type="password" />
                             </FormGroup>
                             <FormGroup>
                                 <ControlLabel>New Password again: </ControlLabel>
-                                <FormControl onChange={this.onPasswordConfirm.bind(this)} type="password"/>
+                                <FormControl onChange={this.onPasswordConfirm.bind(this)} type="password" />
                             </FormGroup>
                             <BusyButton type="submit" onClick={this.resetPassword.bind(this)}>Update Password</BusyButton>
                         </Form>

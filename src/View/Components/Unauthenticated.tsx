@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Action } from "redux"
 
-import { createNavigateToAction } from '../redux/actions';
+import { ReduxStore } from '../Redux';
 
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
 
@@ -11,7 +11,7 @@ import { Login } from "./unauthenticated/Login";
 import { Footer } from './Footer';
 
 interface unauthenticatedProps {
-    dispatch: (a: Action) => void,
+    store: ReduxStore,
     route: string,
     errorMsg: string
 }
@@ -19,7 +19,7 @@ interface unauthenticatedProps {
 export class Unauthenticated extends React.Component<unauthenticatedProps, {}> {
 
     handleNav(href: string) {
-        this.props.dispatch(createNavigateToAction(href));
+        this.props.store.NavigateTo(href);
     }
 
     render() {
@@ -70,7 +70,7 @@ export class Unauthenticated extends React.Component<unauthenticatedProps, {}> {
                 return (
                     <div>
                         {navbar}
-                        <Login dispatch={this.props.dispatch} errorMsg={this.props.errorMsg}/>
+                        <Login store={this.props.store} errorMsg={this.props.errorMsg}/>
                         <Footer />
                     </div>
                 )

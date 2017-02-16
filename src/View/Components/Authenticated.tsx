@@ -1,12 +1,10 @@
 import * as React from "react";
 import { Action } from 'redux'
-import { StateModel } from '../redux/model';
-import { createLogoutAction, createNavigateToAction } from '../redux/actions';
+import { ReduxStore, StateModel } from '../Redux';
 import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
-import { get } from '../util/network';
-import { Synchroniser } from '../util/sync';
+import { ClientStack } from '..';
 
 import { Navbar, Nav, NavItem, NavDropdown, MenuItem, Button } from 'react-bootstrap';
 
@@ -19,9 +17,8 @@ import { User, UserList } from "./Users";
 import { PendingUserList } from "./PendingUsers";
 
 interface authenticatedProps {
-    dispatch: (a: Action) => void,
+    store: ReduxStore,
     state: StateModel
-    synchronizer: Synchroniser
 }
 
 interface state {
@@ -38,8 +35,8 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
             url: props.state.url
         }
 
-        this.timerToken = setInterval(this.props.synchronizer.sync.bind(this.props.synchronizer), 10000);
-        this.props.synchronizer.sync();
+        this.timerToken = setInterval(this.props.store.SyncStateWithserver(), 10000);
+        this.props.store.SyncStateWithserver();
     }
 
     shouldComponentUpdate(nextProps: authenticatedProps, nextState: state) {
@@ -55,13 +52,12 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
     }
 
     handleLogout() {
-        get("/api/auth/logout");
-        this.props.dispatch(createLogoutAction());
+        this.props.store.Logout();
         clearInterval(this.timerToken);
     }
 
     handleNav(href: string) {
-        this.props.dispatch(createNavigateToAction(href));
+        this.props.store.NavigateTo(href);
     }
 
     render() {
@@ -121,7 +117,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                         {navbar}
                         <RegionList
                             isAdmin={this.props.state.auth.isAdmin}
-                            dispatch={this.props.dispatch}
+                            store={this.props.store}
                             regions={this.props.state.regions}
                             estateMap={this.props.state.estateMap}
                             estates={this.props.state.estates}
@@ -134,7 +130,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                         {navbar}
                         <EstateList
                             isAdmin={this.props.state.auth.isAdmin}
-                            dispatch={this.props.dispatch}
+                            store={this.props.store}
                             estates={this.props.state.estates}
                             estateMap={this.props.state.estateMap}
                             managers={this.props.state.managers}
@@ -146,7 +142,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                     <div>
                         {navbar}
                         <GroupList
-                            dispatch={this.props.dispatch}
+                            store={this.props.store}
                             groups={this.props.state.groups}
                             roles={this.props.state.roles}
                             members={this.props.state.members}
@@ -158,7 +154,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                     <div>
                         {navbar}
                         <HostList
-                            dispatch={this.props.dispatch}
+                            store={this.props.store}
                             hosts={this.props.state.hosts}
                             hostStats={this.props.state.hostStats}
                             regions={this.props.state.regions} />
@@ -170,7 +166,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                         {navbar}
                         <UserList
                             isAdmin={this.props.state.auth.isAdmin}
-                            dispatch={this.props.dispatch}
+                            store={this.props.store}
                             users={this.props.state.users}
                             groups={this.props.state.groups}
                             members={this.props.state.members}
@@ -182,7 +178,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                     <div>
                         {navbar}
                         <PendingUserList
-                            dispatch={this.props.dispatch}
+                            store={this.props.store}
                             users={this.props.state.pendingUsers} />
                     </div>
                 )
@@ -191,7 +187,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                     <div>
                         {navbar}
                         <Account
-                            dispatch={this.props.dispatch}
+                            store={this.props.store}
                             user={this.props.state.auth.user}
                             users={this.props.state.users}
                             jobs={this.props.state.jobs}

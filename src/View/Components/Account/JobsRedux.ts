@@ -19,26 +19,6 @@ interface DeleteJobActionBulk extends Action {
   jobs: number[]
 }
 
-const JobClass = Record({
-  id: 0,
-  timestamp: '',
-  type: '',
-  user: '',
-  data: ''
-})
-
-export class Job extends JobClass implements IJob {
-  id: number
-  timestamp: string
-  type: string
-  user: string
-  data: string
-
-  set(key: string, value: string | number): Job {
-    return <Job>super.set(key, value);
-  }
-}
-
 // internal function for code reuse concerning immutable objects
 function upsertJob(state: Map<number, Job>, j: Job): Map<number, Job> {
   let rec = state.get(j.id) || new Job();

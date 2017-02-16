@@ -1,12 +1,12 @@
 
 import { Map, Record, Set } from 'immutable';
-import { User } from '../components/Users';
-import { Region, RegionStat } from '../components/Regions';
-import { Host, HostStat } from '../components/Hosts';
-import { Estate } from '../components/Estates';
-import { Group, Role } from '../components/Groups';
-import { PendingUser } from '../components/PendingUsers';
-import { Job } from '../components/Account';
+import { User } from '../Components/Users';
+import { Region, RegionStat } from '../Components/Regions';
+import { Host, HostStat } from '../Components/Hosts';
+import { Estate } from '../Components/Estates';
+import { Group, Role } from '../Components/Groups';
+import { PendingUser } from '../Components/PendingUsers';
+import { Job } from '../Components/Account';
 
 /** AUTH */
 interface IAuth {

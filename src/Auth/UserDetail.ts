@@ -1,5 +1,4 @@
 
-import { User } from '../Store';
 import { Set } from 'immutable';
 
 /**

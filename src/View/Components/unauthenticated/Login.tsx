@@ -3,17 +3,16 @@ import { Action } from 'redux'
 
 import { Splash } from "../Splash";
 
-import { createLoginAction, createNavigateToAction, createSetAuthErrorMessageAction } from '../../redux/actions';
+import { ReduxStore } from '../../Redux';
 import { User } from '../Users';
 
-import { post } from '../../util/network';
+import { ClientStack, LoginResponse } from '../..';
 
 import { Grid, Row, Col, Form, FormGroup, FormControl, ControlLabel, Button, Alert } from "react-bootstrap"
 
-import { LoginResponse } from '../../../common/messages';
 
 interface loginProps {
-    dispatch: (a: Action) => void,
+    store: ReduxStore,
     errorMsg: string
 }
 
@@ -40,15 +39,15 @@ export class Login extends React.Component<loginProps, {}> {
     }
     handleLogin(e: React.FormEvent) {
         e.preventDefault();
-        post('/api/auth/login', { username: this.state.username, password: this.state.password })
+        ClientStack.Login(this.state.username, this.state.password)
             .then((res: LoginResponse) => {
                 console.log('auth succeeded');
-                this.props.dispatch(createLoginAction(res.uuid, res.isAdmin, res.token));
+                this.props.store.Login(res.uuid, res.isAdmin, res.token);
                 if (window.location.pathname === "" || window.location.pathname === "/" || window.location.pathname === '/login')
-                    this.props.dispatch(createNavigateToAction('/account'));
+                    this.props.store.NavigateTo('/account');
             }).catch((err: Error) => {
                 console.log('auth failed');
-                this.props.dispatch(createSetAuthErrorMessageAction(err.message));
+                this.props.store.LoginError(err.message);
             });
     }
 

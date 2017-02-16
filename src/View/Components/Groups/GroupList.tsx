@@ -10,7 +10,6 @@ import { User } from '../Users';
 import { Grid, Row, Col } from 'react-bootstrap';
 
 interface props {
-    dispatch: (a: Action) => void
     groups: Map<string, Group>
     members: Map<string, Map<string, string>>
     roles: Map<string, Map<string, Role>>

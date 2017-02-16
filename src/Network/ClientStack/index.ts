@@ -8,7 +8,9 @@ export interface Response {
     json(msg: NetworkResponse): void
 }
 
-class Region {
+import { Region, Estate, Host, User } from '../../View/Immutable';
+
+class RegionStack {
     static Create(name: string, x: number, y: number, estate: string): Promise<string> {
         return performCall('POST', '/api/region/create', {
             estate: estate,
@@ -19,17 +21,37 @@ class Region {
             return resp.Message;
         });
     }
-    static Destroy(uuid: string): Promise<void> {
-        return performCall('POST', '/api/region/destroy/' + uuid);
+    static Destroy(region: Region): Promise<void> {
+        return performCall('POST', '/api/region/destroy/' + region.uuid);
     }
-    static AssignEstate(uuid: string, estate: string): Promise<void> {
-        return performCall('POST', '/api/region/estate/' + uuid, { estate: estate });
+    static AssignEstate(region: Region, estate: Estate): Promise<void> {
+        return performCall('POST', '/api/region/estate/' + region.uuid, { estate: estate.EstateID });
     }
-    static AssignHost(uuid: string, host: string): Promise<void> {
-        return performCall('POST', '/api/region/host/' + uuid, { host: host });
+    static AssignHost(region: Region, host: Host): Promise<void> {
+        return performCall('POST', '/api/region/host/' + region.uuid, { host: host.address });
     }
-    static SetCoordinates(uuid: string, x: number, y: number): Promise<void> {
-        return performCall('POST', '/api/region/setXY/' + uuid, { x: x, y: y });
+    static SetCoordinates(region: Region, x: number, y: number): Promise<void> {
+        return performCall('POST', '/api/region/setXY/' + region.uuid, { x: x, y: y });
+    }
+}
+
+class EstateStack {
+    static Create(name: string, owner: User):Promise<number> {
+        return performCall('POST', '/api/estate/create', { name: name, owner: owner.UUID });
+    }
+    static Destroy(estate: Estate): Promise<void> {
+        return performCall('POST', '/api/estate/destroy/' + estate.EstateID)
+    }
+}
+
+class HostStack {
+    static Add(address: string): Promise<number> {
+        return performCall('POST', '/api/host/add', { host: address }).then( (resp: NetworkResponse) => {
+            return parseInt(resp.Message, 10);
+        });
+    }
+    static Destroy(host: Host): Promise<void> {
+        return performCall('POST', '/api/host/remove', { host: host.address })
     }
 }
 
@@ -69,5 +91,7 @@ export class ClientStack {
         })
     }
 
-    static Region = Region;
+    static Region = RegionStack;
+    static Estate = EstateStack;
+    static Host = HostStack;
 }

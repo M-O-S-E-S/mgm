@@ -3,8 +3,8 @@ import { Action } from "redux";
 import { Map, Set } from 'immutable';
 const shallowequal = require('shallowequal');
 
-import { Estate } from '.'
-import { User } from '../Users';
+import { Estate, User } from '../../Immutable';
+import { ReduxStore } from '../../Redux';
 
 import { EstateView } from './EstateView';
 
@@ -12,7 +12,7 @@ import { Grid, Row, Col, Button } from 'react-bootstrap'
 import { AddEstateModal } from './AddEstateModal';
 
 interface props {
-    dispatch: (a: Action) => void,
+    store: ReduxStore,
     estates: Map<number, Estate>
     estateMap: Map<string, number>,
     managers: Map<number, Set<string>>,
@@ -61,13 +61,13 @@ export class EstateList extends React.Component<props, {}> {
             .sort((a: Estate, b: Estate) => { return a.name.localeCompare(b.name) })
             .map((e: Estate) => {
                 return <EstateView
-                    key={e.id.toString()}
+                    key={e.EstateID.toString()}
                     isAdmin={this.props.isAdmin}
-                    dispatch={this.props.dispatch}
+                    store={this.props.store}
                     users={this.props.users}
-                    managers={this.props.managers.get(e.id)}
+                    managers={this.props.managers.get(e.EstateID)}
                     estate={e}
-                    regionCount={regionCount[e.id] || 0} />
+                    regionCount={regionCount[e.EstateID] || 0} />
             })
         return (
             <Grid>
@@ -86,7 +86,7 @@ export class EstateList extends React.Component<props, {}> {
                 </Row>
                 {estates}
                 <AddEstateModal
-                    dispatch={this.props.dispatch}
+                    store={this.props.store}
                     show={this.state.showAdd}
                     cancel={this.cancelNewEstate.bind(this)}
                     users={this.props.users}

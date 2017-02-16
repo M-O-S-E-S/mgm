@@ -2,15 +2,15 @@ import * as React from "react";
 import { Action } from 'redux';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Alert } from 'react-bootstrap';
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
-import { UpsertHostAction } from './HostsRedux';
+import { BusyButton } from '../BusyButton';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux';
 import { Host } from '.';
 
 interface props {
   show: boolean
   cancel: () => void,
-  dispatch: (a: Action) => void,
+  store: ReduxStore,
 }
 
 const ipRegExp = /(^127\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^192\.168\.)/;
@@ -53,11 +53,11 @@ export class AddHostModal extends React.Component<props, state> {
       })
       return;
     }
-    return post('/api/host/add', { host: this.state.ip }).then((res: any) => {
+    return ClientStack.Host.Add(this.state.ip).then((id: number) => {
       let h = new Host();
-      h = h.set('id', res.ID)
-        .set('address', this.state.ip)
-      this.props.dispatch(UpsertHostAction(h));
+      h = h.set('id', id)
+        .set('address', this.state.ip);
+      this.props.store.Host.Update(h);
       this.props.cancel();
     }).catch((err: Error) => {
       this.setState({

@@ -1,38 +1,12 @@
 import { Map, Record } from 'immutable';
 import { Action } from 'redux';
 
+import { User } from '../../Immutable';
+
 const UPSERT_USER = "USERS_UPSERT_USER";
 const UPSERT_USER_BULK = "USERS_UPSERT_USER_BULK";
 const DELETE_USER = "USERS_DELETE_USER";
 const DELETE_USER_BULK = "USERS_DELETE_USER_BULK";
-
-const UserClass = Record({
-  UUID: '',
-  username: '',
-  lastname: '',
-  email: '',
-  godLevel: 0
-})
-
-export class User extends UserClass {
-  readonly UUID: string
-  readonly username: string
-  readonly lastname: string
-  readonly email: string
-  readonly godLevel: number
-
-  set(key: string, value: string | number): User {
-    return <User>super.set(key, value);
-  }
-
-  name(): string {
-    return this.username + ' ' + this.lastname;
-  }
-
-  isAdmin(): boolean {
-    return this.godLevel >= 250;
-  }
-}
 
 interface UserAction extends Action {
   user: User

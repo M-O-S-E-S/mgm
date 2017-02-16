@@ -142,7 +142,6 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                     <div>
                         {navbar}
                         <GroupList
-                            store={this.props.store}
                             groups={this.props.state.groups}
                             roles={this.props.state.roles}
                             members={this.props.state.members}

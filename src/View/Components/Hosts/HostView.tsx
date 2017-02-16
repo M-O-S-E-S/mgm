@@ -3,19 +3,19 @@ import { Action } from 'redux';
 import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
-import { Host, HostStat } from '.'
-import { Region } from '../Regions';
+import { Host, Region } from '../../Immutable';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 import { HostStatView } from './HostStatView';
 import { HostDeletedAction } from '.';
 
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
+import { BusyButton } from '../BusyButton';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux';
 
 
 interface props {
-  dispatch: (a: Action) => void,
+  store: ReduxStore,
   host: Host
   regions: Map<string, Region>
 }
@@ -36,9 +36,9 @@ export class HostView extends React.Component<props, {}> {
       alertify.error('Cannot remove host ' + this.props.host.address + ', there are ' + regionCount + ' regions assigned');
       return Promise.resolve();
     }
-    return post('/api/host/remove', { host: this.props.host.address }).then(() => {
+    return ClientStack.Host.Destroy(this.props.host).then(() => {
       alertify.success('Host ' + this.props.host.address + ' deleted');
-      this.props.dispatch(HostDeletedAction(this.props.host.id));
+      this.props.store.Host.Destroy(this.props.host);
     }).catch((err: Error) => {
       alertify.error('Error deleting host ' + this.props.host.address + ': ' + err.message);
     })

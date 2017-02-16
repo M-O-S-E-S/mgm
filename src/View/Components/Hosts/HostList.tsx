@@ -3,18 +3,16 @@ import { Action } from 'redux';
 import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
-import { Host, HostStat } from '.';
-import { Region } from '../Regions';
-
+import { Host, Region } from '../../Immutable';
+import { ReduxStore } from '../../Redux';
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 
 import { HostView } from './HostView';
 import { AddHostModal } from './AddHostModal';
 
 interface props {
-    dispatch: (a: Action) => void,
+    store: ReduxStore,
     hosts: Map<number, Host>
-    hostStats: Map<number, HostStat>
     regions: Map<string, Region>
 }
 
@@ -49,7 +47,7 @@ export class HostList extends React.Component<props, {}> {
 
     render() {
         let hosts = this.props.hosts.toList().map((h: Host) => {
-            return <HostView key={h.id} host={h} regions={this.props.regions} dispatch={this.props.dispatch} />
+            return <HostView key={h.id} host={h} regions={this.props.regions} store={this.props.store} />
         });
 
         return (
@@ -66,7 +64,7 @@ export class HostList extends React.Component<props, {}> {
                 <AddHostModal
                     show={this.state.showAdd}
                     cancel={this.cancelNewHost.bind(this)}
-                    dispatch={this.props.dispatch} />
+                    store={this.props.store} />
             </Grid >
         );
     }

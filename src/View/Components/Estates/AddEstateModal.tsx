@@ -7,15 +7,16 @@ import { Estate } from '.'
 import { User } from '../Users';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Alert } from 'react-bootstrap';
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
+import { BusyButton } from '../BusyButton';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux';
 
 interface props {
   show: boolean
   cancel: () => void
   users: Map<string, User>
   estates: Map<number, Estate>
-  dispatch: (a: Action) => void
+  store: ReduxStore
 }
 
 interface state {
@@ -69,13 +70,13 @@ export class AddEstateModal extends React.Component<props, state> {
       return;
     }
 
-    return post('/api/estate/create', { name: this.state.name, owner: this.state.owner }).then((res: any) => {
+    return ClientStack.Estate.Create(this.state.name, this.props.users.get(this.state.owner)).then((id: number) => {
       // update redux
       let e = new Estate();
-      e = e.set('id', res.ID)
-        .set('name', this.state.name)
-        .set('owner', this.state.owner);
-      this.props.dispatch(UpsertEstateAction(e));
+      e = e.set('EstateID', id)
+        .set('EstateName', this.state.name)
+        .set('EstateOwner', this.state.owner);
+      this.props.store.Estate.Update(e);
 
       this.props.cancel();
     }).catch((err: Error) => {

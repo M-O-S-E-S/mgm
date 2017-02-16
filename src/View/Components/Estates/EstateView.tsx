@@ -5,15 +5,16 @@ const shallowequal = require('shallowequal');
 
 import { Estate } from '.';
 import { User } from '../Users';
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
+import { BusyButton } from '../BusyButton';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux';
 import { EstateDeletedAction } from '.';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap';
 
 
 interface props {
-  dispatch: (a: Action) => void,
+  store: ReduxStore,
   estate: Estate
   users: Map<string, User>
   managers: Set<string>
@@ -32,9 +33,9 @@ export class EstateView extends React.Component<props, {}> {
       alertify.error('Cannot remove Estate ' + this.props.estate.name + ', there are ' + this.props.regionCount + ' regions assigned');
       return Promise.resolve();
     }
-    return post('/api/estate/destroy/' + this.props.estate.id).then(() => {
+    return ClientStack.Estate.Destroy(this.props.estate).then(() => {
       alertify.success('Estate ' + this.props.estate.name + ' deleted');
-      this.props.dispatch(EstateDeletedAction(this.props.estate.id));
+      this.props.store.Estate.Destroy(this.props.estate);
     }).catch((err: Error) => {
       alertify.error('Error deleting ' + this.props.estate.name + ': ' + err.message);
     });

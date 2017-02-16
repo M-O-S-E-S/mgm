@@ -1,27 +1,11 @@
 import { Record, Map, Set } from 'immutable'
 import { Action } from 'redux'
-import { IEstate } from '../../../common/messages'
+import { Estate } from '../../Immutable';
 
 export const ESTATE_DELETED = "ESTATES_ESTATE_DELETED";
 const UPSERT_ESTATE = "ESTATES_UPSERT_ESTATE";
 const UPSERT_ESTATE_BULK = "ESTATES_UPSERT_BULK";
 const DELETE_ESTATE_BULK = "ESTATES_DELETE_BULK";
-
-const EstateClass = Record({
-  id: 0,
-  name: '',
-  owner: '',
-})
-
-export class Estate extends EstateClass implements IEstate {
-  id: number
-  name: string
-  owner: string
-
-  set(key: string, value: string | number): Estate {
-    return <Estate>super.set(key, value);
-  }
-}
 
 interface EstateAction extends Action {
   estate: Estate
@@ -71,12 +55,12 @@ export const DeleteEstateBulkAction = function (e: number[]): Action {
   return act;
 }
 
-function upsertEstate(state = Map<number, Estate>(), e: IEstate): Map<number, Estate> {
-  let estate = state.get(e.id, new Estate());
-  estate = estate.set('id', e.id)
-    .set('name', e.name)
-    .set('owner', e.owner);
-  return state.set(e.id, estate);
+function upsertEstate(state = Map<number, Estate>(), e: Estate): Map<number, Estate> {
+  let estate = state.get(e.EstateID, new Estate());
+  estate = estate.set('EstateID', e.EstateID)
+    .set('EstateName', e.EstateName)
+    .set('EstateOwner', e.EstateOwner);
+  return state.set(e.EstateID, estate);
 }
 
 export const EstatesReducer = function (state = Map<number, Estate>(), action: Action): Map<number, Estate> {
@@ -87,7 +71,7 @@ export const EstatesReducer = function (state = Map<number, Estate>(), action: A
       return upsertEstate(state, ea.estate);
     case UPSERT_ESTATE_BULK:
       let eb = <EstateBulkAction>action;
-      eb.estates.map((e: IEstate) => {
+      eb.estates.map((e: Estate) => {
         state = upsertEstate(state, e);
       })
       return state;

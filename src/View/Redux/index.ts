@@ -5,7 +5,7 @@ import reducer from "./reducer";
 
 export { StateModel }
 
-import { Region } from '../Immutable';
+import { Region, Estate, Host } from '../Immutable';
 
 export interface ReduxStore {
   Subscribe(cb: () => void): void
@@ -19,6 +19,14 @@ export interface ReduxStore {
     Destroy(region: Region):void
     AssignEstate(region: Region, estate: number):void
     Update(region: Region): void
+  }
+  Estate: {
+    Destroy(estate: Estate):void
+    Update(estate: Estate): void
+  }
+  Host: {
+    Destroy(host: Host): void
+    Update(host: Host): void
   }
 }
 

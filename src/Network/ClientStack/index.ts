@@ -8,7 +8,41 @@ export interface Response {
     json(msg: NetworkResponse): void
 }
 
-import { Region, Estate, Host, User } from '../../View/Immutable';
+import { Region, Estate, Host, User, Group, Role } from '../../View/Immutable';
+
+class UserStack {
+    static Create(name: string, email: string, template: string, password: string): Promise<string> {
+        return performCall('POST', '/api/user/create', {
+            name: name,
+            email: email,
+            template: template,
+            password: password
+        }).then((resp: NetworkResponse) => {
+            return resp.Message;
+        })
+    }
+    static SetAccessLevel(user: User, level: number): Promise<void> {
+        return performCall('POST', '/api/user/accessLevel', { uuid: user.UUID, accessLevel: level });
+    }
+    static SetEmail(user: User, email: string): Promise<void> {
+        return performCall('POST', '/api/user/email', { id: user.UUID, email: email });
+    }
+    static SetPassword(user: User, password: string): Promise<void> {
+        return performCall('POST', '/api/user/password', { id: user.UUID, password: password });
+    }
+    static Destroy(user: User): Promise<void> {
+        return performCall('POST', '/api/user/destroy/' + user.UUID);
+    }
+}
+
+class GroupStack {
+    static AddUser(group: Group, user: User, role: Role): Promise<void> {
+        return performCall('POST',  '/api/group/addUser/' + group.GroupID, { user: user.UUID, role: role.RoleID });
+    }
+    static RemoveUser(group: Group, user: User): Promise<void> {
+        return performCall('POST', '/api/group/removeUser/' + group.GroupID, { user: user.UUID })
+    }
+}
 
 class RegionStack {
     static Create(name: string, x: number, y: number, estate: string): Promise<string> {
@@ -36,7 +70,7 @@ class RegionStack {
 }
 
 class EstateStack {
-    static Create(name: string, owner: User):Promise<number> {
+    static Create(name: string, owner: User): Promise<number> {
         return performCall('POST', '/api/estate/create', { name: name, owner: owner.UUID });
     }
     static Destroy(estate: Estate): Promise<void> {
@@ -46,7 +80,7 @@ class EstateStack {
 
 class HostStack {
     static Add(address: string): Promise<number> {
-        return performCall('POST', '/api/host/add', { host: address }).then( (resp: NetworkResponse) => {
+        return performCall('POST', '/api/host/add', { host: address }).then((resp: NetworkResponse) => {
             return parseInt(resp.Message, 10);
         });
     }
@@ -91,6 +125,8 @@ export class ClientStack {
         })
     }
 
+    static User = UserStack;
+    static Group = GroupStack;
     static Region = RegionStack;
     static Estate = EstateStack;
     static Host = HostStack;

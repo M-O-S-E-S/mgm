@@ -1,7 +1,6 @@
 import { Action } from 'redux';
 import { Record, Map } from 'immutable';
-import { IGroup, IMembership } from '../../../common/messages';
-
+import { Group } from '../../Immutable';
 
 interface GroupAction extends Action {
   group: Group
@@ -18,24 +17,6 @@ interface DeleteGroupBulkAction extends Action {
 const ADD_GROUP = 'GROUPS_ADD_GROUP';
 const ADD_GROUP_BULK = 'GROUPS_ADD_GROUP_BULK';
 const DELETE_GROUP_BULK = 'GROUPS_DELETE_GROUP_BULK';
-
-const GroupClass = Record({
-  GroupID: '',
-  Name: '',
-  FounderID: '',
-  OwnerRoleID: ''
-})
-
-export class Group extends GroupClass implements IGroup {
-  GroupID: string
-  Name: string
-  FounderID: string
-  OwnerRoleID: string
-
-  set(key: string, value: string): Group {
-    return <Group>super.set(key, value);
-  }
-}
 
 export function UpsertGroupAction(g: Group): Action {
   let act: GroupAction = {

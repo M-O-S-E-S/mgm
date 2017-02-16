@@ -1,5 +1,5 @@
 import { Record } from 'immutable';
-import { Job as IJob } from '../../Store';
+import { IJob } from '../../Store';
 
 const JobClass = Record({
   id: 0,

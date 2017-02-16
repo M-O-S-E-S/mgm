@@ -155,7 +155,6 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
                         <HostList
                             store={this.props.store}
                             hosts={this.props.state.hosts}
-                            hostStats={this.props.state.hostStats}
                             regions={this.props.state.regions} />
                     </div>
                 )

@@ -2,19 +2,19 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { UpsertMemberAction, DeleteMemberAction } from '../Groups';
 import { User } from '../Users';
 import { Group, Role } from '../Groups';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Grid, Row, Alert } from 'react-bootstrap';
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
+import { BusyButton } from '../BusyButton';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux';
 
 interface props {
   show: boolean
   cancel: () => void
   user: User
-  dispatch: (a: Action) => void
+  store: ReduxStore
   groups: Map<string, Group>
   members: Map<string, Map<string, string>>
   roles: Map<string, Map<string, Role>>
@@ -106,12 +106,8 @@ export class ManageGroupsModal extends React.Component<props, state> {
   }
 
   onInsertMembership() {
-    return post('/api/group/addUser/' + this.state.selectedGroup.GroupID, { user: this.props.user.UUID, role: this.state.selectedRole.RoleID }).then(() => {
-      this.props.dispatch(UpsertMemberAction({
-        GroupID: this.state.selectedGroup.GroupID,
-        AgentID: this.props.user.UUID,
-        SelectedRoleID: this.state.selectedRole.RoleID
-      }));
+    return ClientStack.Group.AddUser(this.state.selectedGroup, this.props.user, this.state.selectedRole).then(() => {
+      this.props.store.Group.AddUser(this.state.selectedGroup, this.state.selectedRole, this.props.user);
     }).catch((err: Error) => {
       this.setState({
         error: 'Error assigning membership: ' + err.message
@@ -120,12 +116,8 @@ export class ManageGroupsModal extends React.Component<props, state> {
   }
 
   onEjectMembership(g: Group){
-    return post('/api/group/removeUser/' + g.GroupID, { user: this.props.user.UUID }).then(() => {
-      this.props.dispatch(DeleteMemberAction({
-        GroupID: g.GroupID,
-        AgentID: this.props.user.UUID,
-        SelectedRoleID: ''
-      }));
+    return ClientStack.Group.RemoveUser(g, this.props.user).then(() => {
+      this.props.store.Group.DeleteUser(g, this.props.user);
     }).catch((err: Error) => {
       this.setState({
         error: 'Error ejecting membership: ' + err.message

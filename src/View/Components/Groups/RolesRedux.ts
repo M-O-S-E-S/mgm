@@ -1,6 +1,6 @@
 import { Action } from 'redux';
 import { Record, Map } from 'immutable';
-import { IRole } from '../../../common/messages';
+import { Role } from '../../Immutable';
 
 interface RoleAction extends Action {
   role: Role
@@ -18,28 +18,6 @@ interface DeleteRoleBulkaction extends Action {
 const ADD_ROLE = "GROUPS_ADD_ROLE";
 const ADD_ROLE_BULK = "GROUPS_ADD_ROLE_BULK";
 const DELETE_ROLE_BULK = 'GROUPS_DELETE_ROLE_BULK';
-
-const RoleClass = Record({
-  GroupID: '',
-  RoleID: '',
-  Name: '',
-  Description: '',
-  Title: '',
-  Powers: 0
-})
-
-export class Role extends RoleClass implements IRole {
-  GroupID: string
-  RoleID: string
-  Name: string
-  Description: string
-  Title: string
-  Powers: number
-
-  set(key: string, value: string | number): Role {
-    return <Role>super.set(key, value);
-  }
-}
 
 export const UpsertRoleAction = function (r: Role): Action {
   let act: RoleAction = {

@@ -4,16 +4,16 @@ import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
 import { UserView } from './UserView';
-import { User } from '.';
-import { Group, Role } from '../Groups';
+import { Group, Role, User } from '../../Immutable';
 import { AddUserModal } from './AddUserModal';
 import { ManageUserModal } from './ManageUserModal';
 import { ManageGroupsModal } from './ManageGroupsModal';
+import { ReduxStore } from '../../Redux';
 
 import { Grid, Row, Col, Button } from 'react-bootstrap'
 
 interface props {
-    dispatch: (a: Action) => void,
+    store: ReduxStore,
     users: Map<string, User>,
     groups: Map<string, Group>,
     members: Map<string, Map<string, string>>,
@@ -127,11 +127,11 @@ export class UserList extends React.Component<props, state> {
                 <AddUserModal
                     show={this.state.showAdd}
                     dismiss={this.onDismissAdd.bind(this)}
-                    dispatch={this.props.dispatch}
+                    store={this.props.store}
                     users={this.props.users} />
                 <ManageUserModal
                     cancel={this.onDismissManage.bind(this)}
-                    dispatch={this.props.dispatch}
+                    store={this.props.store}
                     show={this.state.showManage}
                     user={this.state.selectedUser} />
                 <ManageGroupsModal
@@ -139,7 +139,7 @@ export class UserList extends React.Component<props, state> {
                     groups={this.props.groups}
                     members={this.props.members}
                     roles={this.props.roles}
-                    dispatch={this.props.dispatch}
+                    store={this.props.store}
                     show={this.state.showGroups}
                     user={this.state.selectedUser} />
             </Grid>

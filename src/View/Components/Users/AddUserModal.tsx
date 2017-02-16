@@ -4,8 +4,9 @@ import { Action } from 'redux';
 
 import { User } from '.';
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Grid, Row, Col, Alert, Radio } from 'react-bootstrap';
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
+import { BusyButton } from '../BusyButton';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux';
 
 import { UpsertUserAction } from '.';
 
@@ -13,7 +14,7 @@ interface props {
   show: boolean
   users: Map<string, User>
   dismiss: () => void,
-  dispatch: (a: Action) => void
+  store: ReduxStore
 }
 
 interface state {
@@ -121,17 +122,17 @@ export class AddUserModal extends React.Component<props, state> {
       success: ''
     })
 
-    return post('/api/user/create', {
-      name: this.state.name,
-      email: this.state.email,
-      template: this.state.template,
-      password: this.state.password
-    }).then((res) => {
+    return ClientStack.User.Create(
+      this.state.name,
+      this.state.email,
+      this.state.template,
+      this.state.password
+    ).then((uuid: string) => {
       let u = new User();
-      u = u.set('uuid', res.Message)
+      u = u.set('uuid', uuid)
         .set('name', this.state.name)
         .set('email', this.state.email);
-      this.props.dispatch(UpsertUserAction(u));
+      this.props.store.User.Update(u);
       this.setState({
         error: '',
         success: 'User ' + this.state.name + ' created successfully'

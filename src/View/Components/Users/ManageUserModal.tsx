@@ -6,14 +6,15 @@ import { DeleteUser, UpsertUserAction } from './UsersRedux';
 import { User } from '../Users';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Grid, Row, Alert } from 'react-bootstrap';
-import { BusyButton } from '../../util/BusyButton';
-import { post } from '../../util/network';
+import { BusyButton } from '../BusyButton';
+import { ClientStack } from '../..';
+import { ReduxStore } from '../../Redux';
 
 interface props {
   show: boolean
   cancel: () => void
   user: User
-  dispatch: (a: Action) => void
+  store: ReduxStore
 }
 
 interface state {
@@ -44,8 +45,8 @@ export class ManageUserModal extends React.Component<props, state> {
   }
 
   setGodLevel(level: number): Promise<void> {
-    return post('/api/user/accessLevel', { uuid: this.props.user.UUID, accessLevel: level }).then(() => {
-      this.props.dispatch(UpsertUserAction(this.props.user.set('godLevel', level)));
+    return ClientStack.User.SetAccessLevel(this.props.user, level).then(() => {
+      this.props.store.User.Update(this.props.user.set('godLevel', level));
     }).catch((err: Error) => {
       this.setState({
         error: 'Error changing ' + this.props.user.name() + '\'s level: ' + err.message
@@ -59,8 +60,8 @@ export class ManageUserModal extends React.Component<props, state> {
     })
   }
   setEmail(): Promise<void> {
-    return post('/api/user/email', { id: this.props.user.UUID, email: this.state.email }).then(() => {
-      this.props.dispatch(UpsertUserAction(this.props.user.set('email', this.state.email)))
+    return ClientStack.User.SetEmail(this.props.user, this.state.email).then(() => {
+      this.props.store.User.Update(this.props.user.set('email', this.state.email));
     }).catch((err: Error) => {
       this.setState({
         error: 'Error changing ' + this.props.user.name() + '\'s email: ' + err.message
@@ -86,8 +87,8 @@ export class ManageUserModal extends React.Component<props, state> {
       });
       return Promise.resolve();
     }
-    return post('/api/user/password', { id: this.props.user.UUID, password: this.state.password }).then(() => {
-      this.props.dispatch(UpsertUserAction(this.props.user.set('email', this.state.email)))
+    return ClientStack.User.SetPassword(this.props.user, this.state.password).then(() => {
+      this.props.store.User.Update(this.props.user.set('email', this.state.email));
       this.setState({
         error: ''
       });
@@ -99,9 +100,9 @@ export class ManageUserModal extends React.Component<props, state> {
   }
 
   deleteUser(): Promise<void> {
-    return post('/api/user/destroy/' + this.props.user.UUID).then(() => {
+    return ClientStack.User.Destroy(this.props.user).then(() => {
       alertify.success('User ' + this.props.user.name() + ' deleted');
-      this.props.dispatch(DeleteUser(this.props.user));
+      this.props.store.User.Destroy(this.props.user);
       this.props.cancel();
     }).catch((err: Error) => {
       alertify.error('Error Deleting ' + this.props.user.name + ': ' + err.message);

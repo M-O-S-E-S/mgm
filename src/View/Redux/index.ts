@@ -68,6 +68,7 @@ import { DispatchUpdateHost, DispatchDeleteHost } from './reducers/host';
 import { DispatchUpdateEstate, DispatchDeleteEstate } from './reducers/estate';
 import { DispatchUpdateManager, DispatchDeleteManager } from './reducers/manager';
 import { DispatchAssignEstateMap } from './reducers/estateMap';
+import { DispatchUpdateGroup, DispatchDeleteGroup } from './reducers/group';
 
 export { Synchronizer } from './Synchronizer';
 
@@ -96,8 +97,8 @@ export function getStore(): ReduxStore {
       Destroy(user: PendingUser | PendingUser[] | string | string[]) { console.log('pending user destroy not implemented'); }
     },
     Group: {
-      Update(group: Group | Group[]) { console.log('group update not implemented'); },
-      Destroy(group: Group | Group[] | string | string[]) { console.log('group destroy not implemented'); },
+      Update: DispatchUpdateGroup.bind(null, store),
+      Destroy: DispatchDeleteGroup.bind(null, store),
       AddUser(group: Group, role: Role, user: User) { console.log('group add user not implemented'); },
       DestroyUser(group: Group, user: User) { console.log('group destroy user not implemented'); },
       AddMember(member: Member | Member[]) { console.log('group add member not implemented'); },

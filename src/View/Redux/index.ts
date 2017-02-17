@@ -47,6 +47,7 @@ export interface ReduxStore {
   }
 }
 
+import { DispatchNav } from './reducers/nav';
 import { DispatchLogin } from './reducers/auth';
 
 export function getStore(): ReduxStore {
@@ -58,7 +59,7 @@ export function getStore(): ReduxStore {
     Subscribe: store.subscribe,
     SyncStateWithserver() { console.log('Sync State not implemented'); },
     GetState: store.getState,
-    NavigateTo() { console.log('Navigate to not implemented'); },
+    NavigateTo: DispatchNav.bind(null, store),
     Auth: {
       Login: DispatchLogin.bind(null, store),
       Logout() { console.log('logout not implemented'); },

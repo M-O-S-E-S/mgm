@@ -16,23 +16,8 @@ import { RolesReducer } from './Roles';
 import { PendingUsersReducer } from './PendingUsers';
 import { JobsReducer } from './Jobs';
 
-import {
-  NavigateTo,
-  APP_NAV_TO
-} from './actions';
-
+import { NavReducer } from './reducers/nav';
 import { APP_LOGOUT, AuthReducer } from './reducers/auth';
-
-function url(state = "/", action: Action) {
-  switch (action.type) {
-    case APP_NAV_TO:
-      let act = <NavigateTo>action;
-      if (act.url === state) return state;
-      return act.url
-    default:
-      return state;
-  }
-}
 
 export default function rootReducer(state = new StateModel(), action: Action): StateModel {
   switch (action.type) {
@@ -42,7 +27,7 @@ export default function rootReducer(state = new StateModel(), action: Action): S
     default:
       return state
         .set('auth', AuthReducer(state.auth, action))
-        .set('url', url(state.url, action))
+        .set('url', NavReducer(state.url, action))
         .set('hosts', HostsReducer(state.hosts, action))
         .set('regions', RegionsReducer(state.regions, action))
         .set('estateMap', EstateMapReducer(state.estateMap, action))

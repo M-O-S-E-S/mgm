@@ -12,7 +12,7 @@ import { IEstate, IManager, IEstateMap } from '../../Types';
 export interface GetEstatesResponse extends NetworkResponse {
     Estates: IEstate[]
     Managers: IManager[]
-    Map: IEstateMap[]
+    EstateMap: IEstateMap[]
 }
 
 import { IGroup, IMember, IRole } from '../../Types';

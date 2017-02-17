@@ -1,4 +1,4 @@
-import { ClientStack, NetworkResponse, GetEstateResponse, GetGroupResponse, GetUserResponse } from '../ClientStack';
+import { ClientStack, NetworkResponse, GetEstatesResult, GetGroupsResult, GetUsersResult } from '../ClientStack';
 import { Map, Set } from 'immutable';
 import { ReduxStore } from '../Redux';
 
@@ -79,7 +79,7 @@ function regions(store: ReduxStore) {
 };
 
 function estates(store: ReduxStore) {
-  ClientStack.Estate.Get().then((res: GetEstateResponse) => {
+  ClientStack.Estate.Get().then((res: GetEstatesResult) => {
     let staleEstates = store.GetState().estates.keySeq().toSet();
     store.Estate.Update(
       res.Estates.map((r: IEstate) => {
@@ -93,7 +93,7 @@ function estates(store: ReduxStore) {
     store.GetState().estates.keySeq().toArray().map((id) => {
       staleManagers = staleManagers.set(id, store.GetState().managers.get(id, Set<string>()));
     })
-    store.Estate.UpdateManager(res.Managers.map((m) => {
+    store.Estate.UpdateManager(res.Managers.map((m: IManager) => {
       let managers = staleManagers.get(m.EstateID, Set<string>());
       managers = managers.delete(m.uuid);
       staleManagers = staleManagers.set(m.EstateID, managers);
@@ -111,7 +111,7 @@ function estates(store: ReduxStore) {
 }
 
 function groups(store: ReduxStore) {
-  ClientStack.Group.Get().then((res: GetGroupResponse) => {
+  ClientStack.Group.Get().then((res: GetGroupsResult) => {
     let staleGroups = store.GetState().groups.keySeq().toSet();
     store.Group.Update(
       res.Groups.map((r: IGroup) => {
@@ -125,7 +125,7 @@ function groups(store: ReduxStore) {
     store.GetState().groups.keySeq().toArray().map((g) => {
       staleMembers = staleMembers.set(g, store.GetState().members.get(g, Map<string, string>()).keySeq().toSet());
     })
-    store.Group.AddMember(res.Members.map((m) => {
+    store.Group.AddMember(res.Members.map((m: IMember) => {
       let members = staleMembers.get(m.GroupID, Set<string>());
       members = members.delete(m.AgentID);
       staleMembers = staleMembers.set(m.GroupID, members);
@@ -179,7 +179,7 @@ function hosts(store: ReduxStore) {
 }
 
 function users(store: ReduxStore) {
-  ClientStack.User.Get().then((res: GetUserResponse) => {
+  ClientStack.User.Get().then((res: GetUsersResult) => {
     let staleUsers = store.GetState().users.keySeq().toSet();
     store.User.Update(
       res.Users.map((u: IUser) => {
@@ -191,7 +191,7 @@ function users(store: ReduxStore) {
     store.User.Destroy(staleUsers.toArray());
 
     let stalePending = store.GetState().pendingUsers.keySeq().toSet();
-    store.PendingUser.Update(res.PendingUser.map((u: IPendingUser) => {
+    store.PendingUser.Update(res.Pending.map((u: IPendingUser) => {
       stalePending = stalePending.delete(u.name);
       return new PendingUser(u);
     }));

@@ -11,13 +11,13 @@ export interface Response {
 import { IRegion, IEstate, IManager, IHost, IUser, IPendingUser, IGroup, IMember, IRole, IEstateMap, IJob } from '../../Types';
 import { Region, Estate, Host, User, Group, Role, Job, PendingUser } from '../Immutable';
 
-export interface GetUserResponse {
+export interface GetUsersResult {
     Users: IUser[],
-    PendingUser: IPendingUser[]
+    Pending: IPendingUser[]
 }
 
 class UserStack {
-    static Get(): Promise<GetUserResponse> {
+    static Get(): Promise<GetUsersResponse> {
         return performCall('GET', '/api/user');
     }
     static Create(name: string, email: string, template: string, password: string): Promise<string> {
@@ -44,14 +44,14 @@ class UserStack {
     }
 }
 
-export interface GetGroupResponse {
+export interface GetGroupsResult {
     Groups: IGroup[],
     Members: IMember[],
     Roles: IRole[]
 }
 
 class GroupStack {
-    static Get(): Promise<GetGroupResponse> {
+    static Get(): Promise<GetGroupsResponse> {
         return performCall('GET', '/api/group');
     }
     static AddUser(group: Group, user: User, role: Role): Promise<void> {
@@ -64,28 +64,28 @@ class GroupStack {
 
 class JobStack {
     static Get(): Promise<IJob[]> {
-        return performCall('GET', '/api/task').then((res: GetJobsResponse) => {
+        return performCall('GET', '/api/job').then((res: GetJobsResponse) => {
             return res.Jobs;
         });
     }
     static Destroy(job: Job): Promise<void> {
-        return performCall('POST', '/api/task/delete/' + job.id);
+        return performCall('POST', '/api/job/delete/' + job.id);
     }
     static LoadOar(region: Region): Promise<number> {
-        return performCall('POST', '/api/task/loadOar/' + region.uuid).then((res: NetworkResponse) => {
+        return performCall('POST', '/api/job/loadOar/' + region.uuid).then((res: NetworkResponse) => {
             return parseInt(res.Message, 10);
         });
     }
     static Upload(job: Job, file: any): Promise<void> {
-        return performCall('POST', '/api/task/upload/' + job.id, { file: file });
+        return performCall('POST', '/api/job/upload/' + job.id, { file: file });
     }
     static SaveOar(region: Region): Promise<number> {
-        return performCall('POST', '/api/task/saveOar/' + region.uuid).then((res: NetworkResponse) => {
+        return performCall('POST', '/api/job/saveOar/' + region.uuid).then((res: NetworkResponse) => {
             return parseInt(res.Message, 10);
         });
     }
     static NukeRegion(region: Region): Promise<number> {
-        return performCall('POST', '/api/task/nukeContent/' + region.uuid).then((res: NetworkResponse) => {
+        return performCall('POST', '/api/job/nukeContent/' + region.uuid).then((res: NetworkResponse) => {
             return parseInt(res.Message, 10);
         });
     }
@@ -146,15 +146,15 @@ class RegionStack {
     }
 }
 
-export interface GetEstateResponse {
+export interface GetEstatesResult {
     Estates: IEstate[],
     Managers: IManager[],
     EstateMap: IEstateMap[]
 }
 
 class EstateStack {
-    static Get(): Promise<GetEstateResponse> {
-        return performCall('GET', '/api/estate');
+    static Get(): Promise<GetEstatesResponse> {
+        return performCall('GET', '/api/estate').then((res: GetEstatesResponse) => { return res; });
     }
     static Create(name: string, owner: User): Promise<number> {
         return performCall('POST', '/api/estate/create', { name: name, owner: owner.UUID });

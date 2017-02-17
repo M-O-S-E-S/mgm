@@ -9,7 +9,6 @@ import { Region, Estate, Manager, EstateMap, Host, User, Group, Role, Member, Jo
 
 export interface ReduxStore {
   Subscribe(cb: () => void): void
-  SyncStateWithserver(): void
   GetState(): StateModel
   NavigateTo(url: string): void
   Auth: {
@@ -59,13 +58,13 @@ export interface ReduxStore {
 
 import { DispatchNav } from './reducers/nav';
 import { DispatchLogin } from './reducers/auth';
+export { Synchronizer } from './Synchronizer';
 
 export function getStore(): ReduxStore {
   let store = createStore<StateModel>(reducer);
 
   return {
     Subscribe: store.subscribe,
-    SyncStateWithserver() { console.log('Sync State not implemented'); },
     GetState: store.getState,
     NavigateTo: DispatchNav.bind(null, store),
     Auth: {
@@ -74,19 +73,26 @@ export function getStore(): ReduxStore {
       LoginError(msg: string) { console.log('login error not implemented'); },
     },
     User: {
-      Update(user: User) { console.log('update user not implemented'); },
-      Destroy(user: User) { console.log('destroy user not implemented'); },
+      Update(user: User | User[]) { console.log('update user not implemented'); },
+      Destroy(user: User | User[] | string | string[]) { console.log('destroy user not implemented'); },
     },
     Job: {
       Update(job: Job | Job[]) { console.log('update job not implemented'); },
-      Destroy(job: Job) { console.log('destroy job not implemented'); },
+      Destroy(job: Job | Job[] | number | number[]) { console.log('destroy job not implemented'); },
     },
     PendingUser: {
-      Destroy(user: PendingUser) { console.log('pending user destroy not implemented'); }
+      Update(user: PendingUser | PendingUser[]) { console.log('pending user update not implemented'); },
+      Destroy(user: PendingUser | PendingUser[] | string | string[]) { console.log('pending user destroy not implemented'); }
     },
     Group: {
-      AddUser(group: Group, role: Role, user: User) { console.log('group adduser not implemented'); },
-      DeleteUser(group: Group, user: User) { console.log('group deleteuser not implemented'); }
+      Update(group: Group | Group[]) { console.log('group update not implemented'); },
+      Destroy(group: Group | Group[] | string | string[]) { console.log('group destroy not implemented'); },
+      AddUser(group: Group, role: Role, user: User) { console.log('group add user not implemented'); },
+      DestroyUser(group: Group, user: User) { console.log('group destroy user not implemented'); },
+      AddMember(member: Member | Member[]) { console.log('group add member not implemented'); },
+      DestroyMember(member: Member | Member[]) { console.log('group destroy member not implemented'); },
+      AddRole(role: Role | Role[]) { console.log('groupt add role not implemented'); },
+      DestroyRole(role: Role | Role[]) { console.log('groupt destroy role not implemented'); }
     },
     Region: {
       Destroy(region: Region) { console.log('region destroy not implemented'); },
@@ -94,8 +100,11 @@ export function getStore(): ReduxStore {
       Update(region: Region) { console.log('region update not implemented'); },
     },
     Estate: {
-      Destroy(estate: Estate) { console.log('estate destroy not implemented'); },
-      Update(estate: Estate) { console.log('estate update not implemented'); },
+      Update(estate: Estate | Estate[]) { console.log('estate update not implemented'); },
+      Destroy(estate: Estate | Estate[] | number | number[]) { console.log('estate destroy not implemented'); },
+      UpdateManager(manager: Manager | Manager[]) { console.log('estate update manager not implemented'); },
+      DestroyManager(estate: Estate | number, manager: Manager | Manager[] | string | string[]) { console.log('estate destroy manager not implemented'); },
+      UpdateMap(em: EstateMap | EstateMap[]) { console.log('estate update map not implemented'); }
     },
     Host: {
       Destroy(host: Host) { console.log('host destroy not implemented'); },

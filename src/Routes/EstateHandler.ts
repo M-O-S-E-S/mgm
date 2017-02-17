@@ -29,7 +29,7 @@ export function GetEstatesHander(store: Store): RequestHandler {
           Success: true,
           Estates: outEstates,
           Managers: outManagers,
-          Map: outMap
+          EstateMap: outMap
         });
       });
   }

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Action } from 'redux'
-import { ReduxStore, StateModel } from '../Redux';
+import { ReduxStore, Synchronizer, StateModel } from '../Redux';
 import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
@@ -36,8 +36,8 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
             url: props.state.url
         }
 
-        this.timerToken = setInterval(this.props.store.SyncStateWithserver, 10000);
-        this.props.store.SyncStateWithserver();
+        this.timerToken = setInterval(Synchronizer.bind(null, this.props.store), 10000);
+        Synchronizer(this.props.store);
     }
 
     shouldComponentUpdate(nextProps: authenticatedProps, nextState: state) {

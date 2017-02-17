@@ -23,7 +23,7 @@ export class PendingUsers {
     return new Promise<IPendingUser[]>((resolve, reject) => {
       this.db.query('SELECT * FROM users', (err, rows: pending_user_row[]) => {
         if (err) return reject(err);
-        resolve(rows);
+        resolve(rows || []);
       })
     });
   }

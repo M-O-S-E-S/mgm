@@ -58,7 +58,8 @@ export interface ReduxStore {
 
 import { DispatchNav } from './reducers/nav';
 import { DispatchLogin } from './reducers/auth';
-import { UpdateJob, DestroyJob } from './reducers/job';
+import { DispatchUpdateJob, DispatchDestroyJob } from './reducers/job';
+import { DispatchUpdateRegion, DispatchDeleteRegion } from './reducers/region';
 
 export { Synchronizer } from './Synchronizer';
 
@@ -79,8 +80,8 @@ export function getStore(): ReduxStore {
       Destroy(user: User | User[] | string | string[]) { console.log('destroy user not implemented'); },
     },
     Job: {
-      Update: UpdateJob.bind(null, store),
-      Destroy: DestroyJob.bind(null, store)
+      Update: DispatchUpdateJob.bind(null, store),
+      Destroy: DispatchDestroyJob.bind(null, store)
     },
     PendingUser: {
       Update(user: PendingUser | PendingUser[]) { console.log('pending user update not implemented'); },
@@ -97,9 +98,9 @@ export function getStore(): ReduxStore {
       DestroyRole(role: Role | Role[]) { console.log('groupt destroy role not implemented'); }
     },
     Region: {
-      Destroy(region: Region) { console.log('region destroy not implemented'); },
+      Update: DispatchUpdateRegion.bind(null, store),
       AssignEstate(region: Region, estate: number) { console.log('region assign estate not implemented'); },
-      Update(region: Region) { console.log('region update not implemented'); },
+      Destroy: DispatchDeleteRegion.bind(null, store),
     },
     Estate: {
       Update(estate: Estate | Estate[]) { console.log('estate update not implemented'); },

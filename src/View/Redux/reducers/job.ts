@@ -17,7 +17,7 @@ interface DeleteJob extends Action {
   jobs: number[]
 }
 
-export function UpdateJob(store: Store, job: Job | Job[]): void {
+export function DispatchUpdateJob(store: Store, job: Job | Job[]): void {
   if (!job) return;
   store.dispatch(<UpdateJob>{
     type: UPDATE_JOB,
@@ -25,12 +25,20 @@ export function UpdateJob(store: Store, job: Job | Job[]): void {
   });
 }
 
-export function DestroyJob(store: Store, job: Job | Job[] | number | number[]): void {
+export function DispatchDestroyJob(store: Store, job: Job | Job[] | number | number[]): void {
   if (!job) return;
-  store.dispatch(<UpdateJob>{
-    type: DELETE_JOB,
-    jobs: [].concat(job)
-  });
+  let jobs = [].concat(job);
+  if (typeof (jobs[0]) === "number") {
+    store.dispatch(<DeleteJob>{
+      type: DELETE_JOB,
+      jobs: jobs
+    });
+  } else {
+    store.dispatch(<DeleteJob>{
+      type: DELETE_JOB,
+      jobs: jobs.map((j: Job) => { return j.id; })
+    });
+  }
 }
 
 export const JobsReducer = function (state = Map<number, Job>(), action: Action): Map<number, Job> {

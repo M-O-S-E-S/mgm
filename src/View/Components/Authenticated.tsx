@@ -53,7 +53,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
     }
 
     handleLogout() {
-        this.props.store.Logout();
+        this.props.store.Auth.Logout();
         clearInterval(this.timerToken);
     }
 

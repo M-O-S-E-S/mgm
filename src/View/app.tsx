@@ -99,7 +99,7 @@ class App extends React.Component<{}, {}> {
     resumeSession() {
         ClientStack.resumeSession().then((res: LoginResponse) => {
             console.log("session resume successfull");
-            store.Login(res.uuid, res.isAdmin, res.token);
+            store.Auth.Login(res.uuid, res.isAdmin, res.token);
             if (url == "" || url == "/")
                 store.NavigateTo('/account');
             this.setState({

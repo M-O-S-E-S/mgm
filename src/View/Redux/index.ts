@@ -12,9 +12,11 @@ export interface ReduxStore {
   SyncStateWithserver(): void
   GetState(): StateModel
   NavigateTo(url: string): void
-  Login(uuid: string, isAdmin: boolean, token: string): void
-  Logout(): void
-  LoginError(message: string): void
+  Auth: {
+    Login(uuid: string, isAdmin: boolean, token: string): void
+    Logout(): void
+    LoginError(message: string): void
+  }
   User: {
     Update(user: User): void
     Destroy(user: User): void
@@ -51,8 +53,42 @@ export function getStore(): ReduxStore {
   //store.dispatch(createNavigateToAction());
 
   return {
-    //  subscribe(cb: () => void) { store.subscribe(cb) },
-    //  getState: store.getState,
-
+    Subscribe: store.subscribe,
+    SyncStateWithserver() { },
+    GetState: store.getState,
+    NavigateTo() { },
+    Auth: {
+      Login(uuid: string, isAdmin: boolean, token: string) { },
+      Logout() { },
+      LoginError(msg: string) { },
+    },
+    User: {
+      Update(user: User) { },
+      Destroy(user: User) { },
+    },
+    Job: {
+      Update(job: Job) { },
+      Destroy(job: Job) { },
+    },
+    PendingUser: {
+      Destroy(user: PendingUser) { }
+    },
+    Group: {
+      AddUser(group: Group, role: Role, user: User) { },
+      DeleteUser(group: Group, user: User) { }
+    },
+    Region: {
+      Destroy(region: Region) { },
+      AssignEstate(region: Region, estate: number) { },
+      Update(region: Region) { },
+    },
+    Estate: {
+      Destroy(estate: Estate) { },
+      Update(estate: Estate) { },
+    },
+    Host: {
+      Destroy(host: Host) { },
+      Update(host: Host) { },
+    }
   }
 }

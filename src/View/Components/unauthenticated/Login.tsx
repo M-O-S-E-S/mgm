@@ -42,12 +42,12 @@ export class Login extends React.Component<loginProps, {}> {
         ClientStack.Login(this.state.username, this.state.password)
             .then((res: LoginResponse) => {
                 console.log('auth succeeded');
-                this.props.store.Login(res.uuid, res.isAdmin, res.token);
+                this.props.store.Auth.Login(res.uuid, res.isAdmin, res.token);
                 if (window.location.pathname === "" || window.location.pathname === "/" || window.location.pathname === '/login')
                     this.props.store.NavigateTo('/account');
             }).catch((err: Error) => {
                 console.log('auth failed');
-                this.props.store.LoginError(err.message);
+                this.props.store.Auth.LoginError(err.message);
             });
     }
 

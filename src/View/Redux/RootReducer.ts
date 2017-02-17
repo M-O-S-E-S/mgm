@@ -5,7 +5,6 @@ import { Member, Role, Manager, EstateMap } from '../Immutable'
 import { StateModel } from './model';
 
 import { UsersReducer } from './Users';
-import { EstatesReducer } from './Estates';
 import { ManagersReducer } from './Managers';
 import { EstateMapReducer } from './EstateMap';
 import { GroupsReducer } from './Groups';
@@ -19,6 +18,7 @@ import { APP_LOGOUT, AuthReducer } from './reducers/auth';
 import { JobsReducer } from './reducers/job';
 import { RegionsReducer } from './reducers/region';
 import { HostsReducer } from './reducers/host';
+import { EstatesReducer } from './reducers/estate';
 
 export default function rootReducer(state = new StateModel(), action: Action): StateModel {
   switch (action.type) {

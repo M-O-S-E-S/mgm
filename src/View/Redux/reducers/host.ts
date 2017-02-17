@@ -41,17 +41,6 @@ export function DispatchDeleteHost(store: Store, h: Host | Host[] | number | num
   }
 }
 
-function upsertHost(state: Map<number, Host>, h: Host): Map<number, Host> {
-  let host = state.get(h.id, new Host());
-  host = host.set('id', h.id)
-    .set('address', h.address)
-    .set('name', h.name)
-    .set('port', h.port)
-    .set('slots', h.slots)
-    .set('status', h.status);
-  return state.set(h.id, host);
-}
-
 export function HostsReducer(state = Map<number, Host>(), action: Action): Map<number, Host> {
   switch (action.type) {
     case UPDATE_HOST:

@@ -1,6 +1,5 @@
 import { Map, Set } from 'immutable';
 import { Action } from 'redux';
-import { ESTATE_DELETED, EstateDeletedAction } from './Estates';
 import { Manager } from '../Immutable';
 
 const UPSERT_MANAGER = "ESTATES_UPSERT_MANAGER";
@@ -69,9 +68,6 @@ export const ManagersReducer = function (state = Map<number, Set<string>>(), act
         managers = managers.delete(m);
       });
       return state.set(db.group, managers);
-    case ESTATE_DELETED:
-      let da = <EstateDeletedAction>action;
-      return state.delete(da.id);
     default:
       return state
   }

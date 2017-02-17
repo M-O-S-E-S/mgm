@@ -61,6 +61,7 @@ import { DispatchLogin } from './reducers/auth';
 import { DispatchUpdateJob, DispatchDestroyJob } from './reducers/job';
 import { DispatchUpdateRegion, DispatchDeleteRegion } from './reducers/region';
 import { DispatchUpdateHost, DispatchDeleteHost } from './reducers/host';
+import { DispatchUpdateEstate, DispatchDeleteEstate } from './reducers/estate';
 
 export { Synchronizer } from './Synchronizer';
 
@@ -104,8 +105,8 @@ export function getStore(): ReduxStore {
       Destroy: DispatchDeleteRegion.bind(null, store),
     },
     Estate: {
-      Update(estate: Estate | Estate[]) { console.log('estate update not implemented'); },
-      Destroy(estate: Estate | Estate[] | number | number[]) { console.log('estate destroy not implemented'); },
+      Update: DispatchUpdateEstate.bind(null, store),
+      Destroy: DispatchDeleteEstate.bind(null, store),
       UpdateManager(manager: Manager | Manager[]) { console.log('estate update manager not implemented'); },
       DestroyManager(estate: Estate | number, manager: Manager | Manager[] | string | string[]) { console.log('estate destroy manager not implemented'); },
       UpdateMap(em: EstateMap | EstateMap[]) { console.log('estate update map not implemented'); }

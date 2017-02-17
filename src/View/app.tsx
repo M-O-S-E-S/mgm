@@ -60,9 +60,6 @@ store.Subscribe(() => {
     }
 })
 
-//import { Synchroniser } from '../Network/sync';
-//let syncer = new Synchroniser(store);
-
 import { Authenticated } from "./Components/Authenticated";
 import { Unauthenticated } from "./Components/Unauthenticated";
 

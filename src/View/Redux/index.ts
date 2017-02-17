@@ -60,6 +60,7 @@ import { DispatchNav } from './reducers/nav';
 import { DispatchLogin } from './reducers/auth';
 import { DispatchUpdateJob, DispatchDestroyJob } from './reducers/job';
 import { DispatchUpdateRegion, DispatchDeleteRegion } from './reducers/region';
+import { DispatchUpdateHost, DispatchDeleteHost } from './reducers/host';
 
 export { Synchronizer } from './Synchronizer';
 
@@ -110,8 +111,8 @@ export function getStore(): ReduxStore {
       UpdateMap(em: EstateMap | EstateMap[]) { console.log('estate update map not implemented'); }
     },
     Host: {
-      Destroy(host: Host) { console.log('host destroy not implemented'); },
-      Update(host: Host) { console.log('host update not implemented'); },
+      Update: DispatchUpdateHost.bind(null, store),
+      Destroy: DispatchDeleteHost.bind(null, store)
     }
   }
 }

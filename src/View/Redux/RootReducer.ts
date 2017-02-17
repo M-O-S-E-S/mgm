@@ -14,10 +14,11 @@ import { GroupsReducer } from './Groups';
 import { MembersReducer } from './Members';
 import { RolesReducer } from './Roles';
 import { PendingUsersReducer } from './PendingUsers';
-import { JobsReducer } from './Jobs';
+
 
 import { NavReducer } from './reducers/nav';
 import { APP_LOGOUT, AuthReducer } from './reducers/auth';
+import { JobsReducer } from './reducers/job';
 
 export default function rootReducer(state = new StateModel(), action: Action): StateModel {
   switch (action.type) {

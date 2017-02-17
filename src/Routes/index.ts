@@ -1,7 +1,8 @@
 
 export { Authorizer } from './Authorizer';
 export {
-  RenewTokenHandler
+  RenewTokenHandler,
+  LoginHandler
 } from './AuthHandler';
 export {
   GetUsersHandler

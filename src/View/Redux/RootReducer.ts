@@ -2,7 +2,7 @@ import { Action } from 'redux';
 import { Record, Map, Set } from 'immutable';
 
 import { Member, Role, Manager, EstateMap } from '../Immutable'
-import { StateModel, Auth } from './model';
+import { StateModel } from './model';
 
 import { UsersReducer } from './Users';
 import { RegionsReducer } from './Regions';
@@ -18,36 +18,10 @@ import { JobsReducer } from './Jobs';
 
 import {
   NavigateTo,
-  LoginAction,
-  SetAuthMessage,
-
-  APP_LOGIN,
-  APP_LOGOUT,
-  APP_AUTH_ERROR,
   APP_NAV_TO
 } from './actions';
 
-function auth(state = new Auth(), action: Action): Auth {
-  switch (action.type) {
-    case APP_LOGIN:
-      let act = <LoginAction>action;
-      return state
-        .set('loggedIn', true)
-        .set('errorMsg', '')
-        .set('user', act.user)
-        .set('isAdmin', act.isAdmin)
-        .set('token', act.token);
-    case APP_AUTH_ERROR:
-      let aca = <SetAuthMessage>action;
-      return state
-        .set('loggedIn', false)
-        .set('user', null)
-        .set('token', null)
-        .set('isAdmin', false)
-        .set('errorMsg', aca.message);
-    default: return state;
-  }
-}
+import { APP_LOGOUT, AuthReducer } from './reducers/auth';
 
 function url(state = "/", action: Action) {
   switch (action.type) {
@@ -63,10 +37,11 @@ function url(state = "/", action: Action) {
 export default function rootReducer(state = new StateModel(), action: Action): StateModel {
   switch (action.type) {
     case APP_LOGOUT:
+      // if we are logging out, wipe all state
       return new StateModel();
     default:
       return state
-        .set('auth', auth(state.auth, action))
+        .set('auth', AuthReducer(state.auth, action))
         .set('url', url(state.url, action))
         .set('hosts', HostsReducer(state.hosts, action))
         .set('regions', RegionsReducer(state.regions, action))

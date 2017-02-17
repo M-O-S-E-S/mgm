@@ -82,4 +82,5 @@ export interface IUser {
   name(): string
   isSuspended(): boolean
   isAdmin(): boolean
+  authenticate(password: string): boolean
 }

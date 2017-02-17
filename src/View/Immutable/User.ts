@@ -31,4 +31,8 @@ export class User extends UserClass implements IUser {
   isSuspended(): boolean {
     return this.godLevel < 1;
   }
+
+  authenticate(password: string): boolean {
+    throw new Error('Authentication nut supported client-side');
+  }
 }

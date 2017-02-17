@@ -32,36 +32,41 @@ clientApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 clientApp.use(express.static(__dirname + '/public'));
 
-import { Authorizer } from './Network';
+// jwt and host ip validation middleware
+import { Authorizer } from './Routes';
 let middleware: Authorizer = new Authorizer(store, certificate);
 let apiRouter = express.Router();
 
+// multipart form parsing middleware
+import * as multer from 'multer'
+
 // Auth
-import { RenewTokenHandler } from './Network';
+import { RenewTokenHandler, LoginHandler } from './Routes';
 apiRouter.get('/auth', middleware.isUser(), RenewTokenHandler(store, certificate));
+apiRouter.post('/auth/login', multer().array(''), LoginHandler(store, certificate));
 
 // Jobs
-import { GetJobsHandler } from './Network';
+import { GetJobsHandler } from './Routes';
 apiRouter.get('/job', middleware.isUser(), GetJobsHandler(store));
 
 // User
-import { GetUsersHandler } from './Network';
+import { GetUsersHandler } from './Routes';
 apiRouter.get('/user', middleware.isUser(), GetUsersHandler(store));
 
 // Region
-import { GetRegionsHandler } from './Network';
+import { GetRegionsHandler } from './Routes';
 apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
 
 // Estate
-import { GetEstatesHander } from './Network';
+import { GetEstatesHander } from './Routes';
 apiRouter.get('/estate', middleware.isUser(), GetEstatesHander(store));
 
 // Group
-import { GetGroupsHander } from './Network';
+import { GetGroupsHander } from './Routes';
 apiRouter.get('/group', middleware.isUser(), GetGroupsHander(store));
 
 // Host
-import { GetHostHandler } from './Network';
+import { GetHostHandler } from './Routes';
 apiRouter.get('/host', middleware.isAdmin(), GetHostHandler(store));
 
 

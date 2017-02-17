@@ -8,8 +8,6 @@ import { Groups } from './Groups';
 
 import { IUser, IHost, IRegion, IEstate, IManager, IEstateMap, IPendingUser, IJob, IGroup, IRole, IMember } from '../Types';
 
-export { GetUserPermissions } from './permissions';
-
 import { IPool, createPool } from 'mysql';
 
 export interface Store {
@@ -23,6 +21,7 @@ export interface Store {
   Users: {
     getAll(): Promise<IUser[]>
     getByID(uuid: string): Promise<IUser>
+    getByName(name: string): Promise<IUser>
   },
   Groups: {
     getAll(): Promise<IGroup[]>

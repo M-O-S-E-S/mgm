@@ -3,6 +3,8 @@ import { IPool } from 'mysql';
 
 import { IUser } from '../Types';
 
+import { Credential } from '../Auth';
+
 interface user_row {
   UUID: string
   username: string
@@ -48,6 +50,7 @@ class UserObj implements IUser {
   lastname: string
   godLevel: number
   email: string
+  private passwordHash: string
 
   constructor(u: user_row) {
     this.UUID = u.UUID;
@@ -55,6 +58,7 @@ class UserObj implements IUser {
     this.lastname = u.lastname;
     this.godLevel = u.godLevel;
     this.email = u.email;
+    this.passwordHash = u .passwordHash;
   }
 
   name(): string {
@@ -65,6 +69,9 @@ class UserObj implements IUser {
   }
   isAdmin(): boolean {
     return this.godLevel >= 250;
+  }
+  authenticate(password: string): boolean{
+    return Credential.fromHalcyon(this.passwordHash).compare(password)
   }
 }
 
@@ -99,19 +106,22 @@ export class Users {
     })
   }
 
-  /*
-    getByName(name: string): Promise<UserInstance> {
-      let nameParts = name.split(' ');
-      return this.user.findOne({
-        where: {
-          username: nameParts[0],
-          lastname: nameParts[1]
-        }
-      }).then((user: UserInstance) => {
-        if (user) return user;
-        throw new Error('User does not exist');
+  getByName(name: string): Promise<IUser> {
+    let nameParts = name.split(' ');
+    return new Promise<IUser>((resolve, reject) => {
+      this.db.query('SELECT * FROM users WHERE username=? AND lastname=?', [nameParts[0], nameParts[1]], (err: Error, rows: user_row[]) => {
+        if (err)
+          return reject(err);
+        if (rows.length == 0)
+          return reject(new Error('User ' + name + ' does not exist'));
+        resolve(new UserObj(rows[0]));
       })
-    }
+    })
+
+  }
+
+  /*
+    
   
     getByEmail(email: string): Promise<UserInstance> {
       return this.user.findOne({

@@ -67,6 +67,7 @@ import { DispatchUpdateRegion, DispatchDeleteRegion } from './reducers/region';
 import { DispatchUpdateHost, DispatchDeleteHost } from './reducers/host';
 import { DispatchUpdateEstate, DispatchDeleteEstate } from './reducers/estate';
 import { DispatchUpdateManager, DispatchDeleteManager } from './reducers/manager';
+import { DispatchAssignEstateMap } from './reducers/estateMap';
 
 export { Synchronizer } from './Synchronizer';
 
@@ -118,7 +119,7 @@ export function getStore(): ReduxStore {
       Destroy: DispatchDeleteManager.bind(null, store),
     },
     EstateMap: {
-      Update(em: EstateMap | EstateMap[]) { console.log('estate update map not implemented'); }
+      Update: DispatchAssignEstateMap.bind(null, store),
     },
     Host: {
       Update: DispatchUpdateHost.bind(null, store),

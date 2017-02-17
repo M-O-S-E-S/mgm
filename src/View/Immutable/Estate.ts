@@ -38,7 +38,7 @@ import { IEstateMap } from '../../Types';
 
 const EstateMapClass = Record({
   EstateID: 0,
-  uuid: ''
+  RegionID: ''
 })
 
 export class EstateMap extends EstateMapClass implements IEstateMap {

@@ -38,7 +38,7 @@ export class Regions {
             y: r.locY,
             status: r.status,
             node: r.slaveAddress,
-            isRunning: r.isRunning
+            isRunning: r.isRunning? true : false
           }
         }));
       });

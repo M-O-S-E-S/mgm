@@ -69,6 +69,7 @@ import { DispatchUpdateEstate, DispatchDeleteEstate } from './reducers/estate';
 import { DispatchUpdateManager, DispatchDeleteManager } from './reducers/manager';
 import { DispatchAssignEstateMap } from './reducers/estateMap';
 import { DispatchUpdateGroup, DispatchDeleteGroup } from './reducers/group';
+import { DispatchUpdateUser, DispatchDeleteUser } from './reducers/user';
 
 export { Synchronizer } from './Synchronizer';
 
@@ -85,8 +86,8 @@ export function getStore(): ReduxStore {
       LoginError(msg: string) { console.log('login error not implemented'); },
     },
     User: {
-      Update(user: User | User[]) { console.log('update user not implemented'); },
-      Destroy(user: User | User[] | string | string[]) { console.log('destroy user not implemented'); },
+      Update: DispatchUpdateUser.bind(null, store),
+      Destroy: DispatchDeleteUser.bind(null, store),
     },
     Job: {
       Update: DispatchUpdateJob.bind(null, store),

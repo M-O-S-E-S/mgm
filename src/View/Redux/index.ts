@@ -5,7 +5,7 @@ import reducer from "./RootReducer";
 
 export { StateModel }
 
-import { Region, Estate, Host, User, Group, Role, Job, PendingUser } from '../Immutable';
+import { Region, Estate, Manager, EstateMap, Host, User, Group, Role, Member, Job, PendingUser } from '../Immutable';
 
 export interface ReduxStore {
   Subscribe(cb: () => void): void
@@ -18,32 +18,42 @@ export interface ReduxStore {
     LoginError(message: string): void
   }
   User: {
-    Update(user: User): void
-    Destroy(user: User): void
+    Update(user: User | User[]): void
+    Destroy(user: User | User[] | string | string[]): void
   }
   Job: {
-    Update(job: Job): void
-    Destroy(job: Job): void
+    Update(job: Job | Job[]): void
+    Destroy(job: Job | Job[] | number | number[]): void
   }
   PendingUser: {
-    Destroy(user: PendingUser): void
+    Update(user: PendingUser | PendingUser[]): void
+    Destroy(user: PendingUser | PendingUser[] | string | string[]): void
   }
   Group: {
+    Update(group: Group | Group[]): void
+    Destroy(group: Group | Group[] | string | string[]): void
     AddUser(group: Group, role: Role, user: User): void
-    DeleteUser(group: Group, user: User): void
+    DestroyUser(group: Group, user: User): void
+    AddMember(member: Member | Member[]): void
+    DestroyMember(member: Member | Member[]): void
+    AddRole(role: Role | Role[]): void
+    DestroyRole(role: Role | Role[]): void
   }
   Region: {
-    Destroy(region: Region): void
+    Destroy(region: Region | Region[] | string | string[]): void
     AssignEstate(region: Region, estate: number): void
-    Update(region: Region): void
+    Update(region: Region | Region[]): void
   }
   Estate: {
-    Destroy(estate: Estate): void
-    Update(estate: Estate): void
+    Update(estate: Estate | Estate[]): void
+    Destroy(estate: Estate | Estate[] | number | number[]): void
+    UpdateManager(manager: Manager | Manager[]): void
+    DestroyManager(estate: Estate | number, manager: Manager | Manager[] | string | string[]): void
+    UpdateMap(em: EstateMap | EstateMap[]): void
   }
   Host: {
-    Destroy(host: Host): void
-    Update(host: Host): void
+    Destroy(host: Host | Host[] | number | number[]): void
+    Update(host: Host | Host[]): void
   }
 }
 
@@ -52,8 +62,6 @@ import { DispatchLogin } from './reducers/auth';
 
 export function getStore(): ReduxStore {
   let store = createStore<StateModel>(reducer);
-
-  //store.dispatch(createNavigateToAction());
 
   return {
     Subscribe: store.subscribe,
@@ -70,7 +78,7 @@ export function getStore(): ReduxStore {
       Destroy(user: User) { console.log('destroy user not implemented'); },
     },
     Job: {
-      Update(job: Job) { console.log('update job not implemented'); },
+      Update(job: Job | Job[]) { console.log('update job not implemented'); },
       Destroy(job: Job) { console.log('destroy job not implemented'); },
     },
     PendingUser: {

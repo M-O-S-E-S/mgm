@@ -114,9 +114,9 @@ export class ManageGroupsModal extends React.Component<props, state> {
     });
   }
 
-  onEjectMembership(g: Group){
+  onEjectMembership(g: Group) {
     return ClientStack.Group.RemoveUser(g, this.props.user).then(() => {
-      this.props.store.Group.DeleteUser(g, this.props.user);
+      this.props.store.Group.DestroyUser(g, this.props.user);
     }).catch((err: Error) => {
       this.setState({
         error: 'Error ejecting membership: ' + err.message
@@ -135,7 +135,7 @@ export class ManageGroupsModal extends React.Component<props, state> {
 
           <div style={{ height: "10em", overflowY: "auto", border: "1px solid grey" }}>
             {this.state.memberGroups.map((g: Group) => {
-              return <p key={g.GroupID}>{g.Name} <BusyButton bsStyle="danger" bsSize="xs" onClick={this.onEjectMembership.bind(this,g)}>Eject from group</BusyButton></p>
+              return <p key={g.GroupID}>{g.Name} <BusyButton bsStyle="danger" bsSize="xs" onClick={this.onEjectMembership.bind(this, g)}>Eject from group</BusyButton></p>
             })}
           </div>
 

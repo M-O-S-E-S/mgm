@@ -2,15 +2,24 @@ import { performCall, updateToken, NetworkResponse } from './call';
 
 import { LoginResponse, GetEstatesResponse, GetGroupsResponse, GetHostsResponse, GetJobsResponse, GetRegionsResponse, GetUsersResponse } from './messages';
 
-export { LoginResponse, GetEstatesResponse, GetGroupsResponse, GetHostsResponse, GetJobsResponse, GetRegionsResponse, GetUsersResponse };
+export { NetworkResponse, LoginResponse, GetEstatesResponse, GetGroupsResponse, GetHostsResponse, GetJobsResponse, GetRegionsResponse, GetUsersResponse };
 
 export interface Response {
     json(msg: NetworkResponse): void
 }
 
-import { Region, Estate, Host, User, Group, Role, Job, PendingUser } from '../../View/Immutable';
+import { IRegion, IEstate, IManager, IHost, IUser, IPendingUser, IGroup, IMember, IRole, IEstateMap, IJob } from '../../Types';
+import { Region, Estate, Host, User, Group, Role, Job, PendingUser } from '../Immutable';
+
+export interface GetUserResponse {
+    Users: IUser[],
+    PendingUser: IPendingUser[]
+}
 
 class UserStack {
+    static Get(): Promise<GetUserResponse> {
+        return performCall('GET', '/api/user');
+    }
     static Create(name: string, email: string, template: string, password: string): Promise<string> {
         return performCall('POST', '/api/user/create', {
             name: name,
@@ -35,7 +44,16 @@ class UserStack {
     }
 }
 
+export interface GetGroupResponse {
+    Groups: IGroup[],
+    Members: IMember[],
+    Roles: IRole[]
+}
+
 class GroupStack {
+    static Get(): Promise<GetGroupResponse> {
+        return performCall('GET', '/api/group');
+    }
     static AddUser(group: Group, user: User, role: Role): Promise<void> {
         return performCall('POST', '/api/group/addUser/' + group.GroupID, { user: user.UUID, role: role.RoleID });
     }
@@ -45,6 +63,11 @@ class GroupStack {
 }
 
 class JobStack {
+    static Get(): Promise<IJob[]> {
+        return performCall('GET', '/api/task').then((res: GetJobsResponse) => {
+            return res.Jobs;
+        });
+    }
     static Destroy(job: Job): Promise<void> {
         return performCall('POST', '/api/task/delete/' + job.id);
     }
@@ -80,6 +103,11 @@ class PendingUserStack {
 }
 
 class RegionStack {
+    static Get(): Promise<IRegion[]> {
+        return performCall('GET', '/api/region').then((res: GetRegionsResponse) => {
+            return res.Regions;
+        });
+    }
     static Create(name: string, x: number, y: number, estate: string): Promise<string> {
         return performCall('POST', '/api/region/create', {
             estate: estate,
@@ -114,11 +142,20 @@ class RegionStack {
         return performCall('POST', '/api/region/stop/' + region.uuid);
     }
     static Kill(region: Region): Promise<void> {
-        return performCall('POST',  '/api/region/kill/' + region.uuid);
+        return performCall('POST', '/api/region/kill/' + region.uuid);
     }
 }
 
+export interface GetEstateResponse {
+    Estates: IEstate[],
+    Managers: IManager[],
+    EstateMap: IEstateMap[]
+}
+
 class EstateStack {
+    static Get(): Promise<GetEstateResponse> {
+        return performCall('GET', '/api/estate');
+    }
     static Create(name: string, owner: User): Promise<number> {
         return performCall('POST', '/api/estate/create', { name: name, owner: owner.UUID });
     }
@@ -128,6 +165,9 @@ class EstateStack {
 }
 
 class HostStack {
+    static Get(): Promise<IHost[]> {
+        return performCall('GET', '/api/host').then((res: GetHostsResponse) => { return res.Hosts; });
+    }
     static Add(address: string): Promise<number> {
         return performCall('POST', '/api/host/add', { host: address }).then((resp: NetworkResponse) => {
             return parseInt(resp.Message, 10);

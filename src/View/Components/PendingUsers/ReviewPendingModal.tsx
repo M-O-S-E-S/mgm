@@ -76,7 +76,6 @@ export class ReviewPendingModal extends React.Component<props, state> {
   }
 
   render() {
-    console.log('render');
     return (
       <Modal show={this.props.show} onHide={this.props.cancel}>
         <Modal.Header>

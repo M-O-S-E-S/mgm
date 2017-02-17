@@ -28,7 +28,7 @@ interface state {
 
 export class Authenticated extends React.Component<authenticatedProps, state> {
     state: state
-    timerToken: number;
+    timerToken: any;
 
     constructor(props: authenticatedProps) {
         super(props);
@@ -36,7 +36,7 @@ export class Authenticated extends React.Component<authenticatedProps, state> {
             url: props.state.url
         }
 
-        this.timerToken = setInterval(this.props.store.SyncStateWithserver(), 10000);
+        this.timerToken = setInterval(this.props.store.SyncStateWithserver, 10000);
         this.props.store.SyncStateWithserver();
     }
 

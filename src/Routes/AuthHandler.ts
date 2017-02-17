@@ -28,6 +28,7 @@ export function RenewTokenHandler(store: Store, cert: Buffer): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {
     let userDetail: UserDetail;
     GetUserPermissions(store, req.user.uuid).then((ud: UserDetail) => {
+      userDetail = ud;
       return signToken(ud, cert);
     }).then((token: string) => {
       let resp: LoginResponse = {

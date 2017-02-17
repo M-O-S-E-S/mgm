@@ -41,14 +41,6 @@ export function DispatchDeleteEstate(store: Store, e: number | number[] | Estate
   }
 }
 
-function upsertEstate(state = Map<number, Estate>(), e: Estate): Map<number, Estate> {
-  let estate = state.get(e.EstateID, new Estate());
-  estate = estate.set('EstateID', e.EstateID)
-    .set('EstateName', e.EstateName)
-    .set('EstateOwner', e.EstateOwner);
-  return state.set(e.EstateID, estate);
-}
-
 export function EstatesReducer(state = Map<number, Estate>(), action: Action): Map<number, Estate> {
   let er: Estate;
   switch (action.type) {
@@ -56,11 +48,13 @@ export function EstatesReducer(state = Map<number, Estate>(), action: Action): M
       let ea = <UpdateEstate>action;
       ea.estates.map((e: Estate) => {
         let estate = state.get(e.EstateID, new Estate());
-        estate = estate.set('EstateID', e.EstateID)
-          .set('EstateName', e.EstateName)
-          .set('EstateOwner', e.EstateOwner);
-        return state.set(e.EstateID, estate);
-      })
+        state = state.set(
+          e.EstateID,
+          estate.set('EstateID', e.EstateID)
+            .set('EstateName', e.EstateName)
+            .set('EstateOwner', e.EstateOwner)
+        );
+      });
       return state;
     case DELETE_ESTATE:
       let db = <DeleteEstate>action;

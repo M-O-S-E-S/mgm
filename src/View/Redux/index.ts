@@ -58,6 +58,8 @@ export interface ReduxStore {
 
 import { DispatchNav } from './reducers/nav';
 import { DispatchLogin } from './reducers/auth';
+import { UpdateJob, DestroyJob } from './reducers/job';
+
 export { Synchronizer } from './Synchronizer';
 
 export function getStore(): ReduxStore {
@@ -77,8 +79,8 @@ export function getStore(): ReduxStore {
       Destroy(user: User | User[] | string | string[]) { console.log('destroy user not implemented'); },
     },
     Job: {
-      Update(job: Job | Job[]) { console.log('update job not implemented'); },
-      Destroy(job: Job | Job[] | number | number[]) { console.log('destroy job not implemented'); },
+      Update: UpdateJob.bind(null, store),
+      Destroy: DestroyJob.bind(null, store)
     },
     PendingUser: {
       Update(user: PendingUser | PendingUser[]) { console.log('pending user update not implemented'); },

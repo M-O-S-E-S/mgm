@@ -93,18 +93,18 @@ function estates(store: ReduxStore) {
     store.GetState().estates.keySeq().toArray().map((id) => {
       staleManagers = staleManagers.set(id, store.GetState().managers.get(id, Set<string>()));
     })
-    store.Estate.UpdateManager(res.Managers.map((m: IManager) => {
+    store.Manager.Update(res.Managers.map((m: IManager) => {
       let managers = staleManagers.get(m.EstateID, Set<string>());
       managers = managers.delete(m.uuid);
       staleManagers = staleManagers.set(m.EstateID, managers);
       return new Manager(m);
     }));
     staleManagers.map((managers, group) => {
-      store.Estate.DestroyManager(group, managers.toArray());
+      store.Manager.Destroy(group, managers.toArray());
     });
 
     // EstateMap almost never deletes, and is only used internally, ignore stale values
-    store.Estate.UpdateMap(res.EstateMap.map((m: IEstateMap) => {
+    store.EstateMap.Update(res.EstateMap.map((m: IEstateMap) => {
       return new EstateMap(m);
     }));
   });

@@ -46,9 +46,13 @@ export interface ReduxStore {
   Estate: {
     Update(estate: Estate | Estate[]): void
     Destroy(estate: Estate | Estate[] | number | number[]): void
-    UpdateManager(manager: Manager | Manager[]): void
-    DestroyManager(estate: Estate | number, manager: Manager | Manager[] | string | string[]): void
-    UpdateMap(em: EstateMap | EstateMap[]): void
+  }
+  Manager: {
+    Update(manager: Manager | Manager[]): void
+    Destroy(estate: Estate | number, manager: Manager | Manager[] | string | string[]): void
+  }
+  EstateMap: {
+    Update(em: EstateMap | EstateMap[]): void
   }
   Host: {
     Destroy(host: Host | Host[] | number | number[]): void
@@ -62,6 +66,7 @@ import { DispatchUpdateJob, DispatchDestroyJob } from './reducers/job';
 import { DispatchUpdateRegion, DispatchDeleteRegion } from './reducers/region';
 import { DispatchUpdateHost, DispatchDeleteHost } from './reducers/host';
 import { DispatchUpdateEstate, DispatchDeleteEstate } from './reducers/estate';
+import { DispatchUpdateManager, DispatchDeleteManager } from './reducers/manager';
 
 export { Synchronizer } from './Synchronizer';
 
@@ -107,9 +112,13 @@ export function getStore(): ReduxStore {
     Estate: {
       Update: DispatchUpdateEstate.bind(null, store),
       Destroy: DispatchDeleteEstate.bind(null, store),
-      UpdateManager(manager: Manager | Manager[]) { console.log('estate update manager not implemented'); },
-      DestroyManager(estate: Estate | number, manager: Manager | Manager[] | string | string[]) { console.log('estate destroy manager not implemented'); },
-      UpdateMap(em: EstateMap | EstateMap[]) { console.log('estate update map not implemented'); }
+    },
+    Manager: {
+      Update: DispatchUpdateManager.bind(null, store),
+      Destroy: DispatchDeleteManager.bind(null, store),
+    },
+    EstateMap: {
+      Update(em: EstateMap | EstateMap[]) { console.log('estate update map not implemented'); }
     },
     Host: {
       Update: DispatchUpdateHost.bind(null, store),

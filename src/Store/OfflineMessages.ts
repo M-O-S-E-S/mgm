@@ -1,38 +1,41 @@
+import { IPool } from 'mysql';
 
-import * as Sequelize from 'sequelize';
-import { OfflineMessageInstance, OfflineMessageAttribute } from './mysql';
+interface offline_row {
+  uuid: string,
+  message: string
+}
 
 export class OfflineMessages {
-  private db: Sequelize.Model<OfflineMessageInstance, OfflineMessageAttribute>
+  private db: IPool
 
-  constructor(ui: Sequelize.Model<OfflineMessageInstance, OfflineMessageAttribute>) {
-    this.db = ui;
+  constructor(db: IPool) {
+    this.db = db;
   }
 
-  getFor(uuid: string): Promise<OfflineMessageInstance[]> {
-    return this.db.findAll({
-      where: {
-        uuid: uuid
-      }
+  getFor(uuid: string): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      this.db.query('SELECT * FROM offlineMessages WHERE uuid=?', uuid, (err: Error, rows: offline_row[]) => {
+        if (err) return reject(err);
+        resolve(rows.map((r: offline_row) => { return r.message }))
+      });
     });
   }
 
   destroyFor(uuid: string): Promise<void> {
-    return this.db.findAll({
-      where: {
-        uuid: uuid
-      }
-    }).then( (msgs: OfflineMessageInstance[]) => {
-      return Promise.all( msgs.map( (m: OfflineMessageInstance) => {
-        return m.destroy();
-      }))
-    }).then(() => {});
+    return new Promise<void>((resolve, reject) => {
+      this.db.query('DELETE FROM offlineMessages WHERE uuid=?', uuid, (err: Error) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
   }
 
-  save(uuid: string, message: string): Promise<OfflineMessageInstance> {
-    return this.db.create({
-      uuid: uuid,
-      message: message
-    })
+  save(uuid: string, message: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.db.query('INSERT INTO offlineMessages SET ?', <offline_row>{ uuid: uuid, message: message }, (err: Error) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
   }
 }

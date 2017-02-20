@@ -6,7 +6,9 @@ const UserClass = Record({
   username: '',
   lastname: '',
   email: '',
-  godLevel: 0
+  godLevel: 0,
+  created: new Date(),
+  partner: ''
 })
 
 export class User extends UserClass implements IUser {
@@ -15,6 +17,8 @@ export class User extends UserClass implements IUser {
   readonly lastname: string
   readonly email: string
   readonly godLevel: number
+  readonly created: Date
+  readonly partner: string
 
   set(key: string, value: string | number): User {
     return <User>super.set(key, value);

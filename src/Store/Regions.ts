@@ -38,9 +38,32 @@ export class Regions {
             y: r.locY,
             status: r.status,
             node: r.slaveAddress,
-            isRunning: r.isRunning? true : false
+            publicAddress: r.externalAddress,
+            port: r.httpPort,
+            isRunning: r.isRunning ? true : false
           }
         }));
+      });
+    });
+  }
+
+  getByUUID(uuid: string): Promise<IRegion> {
+    return new Promise<IRegion>((resolve, reject) => {
+      this.db.query('SELECT * FROM regions WHERE uuid=?', uuid, (err: Error, rows: region_row[]) => {
+        if (err) return reject(err);
+        if (rows.length !== 1) return reject(new Error('Region ' + uuid + ' does not exist'));
+        let r = rows[0];
+        resolve({
+          uuid: r.uuid,
+          name: r.name,
+          x: r.locX,
+          y: r.locY,
+          status: r.status,
+          node: r.slaveAddress,
+          publicAddress: r.externalAddress,
+          port: r.httpPort,
+          isRunning: r.isRunning ? true : false
+        });
       });
     });
   }
@@ -69,18 +92,6 @@ export class Regions {
       where: {
         slaveAddress: address
       }
-    })
-  }
-
-  getByUUID(uuid: string): Promise<RegionInstance> {
-    return this.db.findAll({
-      where: {
-        uuid: uuid
-      }
-    }).then((regions) => {
-      if (regions.length == 0)
-        throw new Error('Region DNE');
-      return regions[0];
     })
   }
   */

@@ -1,11 +1,9 @@
+import { RequestHandler } from 'express';
+import { Store } from '../Store';
+import { IJob } from '../Types';
+import { AuthenticatedRequest } from './Authorizer';
 
-import * as express from 'express';
-
-import { PersistanceLayer, RegionInstance, HostInstance } from '../database';
-import { UUIDString, RegionLogs, RegionINI } from '../lib'
-import { Config } from '../Config';
-
-export function DispatchHandler(db: PersistanceLayer, config: Config): express.Router {
+export function DispatchHandler(db: Store, config: Config): express.Router {
   let router: express.Router = express.Router();
 
   let logger = new RegionLogs(config.mgm.log_dir);

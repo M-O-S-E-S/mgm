@@ -1,16 +1,14 @@
-
-import * as express from 'express';
-import { UUIDString } from '../lib';
-import { PersistanceLayer, RegionInstance, HostInstance, UserInstance } from '../database';
-import { Config } from '../Config';
-import { AuthenticatedRequest } from '.';
+import { RequestHandler } from 'express';
+import { IUser, IRegion } from '../Types';
+import { Store } from '../Store';
+import { AuthenticatedRequest } from './Authorizer';
 
 import * as jwt from 'jsonwebtoken';
 import * as dateFormat from 'dateformat';
 /**
  * This function generates a Halcyon-style JWT.  JHalcyon is a bit particular, but this works.
  */
-export function GetConsoleToken(u: UserInstance, cert: Buffer): Promise<string> {
+export function GetConsoleToken(u: IUser, cert: Buffer): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     jwt.sign(
       {
@@ -34,34 +32,30 @@ export function GetConsoleToken(u: UserInstance, cert: Buffer): Promise<string> 
   })
 }
 
-export function ConsoleHandler(db: PersistanceLayer, config: Config, isUser: any): express.Router {
-  let router = express.Router();
-
-  router.post('/open/:uuid', isUser, (req: AuthenticatedRequest, res) => {
-    let regionID = new UUIDString(req.params.uuid);
-    let region: RegionInstance;
+export function ConsoleHandler(db: Store, cert: Buffer, isUser: any): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let regionID = req.params.uuid;
+    let region: IRegion;
     if (req.user.isAdmin) {
       res.json({ Success: false, Message: 'Console is restricted to admin' });
       return;
     }
-    db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
+    db.Regions.getByUUID(regionID).then((r: IRegion) => {
       if (!r.isRunning) {
         throw new Error('Region must be running to open a console');
       }
       region = r;
       return db.Users.getByID(req.user.uuid);
-    }).then((u: UserInstance) => {
-      return GetConsoleToken(u, config.mgm.certificate);
+    }).then((u: IUser) => {
+      return GetConsoleToken(u, cert);
     }).then((t: string) => {
       res.json({
         Success: true,
         Token: t,
-        URL: 'http://' + region.externalAddress + ':' + region.httpPort
+        URL: 'http://' + region.publicAddress + ':' + region.port
       });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
-
-  return router;
+  };
 }

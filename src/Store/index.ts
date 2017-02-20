@@ -5,6 +5,7 @@ import { Estates } from './Estates';
 import { PendingUsers } from './PendingUsers';
 import { Jobs } from './Jobs';
 import { Groups } from './Groups';
+import { OfflineMessages } from './OfflineMessages';
 
 import { IUser, IHost, IRegion, IEstate, IManager, IEstateMap, IPendingUser, IJob, IGroup, IRole, IMember } from '../Types';
 
@@ -18,6 +19,7 @@ export interface Store {
   },
   Regions: {
     getAll(): Promise<IRegion[]>
+    getByUUID(uuid: string): Promise<IRegion>
   }
   Users: {
     getAll(): Promise<IUser[]>
@@ -32,14 +34,20 @@ export interface Store {
   }
   PendingUsers: {
     getAll(): Promise<IPendingUser[]>
+    create(name: string, email: string, template: string, cred: Credential, summary: string): Promise<IPendingUser>
   },
   Jobs: {
     getFor(uuid: string): Promise<IJob[]>
-  }
+  },
   Estates: {
     getAll(): Promise<IEstate[]>
     getManagers(): Promise<IManager[]>
     getMapping(): Promise<IEstateMap[]>
+  },
+  OfflineMessages: {
+    save(to: string, message: string): Promise<void>
+    getFor(uuid: string): Promise<string[]>
+    destroyFor(uuid: string): Promise<void>
   }
 }
 
@@ -86,7 +94,8 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
     Groups: new Groups(halDB),
     PendingUsers: new PendingUsers(mgmDB),
     Estates: new Estates(halDB),
-    Jobs: new Jobs(mgmDB)
+    Jobs: new Jobs(mgmDB),
+    OfflineMessages: new OfflineMessages(mgmDB),
   };
 }
 

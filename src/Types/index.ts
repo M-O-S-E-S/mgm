@@ -59,7 +59,7 @@ export interface IPendingUser {
   email: string
   gender: string
   password: string
-  registered: string
+  registered: Date
   summary: string
 }
 
@@ -70,6 +70,8 @@ export interface IRegion {
   y: number
   status: string
   node: string
+  publicAddress: string
+  port: number
   isRunning: Boolean
 }
 
@@ -78,6 +80,8 @@ export interface IUser {
   username: string
   lastname: string
   email: string
+  created: Date
+  partner: string
 
   name(): string
   isSuspended(): boolean

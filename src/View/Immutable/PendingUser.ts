@@ -5,7 +5,7 @@ const PendingUserClass = Record({
   name: '',
   email: '',
   gender: '',
-  registered: '',
+  registered: new Date(),
   summary: ''
 })
 
@@ -13,7 +13,7 @@ export class PendingUser extends PendingUserClass implements IPendingUser {
   name: string
   email: string
   gender: string
-  registered: string
+  registered: Date
   password: string
   summary: string
 

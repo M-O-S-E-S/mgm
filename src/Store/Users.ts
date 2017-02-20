@@ -18,7 +18,7 @@ interface user_row {
   homeLookAtX: number
   homeLookAtY: number
   homeLookAtZ: number
-  created: number
+  created: Date
   lastLogin: number
   userInventoryURI: string
   userAssetURI: string
@@ -50,6 +50,8 @@ class UserObj implements IUser {
   lastname: string
   godLevel: number
   email: string
+  created: Date
+  partner: string
   private passwordHash: string
 
   constructor(u: user_row) {
@@ -59,6 +61,8 @@ class UserObj implements IUser {
     this.godLevel = u.godLevel;
     this.email = u.email;
     this.passwordHash = u.passwordHash;
+    this.created = u.created;
+    this.partner = u.partner;
   }
 
   name(): string {

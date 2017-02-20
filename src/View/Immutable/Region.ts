@@ -9,6 +9,8 @@ const RegionClass = Record({
   estateName: '',
   status: '',
   node: '',
+  publicAddress: '',
+  port: 9000,
   isRunning: false
 })
 
@@ -19,6 +21,8 @@ export class Region extends RegionClass implements IRegion {
   readonly x: number
   readonly y: number
   readonly node: string
+  readonly publicAddress: string
+  readonly port: number
   readonly isRunning: boolean
   readonly status: string
 

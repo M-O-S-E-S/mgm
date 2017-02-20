@@ -1,12 +1,12 @@
+import { RequestHandler } from 'express';
+import { Store } from '../Store';
+import { IUser, IPendingUser } from '../Types';
 
-import * as express from 'express';
-import { PersistanceLayer, PendingUserInstance, UserInstance } from '../database';
-import { UUIDString, EmailMgr, Credential } from '../lib';
+import { EmailMgr } from '../lib';
+import { Credential } from '../Auth';
 
-export function RegisterHandler(db: PersistanceLayer, templates: { [key: string]: string }): express.Router {
-  let router: express.Router = express.Router();
-
-  router.post('/submit', (req, res) => {
+export function RegisterHandler(store: Store, templates: { [key: string]: string }): RequestHandler {
+  return (req, res) => {
     let name: string = req.body.name;
     let email = req.body.email;
     let template = req.body.gender;
@@ -39,28 +39,28 @@ export function RegisterHandler(db: PersistanceLayer, templates: { [key: string]
     }
 
     //ensure no duplicate names
-    db.Users.getAll().then((users: UserInstance[]) => {
+    store.Users.getAll().then((users: IUser[]) => {
       for (let u of users) {
         if (u.username.toLowerCase() + ' ' + u.lastname.toLowerCase() === name.toLowerCase()) {
           throw new Error('Name is already in use by a registered user');
         }
       }
     }).then(() => {
-      return db.PendingUsers.getAll();
-    }).then((users: PendingUserInstance[]) => {
+      return store.PendingUsers.getAll();
+    }).then((users: IPendingUser[]) => {
       for (let u of users) {
         if (u.name.toLowerCase() === name.toLowerCase()) {
           throw new Error('Name is already in use by an applicant user');
         }
-        if(u.email === email) {
+        if (u.email === email) {
           throw new Error('registration emails must be unique');
         }
       }
-    }).then( () => {
-      return db.PendingUsers.create(name, email, template, Credential.fromPlaintext(password), summary);
-    }).then( () => {
+    }).then(() => {
+      return store.PendingUsers.create(name, email, template, Credential.fromPlaintext(password), summary);
+    }).then(() => {
       return EmailMgr.instance().registrationSuccessfull(name, email);
-    }).then( () => {
+    }).then(() => {
       res.json({ Success: true });
     }).then(() => {
       EmailMgr.instance().notifyAdminUserPending(name, email);
@@ -68,8 +68,5 @@ export function RegisterHandler(db: PersistanceLayer, templates: { [key: string]
       console.log(err);
       res.json({ Success: false, Message: err.message });
     });
-
-  });
-
-  return router;
+  };
 }

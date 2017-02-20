@@ -9,6 +9,7 @@ import { Groups } from './Groups';
 import { IUser, IHost, IRegion, IEstate, IManager, IEstateMap, IPendingUser, IJob, IGroup, IRole, IMember } from '../Types';
 
 import { IPool, createPool } from 'mysql';
+import { Credential } from '../Auth';
 
 export interface Store {
   Hosts: {
@@ -22,6 +23,7 @@ export interface Store {
     getAll(): Promise<IUser[]>
     getByID(uuid: string): Promise<IUser>
     getByName(name: string): Promise<IUser>
+    setPassword(user: IUser, credential: Credential): Promise<void>
   },
   Groups: {
     getAll(): Promise<IGroup[]>

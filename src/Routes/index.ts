@@ -5,7 +5,8 @@ export {
   LoginHandler
 } from './AuthHandler';
 export {
-  GetUsersHandler
+  GetUsersHandler,
+  SetPasswordHandler
 } from './UserHandler';
 export {
   GetJobsHandler

@@ -39,19 +39,21 @@ let apiRouter = express.Router();
 
 // multipart form parsing middleware
 import * as multer from 'multer'
+let formParser = multer().array('');
 
 // Auth
 import { RenewTokenHandler, LoginHandler } from './Routes';
 apiRouter.get('/auth', middleware.isUser(), RenewTokenHandler(store, certificate));
-apiRouter.post('/auth/login', multer().array(''), LoginHandler(store, certificate));
+apiRouter.post('/auth/login', formParser, LoginHandler(store, certificate));
 
 // Jobs
 import { GetJobsHandler } from './Routes';
 apiRouter.get('/job', middleware.isUser(), GetJobsHandler(store));
 
 // User
-import { GetUsersHandler } from './Routes';
+import { GetUsersHandler, SetPasswordHandler } from './Routes';
 apiRouter.get('/user', middleware.isUser(), GetUsersHandler(store));
+apiRouter.post('/user/password', middleware.isUser(), formParser, SetPasswordHandler(store));
 
 // Region
 import { GetRegionsHandler } from './Routes';

@@ -84,24 +84,6 @@ export function UserHandler(db: PersistanceLayer, templates: { [key: string]: st
     });
   });
 
-  router.post('/password', isAdmin, (req: AuthenticatedRequest, res) => {
-    let password = req.body.password;
-    let userID = new UUIDString(req.body.id);
-
-    if (!password || password === '') {
-      return res.json({ Success: false, Message: 'Password cannot be blank' });
-    }
-
-    db.Users.getByID(userID.toString()).then((u: UserInstance) => {
-      u.passwordHash = Credential.fromPlaintext(password).hash;
-      return u.save();
-    }).then(() => {
-      res.json({ Success: true });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    });
-  });
-
   router.post('/suspend', isAdmin, (req: AuthenticatedRequest, res) => {
     res.json({ Success: false, Message: 'Not Implemented' });
   });

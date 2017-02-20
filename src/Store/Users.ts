@@ -58,7 +58,7 @@ class UserObj implements IUser {
     this.lastname = u.lastname;
     this.godLevel = u.godLevel;
     this.email = u.email;
-    this.passwordHash = u .passwordHash;
+    this.passwordHash = u.passwordHash;
   }
 
   name(): string {
@@ -70,7 +70,7 @@ class UserObj implements IUser {
   isAdmin(): boolean {
     return this.godLevel >= 250;
   }
-  authenticate(password: string): boolean{
+  authenticate(password: string): boolean {
     return Credential.fromHalcyon(this.passwordHash).compare(password)
   }
 }
@@ -115,10 +115,20 @@ export class Users {
         if (rows.length == 0)
           return reject(new Error('User ' + name + ' does not exist'));
         resolve(new UserObj(rows[0]));
-      })
-    })
-
+      });
+    });
   }
+
+  setPassword(user: IUser, cred: Credential): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.db.query('UPDATE users SET passwordHash=? WHERE UUID=?', [cred.hash, user.UUID], (err: Error) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+  }
+
+
 
   /*
     
@@ -191,20 +201,6 @@ export class Users {
         return newUser;
       })
     }
-  
-  
-    setPassword(user: string, plaintext: string): Promise<void> {
-      return this.user.find({
-        where: {
-          uuid: user
-        }
-      }).then((u: UserInstance) => {
-        if (u) {
-          return u.updateAttributes({
-            passwordHash: Credential.fromPlaintext(plaintext)
-          })
-        }
-      }).then(() => { });
-    }
+
     */
 }

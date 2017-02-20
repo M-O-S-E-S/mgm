@@ -3,7 +3,8 @@ import { IUser, IPendingUser } from '../Types';
 import { Store } from '../Store';
 import { AuthenticatedRequest } from './Authorizer';
 
-import { Response, GetUsersResponse} from '../View/ClientStack';
+import { Response, GetUsersResponse } from '../View/ClientStack';
+import { Credential } from '../Auth';
 
 export function GetUsersHandler(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {
@@ -31,4 +32,28 @@ export function GetUsersHandler(store: Store): RequestHandler {
         });
       });
   }
+}
+
+export function SetPasswordHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res: Response) => {
+    let password = req.body.password;
+    let userID = req.body.id;
+
+    // A user must be an admin, or setting thier own password to succeed
+    if (!req.user.isAdmin && req.user.uuid !== userID) {
+      return res.json({ Success: false, Message: 'Access Denied' });
+    }
+
+    if (!password || password === '') {
+      return res.json({ Success: false, Message: 'Password cannot be blank' });
+    }
+
+    store.Users.getByID(userID).then((u: IUser) => {
+      return store.Users.setPassword(u, Credential.fromPlaintext(password));
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err: Error) => {
+      res.json({ Success: false, Message: err.message });
+    });
+  };
 }

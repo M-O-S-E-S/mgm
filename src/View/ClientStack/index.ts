@@ -9,7 +9,7 @@ export interface Response {
 }
 
 import { IRegion, IEstate, IManager, IHost, IUser, IPendingUser, IGroup, IMember, IRole, IEstateMap, IJob } from '../../Types';
-import { Region, Estate, Host, User, Group, Role, Job, PendingUser } from '../Immutable';
+import { Region, Estate, Host, User, Group, Member, Role, Job, PendingUser } from '../Immutable';
 
 export interface GetUsersResult {
     Users: IUser[],
@@ -57,8 +57,8 @@ class GroupStack {
     static AddUser(group: Group, user: User, role: Role): Promise<void> {
         return performCall('POST', '/api/group/addUser/' + group.GroupID, { user: user.UUID, role: role.RoleID });
     }
-    static RemoveUser(group: Group, user: User): Promise<void> {
-        return performCall('POST', '/api/group/removeUser/' + group.GroupID, { user: user.UUID })
+    static RemoveUser(member: Member): Promise<void> {
+        return performCall('POST', '/api/group/removeUser/' + member.GroupID, { user: member.AgentID })
     }
 }
 

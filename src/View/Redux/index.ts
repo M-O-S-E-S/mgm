@@ -32,8 +32,6 @@ export interface ReduxStore {
   Group: {
     Update(group: Group | Group[]): void
     Destroy(group: Group | Group[] | string | string[]): void
-    AddUser(group: Group, role: Role, user: User): void
-    DestroyUser(group: Group, user: User): void
     AddMember(member: Member | Member[]): void
     DestroyMember(member: Member | Member[]): void
     AddRole(role: Role | Role[]): void
@@ -105,8 +103,6 @@ export function getStore(): ReduxStore {
     Group: {
       Update: DispatchUpdateGroup.bind(null, store),
       Destroy: DispatchDeleteGroup.bind(null, store),
-      AddUser(group: Group, role: Role, user: User) { console.log('group add user not implemented'); },
-      DestroyUser(group: Group, user: User) { console.log('group destroy user not implemented'); },
       AddMember: DispatchUpdateMember.bind(null, store),
       DestroyMember: DispatchDeleteMember.bind(null, store),
       AddRole: DispatchUpdateRole.bind(null, store),

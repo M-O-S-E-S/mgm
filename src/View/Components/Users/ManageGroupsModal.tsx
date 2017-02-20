@@ -22,7 +22,7 @@ interface props {
 interface state {
   error?: string
   name?: string
-  memberGroups?: Group[]
+  memberGroups?: { g: Group, m: Member }[]
   candidateGroups?: Group[]
   candidateRoles?: Role[]
   selectedGroup?: Group
@@ -60,7 +60,7 @@ export class ManageGroupsModal extends React.Component<props, state> {
     }
 
     // Collect the groups that this user is and is not a member of
-    let memberGroups: Group[] = [];
+    let memberGroups: { g: Group, m: Member }[] = [];
     let candidateGroups: Group[] = [];
     nextProps.groups.toArray()
       .map((g: Group) => {
@@ -71,7 +71,7 @@ export class ManageGroupsModal extends React.Component<props, state> {
           candidateGroups.push(g);
         } else {
           //let r = nextProps.roles.get(g.GroupID, Map<string, Role>()).get(m.SelectedRoleID);
-          memberGroups.push(g);
+          memberGroups.push({ g: g, m: m });
         }
       })
 
@@ -98,7 +98,13 @@ export class ManageGroupsModal extends React.Component<props, state> {
 
   onInsertMembership() {
     return ClientStack.Group.AddUser(this.state.selectedGroup, this.props.user, this.state.selectedRole).then(() => {
-      this.props.store.Group.AddUser(this.state.selectedGroup, this.state.selectedRole, this.props.user);
+      let member = new Member();
+      member = member
+        .set('GroupID', this.state.selectedGroup.GroupID)
+        .set('RoleID', this.state.selectedRole.RoleID)
+        .set('AgentID', this.props.user.UUID);
+      this.props.store.Group.AddMember(member);
+
     }).catch((err: Error) => {
       this.setState({
         error: 'Error assigning membership: ' + err.message
@@ -106,9 +112,9 @@ export class ManageGroupsModal extends React.Component<props, state> {
     });
   }
 
-  onEjectMembership(g: Group) {
-    return ClientStack.Group.RemoveUser(g, this.props.user).then(() => {
-      this.props.store.Group.DestroyUser(g, this.props.user);
+  onEjectMembership(m: Member) {
+    return ClientStack.Group.RemoveUser(m).then(() => {
+      this.props.store.Group.DestroyMember(m);
     }).catch((err: Error) => {
       this.setState({
         error: 'Error ejecting membership: ' + err.message
@@ -126,8 +132,8 @@ export class ManageGroupsModal extends React.Component<props, state> {
           <p>{this.state.name} is a member of these groups:</p>
 
           <div style={{ height: "10em", overflowY: "auto", border: "1px solid grey" }}>
-            {this.state.memberGroups.map((g: Group) => {
-              return <p key={g.GroupID}>{g.Name} <BusyButton bsStyle="danger" bsSize="xs" onClick={this.onEjectMembership.bind(this, g)}>Eject from group</BusyButton></p>
+            {this.state.memberGroups.map((r: { g: Group, m: Member }) => {
+              return <p key={r.g.GroupID}>{r.g.Name} <BusyButton bsStyle="danger" bsSize="xs" onClick={this.onEjectMembership.bind(this, r.m)}>Eject from group</BusyButton></p>
             })}
           </div>
 

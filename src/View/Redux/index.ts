@@ -73,7 +73,7 @@ import { DispatchUpdatePendingUser, DispatchDeletePendingUser } from './reducers
 import { DispatchUpdateMember, DispatchDeleteMember } from './reducers/members';
 import { DispatchUpdateRole, DispatchDeleteRole } from './reducers/role';
 
-export { Synchronizer } from './Synchronizer';
+export { Synchronizer, ResumeSession } from './Synchronizer';
 
 export function getStore(): ReduxStore {
   let store = createStore<StateModel>(reducer);

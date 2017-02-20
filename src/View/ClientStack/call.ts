@@ -4,7 +4,7 @@ export interface NetworkResponse {
   Message?: string
 }
 
-let authToken: string = null;
+let authToken: string = '';
 
 export function updateToken(token: string) {
   authToken = token;

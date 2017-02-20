@@ -13,7 +13,7 @@ function signToken(ud: UserDetail, cert: Buffer): Promise<string> {
       ud,
       cert,
       {
-        expiresIn: '1d'
+        expiresIn: '1h'
       },
       (err: Error, newToken: string) => {
         if (err)

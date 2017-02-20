@@ -3,9 +3,9 @@ import * as ReactDOM from "react-dom";
 import { Unsubscribe } from 'redux';
 import { Map } from 'immutable';
 
-import { ClientStack, LoginResponse } from './ClientStack';
+import { ClientStack } from './ClientStack';
 
-import { ReduxStore, getStore, StateModel } from "./Redux";
+import { ReduxStore, getStore, StateModel, ResumeSession } from "./Redux";
 import { User } from './Immutable';
 
 //create the redux store, using our websocket middleware for MGM async
@@ -61,7 +61,7 @@ store.Subscribe(() => {
         } else {
             localStorage.removeItem("token");
             token = '';
-            ClientStack.updateToken(null);
+            ClientStack.updateToken('');
         }
     }
 });
@@ -100,20 +100,17 @@ class App extends React.Component<{}, {}> {
     }
 
     resumeSession() {
-        ClientStack.resumeSession().then((res: LoginResponse) => {
-            console.log("session resume successfull");
-            store.Auth.Login(res.uuid, res.isAdmin, res.token);
+        ResumeSession(store).then(() => {
             if (url == "" || url == "/")
                 store.NavigateTo('/account');
             this.setState({
                 loading: false
-            })
+            });
         }).catch((err: Error) => {
-            console.log('session resume failed: ' + err.message)
             this.setState({
                 loading: false
-            })
-        });
+            });
+        })
     }
 
     render() {

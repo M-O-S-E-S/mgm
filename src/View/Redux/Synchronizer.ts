@@ -1,4 +1,4 @@
-import { ClientStack, NetworkResponse, GetEstatesResult, GetGroupsResult, GetUsersResult } from '../ClientStack';
+import { ClientStack, NetworkResponse, GetEstatesResult, GetGroupsResult, GetUsersResult, LoginResponse } from '../ClientStack';
 import { Map, Set } from 'immutable';
 import { ReduxStore } from '../Redux';
 
@@ -42,17 +42,38 @@ interface userResult extends NetworkResponse {
 }
 
 export function Synchronizer(store: ReduxStore): void {
-  jobs(store);
-  regions(store);
-  estates(store);
-  groups(store);
-  hosts(store);
-  users(store);
+  Promise.all<void>([
+    ResumeSession(store),
+    jobs(store),
+    regions(store),
+    estates(store),
+    groups(store),
+    hosts(store),
+    users(store)
+  ]).catch((err: Error) => {
+    console.log('Error in synchronizer: ' + err.message);
+    if (err.message === 'jwt expired') {
+      store.Auth.Logout();
+      store.Auth.Error('Token expired, please log in again');
+    }
+  });
 }
 
-function jobs(store: ReduxStore) {
+export function ResumeSession(store: ReduxStore): Promise<void> {
+  return ClientStack.resumeSession().then((res: LoginResponse) => {
+    store.Auth.Login(res.uuid, res.isAdmin, res.token);
+  }).catch((err: Error) => {
+    console.log('session resume failed: ' + err.message)
+    if (err.message === 'jwt expired') {
+      store.Auth.Logout();
+      store.Auth.Error('Token expired, please log in again');
+    }
+  });
+}
+
+function jobs(store: ReduxStore): Promise<void> {
   let stale = store.GetState().jobs.keySeq().toSet();
-  ClientStack.Job.Get().then((jobs: IJob[]) => {
+  return ClientStack.Job.Get().then((jobs: IJob[]) => {
     return jobs.map((j: IJob) => {
       stale = stale.delete(j.id);
       let job = new Job(j);
@@ -64,9 +85,9 @@ function jobs(store: ReduxStore) {
   });
 };
 
-function regions(store: ReduxStore) {
+function regions(store: ReduxStore): Promise<void> {
   let stale = store.GetState().regions.keySeq().toSet();
-  ClientStack.Region.Get().then((regions: IRegion[]) => {
+  return ClientStack.Region.Get().then((regions: IRegion[]) => {
     return regions.map((r: IRegion) => {
       stale = stale.delete(r.uuid);
       let region = new Region(r);
@@ -78,8 +99,8 @@ function regions(store: ReduxStore) {
   });
 };
 
-function estates(store: ReduxStore) {
-  ClientStack.Estate.Get().then((res: GetEstatesResult) => {
+function estates(store: ReduxStore): Promise<void> {
+  return ClientStack.Estate.Get().then((res: GetEstatesResult) => {
     let staleEstates = store.GetState().estates.keySeq().toSet();
     store.Estate.Update(
       res.Estates.map((r: IEstate) => {
@@ -110,8 +131,8 @@ function estates(store: ReduxStore) {
   });
 }
 
-function groups(store: ReduxStore) {
-  ClientStack.Group.Get().then((res: GetGroupsResult) => {
+function groups(store: ReduxStore): Promise<void> {
+  return ClientStack.Group.Get().then((res: GetGroupsResult) => {
     let staleGroups = store.GetState().groups.keySeq().toSet();
     store.Group.Update(
       res.Groups.map((r: IGroup) => {
@@ -165,8 +186,8 @@ function groups(store: ReduxStore) {
   });
 }
 
-function hosts(store: ReduxStore) {
-  ClientStack.Host.Get().then((hosts: IHost[]) => {
+function hosts(store: ReduxStore): Promise<void> {
+  return ClientStack.Host.Get().then((hosts: IHost[]) => {
     let staleHosts = store.GetState().hosts.keySeq().toSet();
     store.Host.Update(
       hosts.map((h: IHost) => {
@@ -178,8 +199,8 @@ function hosts(store: ReduxStore) {
   });
 }
 
-function users(store: ReduxStore) {
-  ClientStack.User.Get().then((res: GetUsersResult) => {
+function users(store: ReduxStore): Promise<void> {
+  return ClientStack.User.Get().then((res: GetUsersResult) => {
     let staleUsers = store.GetState().users.keySeq().toSet();
     store.User.Update(
       res.Users.map((u: IUser) => {

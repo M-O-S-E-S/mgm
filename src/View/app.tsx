@@ -39,26 +39,32 @@ if (localStorage.getItem("user")) {
     token = localStorage.getItem("token");
     isAdmin = localStorage.getItem("isAdmin") === 'true';
     ClientStack.updateToken(token);
-    ;
 }
 store.Subscribe(() => {
     let auth = store.GetState().auth;
-    if (auth.user !== user || auth.token !== token) {
-        if (auth.user) {
+    if (auth.user !== user) {
+        user = auth.user;
+        if (user) {
             localStorage.setItem("user", auth.user);
-            localStorage.setItem("token", auth.token);
             localStorage.setItem("isAdmin", auth.isAdmin ? 'true' : 'false');
-            ClientStack.updateToken(token);
         } else {
             localStorage.removeItem("user");
-            localStorage.removeItem("token");
             localStorage.removeItem("isAdmin");
             user = null;
+        }
+    }
+    if (auth.token !== token) {
+        token = auth.token;
+        if (auth.token) {
+            localStorage.setItem("token", token);
+            ClientStack.updateToken(token);
+        } else {
+            localStorage.removeItem("token");
             token = '';
             ClientStack.updateToken(null);
         }
     }
-})
+});
 
 import { Authenticated } from "./Components/Authenticated";
 import { Unauthenticated } from "./Components/Unauthenticated";

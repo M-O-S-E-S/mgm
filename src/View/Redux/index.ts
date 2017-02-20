@@ -14,7 +14,8 @@ export interface ReduxStore {
   Auth: {
     Login(uuid: string, isAdmin: boolean, token: string): void
     Logout(): void
-    LoginError(message: string): void
+    Error(message: string): void
+    ClearError(): void
   }
   User: {
     Update(user: User | User[]): void
@@ -61,7 +62,7 @@ export interface ReduxStore {
 }
 
 import { DispatchNav } from './reducers/nav';
-import { DispatchLogin } from './reducers/auth';
+import { DispatchLogin, DispatchLogout, DispatchSetAuthMessage, DispatchClearAuthMessage } from './reducers/auth';
 import { DispatchUpdateJob, DispatchDestroyJob } from './reducers/job';
 import { DispatchUpdateRegion, DispatchDeleteRegion } from './reducers/region';
 import { DispatchUpdateHost, DispatchDeleteHost } from './reducers/host';
@@ -70,6 +71,7 @@ import { DispatchUpdateManager, DispatchDeleteManager } from './reducers/manager
 import { DispatchAssignEstateMap } from './reducers/estateMap';
 import { DispatchUpdateGroup, DispatchDeleteGroup } from './reducers/group';
 import { DispatchUpdateUser, DispatchDeleteUser } from './reducers/user';
+import { DispatchUpdatePendingUser, DispatchDeletePendingUser } from './reducers/pendingUser';
 
 export { Synchronizer } from './Synchronizer';
 
@@ -82,8 +84,9 @@ export function getStore(): ReduxStore {
     NavigateTo: DispatchNav.bind(null, store),
     Auth: {
       Login: DispatchLogin.bind(null, store),
-      Logout() { console.log('logout not implemented'); },
-      LoginError(msg: string) { console.log('login error not implemented'); },
+      Logout: DispatchLogout.bind(null, store),
+      Error: DispatchSetAuthMessage.bind(null, store),
+      ClearError: DispatchClearAuthMessage.bind(null, store)
     },
     User: {
       Update: DispatchUpdateUser.bind(null, store),
@@ -94,8 +97,8 @@ export function getStore(): ReduxStore {
       Destroy: DispatchDestroyJob.bind(null, store)
     },
     PendingUser: {
-      Update(user: PendingUser | PendingUser[]) { console.log('pending user update not implemented'); },
-      Destroy(user: PendingUser | PendingUser[] | string | string[]) { console.log('pending user destroy not implemented'); }
+      Update: DispatchUpdatePendingUser.bind(null, store),
+      Destroy: DispatchDeletePendingUser.bind(null, store)
     },
     Group: {
       Update: DispatchUpdateGroup.bind(null, store),

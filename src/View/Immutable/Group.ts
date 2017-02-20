@@ -21,9 +21,8 @@ export class Group extends GroupClass implements IGroup {
 
 const MemberClass = Record({
   GroupID: '',
-  Name: '',
-  FounderID: '',
-  OwnerRoleID: ''
+  AgentID: '',
+  SelectedRoleID: ''
 })
 
 export class Member extends MemberClass implements IMember {

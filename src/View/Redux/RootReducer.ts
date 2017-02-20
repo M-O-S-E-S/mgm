@@ -4,8 +4,6 @@ import { Record, Map, Set } from 'immutable';
 import { Member, Role, Manager, EstateMap } from '../Immutable'
 import { StateModel } from './model';
 
-import { RolesReducer } from './Roles';
-
 import { NavReducer } from './reducers/nav';
 import { APP_LOGOUT, AuthReducer } from './reducers/auth';
 import { JobsReducer } from './reducers/job';
@@ -18,6 +16,7 @@ import { GroupsReducer } from './reducers/group';
 import { UsersReducer } from './reducers/user';
 import { PendingUserReducer } from './reducers/pendingUser';
 import { MemberReducer } from './reducers/members';
+import { RoleReducer } from './reducers/role';
 
 export default function rootReducer(state = new StateModel(), action: Action): StateModel {
   switch (action.type) {
@@ -34,7 +33,7 @@ export default function rootReducer(state = new StateModel(), action: Action): S
         .set('users', UsersReducer(state.users, action))
         .set('pendingUsers', PendingUserReducer(state.pendingUsers, action))
         .set('groups', GroupsReducer(state.groups, action))
-        .set('roles', RolesReducer(state.roles, action))
+        .set('roles', RoleReducer(state.roles, action))
         .set('members', MemberReducer(state.members, action))
         .set('estates', EstatesReducer(state.estates, action))
         .set('managers', ManagersReducer(state.managers, action))

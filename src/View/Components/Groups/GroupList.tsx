@@ -3,14 +3,14 @@ import { Action } from "redux";
 import { Map, Set } from 'immutable';
 const shallowequal = require('shallowequal');
 
-import { Group, Role, User } from '../../Immutable';
+import { Group, Member, Role, User } from '../../Immutable';
 import { GroupView } from './GroupView';
 
 import { Grid, Row, Col } from 'react-bootstrap';
 
 interface props {
     groups: Map<string, Group>
-    members: Map<string, Map<string, string>>
+    members: Map<string, Map<string, Member>>
     roles: Map<string, Map<string, Role>>
     users: Map<string,User>
 }

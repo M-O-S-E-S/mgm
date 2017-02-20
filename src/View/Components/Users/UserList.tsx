@@ -4,7 +4,7 @@ import { Map } from 'immutable';
 const shallowequal = require('shallowequal');
 
 import { UserView } from './UserView';
-import { Group, Role, User } from '../../Immutable';
+import { Group, Member, Role, User } from '../../Immutable';
 import { AddUserModal } from './AddUserModal';
 import { ManageUserModal } from './ManageUserModal';
 import { ManageGroupsModal } from './ManageGroupsModal';
@@ -16,7 +16,7 @@ interface props {
     store: ReduxStore,
     users: Map<string, User>,
     groups: Map<string, Group>,
-    members: Map<string, Map<string, string>>,
+    members: Map<string, Map<string, Member>>,
     roles: Map<string, Map<string, Role>>,
     isAdmin: boolean
 }

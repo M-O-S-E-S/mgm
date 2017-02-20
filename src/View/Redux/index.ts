@@ -72,6 +72,7 @@ import { DispatchAssignEstateMap } from './reducers/estateMap';
 import { DispatchUpdateGroup, DispatchDeleteGroup } from './reducers/group';
 import { DispatchUpdateUser, DispatchDeleteUser } from './reducers/user';
 import { DispatchUpdatePendingUser, DispatchDeletePendingUser } from './reducers/pendingUser';
+import { DispatchUpdateMember, DispatchDeleteMember } from './reducers/members';
 
 export { Synchronizer } from './Synchronizer';
 
@@ -105,8 +106,8 @@ export function getStore(): ReduxStore {
       Destroy: DispatchDeleteGroup.bind(null, store),
       AddUser(group: Group, role: Role, user: User) { console.log('group add user not implemented'); },
       DestroyUser(group: Group, user: User) { console.log('group destroy user not implemented'); },
-      AddMember(member: Member | Member[]) { console.log('group add member not implemented'); },
-      DestroyMember(member: Member | Member[]) { console.log('group destroy member not implemented'); },
+      AddMember: DispatchUpdateMember.bind(null, store),
+      DestroyMember: DispatchDeleteMember.bind(null, store),
       AddRole(role: Role | Role[]) { console.log('groupt add role not implemented'); },
       DestroyRole(role: Role | Role[]) { console.log('groupt destroy role not implemented'); }
     },

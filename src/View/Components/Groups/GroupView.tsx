@@ -2,13 +2,13 @@ import * as React from "react";
 import { Map, Set, Iterable } from 'immutable';
 const shallowequal = require('shallowequal');
 
-import { Group, Role, User } from '../../Immutable';
+import { Group, Member, Role, User } from '../../Immutable';
 
 import { Grid, Row, Col } from 'react-bootstrap';
 
 interface props {
   group: Group
-  members: Map<string, string>
+  members: Map<string, Member>
   roles: Map<string, Role>
   users: Map<string,User>
 }

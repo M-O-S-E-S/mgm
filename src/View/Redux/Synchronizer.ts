@@ -123,7 +123,7 @@ function groups(store: ReduxStore) {
 
     let staleMembers = Map<string, Set<string>>();
     store.GetState().groups.keySeq().toArray().map((g) => {
-      staleMembers = staleMembers.set(g, store.GetState().members.get(g, Map<string, string>()).keySeq().toSet());
+      staleMembers = staleMembers.set(g, store.GetState().members.get(g, Map<string, Member>()).keySeq().toSet());
     })
     store.Group.AddMember(res.Members.map((m: IMember) => {
       let members = staleMembers.get(m.GroupID, Set<string>());

@@ -2,7 +2,7 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { User, Group, Role } from '../../Immutable';
+import { User, Group, Member, Role } from '../../Immutable';
 
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Grid, Row, Alert } from 'react-bootstrap';
 import { BusyButton } from '../BusyButton';
@@ -15,7 +15,7 @@ interface props {
   user: User
   store: ReduxStore
   groups: Map<string, Group>
-  members: Map<string, Map<string, string>>
+  members: Map<string, Map<string, Member>>
   roles: Map<string, Map<string, Role>>
 }
 
@@ -59,26 +59,18 @@ export class ManageGroupsModal extends React.Component<props, state> {
       return;
     }
 
-    // for an unknown reason, this early exist prevents repopulation
-    // if you open the same user twice in a row
-    //if (this.props.groups == nextProps.groups &&
-    //  this.props.members == nextProps.members &&
-    //  this.props.roles == nextProps.roles &&
-    //  this.props.user == nextProps.user)
-    //  return;
-
     // Collect the groups that this user is and is not a member of
     let memberGroups: Group[] = [];
     let candidateGroups: Group[] = [];
     nextProps.groups.toArray()
       .map((g: Group) => {
-        let members = nextProps.members.get(g.GroupID, Map<string, string>());
+        let members = nextProps.members.get(g.GroupID, Map<string, Member>());
         // if this user is a member of this group, it has a role
-        let roleId = members.get(nextProps.user.UUID, '');
-        if (roleId === '') {
+        let m = members.get(nextProps.user.UUID, new Member());
+        if (m.SelectedRoleID === '') {
           candidateGroups.push(g);
         } else {
-          let r = nextProps.roles.get(g.GroupID).get(roleId);
+          //let r = nextProps.roles.get(g.GroupID, Map<string, Role>()).get(m.SelectedRoleID);
           memberGroups.push(g);
         }
       })
@@ -92,7 +84,7 @@ export class ManageGroupsModal extends React.Component<props, state> {
 
   onSelectGroup(e: { target: { value: string } }) {
     let groupID = e.target.value;
-    let roles = this.props.roles.get(groupID).toArray();
+    let roles = this.props.roles.get(groupID, Map<string, Role>()).toArray();
     this.setState({
       selectedGroup: this.props.groups.get(groupID),
       candidateRoles: roles

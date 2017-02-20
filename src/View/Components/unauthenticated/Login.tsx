@@ -39,6 +39,7 @@ export class Login extends React.Component<loginProps, {}> {
     }
     handleLogin(e: React.FormEvent) {
         e.preventDefault();
+        this.props.store.Auth.ClearError();
         ClientStack.Login(this.state.username, this.state.password)
             .then((res: LoginResponse) => {
                 console.log('auth succeeded');
@@ -47,7 +48,7 @@ export class Login extends React.Component<loginProps, {}> {
                     this.props.store.NavigateTo('/account');
             }).catch((err: Error) => {
                 console.log('auth failed');
-                this.props.store.Auth.LoginError(err.message);
+                this.props.store.Auth.Error(err.message);
             });
     }
 

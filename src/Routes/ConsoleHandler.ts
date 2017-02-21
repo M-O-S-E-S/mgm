@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { IUser, IRegion } from '../Types';
 import { Store } from '../Store';
-import { AuthenticatedRequest } from './Authorizer';
+import { AuthenticatedRequest } from '../Auth';
 
 import * as jwt from 'jsonwebtoken';
 import * as dateFormat from 'dateformat';

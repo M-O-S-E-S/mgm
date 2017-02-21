@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { IUser, IPendingUser } from '../Types';
 import { Store } from '../Store';
-import { AuthenticatedRequest } from './Authorizer';
+import { AuthenticatedRequest } from '../Auth';
 
 import { Response, GetUsersResponse } from '../View/ClientStack';
 import { Credential } from '../Auth';

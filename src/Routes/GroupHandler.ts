@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { IGroup, IRole, IMember } from '../Types';
 import { Store } from '../Store'
-import { AuthenticatedRequest } from './Authorizer';
+import { AuthenticatedRequest } from '../Auth';
 
 import { Response, GetGroupsResponse } from '../View/ClientStack';
 

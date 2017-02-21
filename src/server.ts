@@ -33,7 +33,7 @@ clientApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 clientApp.use(express.static(__dirname + '/public'));
 
 // jwt and host ip validation middleware
-import { Authorizer } from './Routes';
+import { Authorizer } from './Auth';
 let middleware: Authorizer = new Authorizer(store, certificate);
 let apiRouter = express.Router();
 

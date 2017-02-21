@@ -31,8 +31,8 @@ export class PendingUserView extends React.Component<PUProps, {}> {
         return !shallowequal(this.props, nextProps);
     }
 
-    formatDate(timestamp: string): string {
-        let date = new Date(timestamp);
+    formatDate(date: Date): string {
+        //let date = new Date(timestamp);
         return monthNames[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + ': ' +
             ('00' + date.getHours()).slice(-2) + ':' +
             ('00' + date.getMinutes()).slice(-2);

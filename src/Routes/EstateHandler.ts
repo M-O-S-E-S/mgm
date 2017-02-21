@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { IEstate, IManager, IEstateMap } from '../Types';
 import { Store } from '../Store';
-import { AuthenticatedRequest } from './Authorizer';
+import { AuthenticatedRequest } from '../Auth';
 
 import { Response, GetEstatesResponse } from '../View/ClientStack';
 

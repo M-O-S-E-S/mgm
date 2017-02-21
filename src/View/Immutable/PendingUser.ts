@@ -17,7 +17,7 @@ export class PendingUser extends PendingUserClass implements IPendingUser {
   password: string
   summary: string
 
-  set(key: string, value: string): PendingUser {
+  set(key: string, value: string | Date): PendingUser {
     return <PendingUser>super.set(key, value);
   }
 }

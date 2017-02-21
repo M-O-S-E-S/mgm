@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
 import { IJob } from '../Types';
-import { AuthenticatedRequest } from './Authorizer';
+import { AuthenticatedRequest } from '../Auth';
 
 export function DispatchHandler(db: Store, config: Config): express.Router {
   let router: express.Router = express.Router();

@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
 import { IJob } from '../Types';
-import { AuthenticatedRequest } from './Authorizer';
+import { AuthenticatedRequest } from '../Auth';
 
 import { Response, GetJobsResponse } from '../View/ClientStack';
 

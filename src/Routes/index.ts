@@ -1,5 +1,4 @@
 
-export { Authorizer } from './Authorizer';
 export {
   RenewTokenHandler,
   LoginHandler

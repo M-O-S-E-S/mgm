@@ -4,7 +4,7 @@ import { sign } from 'jsonwebtoken';
 import { IUser } from '../Types';
 import { Store } from '../Store';
 import { Response, LoginResponse } from '../View/ClientStack';
-import { AuthenticatedRequest } from './Authorizer';
+import { AuthenticatedRequest } from '../Auth';
 import { UserDetail, GetUserPermissions } from '../Auth';
 
 function signToken(ud: UserDetail, cert: Buffer): Promise<string> {

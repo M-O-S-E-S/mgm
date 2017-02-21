@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
 import { IRegion } from '../Types';
-import { AuthenticatedRequest } from './Authorizer';
+import { AuthenticatedRequest } from '../Auth';
 import { Set } from 'immutable';
 
 import { Response, GetRegionsResponse } from '../View/ClientStack';

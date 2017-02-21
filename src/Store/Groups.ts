@@ -55,6 +55,24 @@ export class Groups {
     return this.db.query('SELECT * FROM osrole WHERE 1');
   }
 
+  addMember(user: IMember): Promise<void> {
+    let member: member_row = {
+      GroupID: user.GroupID,
+      AgentID: user.AgentID,
+      SelectedRoleID: user.SelectedRoleID,
+      Contribution: 0,
+      ListInProfile: 1,
+      AcceptNotices: 1
+    }
+    return this.db.query('INSERT INTO osgroupmembership SET ?', member).then(() => {
+      return member;
+    });
+  }
+
+  removeMember(user: IMember): Promise<void> {
+    return this.db.query('DELETE FROM osgroupmembership WHERE GroupID=? AND AgentID=?', [user.GroupID, user.AgentID]);
+  }
+
   /*
   getGroupByID(id: string): Promise<GroupInstance> {
     return this.groups.findOne({
@@ -80,17 +98,6 @@ export class Groups {
         GroupID: group
       }
     })
-  }
-
-  addUserToGroup(group: string, user: string, role: string): Promise<MembershipInstance> {
-    return this.membership.create({
-      GroupID: group,
-      AgentID: user,
-      SelectedRoleID: role,
-      Contribution: 0,
-      ListInProfile: 1,
-      AcceptNotices: 1
-    });
   }
   */
 }

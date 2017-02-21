@@ -66,8 +66,10 @@ apiRouter.post('/estate/create', formParser, middleware.isAdmin(), CreateEstateH
 apiRouter.post('/estate/destroy/:id', middleware.isAdmin(), DeleteEstateHandler(store));
 
 // Group
-import { GetGroupsHander } from './Routes';
-apiRouter.get('/group', middleware.isUser(), GetGroupsHander(store));
+import { GetGroupsHandler, AddMemberHandler, RemoveMemberHandler } from './Routes';
+apiRouter.get('/group', middleware.isUser(), GetGroupsHandler(store));
+apiRouter.post('/group/addMember/:id', formParser, middleware.isAdmin(), AddMemberHandler(store));
+apiRouter.post('/group/removeMember/:id', formParser, middleware.isAdmin(), RemoveMemberHandler(store));
 
 // Host
 import { GetHostHandler } from './Routes';

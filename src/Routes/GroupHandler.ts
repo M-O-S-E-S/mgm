@@ -5,8 +5,8 @@ import { AuthenticatedRequest } from '../Auth';
 
 import { Response, GetGroupsResponse } from '../View/ClientStack';
 
-export function GetGroupsHander(store: Store): RequestHandler {
-  return function (req: AuthenticatedRequest, res) {
+export function GetGroupsHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
     let outGroups: IGroup[] = [];
     let outRoles: IRole[] = [];
     let outMembers: IMember[] = [];
@@ -31,103 +31,59 @@ export function GetGroupsHander(store: Store): RequestHandler {
   }
 }
 
-/*
-export function GroupHandler(db: PersistanceLayer, isUser: any, isAdmin): express.Router {
-  let router = express.Router();
+export function AddMemberHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let groupID = req.params.id;
+    let userID = req.body.user;
+    let roleID = req.body.role;
 
-  router.get('/', isUser, (req: AuthenticatedRequest, res) => {
-    let iGroups: IGroup[] = [];
-    let iRoles: IRole[] = [];
-    let iMembers: IMembership[] = [];
-
-    db.Groups.getGroups().then((groups: GroupInstance[]) => {
-      iGroups = groups.map((g: GroupInstance) => {
-        let ig: IGroup = {
-          GroupID: g.GroupID,
-          Name: g.Name,
-          FounderID: g.FounderID,
-          OwnerRoleID: g.OwnerRoleID
-        }
-        return ig;
-      })
-    }).then(() => {
-      return db.Groups.getRoles();
-    }).then((roles: RoleInstance[]) => {
-      iRoles = roles.map((r: RoleInstance) => {
-        let ir: IRole = {
-          GroupID: r.GroupID,
-          RoleID: r.RoleID,
-          Name: r.Name,
-          Description: r.Description,
-          Title: r.Title,
-          Powers: r.Powers
-        }
-        return ir;
-      })
-    }).then(() => {
-      return db.Groups.getMembers();
-    }).then((members: MembershipInstance[]) => {
-      iMembers = members.map((m: MembershipInstance) => {
-        let im: IMembership = {
-          GroupID: m.GroupID,
-          AgentID: m.AgentID,
-          SelectedRoleID: m.SelectedRoleID
-        }
-        return im;
-      })
-    }).then(() => {
-      res.json({
-        Success: true,
-        Groups: iGroups,
-        Members: iMembers,
-        Roles: iRoles
+    // confirm user exists
+    store.Users.getByID(userID).then(() => {
+      // user exists
+      // confirm group exists
+      return store.Groups.getAll();
+    }).then((groups: IGroup[]) => {
+      let found = false;
+      groups.map((g: IGroup) => {
+        if (g.GroupID === groupID)
+          found = true;
       });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    })
-  });
-
-  router.post('/removeUser/:id', isAdmin, (req: AuthenticatedRequest, res) => {
-    let groupID = new UUIDString(req.params.id);
-    let userID = new UUIDString(req.body.user);
-
-    console.log('Removing user ' + userID + ' from group ' + groupID);
-
-    db.Groups.getMembershipForUser(groupID.toString(), userID.toString()).then((memberships: MembershipInstance[]) => {
-      return Promise.all(memberships.map((m: MembershipInstance) => {
-        return m.destroy();
-      }))
-
+      if (!found)
+        throw new Error('Group ' + groupID + ' does not exist');
+    }).then(() => {
+      return store.Groups.getMembers();
+    }).then((members: IMember[]) => {
+      // reject if user is already a member
+      members.map((m: IMember) => {
+        if (m.AgentID === userID && m.GroupID === groupID)
+          throw new Error('User ' + userID + ' is already a member of group ' + groupID);
+      });
+    }).then(() => {
+      return store.Groups.addMember(<IMember>{
+        GroupID: groupID,
+        AgentID: userID,
+        SelectedRoleID: roleID
+      });
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
-    })
-  });
-
-  router.post('/addUser/:id', isAdmin, (req: AuthenticatedRequest, res) => {
-    let groupID = new UUIDString(req.params.id);
-    let userID = new UUIDString(req.body.user);
-    let roleID = new UUIDString(req.body.role);
-
-    let user: UserInstance;
-
-    console.log('Placing user ' + userID + ' into group ' + groupID + ' with role ' + roleID);
-
-    //confirm necessary components
-    db.Users.getByID(userID.toString()).then(() => {
-      //user exists, confirm role
-      return db.Groups.getRoleByID(groupID.toString(), roleID.toString())
-    }).then(() => {
-      // role exists
-      return db.Groups.addUserToGroup(groupID.toString(), userID.toString(), roleID.toString());
-    }).then(() => {
-      res.json({ Success: true });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    })
-  });
-
-  return router;
+    });
+  }
 }
-*/
+
+export function RemoveMemberHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let groupID = req.params.id;
+    let userID = req.body.user;
+
+    store.Groups.removeMember(<IMember>{
+      AgentID: userID,
+      GroupID: groupID
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err: Error) => {
+      res.json({ Success: false, Message: err.message });
+    });
+  }
+}

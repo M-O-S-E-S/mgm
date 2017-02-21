@@ -14,8 +14,7 @@ interface UpdateMember extends Action {
 }
 
 interface DeleteMember extends Action {
-  group: string
-  members: string[]
+  members: Member[]
 }
 
 
@@ -27,26 +26,12 @@ export function DispatchUpdateMember(store: Store, m: Member | Member[]): void {
   });
 }
 
-export function DispatchDeleteMember(store: Store, g: Group | string, m: Member | Member[] | string | string[]): Action {
-  if (!g || !m) return;
-  let group: string
-  if (typeof (g) === "string") {
-    group = g;
-  } else {
-    group = g.GroupID;
-  }
-  let members = [].concat(m);
-  if (typeof (members[0]) === "string") {
-    store.dispatch(<DeleteMember>{
-      type: DELETE_MEMBER,
-      members: members
-    });
-  } else {
-    store.dispatch(<DeleteMember>{
-      type: DELETE_MEMBER,
-      members: members.map((m: Member) => { return m.AgentID; })
-    });
-  }
+export function DispatchDeleteMember(store: Store, m: Member | Member[]): void {
+  if (!m) return;
+  store.dispatch(<DeleteMember>{
+    type: DELETE_MEMBER,
+    members: [].concat(m)
+  });
 }
 
 export function MemberReducer(state = Map<string, Map<string, Member>>(), action: Action): Map<string, Map<string, Member>> {
@@ -66,11 +51,12 @@ export function MemberReducer(state = Map<string, Map<string, Member>>(), action
       return state;
     case DELETE_MEMBER:
       let del = <DeleteMember>action;
-      let members = state.get(del.group, Map<string, Member>());
-      del.members.map((m: string) => {
-        members = members.delete(m);
+      del.members.map((m: Member) => {
+        let members = state.get(m.GroupID, Map<string, Member>());
+        members = members.delete(m.AgentID);
+        state = state.set(m.GroupID, members);
       });
-      return state.set(del.group, members);
+      return state;
     default:
       return state;
   }

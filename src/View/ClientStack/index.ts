@@ -54,11 +54,11 @@ class GroupStack {
     static Get(): Promise<GetGroupsResponse> {
         return performCall('GET', '/api/group');
     }
-    static AddUser(group: Group, user: User, role: Role): Promise<void> {
-        return performCall('POST', '/api/group/addUser/' + group.GroupID, { user: user.UUID, role: role.RoleID });
+    static AddMember(group: Group, user: User, role: Role): Promise<void> {
+        return performCall('POST', '/api/group/addMember/' + group.GroupID, { user: user.UUID, role: role.RoleID });
     }
     static RemoveUser(member: Member): Promise<void> {
-        return performCall('POST', '/api/group/removeUser/' + member.GroupID, { user: member.AgentID })
+        return performCall('POST', '/api/group/removeMember/' + member.GroupID, { user: member.AgentID })
     }
 }
 

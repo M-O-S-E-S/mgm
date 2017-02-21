@@ -33,7 +33,7 @@ export interface ReduxStore {
     Update(group: Group | Group[]): void
     Destroy(group: Group | Group[] | string | string[]): void
     AddMember(member: Member | Member[]): void
-    DestroyMember(member: Member | Member[]): void
+    DestroyMember(m: Member | Member[] | string | string[]): void
     AddRole(role: Role | Role[]): void
     DestroyRole(role: Role | Role[]): void
   }

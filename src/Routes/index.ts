@@ -19,7 +19,9 @@ import {
   DeleteEstateHandler
 } from './EstateHandler';
 import {
-  GetGroupsHander
+  GetGroupsHandler,
+  AddMemberHandler,
+  RemoveMemberHandler
 } from './GroupHandler';
 import {
   GetHostHandler
@@ -36,6 +38,8 @@ export {
   GetEstatesHandler,
   CreateEstateHandler,
   DeleteEstateHandler,
-  GetGroupsHander,
+  GetGroupsHandler,
+  AddMemberHandler,
+  RemoveMemberHandler,
   GetHostHandler
 }

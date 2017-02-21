@@ -97,11 +97,11 @@ export class ManageGroupsModal extends React.Component<props, state> {
   }
 
   onInsertMembership() {
-    return ClientStack.Group.AddUser(this.state.selectedGroup, this.props.user, this.state.selectedRole).then(() => {
+    return ClientStack.Group.AddMember(this.state.selectedGroup, this.props.user, this.state.selectedRole).then(() => {
       let member = new Member();
       member = member
         .set('GroupID', this.state.selectedGroup.GroupID)
-        .set('RoleID', this.state.selectedRole.RoleID)
+        .set('SelectedRoleID', this.state.selectedRole.RoleID)
         .set('AgentID', this.props.user.UUID);
       this.props.store.Group.AddMember(member);
 

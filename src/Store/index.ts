@@ -31,6 +31,8 @@ export interface Store {
     getAll(): Promise<IGroup[]>
     getRoles(): Promise<IRole[]>
     getMembers(): Promise<IMember[]>
+    addMember(user: IMember): Promise<void>
+    removeMember(user: IMember): Promise<void>
   }
   PendingUsers: {
     getAll(): Promise<IPendingUser[]>

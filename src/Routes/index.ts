@@ -1,24 +1,39 @@
 
-export {
+import {
   RenewTokenHandler,
   LoginHandler
 } from './AuthHandler';
-export {
+import {
   GetUsersHandler,
   SetPasswordHandler
 } from './UserHandler';
-export {
+import {
   GetJobsHandler
 } from './JobHandler';
-export {
+import {
   GetRegionsHandler
 } from './RegionHandler';
-export {
-  GetEstatesHander
+import {
+  GetEstatesHandler,
+  CreateEstateHandler
 } from './EstateHandler';
-export {
+import {
   GetGroupsHander
 } from './GroupHandler';
-export {
+import {
   GetHostHandler
 } from './HostHandler';
+import { ConsoleHandler } from './ConsoleHandler';
+
+export {
+  RenewTokenHandler,
+  LoginHandler,
+  GetUsersHandler,
+  SetPasswordHandler,
+  GetJobsHandler,
+  GetRegionsHandler,
+  GetEstatesHandler,
+  CreateEstateHandler,
+  GetGroupsHander,
+  GetHostHandler
+}

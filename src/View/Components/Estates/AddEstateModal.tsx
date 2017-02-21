@@ -95,7 +95,7 @@ export class AddEstateModal extends React.Component<props, state> {
     let users = this.props.users.toList().sort((a, b) => {
       return a.lastname.localeCompare(b.lastname);
     }).map((u: User) => {
-      return <option key={u.UUID} value={u.UUID}>{u.name}</option>
+      return <option key={u.UUID} value={u.UUID}>{u.name()}</option>
     });
     return (
       <Modal show={this.props.show} onHide={this.props.cancel}>

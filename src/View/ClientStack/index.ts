@@ -152,12 +152,18 @@ export interface GetEstatesResult {
     EstateMap: IEstateMap[]
 }
 
+export interface CreateEstateResponse {
+    EstateID: number
+}
+
 class EstateStack {
     static Get(): Promise<GetEstatesResponse> {
         return performCall('GET', '/api/estate').then((res: GetEstatesResponse) => { return res; });
     }
     static Create(name: string, owner: User): Promise<number> {
-        return performCall('POST', '/api/estate/create', { name: name, owner: owner.UUID });
+        return performCall('POST', '/api/estate/create', { name: name, owner: owner.UUID }).then((r: CreateEstateResponse) => {
+            return r.EstateID;
+        });
     }
     static Destroy(estate: Estate): Promise<void> {
         return performCall('POST', '/api/estate/destroy/' + estate.EstateID)

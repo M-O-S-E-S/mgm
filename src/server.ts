@@ -60,8 +60,9 @@ import { GetRegionsHandler } from './Routes';
 apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
 
 // Estate
-import { GetEstatesHander } from './Routes';
-apiRouter.get('/estate', middleware.isUser(), GetEstatesHander(store));
+import { GetEstatesHandler, CreateEstateHandler } from './Routes';
+apiRouter.get('/estate', middleware.isUser(), GetEstatesHandler(store));
+apiRouter.post('/estate/create', formParser, middleware.isAdmin(), CreateEstateHandler(store));
 
 // Group
 import { GetGroupsHander } from './Routes';

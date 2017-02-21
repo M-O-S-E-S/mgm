@@ -3,7 +3,7 @@ import { IPool } from 'mysql';
 import { IEstate, IManager, IEstateMap } from '../Types';
 
 interface estate_row {
-  EstateID: number
+  EstateID?: number
   EstateName: string
   AbuseEmailToEstateOwner: number
   DenyAnonymous: number
@@ -90,6 +90,41 @@ export class Estates {
     });
   }
 
+  create(name: string, owner: string): Promise<IEstate> {
+    let estate: estate_row = {
+      EstateName: name,
+      EstateOwner: owner,
+      AbuseEmailToEstateOwner: 0,
+      DenyAnonymous: 1,
+      ResetHomeOnTeleport: 0,
+      FixedSun: 0,
+      DenyTransacted: 0,
+      BlockDwell: 0,
+      DenyIdentified: 0,
+      AllowVoice: 1,
+      UseGlobalTime: 1,
+      PricePerMeter: 0,
+      TaxFree: 1,
+      AllowDirectTeleport: 1,
+      RedirectGridX: 0,
+      RedirectGridY: 0,
+      ParentEstateID: 0,
+      SunPosition: 0,
+      EstateSkipScripts: 0,
+      BillableFactor: 0,
+      PublicAccess: 1,
+      AbuseEmail: '',
+      DenyMinors: 0,
+    }
+    return new Promise<IEstate>( (resolve, reject) => {
+      this.db.query('INSERT INTO estate_settings SET ?', estate, (err: Error, result) => {
+        if(err) return reject(err);
+        estate.EstateID = result.insertId;
+        resolve(new Estate(estate));
+      });
+    });
+  }
+
   /*
   
 
@@ -114,34 +149,6 @@ export class Estates {
       RegionID: region,
       EstateID: estate
     });
-  }
-
-  create(name: string, owner: string): Promise<EstateInstance> {
-    return this.estates.create({
-      EstateName: name,
-      EstateOwner: owner,
-      AbuseEmailToEstateOwner: 0,
-      DenyAnonymous: 1,
-      ResetHomeOnTeleport: 0,
-      FixedSun: 0,
-      DenyTransacted: 0,
-      BlockDwell: 0,
-      DenyIdentified: 0,
-      AllowVoice: 0,
-      UseGlobalTime: 1,
-      PricePerMeter: 0,
-      TaxFree: 1,
-      AllowDirectTeleport: 1,
-      RedirectGridX: 0,
-      RedirectGridY: 0,
-      ParentEstateID: 0,
-      SunPosition: 0,
-      EstateSkipScripts: 0,
-      BillableFactor: 0,
-      PublicAccess: 1,
-      AbuseEmail: '',
-      DenyMinors: 0,
-    })
   }
 
   destroy(id: number): Promise<void> {

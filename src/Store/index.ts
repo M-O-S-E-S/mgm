@@ -40,6 +40,7 @@ export interface Store {
     getFor(uuid: string): Promise<IJob[]>
   },
   Estates: {
+    create(name: string, owner: string): Promise<IEstate>
     getAll(): Promise<IEstate[]>
     getManagers(): Promise<IManager[]>
     getMapping(): Promise<IEstateMap[]>

@@ -24,7 +24,9 @@ import {
   RemoveMemberHandler
 } from './GroupHandler';
 import {
-  GetHostHandler
+  GetHostHandler,
+  AddHostHandler,
+  RemoveHostHandler
 } from './HostHandler';
 import { ConsoleHandler } from './ConsoleHandler';
 
@@ -41,5 +43,7 @@ export {
   GetGroupsHandler,
   AddMemberHandler,
   RemoveMemberHandler,
-  GetHostHandler
+  GetHostHandler,
+  AddHostHandler,
+  RemoveHostHandler
 }

@@ -72,8 +72,10 @@ apiRouter.post('/group/addMember/:id', formParser, middleware.isAdmin(), AddMemb
 apiRouter.post('/group/removeMember/:id', formParser, middleware.isAdmin(), RemoveMemberHandler(store));
 
 // Host
-import { GetHostHandler } from './Routes';
+import { GetHostHandler, AddHostHandler, RemoveHostHandler } from './Routes';
 apiRouter.get('/host', middleware.isAdmin(), GetHostHandler(store));
+apiRouter.post('/host/add', formParser, middleware.isAdmin(), AddHostHandler(store));
+apiRouter.post('/host/remove', formParser, middleware.isAdmin(), RemoveHostHandler(store));
 
 
 clientApp.use('/api', apiRouter);

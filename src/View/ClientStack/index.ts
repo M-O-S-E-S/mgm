@@ -170,17 +170,21 @@ class EstateStack {
     }
 }
 
+export interface AddHostResponse {
+    HostID: number
+}
+
 class HostStack {
     static Get(): Promise<IHost[]> {
         return performCall('GET', '/api/host').then((res: GetHostsResponse) => { return res.Hosts; });
     }
     static Add(address: string): Promise<number> {
-        return performCall('POST', '/api/host/add', { host: address }).then((resp: NetworkResponse) => {
-            return parseInt(resp.Message, 10);
+        return performCall('POST', '/api/host/add', { host: address }).then((resp: AddHostResponse) => {
+            return resp.HostID;
         });
     }
     static Destroy(host: Host): Promise<void> {
-        return performCall('POST', '/api/host/remove', { host: host.address })
+        return performCall('POST', '/api/host/remove', { host: host.id })
     }
 }
 

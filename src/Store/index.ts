@@ -15,6 +15,8 @@ import { Credential } from '../Auth';
 export interface Store {
   Hosts: {
     getAll(): Promise<IHost[]>
+    create(address: string): Promise<IHost>
+    destroy(id: number): Promise<void>
     getByAddress(address: string): Promise<IHost>
   },
   Regions: {

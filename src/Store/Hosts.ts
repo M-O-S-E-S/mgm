@@ -4,7 +4,7 @@ import { IPool } from 'promise-mysql';
 import { IHost } from '../Types';
 
 interface hosts_row {
-  id: number
+  id?: number
   address: string
   port: number
   name: string
@@ -31,20 +31,21 @@ export class Hosts {
     });
   }
 
-  /*
-  create(address: string): Promise<HostInstance> {
-    return this.db.create({
+  create(address: string): Promise<IHost> {
+    let host: hosts_row = {
       address: address,
+      port: 0,
+      name: '',
+      slots: 0,
       status: ''
-    })
+    }
+    return this.db.query('INSERT INTO hosts SET ?', host).then((result) => {
+      host.id = result.insertId;
+      return host;
+    });
   }
 
-  destroy(id: number): Promise<number> {
-    return this.db.destroy({
-      where: {
-        id: id
-      }
-    })
-  }*/
-
+  destroy(id: number): Promise<void> {
+    return this.db.query('DELETE FROM hosts WHERE id=?', id);
+  }
 }

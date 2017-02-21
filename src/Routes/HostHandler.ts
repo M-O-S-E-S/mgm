@@ -3,73 +3,47 @@ import { Store } from '../Store';
 import { IHost } from '../Types';
 import { AuthenticatedRequest } from '../Auth';
 
-import { Response, GetHostsResponse } from '../View/ClientStack';
+import { Response, GetHostsResponse, AddHostResponse } from '../View/ClientStack';
 
 export function GetHostHandler(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res) {
-    store.Hosts.getAll()
-      .then((hosts: IHost[]) => {
-        res.json(<GetHostsResponse>{
-          Success: true,
-          Hosts: hosts
-        });
-      }).catch((err: Error) => {
-        res.json({
-          Success: false,
-          Message: err.message
-        });
+    store.Hosts.getAll().then((hosts: IHost[]) => {
+      res.json(<GetHostsResponse>{
+        Success: true,
+        Hosts: hosts
       });
+    }).catch((err: Error) => {
+      res.json({
+        Success: false,
+        Message: err.message
+      });
+    });
   }
 }
 
-/*
-export function HostHandler(db: PersistanceLayer, isUser, isAdmin): express.Router {
-  let router = express.Router();
-
-  router.get('/', isAdmin, (req: AuthenticatedRequest, res) => {
-    db.Hosts.getAll().then((hosts: HostInstance[]) => {
-      res.json({
-        Success: true,
-        Hosts: hosts.map(host => {
-          let ih: IHost = {
-            id: host.id,
-            address: host.address,
-            name: host.name,
-            slots: host.slots,
-            status: host.status
-          }
-          return ih;
-        })
-      });
-    });
-  });
-
-  router.post('/add', isAdmin, (req: AuthenticatedRequest, res) => {
-    let host: string = req.body.host || '';
+export function AddHostHandler(store: Store): RequestHandler {
+  return function (req: AuthenticatedRequest, res) {
+    let host: string = req.body.host;
     if (host === '') {
-      res.json({ Success: false, Message: 'Invalid host' });
-      return;
+      return res.json({ Success: false, Message: 'Invalid host' });
     }
 
-    db.Hosts.create(host).then((h: HostInstance) => {
-      res.json({ Success: true, ID: h.id });
+    store.Hosts.create(host).then((h: IHost) => {
+      res.json(<AddHostResponse>{ Success: true, HostID: h.id });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
-    });
-  });
+    })
+  }
+}
 
-  router.post('/remove', isAdmin, (req: AuthenticatedRequest, res) => {
-    let host: string = req.body.host || '';
+export function RemoveHostHandler(store: Store): RequestHandler {
+  return function (req: AuthenticatedRequest, res) {
+    let host: number = parseInt(req.body.host);
 
-    db.Hosts.getByAddress(host).then( (h: HostInstance) => {
-      return h.destroy();
-    }).then(() => {
+    store.Hosts.destroy(host).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
-    });
-  });
-
-  return router;
+    })
+  }
 }
-*/

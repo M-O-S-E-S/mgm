@@ -10,7 +10,6 @@
     "md5": "registry:dt/md5#2.1.0+20160521153251",
     "mime": "registry:dt/mime#0.0.0+20160316155526",
     "multer": "registry:dt/multer#0.0.0+20160317120654",
-    "mysql": "registry:dt/mysql#0.0.0+20160316155526",
     "node": "registry:dt/node#6.0.0+20160915134512",
     "react": "registry:dt/react#0.14.0+20160829191040",
     "react-bootstrap": "registry:dt/react-bootstrap#0.0.0+20160806072414",

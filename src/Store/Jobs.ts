@@ -1,5 +1,5 @@
 
-import { IPool } from 'mysql';
+import { IPool } from 'promise-mysql';
 
 import { IJob } from '../Types';
 
@@ -19,12 +19,7 @@ export class Jobs {
   }
 
   getFor(uuid: string): Promise<IJob[]> {
-    return new Promise<IJob[]>((resolve, reject) => {
-      this.db.query('SELECT * FROM jobs WHERE user=?', [uuid], (err: Error, rows: job_row[]) => {
-        if (err) return reject(err);
-        resolve(rows);
-      })
-    })
+    return this.db.query('SELECT * FROM jobs WHERE user=?', [uuid]);
   }
 
   /*getByID(id: number): Promise<JobInstance> {

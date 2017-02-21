@@ -1,5 +1,5 @@
 
-import { IPool } from 'mysql';
+import { IPool } from 'promise-mysql';
 
 import { IGroup, IMember, IRole } from '../Types';
 
@@ -44,30 +44,15 @@ export class Groups {
   }
 
   getAll(): Promise<IGroup[]> {
-    return new Promise<IGroup[]>((resolve, reject) => {
-      this.db.query('SELECT * FROM osgroup WHERE 1', (err: Error, rows: group_row[]) => {
-        if (err) return reject(err);
-        resolve(rows);
-      });
-    });
+    return this.db.query('SELECT * FROM osgroup WHERE 1');
   }
 
   getMembers(): Promise<IMember[]> {
-    return new Promise<IMember[]>((resolve, reject) => {
-      this.db.query('SELECT * FROM osgroupmembership WHERE 1', (err: Error, rows: member_row[]) => {
-        if (err) return reject(err);
-        resolve(rows);
-      });
-    });
+    return this.db.query('SELECT * FROM osgroupmembership WHERE 1');
   }
 
   getRoles(): Promise<IRole[]> {
-    return new Promise<IRole[]>((resolve, reject) => {
-      this.db.query('SELECT * FROM osrole WHERE 1', (err: Error, rows: role_row[]) => {
-        if (err) return reject(err);
-        resolve(rows);
-      })
-    });
+    return this.db.query('SELECT * FROM osrole WHERE 1');
   }
 
   /*

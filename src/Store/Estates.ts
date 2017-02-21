@@ -1,4 +1,4 @@
-import { IPool } from 'mysql';
+import { IPool } from 'promise-mysql';
 
 import { IEstate, IManager, IEstateMap } from '../Types';
 
@@ -59,35 +59,20 @@ export class Estates {
   }
 
   getAll(): Promise<IEstate[]> {
-    return new Promise<Estate[]>((resolve, reject) => {
-      this.db.query('SELECT * FROM estate_settings WHERE 1', (err, rows: estate_row[]) => {
-        if (err)
-          return reject(err);
-        resolve(rows.map((row) => {
-          return new Estate(row);
-        }));
+    return this.db.query('SELECT * FROM estate_settings WHERE 1').then((rows: estate_row[]) => {
+      return <IEstate[]>rows.map((row) => {
+        return new Estate(row);
       });
     });
   }
 
+
   getManagers(): Promise<IManager[]> {
-    return new Promise<IManager[]>((resolve, reject) => {
-      this.db.query('SELECT * FROM estate_managers WHERE 1', (err, rows: manager_row[]) => {
-        if (err)
-          return reject(err);
-        resolve(rows);
-      });
-    });
+    return this.db.query('SELECT * FROM estate_managers WHERE 1');
   }
 
   getMapping(): Promise<IEstateMap[]> {
-    return new Promise<IEstateMap[]>((resolve, reject) => {
-      this.db.query('SELECT * FROM estate_map WHERE 1', (err: Error, rows: estate_map_row[]) => {
-        if (err)
-          return reject(err);
-        resolve(rows);
-      });
-    });
+    return this.db.query('SELECT * FROM estate_map WHERE 1');
   }
 
   create(name: string, owner: string): Promise<IEstate> {
@@ -116,32 +101,28 @@ export class Estates {
       AbuseEmail: '',
       DenyMinors: 0,
     }
-    return new Promise<IEstate>((resolve, reject) => {
-      this.db.query('INSERT INTO estate_settings SET ?', estate, (err: Error, result) => {
-        if (err) return reject(err);
-        estate.EstateID = result.insertId;
-        resolve(new Estate(estate));
-      });
+    return this.db.query('INSERT INTO estate_settings SET ?', estate).then((result) => {
+      estate.EstateID = result.insertId;
+      return new Estate(estate);
     });
   }
 
   destroy(id: number): Promise<void> {
     // make sure there are no regions with this estate before deletion
     // regions must alsways have an estate
-    return new Promise<number>((resolve, reject) => {
-      this.db.query('SELECT * FROM estate_map WHERE EstateID=?', id, (err: Error, rows: any[]) => {
-        if (err) return reject(err);
-        resolve(rows.length);
-      });
+    return this.db.query('SELECT * FROM estate_map WHERE EstateID=?', id).then((rows: any[]) => {
+      return rows.length;
     }).then((count: number) => {
       if (count !== 0)
         throw new Error('Cannot delete estate ' + id + ', there are ' + count + ' regions still assigned.');
       // safe to wipe
-      this.db.query('DELETE FROM estate_settings WHERE EstateID=?', id);
-      this.db.query('DELETE FROM estateban WHERE EstateID=?', id);
-      this.db.query('DELETE FROM estate_groups WHERE EstateID=?', id);
-      this.db.query('DELETE FROM estate_managers WHERE EstateId=?', id); // watch the different EstateID vs EstateId
-      this.db.query('DELETE FROM estate_users WHERE EstateID=?', id);
+      return Promise.all([
+        this.db.query('DELETE FROM estate_settings WHERE EstateID=?', id),
+        this.db.query('DELETE FROM estateban WHERE EstateID=?', id),
+        this.db.query('DELETE FROM estate_groups WHERE EstateID=?', id),
+        this.db.query('DELETE FROM estate_managers WHERE EstateId=?', id), // watch the different EstateID vs EstateId
+        this.db.query('DELETE FROM estate_users WHERE EstateID=?', id)
+      ]);
     });
   }
 

@@ -1,5 +1,5 @@
 
-import { IPool } from 'mysql';
+import { IPool } from 'promise-mysql';
 
 import { IUser } from '../Types';
 
@@ -87,49 +87,32 @@ export class Users {
   }
 
   getAll(): Promise<IUser[]> {
-    return new Promise<IUser[]>((resolve, reject) => {
-      this.db.query('SELECT * FROM users WHERE 1', (err: Error, rows: user_row[]) => {
-        if (err)
-          return reject(err);
-        resolve(rows.map((row: user_row): IUser => {
-          return new UserObj(row);
-        }));
-      })
-    })
+    return this.db.query('SELECT * FROM users WHERE 1').then((rows: user_row[]) => {
+      return rows.map((row: user_row): IUser => {
+        return new UserObj(row);
+      });
+    });
   }
 
   getByID(uuid: string): Promise<IUser> {
-    return new Promise<IUser>((resolve, reject) => {
-      this.db.query('SELECT * FROM users WHERE UUID=?', [uuid], (err: Error, rows: user_row[]) => {
-        if (err)
-          return reject(err);
-        if (rows.length == 0)
-          return reject(new Error('User ' + uuid + ' does not exist'));
-        resolve(new UserObj(rows[0]));
-      })
-    })
+    return this.db.query('SELECT * FROM users WHERE UUID=?', [uuid]).then((rows: user_row[]) => {
+      if (rows.length == 0)
+        throw new Error('User ' + uuid + ' does not exist');
+      return new UserObj(rows[0]);
+    });
   }
 
   getByName(name: string): Promise<IUser> {
     let nameParts = name.split(' ');
-    return new Promise<IUser>((resolve, reject) => {
-      this.db.query('SELECT * FROM users WHERE username=? AND lastname=?', [nameParts[0], nameParts[1]], (err: Error, rows: user_row[]) => {
-        if (err)
-          return reject(err);
-        if (rows.length == 0)
-          return reject(new Error('User ' + name + ' does not exist'));
-        resolve(new UserObj(rows[0]));
-      });
+    return this.db.query('SELECT * FROM users WHERE username=? AND lastname=?', [nameParts[0], nameParts[1]]).then((rows: user_row[]) => {
+      if (rows.length == 0)
+        throw new Error('User ' + name + ' does not exist');
+      return new UserObj(rows[0]);
     });
   }
 
   setPassword(user: IUser, cred: Credential): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.db.query('UPDATE users SET passwordHash=? WHERE UUID=?', [cred.hash, user.UUID], (err: Error) => {
-        if (err) return reject(err);
-        resolve();
-      });
-    });
+    return this.db.query('UPDATE users SET passwordHash=? WHERE UUID=?', [cred.hash, user.UUID]);
   }
 
 

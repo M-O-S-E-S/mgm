@@ -9,7 +9,7 @@ import { OfflineMessages } from './OfflineMessages';
 
 import { IUser, IHost, IRegion, IEstate, IManager, IEstateMap, IPendingUser, IJob, IGroup, IRole, IMember } from '../Types';
 
-import { IPool, createPool } from 'mysql';
+import { IPool, createPool } from 'promise-mysql';
 import { Credential } from '../Auth';
 
 export interface Store {

@@ -1,5 +1,5 @@
 
-import { IPool } from 'mysql';
+import { IPool } from 'promise-mysql';
 
 import { IHost } from '../Types';
 
@@ -20,24 +20,14 @@ export class Hosts {
   }
 
   getAll(): Promise<IHost[]> {
-    return new Promise<IHost[]>((resolve, reject) => {
-      this.db.query('SELECT * FROM hosts WHERE 1', (err: Error, rows: hosts_row[]) => {
-        if (err)
-          return reject(err);
-        resolve(rows);
-      });
-    });
+    return this.db.query('SELECT * FROM hosts WHERE 1');
   }
 
   getByAddress(address: string): Promise<IHost> {
-    return new Promise<IHost>((resolve, reject) => {
-      this.db.query('SELECT * FROM hosts WHERE address=?', [address], (err: Error, rows: hosts_row[]) => {
-        if (err)
-          return reject(err);
-        if (rows.length == 0)
-          return reject(new Error('Host ' + address + ' does not exist'));
-        resolve(rows[0]);
-      });
+    return this.db.query('SELECT * FROM hosts WHERE address=?', [address]).then((rows: hosts_row[]) => {
+      if (rows.length == 0)
+        throw new Error('Host ' + address + ' does not exist');
+      return rows[0];
     });
   }
 

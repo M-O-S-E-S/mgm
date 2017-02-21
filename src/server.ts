@@ -21,7 +21,7 @@ if (!Validate(conf)) {
 let certificate = fs.readFileSync(conf.mgm.privateKeyPath)
 
 import { getStore, Store } from './Store';
-let store: Store = getStore(conf.mgm.db,conf.halcyon.db);
+let store: Store = getStore(conf.mgm.db, conf.halcyon.db);
 
 let clientApp = express();
 clientApp.use(bodyParser.json({ limit: '1gb' }));       // to support JSON-encoded bodies
@@ -60,9 +60,10 @@ import { GetRegionsHandler } from './Routes';
 apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
 
 // Estate
-import { GetEstatesHandler, CreateEstateHandler } from './Routes';
+import { GetEstatesHandler, CreateEstateHandler, DeleteEstateHandler } from './Routes';
 apiRouter.get('/estate', middleware.isUser(), GetEstatesHandler(store));
 apiRouter.post('/estate/create', formParser, middleware.isAdmin(), CreateEstateHandler(store));
+apiRouter.post('/estate/destroy/:id', middleware.isAdmin(), DeleteEstateHandler(store));
 
 // Group
 import { GetGroupsHander } from './Routes';

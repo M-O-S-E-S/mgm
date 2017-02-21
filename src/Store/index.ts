@@ -41,6 +41,7 @@ export interface Store {
   },
   Estates: {
     create(name: string, owner: string): Promise<IEstate>
+    destroy(id: number): Promise<void>
     getAll(): Promise<IEstate[]>
     getManagers(): Promise<IManager[]>
     getMapping(): Promise<IEstateMap[]>

@@ -75,13 +75,12 @@ export class AddEstateModal extends React.Component<props, state> {
         .set('EstateName', this.state.name)
         .set('EstateOwner', this.state.owner);
       this.props.store.Estate.Update(e);
-
       this.props.cancel();
     }).catch((err: Error) => {
-      this.setState({
+      return this.setState({
         error: 'Error creating estate: ' + err.message
-      })
-    })
+      });
+    });
   }
 
   onName(e: { target: { value: string } }) {

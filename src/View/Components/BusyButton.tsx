@@ -21,17 +21,24 @@ export class BusyButton extends React.Component<props, {}> {
   }
 
   handleClick() {
-    if(this.state.busy){
+    if (this.state.busy) {
       return;
     }
     this.setState({
       busy: true
     });
-    this.props.onClick().then(() => {
+    let click = this.props.onClick();
+    if (click) {
+      click.then(() => {
+        this.setState({
+          busy: false
+        });
+      });
+    } else {
       this.setState({
         busy: false
-      })
-    });
+      });
+    }
   }
 
   render() {

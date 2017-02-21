@@ -15,7 +15,8 @@ import {
 } from './RegionHandler';
 import {
   GetEstatesHandler,
-  CreateEstateHandler
+  CreateEstateHandler,
+  DeleteEstateHandler
 } from './EstateHandler';
 import {
   GetGroupsHander
@@ -34,6 +35,7 @@ export {
   GetRegionsHandler,
   GetEstatesHandler,
   CreateEstateHandler,
+  DeleteEstateHandler,
   GetGroupsHander,
   GetHostHandler
 }

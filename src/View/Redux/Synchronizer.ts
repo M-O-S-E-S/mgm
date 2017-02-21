@@ -108,6 +108,9 @@ function estates(store: ReduxStore): Promise<void> {
         return new Estate(r);
       })
     );
+    staleEstates.map((e: number) => {
+      console.log(store.GetState().estates.get(e));
+    })
     store.Estate.Destroy(staleEstates.toArray());
 
     let staleManagers = Map<number, Set<string>>();

@@ -47,7 +47,7 @@ export function CreateEstateHandler(store: Store): RequestHandler {
           throw new Error('An estate named ' + name + ' Already Exists');
         }
       });
-      return store.Estates.create(ownerID, name);
+      return store.Estates.create(name, ownerID);
     }).then((estate: IEstate) => {
       res.json(<CreateEstateResponse>{ Success: true, EstateID: estate.EstateID });
     }).catch((err: Error) => {
@@ -56,43 +56,14 @@ export function CreateEstateHandler(store: Store): RequestHandler {
   }
 }
 
-/*
-
-  router.post('/create', isAdmin, (req: AuthenticatedRequest, res) => {
-    let estateName = req.body.name;
-    let owner = req.body.owner;
-
-    if (estateName === '') {
-      return res.json({ Success: false, Message: 'Estate name cannot be blank' });
-    }
-
-    db.Estates.getAll().then((estates: EstateInstance[]) => {
-      for (let e of estates) {
-        if (e.EstateName === estateName) {
-          throw new Error('An estate with that name already exists');
-        }
-      }
-    }).then(() => {
-      return db.Users.getByID(owner);
-    }).then((u: UserInstance) => {
-      return db.Estates.create(estateName, owner);
-    }).then((e: EstateInstance) => {
-      res.json({ Success: true, ID: e.EstateID });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    });
-  });
-
-  router.post('/destroy/:id', isAdmin, (req: AuthenticatedRequest, res) => {
+export function DeleteEstateHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
     let estateID = req.params.id;
 
-    db.Estates.destroy(estateID).then(() => {
+    store.Estates.destroy(estateID).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
-
-  return router;
+  };
 }
-*/

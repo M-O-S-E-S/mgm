@@ -116,12 +116,32 @@ export class Estates {
       AbuseEmail: '',
       DenyMinors: 0,
     }
-    return new Promise<IEstate>( (resolve, reject) => {
+    return new Promise<IEstate>((resolve, reject) => {
       this.db.query('INSERT INTO estate_settings SET ?', estate, (err: Error, result) => {
-        if(err) return reject(err);
+        if (err) return reject(err);
         estate.EstateID = result.insertId;
         resolve(new Estate(estate));
       });
+    });
+  }
+
+  destroy(id: number): Promise<void> {
+    // make sure there are no regions with this estate before deletion
+    // regions must alsways have an estate
+    return new Promise<number>((resolve, reject) => {
+      this.db.query('SELECT * FROM estate_map WHERE EstateID=?', id, (err: Error, rows: any[]) => {
+        if (err) return reject(err);
+        resolve(rows.length);
+      });
+    }).then((count: number) => {
+      if (count !== 0)
+        throw new Error('Cannot delete estate ' + id + ', there are ' + count + ' regions still assigned.');
+      // safe to wipe
+      this.db.query('DELETE FROM estate_settings WHERE EstateID=?', id);
+      this.db.query('DELETE FROM estateban WHERE EstateID=?', id);
+      this.db.query('DELETE FROM estate_groups WHERE EstateID=?', id);
+      this.db.query('DELETE FROM estate_managers WHERE EstateId=?', id); // watch the different EstateID vs EstateId
+      this.db.query('DELETE FROM estate_users WHERE EstateID=?', id);
     });
   }
 
@@ -149,29 +169,6 @@ export class Estates {
       RegionID: region,
       EstateID: estate
     });
-  }
-
-  destroy(id: number): Promise<void> {
-    return this.estateMap.findAll({
-      where: {
-        EstateID: id
-      }
-    }).then((mapper: EstateMapInstance[]) => {
-      if (mapper.length > 0) {
-        throw new Error('Cannot delete an estate with member regions');
-      }
-    }).then(() => {
-      // destroy the primary record in estate_settings
-      return this.estates.destroy({ where: { EstateID: id } });
-    }).then(() => {
-      //estate settings succeeded, ignore errors on the rest
-      this.estateBan.destroy({ where: { EstateID: id } });
-      this.estateGroup.destroy({ where: { EstateID: id } });
-      this.managers.destroy({ where: { EstateID: id } });
-      // don't need this one, we already know there are no regions on it
-      //halDB.estateMap.destroy({ where: { EstateID: estateID } });
-      this.estateUser.destroy({ where: { EstateID: id } });
-    })
   }
   */
 }

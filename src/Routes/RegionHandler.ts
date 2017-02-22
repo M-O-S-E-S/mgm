@@ -3,6 +3,7 @@ import { Store } from '../Store';
 import { IRegion } from '../Types';
 import { AuthenticatedRequest } from '../Auth';
 import { Set } from 'immutable';
+import { RegionLogs } from '../lib';
 
 import { Response, GetRegionsResponse } from '../View/ClientStack';
 
@@ -10,7 +11,7 @@ export function GetRegionsHandler(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {
     store.Regions.getAll()
       .then((regions: IRegion[]) => {
-        return regions.filter( (r: IRegion) => {
+        return regions.filter((r: IRegion) => {
           return req.user.regions.has(r.uuid);
         });
       }).then((regions: IRegion[]) => {
@@ -27,44 +28,13 @@ export function GetRegionsHandler(store: Store): RequestHandler {
   }
 }
 
-/*
-export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAdmin): express.Router {
-  let router = express.Router();
+export function GetRegionLogsHandler(store: Store, logger: RegionLogs): RequestHandler {
+  return function (req: AuthenticatedRequest, res: Response) {
+    let regionID = req.params.uuid;
 
-  let logger = new RegionLogs(config.mgm.log_dir);
-
-  router.get('/', isUser, (req: AuthenticatedRequest, res) => {
-    let user = new UUIDString(req.user.uuid);
-
-    // just send them all and let the client sort them.  They cant control them anyways,
-    // and they can see them in-world anyways.  no need to be secret
-    db.Regions.getAll().then((regions: RegionInstance[]) => {
-      res.json({
-        Success: true,
-        Regions: regions.map((r: RegionInstance) => {
-          let ir: IRegion = {
-            uuid: r.uuid,
-            name: r.name,
-            x: r.locX,
-            y: r.locY,
-            status: r.status,
-            node: r.slaveAddress,
-            isRunning: r.isRunning
-          }
-          return ir;
-        })
-      });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    });
-  });
-
-  router.get('/logs/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
-    let regionID = new UUIDString(req.params.uuid);
-
-    db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
-      return logger.getLogs(regionID);
-    }).then( (log: string) => {
+    store.Regions.getByUUID(regionID).then((r: IRegion) => {
+      return logger.getLogs(r);
+    }).then((log: string) => {
       res.json({
         Success: true,
         Message: log
@@ -72,7 +42,14 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
+  }
+}
+
+/*
+export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAdmin): express.Router {
+  let router = express.Router();
+
+  let logger = new RegionLogs(config.mgm.log_dir);
 
   router.post('/destroy/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);

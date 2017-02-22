@@ -14,7 +14,8 @@ import {
   PasswordResetHandler
 } from './JobHandler';
 import {
-  GetRegionsHandler
+  GetRegionsHandler,
+  GetRegionLogsHandler
 } from './RegionHandler';
 import {
   GetEstatesHandler,
@@ -46,6 +47,7 @@ export {
   PasswordResetHandler,
 
   GetRegionsHandler,
+  GetRegionLogsHandler,
 
   GetEstatesHandler,
   CreateEstateHandler,

@@ -77,8 +77,11 @@ apiRouter.get('/user', middleware.isUser(), GetUsersHandler(store));
 apiRouter.post('/user/password', middleware.isUser(), formParser, SetPasswordHandler(store));
 
 // Region
-import { GetRegionsHandler } from './Routes';
+import { GetRegionsHandler, GetRegionLogsHandler } from './Routes';
+import { RegionLogs } from './lib';
+let regionLogs = new RegionLogs(conf.mgm.log_dir);
 apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
+apiRouter.get('/region/logs/:uuid', middleware.isUser(), GetRegionLogsHandler(store, regionLogs));
 
 // Estate
 import { GetEstatesHandler, CreateEstateHandler, DeleteEstateHandler } from './Routes';

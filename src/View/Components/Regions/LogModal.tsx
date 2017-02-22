@@ -28,22 +28,21 @@ export class LogModal extends React.Component<props, {}> {
     }
   }
 
-  componentWillReceiveProps(nextProps: props){
-    if(!nextProps.region) return;
-    if(!nextProps.show) {
+  componentWillReceiveProps(nextProps: props) {
+    if (!nextProps.region) return;
+    if (!nextProps.show) {
       this.setState({
         content: ''
       });
       return;
     }
 
-    ClientStack.Region.GetLog(nextProps.region).then((result: any) => {
-      let logString: string = result.Message;
+    ClientStack.Region.GetLog(nextProps.region).then((logString: string) => {
       this.setState({
         loaded: true,
-        content: logString.split('\n').map((s: string, idx: number) => {
-          return <p key={'logline ' + idx}>{s}</p>
-        })
+        content: logString//.split('\n').map((s: string, idx: number) => {
+        //return <p key={'logline ' + idx}>{s}</p>
+        //})
       });
     }).catch((err: Error) => {
       this.setState({
@@ -59,8 +58,8 @@ export class LogModal extends React.Component<props, {}> {
         <Modal.Header closeButton>
           <Modal.Title>{this.props.region ? this.props.region.name + ' ' : ''}Logs</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          { this.state.loaded? this.state.content : <p>Loading...</p>}
+        <Modal.Body style={{ whiteSpace: 'pre-line' }}>
+          {this.state.loaded ? this.state.content : <p>Loading...</p>}
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={this.props.dismiss}>Close</Button>

@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
-import { IRegion, IHost } from '../Types';
+import { IRegion, IHost, IEstate } from '../Types';
 import { AuthenticatedRequest } from '../Auth';
 import { Set } from 'immutable';
 import { RegionLogs } from '../lib';
@@ -124,6 +124,32 @@ export function GetRegionLogsHandler(store: Store, logger: RegionLogs): RequestH
   }
 }
 
+export function SetRegionEstateHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let regionID = req.params.uuid;
+    let estateID: number = parseInt(req.body.estate);
+
+    let estate: IEstate;
+
+    if (!req.user.isAdmin && !req.user.regions.has(regionID))
+      return res.json({ Success: false, Message: 'Permission Denied' });
+
+    //confirm the components exist
+    store.Estates.getById(estateID).then((e: IEstate) => {
+      //confirmed
+      estate = e;
+      return store.Regions.getByUUID(regionID.toString());
+    }).then((r: IRegion) => {
+      //confirmed
+       return store.Estates.setEstateForRegion(estate, r);
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err: Error) => {
+      res.json({ Success: false, Message: err.message });
+    });
+  };
+}
+
 /*
   router.post('/destroy/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
@@ -136,28 +162,6 @@ export function GetRegionLogsHandler(store: Store, logger: RegionLogs): RequestH
         return res.json({ Success: false, Message: 'region is still allocated a host' });
       }
       return r.destroy();
-    }).then(() => {
-      res.json({ Success: true });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    });
-  });
-
-  router.post('/estate/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
-    let regionID = new UUIDString(req.params.uuid);
-    let estateID: number = parseInt(req.body.estate);
-
-    //confirm the components exist
-    db.Estates.getEstateByID(estateID).then(() => {
-      //confirmed
-      return db.Regions.getByUUID(regionID.toString());
-    }).then(() => {
-      //confirmed
-      return db.Estates.getMapForRegion(regionID.toString());
-    }).then((r: EstateMapInstance) => {
-      return r.destroy();
-    }).then(() => {
-      return db.Estates.setMapForRegion(estateID, regionID.toString());
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {

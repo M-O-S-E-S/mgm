@@ -2,7 +2,7 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { Region, Estate, Host } from '../../Immutable';
+import { Region, Estate, Host, EstateMap } from '../../Immutable';
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Row, Col, Alert, Button } from 'react-bootstrap';
 import { BusyButton } from '../BusyButton';
 import { ClientStack } from '../..';
@@ -115,7 +115,10 @@ export class ManageModal extends React.Component<props, {}> {
       })
 
       // update region in redux 
-      this.props.store.Region.AssignEstate(this.props.region, parseInt(this.state.selectedEstate, 10));
+      let m = new EstateMap()
+        .set('EstateID', this.state.selectedEstate)
+        .set('RegionID', this.props.region.uuid);
+      this.props.store.EstateMap.Update(m);
 
     }).catch((err: Error) => {
       this.setState({

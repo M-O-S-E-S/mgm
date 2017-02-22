@@ -56,8 +56,10 @@ export interface Store {
     create(name: string, owner: string): Promise<IEstate>
     destroy(id: number): Promise<void>
     getAll(): Promise<IEstate[]>
+    getById(id: number): Promise<IEstate>
     getManagers(): Promise<IManager[]>
     getMapping(): Promise<IEstateMap[]>
+    setEstateForRegion(estate: IEstate, region: IRegion): Promise<void>
   },
   OfflineMessages: {
     save(to: string, message: string): Promise<void>

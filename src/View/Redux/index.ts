@@ -39,7 +39,6 @@ export interface ReduxStore {
   }
   Region: {
     Destroy(region: Region | Region[] | string | string[]): void
-    AssignEstate(region: Region, estate: number): void
     Update(region: Region | Region[]): void
   }
   Estate: {
@@ -110,7 +109,6 @@ export function getStore(): ReduxStore {
     },
     Region: {
       Update: DispatchUpdateRegion.bind(null, store),
-      AssignEstate(region: Region, estate: number) { console.log('region assign estate not implemented'); },
       Destroy: DispatchDeleteRegion.bind(null, store),
     },
     Estate: {

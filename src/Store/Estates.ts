@@ -1,6 +1,6 @@
 import { IPool } from 'promise-mysql';
 
-import { IEstate, IManager, IEstateMap } from '../Types';
+import { IEstate, IManager, IEstateMap, IRegion } from '../Types';
 
 interface estate_row {
   EstateID?: number
@@ -126,16 +126,19 @@ export class Estates {
     });
   }
 
-  /*
-  
-
-  getEstateByID(id: number): Promise<EstateInstance> {
-    return this.estates.findOne({
-      where: {
-        EstateId: id
-      }
+  getById(id: number): Promise<IEstate> {
+    return this.db.query('SELECT * FROM estate_settings WHERE EstateID=?', id).then((rows: estate_row[]) => {
+      if (rows.length !== 1)
+        throw new Error('Estate ' + id + ' does not exist')
+      return new Estate(rows[0]);
     });
   }
+
+  setEstateForRegion(estate: IEstate, region: IRegion): Promise<void> {
+    return this.db.query('UPDATE estate_map SET EstateID=? WHERE RegionID=?', [estate.EstateID, region.uuid]);
+  }
+
+  /*
 
   getMapForRegion(region: string): Promise<EstateMapInstance> {
     return this.estateMap.findOne({
@@ -145,11 +148,5 @@ export class Estates {
     });
   }
 
-  setMapForRegion(estate: number, region: string): Promise<EstateMapInstance> {
-    return this.estateMap.create({
-      RegionID: region,
-      EstateID: estate
-    });
-  }
   */
 }

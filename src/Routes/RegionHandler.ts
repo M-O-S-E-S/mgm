@@ -51,6 +51,34 @@ export function StartRegionHandler(store: Store): RequestHandler {
   };
 }
 
+
+export function StopRegionHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let regionID = req.params.uuid;
+    let region: IRegion
+
+    if (!req.user.isAdmin && !req.user.regions.has(regionID))
+      return res.json({ Success: false, Message: 'Permission Denied' });
+
+    store.Regions.getByUUID(regionID.toString()).then((r: IRegion) => {
+      if (!r.isRunning) {
+        throw new Error('Region ' + r.name + ' is not running');
+      }
+      if (!r.node) {
+        throw new Error('Region ' + r.name + ' is marked as running, but is not assigned to a host');
+      }
+      region = r;
+      return store.Hosts.getByAddress(r.node);
+    }).then( (h: IHost) => {
+      return StopRegion(region, h);
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err) => {
+      res.json({ Success: false, Message: err.message });
+    });
+  };
+}
+
 export function GetRegionLogsHandler(store: Store, logger: RegionLogs): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {
     let regionID = req.params.uuid;
@@ -234,27 +262,6 @@ export function GetRegionLogsHandler(store: Store, logger: RegionLogs): RequestH
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    });
-  });
-
-  router.post('/stop/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
-    let regionID = new UUIDString(req.params.uuid);
-    let target: RegionInstance;
-    db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
-      if (!r.isRunning) {
-        throw new Error('Region ' + r.name + ' is not running');
-      }
-      if (r.slaveAddress === null || r.slaveAddress === '') {
-        throw new Error('Region ' + r.name + ' is marked as running, but is not assigned to a host');
-      }
-      target = r;
-      return db.Hosts.getByAddress(r.slaveAddress);
-    }).then((h: HostInstance) => {
-      return StopRegion(target, h);
-    }).then(() => {
-      res.json({ Success: true });
-    }).catch((err) => {
       res.json({ Success: false, Message: err.message });
     });
   });

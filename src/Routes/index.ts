@@ -8,7 +8,9 @@ import {
   SetPasswordHandler
 } from './UserHandler';
 import {
-  GetJobsHandler
+  GetJobsHandler,
+  PasswordResetCodeHandler,
+  PasswordResetHandler
 } from './JobHandler';
 import {
   GetRegionsHandler
@@ -33,16 +35,24 @@ import { ConsoleHandler } from './ConsoleHandler';
 export {
   RenewTokenHandler,
   LoginHandler,
+
   GetUsersHandler,
   SetPasswordHandler,
+
   GetJobsHandler,
+  PasswordResetCodeHandler,
+  PasswordResetHandler,
+
   GetRegionsHandler,
+
   GetEstatesHandler,
   CreateEstateHandler,
   DeleteEstateHandler,
+
   GetGroupsHandler,
   AddMemberHandler,
   RemoveMemberHandler,
+
   GetHostHandler,
   AddHostHandler,
   RemoveHostHandler

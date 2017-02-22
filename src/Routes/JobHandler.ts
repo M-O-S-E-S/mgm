@@ -1,7 +1,9 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
-import { IJob } from '../Types';
-import { AuthenticatedRequest } from '../Auth';
+import { IJob, IUser } from '../Types';
+import { AuthenticatedRequest, Credential } from '../Auth';
+import { sign, verify } from 'jsonwebtoken';
+import { EmailMgr } from '../lib'
 
 import { Response, GetJobsResponse } from '../View/ClientStack';
 
@@ -21,49 +23,72 @@ export function GetJobsHandler(store: Store): RequestHandler {
   };
 }
 
+export function PasswordResetCodeHandler(store: Store, cert: Buffer): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let email = req.body.email || '';
 
+    if (email === '') {
+      return res.json({ Success: false, Message: 'Email cannot be blank' });
+    }
 
-console.log('arbitrary command from job handler');
-
-/*
-export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin): express.Router {
-  let router = express.Router();
-
-  let uploadDir = conf.mgm.upload_dir;
-  let defaultOar = conf.mgm.default_oar_path;
-
-  //ensure the directory for logs exists
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdir(path.join(uploadDir), (err) => {
-      if (err && err.code !== "EEXIST")
-        throw new Error('Cannot create region log directory at ' + uploadDir);
-    });
-  }
-
-  if(!fs.existsSync(defaultOar)) {
-    throw new Error('Default oar does not exist at ' + defaultOar);
-  }
-
-  router.get('/', isUser, (req: AuthenticatedRequest, res) => {
-    db.Jobs.getFor(req.user.uuid).then((jobs: JobInstance[]) => {
-      res.json({
-        Success: true,
-        Jobs: jobs.map((j: JobInstance) => {
-          let ij: IJob = {
-            id: j.id,
-            timestamp: j.timestamp,
-            type: j.type,
-            user: j.user,
-            data: j.data
-          }
-          return ij;
-        })
+    store.Users.getByEmail(email).then((u: IUser) => {
+      return store.Jobs.create('ResetToken', u, 'Token Requested');
+    }).then((j: IJob) => {
+      return new Promise<string>((resolve, reject) => {
+        sign({ email: email }, cert, {
+          expiresIn: '2d'
+        }, (err, token) => {
+          if (err) return reject(err);
+          resolve(token);
+        });
       });
+    }).then((token: string) => {
+      return EmailMgr.instance().sendAuthResetToken(email, token);
+    }).then(() => {
+      res.json({ Success: true });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
+  }
+}
 
+export function PasswordResetHandler(store: Store, cert: Buffer): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let name: string = req.body.name || '';
+    let token = req.body.token || '';
+    let password = req.body.password || '';
+
+    if (!password || password === '') {
+      return res.json({ Success: false, Message: 'Blank passwords not permitted' });
+    }
+
+    let user: IUser;
+
+    new Promise<string>((resolve, reject) => {
+      verify(token, cert, (err, decoded) => {
+        if (err) return reject(new Error('Invalid Token'));
+        resolve(decoded.email);
+      });
+    }).then((email: string) => {
+      return store.Users.getByEmail(email);
+    }).then((u: IUser) => {
+      user = u;
+      if (u.name().toLowerCase() === name.toLowerCase()) {
+        return store.Users.setPassword(u, Credential.fromPlaintext(password));
+      }
+      throw new Error('Invalid submission');
+    }).then(() => {
+      return store.Jobs.create('ResetToken', user, 'Password Reset')
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err: Error) => {
+      res.json({ Success: false, Message: err.message });
+    });
+  }
+}
+
+
+/*
   router.post('/loadOar/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let merge = req.body.merge;
     let regionID = new UUIDString(req.params.uuid);
@@ -184,78 +209,6 @@ export function TaskHandler(db: PersistanceLayer, conf: Config, isUser, isAdmin)
       res.json({ Success: false, Message: err.message });
     });
 
-  });
-
-  router.post('/loadIar', isUser, (req: AuthenticatedRequest, res) => {
-    res.json({ Success: false, Message: 'Not Implemented' });
-  });
-
-  router.post('/saveIar', isUser, (req: AuthenticatedRequest, res) => {
-    res.json({ Success: false, Message: 'Not Implemented' });
-  });
-
-  router.post('/resetCode', (req, res) => {
-    let email = req.body.email || '';
-
-    if (email === '') {
-      return res.json({ Success: false, Message: 'Email cannot be blank' });
-    }
-
-    db.Users.getByEmail(email).then((u: UserInstance) => {
-      if (!u || email !== u.email) throw new Error('User does not exist');
-      console.log('User ' + u.UUID + ' requesting password reset token');
-      return db.Jobs.create('ResetToken', u.UUID, 'Token Requested').then((j: JobInstance) => {
-        console.log('Password reset job created for ' + u.UUID + ' with ID ' + j.id);
-        return new Promise<string>((resolve, reject) => {
-          jwt.sign({ email: email }, conf.mgm.certificate, {
-            expiresIn: '2d'
-          }, (err, token) => {
-            if (err) return reject(err);
-            resolve(token);
-          });
-        });
-      }).then((token: string) => {
-        return EmailMgr.instance().sendAuthResetToken(email, token);
-      }).then(() => {
-        res.json({ Success: true });
-      }).catch((err: Error) => {
-        res.json({ Success: false, Message: err.message });
-      });
-    });
-  });
-
-  router.post('/resetPassword', (req, res) => {
-    let name: string = req.body.name || '';
-    let token = req.body.token || '';
-    let password = req.body.password || '';
-
-    if (!password || password === '') {
-      return res.json({ Success: false, Message: 'Blank passwords not permitted' });
-    }
-
-    let id = '';
-
-    new Promise<string>((resolve, reject) => {
-      jwt.verify(token, conf.mgm.certificate, (err, decoded) => {
-        if (err) return reject(new Error('Invalid Token'));
-        resolve(decoded.email);
-      });
-    }).then((email: string) => {
-      return db.Users.getByEmail(email);
-    }).then((u: UserInstance) => {
-      id = u.UUID;
-      if (u.username.toLowerCase() + ' ' + u.lastname.toLowerCase() === name.toLowerCase()) {
-        u.passwordHash = Credential.fromPlaintext(password).hash;
-        return u.save();
-      }
-      throw new Error('Invalid submission');
-    }).then(() => {
-      return db.Jobs.create('ResetToken', id, 'Password Reset')
-    }).then(() => {
-      res.json({ Success: true });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    });
   });
 
   router.get('/ready/:id', (req, res) => {

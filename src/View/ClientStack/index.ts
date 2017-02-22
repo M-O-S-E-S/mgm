@@ -205,10 +205,10 @@ export class ClientStack {
     }
 
     static PasswordResetToken(email: string): Promise<void> {
-        return performCall('POST', '/api/task/resetCode', { email: email });
+        return performCall('POST', '/api/job/resetCode', { email: email });
     }
     static SetPasswordWithToken(name: string, token: string, password: string): Promise<void> {
-        return performCall('POST', '/api/task/resetPassword', {
+        return performCall('POST', '/api/job/resetPassword', {
             name: name,
             token: token,
             password: password

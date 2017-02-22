@@ -97,7 +97,7 @@ export class Users {
   getByID(uuid: string): Promise<IUser> {
     return this.db.query('SELECT * FROM users WHERE UUID=?', [uuid]).then((rows: user_row[]) => {
       if (rows.length == 0)
-        throw new Error('User ' + uuid + ' does not exist');
+        throw new Error('User with id ' + uuid + ' does not exist');
       return new UserObj(rows[0]);
     });
   }
@@ -106,7 +106,7 @@ export class Users {
     let nameParts = name.split(' ');
     return this.db.query('SELECT * FROM users WHERE username=? AND lastname=?', [nameParts[0], nameParts[1]]).then((rows: user_row[]) => {
       if (rows.length == 0)
-        throw new Error('User ' + name + ' does not exist');
+        throw new Error('User with name ' + name + ' does not exist');
       return new UserObj(rows[0]);
     });
   }
@@ -115,22 +115,15 @@ export class Users {
     return this.db.query('UPDATE users SET passwordHash=? WHERE UUID=?', [cred.hash, user.UUID]);
   }
 
-
+  getByEmail(email: string): Promise<IUser> {
+    return this.db.query('SELECT * FROM users WHERE email=?', email).then((rows: user_row[]) => {
+      if (rows.length == 0)
+        throw new Error('User with email ' + email + ' does not exist');
+      return new UserObj(rows[0]);
+    });
+  }
 
   /*
-    
-  
-    getByEmail(email: string): Promise<UserInstance> {
-      return this.user.findOne({
-        where: {
-          email: email
-        }
-      }).then((u: UserInstance) => {
-        if (u)
-          return u;
-        throw new Error('User does not exist');
-      })
-    }
   
     createUserFromTemplate(fname: string, lname: string, cred: Credential, email: string, template: UserInstance): Promise<UserInstance> {
       if (!template) {

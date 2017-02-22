@@ -1,10 +1,10 @@
 
 import { IPool } from 'promise-mysql';
 
-import { IJob } from '../Types';
+import { IJob, IUser } from '../Types';
 
 interface job_row {
-  id: number
+  id?: number
   timestamp: Date
   type: string
   user: string
@@ -22,6 +22,19 @@ export class Jobs {
     return this.db.query('SELECT * FROM jobs WHERE user=?', [uuid]);
   }
 
+  create(type: string, user: IUser, data: string): Promise<IJob> {
+    let job: job_row = {
+      timestamp: new Date(),
+      type: type,
+      user: user.UUID,
+      data: data
+    }
+    return this.db.query('INSERT INTO jobs SET ?', job).then((result) => {
+      job.id = result.insertId;
+      return job;
+    });
+  }
+
   /*getByID(id: number): Promise<JobInstance> {
     return this.db.findOne({
       where: {
@@ -29,13 +42,5 @@ export class Jobs {
       }
     });
   }
-
-  create(type: string, user: string, data: string): Promise<JobInstance> {
-    return this.db.create({
-      type: type,
-      user: user,
-      timestamp: new Date().toISOString(),
-      data: data
-    });
-  }*/
+  */
 }

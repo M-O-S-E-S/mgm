@@ -26,6 +26,7 @@ export interface Store {
   Users: {
     getAll(): Promise<IUser[]>
     getByID(uuid: string): Promise<IUser>
+    getByEmail(email: string): Promise<IUser>
     getByName(name: string): Promise<IUser>
     setPassword(user: IUser, credential: Credential): Promise<void>
   },
@@ -42,6 +43,7 @@ export interface Store {
   },
   Jobs: {
     getFor(uuid: string): Promise<IJob[]>
+    create(type: string, owner: IUser, content: string): Promise<IJob>
   },
   Estates: {
     create(name: string, owner: string): Promise<IEstate>

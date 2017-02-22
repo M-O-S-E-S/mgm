@@ -15,8 +15,8 @@ if (!Validate(conf)) {
 }
 
 //initialize singletons
-//import { EmailMgr } from './lib';
-//new EmailMgr(conf.mgm.mail);
+import { EmailMgr } from './lib';
+new EmailMgr(conf.mgm.mail);
 
 let certificate = fs.readFileSync(conf.mgm.privateKeyPath)
 
@@ -46,9 +46,29 @@ import { RenewTokenHandler, LoginHandler } from './Routes';
 apiRouter.get('/auth', middleware.isUser(), RenewTokenHandler(store, certificate));
 apiRouter.post('/auth/login', formParser, LoginHandler(store, certificate));
 
+
+
+
 // Jobs
-import { GetJobsHandler } from './Routes';
+import { GetJobsHandler, PasswordResetCodeHandler, PasswordResetHandler } from './Routes';
+let uploadDir = conf.mgm.upload_dir;
+let defaultOar = conf.mgm.default_oar_path;
+
+//ensure the directory for logs exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdir(path.join(uploadDir), (err) => {
+    if (err && err.code !== "EEXIST")
+      throw new Error('Cannot create region log directory at ' + uploadDir);
+  });
+}
+
+if (!fs.existsSync(defaultOar)) {
+  throw new Error('Default oar does not exist at ' + defaultOar);
+}
 apiRouter.get('/job', middleware.isUser(), GetJobsHandler(store));
+apiRouter.post('/job/resetCode', formParser, PasswordResetCodeHandler(store, certificate));
+apiRouter.post('/job/resetPassword', formParser, PasswordResetHandler(store, certificate));
+
 
 // User
 import { GetUsersHandler, SetPasswordHandler } from './Routes';

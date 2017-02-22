@@ -72,13 +72,14 @@ apiRouter.get('/user', middleware.isUser(), GetUsersHandler(store));
 apiRouter.post('/user/password', middleware.isUser(), formParser, SetPasswordHandler(store));
 
 // Region
-import { GetRegionsHandler, GetRegionLogsHandler, StartRegionHandler, StopRegionHandler } from './Routes';
+import { GetRegionsHandler, GetRegionLogsHandler, StartRegionHandler, StopRegionHandler, KillRegionHandler } from './Routes';
 import { RegionLogs } from './lib';
 let regionLogs = new RegionLogs(conf.mgm.log_dir);
 apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
 apiRouter.get('/region/logs/:uuid', middleware.isUser(), GetRegionLogsHandler(store, regionLogs));
 apiRouter.post('/region/start/:regionID', middleware.isUser(), StartRegionHandler(store));
 apiRouter.post('/region/stop/:uuid', middleware.isUser(), StopRegionHandler(store));
+apiRouter.post('/region/kill/:uuid', middleware.isUser(), KillRegionHandler(store));
 
 // Estate
 import { GetEstatesHandler, CreateEstateHandler, DeleteEstateHandler } from './Routes';

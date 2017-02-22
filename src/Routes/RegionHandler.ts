@@ -69,8 +69,33 @@ export function StopRegionHandler(store: Store): RequestHandler {
       }
       region = r;
       return store.Hosts.getByAddress(r.node);
-    }).then( (h: IHost) => {
+    }).then((h: IHost) => {
       return StopRegion(region, h);
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err) => {
+      res.json({ Success: false, Message: err.message });
+    });
+  };
+}
+
+export function KillRegionHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let regionID = req.params.uuid;
+    let target: IRegion;
+
+    if (!req.user.isAdmin && !req.user.regions.has(regionID))
+      return res.json({ Success: false, Message: 'Permission Denied' });
+
+    store.Regions.getByUUID(regionID.toString()).then((r: IRegion) => {
+      if (!r.isRunning)
+        throw new Error('Region ' + r.name + ' is not running');
+      if (!r.node)
+        throw new Error('Region ' + r.name + ' is marked as running, but is not assigned to a host');
+      target = r;
+      return store.Hosts.getByAddress(r.node);
+    }).then((h: IHost) => {
+      return KillRegion(target, h);
     }).then(() => {
       res.json({ Success: true });
     }).catch((err) => {
@@ -266,28 +291,5 @@ export function GetRegionLogsHandler(store: Store, logger: RegionLogs): RequestH
     });
   });
 
-  router.post('/kill/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
-    let regionID = new UUIDString(req.params.uuid);
-    let target: RegionInstance;
-    db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
-      if (!r.isRunning)
-        throw new Error('Region ' + r.name + ' is not running');
-      if (r.slaveAddress === null || r.slaveAddress === '')
-        throw new Error('Region ' + r.name + ' is marked as running, but is not assigned to a host');
-      target = r;
-      return db.Hosts.getByAddress(r.slaveAddress);
-    }).then((h: HostInstance) => {
-      return KillRegion(target, h);
-    }).then(() => {
-      res.json({ Success: true });
-    }).catch((err) => {
-      res.json({ Success: false, Message: err.message });
-    });
-  });
 
-  router.get('/config/:uuid?', isAdmin, (req: AuthenticatedRequest, res) => {
-    res.json({ Success: false, Message: 'Not Implemented' });
-  });
-
-  return router;
 }*/

@@ -3,6 +3,8 @@ import { Store } from '../Store';
 import { IRegion } from '../Types';
 import { AuthenticatedRequest } from '../Auth';
 import { RegionLogs } from '../lib';
+import { RegionINI } from '../lib/Region';
+import { Config } from '../Config';
 
 //let remoteIP: string = req.ip.split(':').pop();
 
@@ -94,55 +96,47 @@ export function NodeStatHandler(store: Store): RequestHandler {
   };
 }
 
-/*
-export function DispatchHandler(db: Store, config: Config): express.Router {
-  let router: express.Router = express.Router();
-
-  let logger = new RegionLogs(config.mgm.log_dir);
-
-  router.get('/region/:id', (req, res) => {
-    let uuid = new UUIDString(req.params.id);
+export function RegionConfigHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let uuid = req.params.id;
     //validate host
     let remoteIP: string = req.ip.split(':').pop();
-    db.Regions.getByUUID(uuid.toString()).then((r: RegionInstance) => {
-      if (r.slaveAddress === remoteIP) {
+    store.Regions.getByUUID(uuid.toString()).then((r: IRegion) => {
+      if (r.node === req.node.address) {
         return r;
       }
       throw new Error('Requested region does not exist on the requesting host');
-    }).then((r: RegionInstance) => {
+    }).then((r: IRegion) => {
       res.json({
         Success: true,
         Region: {
           Name: r.name,
           RegionUUID: r.uuid,
-          LocationX: r.locX,
-          LocationY: r.locY,
-          InternalPort: r.httpPort,
-          ExternalHostName: r.slaveAddress
+          LocationX: r.x,
+          LocationY: r.y,
+          InternalPort: r.port,
+          ExternalHostName: r.node
         }
       });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
       return;
     });
-  });
+  };
+}
 
-  router.get('/process/:id', (req, res) => {
-    let uuid = new UUIDString(req.params.id);
-    let httpPort = req.query.httpPort;
-    let consolePort = req.query.consolePort;
-    let externalAddress = req.query.externalAddress;
+export function IniConfigHandler(store: Store, config: Config): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let uuid = req.params.id;
+    let httpPort = req.query['httpPort'];
+    let externalAddress = req.query['externalAddress'];
     //validate host
-    let remoteIP: string = req.ip.split(':').pop();
-    db.Regions.getByUUID(uuid.toString()).then((r: RegionInstance) => {
-      if (r.slaveAddress === remoteIP) {
-        return r;
+    store.Regions.getByUUID(uuid.toString()).then((r: IRegion) => {
+      if (r.node === req.node.address) {
+        return store.Regions.setPortAndAddress(r, parseInt(httpPort), externalAddress);
       }
       throw new Error('Requested region does not exist on the requesting host');
-    }).then((r: RegionInstance) => {
-      r.httpPort = httpPort;
-      r.externalAddress = externalAddress;
-      r.save();
+    }).then((r: IRegion) => {
       return RegionINI(r, config);
     }).then((config: { [key: string]: { [key: string]: string } }) => {
       res.json({ Success: true, Region: config });
@@ -150,8 +144,5 @@ export function DispatchHandler(db: Store, config: Config): express.Router {
       res.json({ Success: false, Message: err.message });
       return;
     });
-  });
-
-  return router;
+  };
 }
-*/

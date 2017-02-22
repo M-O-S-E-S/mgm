@@ -38,7 +38,9 @@ import { ConsoleHandler } from './ConsoleHandler';
 import {
   NodeLogHandler,
   NodeHandler,
-  NodeStatHandler
+  NodeStatHandler,
+  RegionConfigHandler,
+  IniConfigHandler
 } from './NodeHandler';
 
 export {
@@ -71,5 +73,7 @@ export {
 
   NodeLogHandler,
   NodeHandler,
-  NodeStatHandler
+  NodeStatHandler,
+  RegionConfigHandler,
+  IniConfigHandler
 }

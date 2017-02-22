@@ -25,6 +25,7 @@ export interface Store {
     getByUUID(uuid: string): Promise<IRegion>
     setStatus(region: IRegion, isRunning: boolean, status: string): Promise<IRegion>
     setHost(region: IRegion, host: IHost): Promise<IRegion>
+    setPortAndAddress(region: IRegion, port: number, address: string): Promise<IRegion>
     getByNode(host: IHost): Promise<IRegion[]>
   }
   Users: {

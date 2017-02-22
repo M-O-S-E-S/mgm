@@ -140,13 +140,15 @@ clusterApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   limit: '1gb'
 }));
 
-import { NodeLogHandler, NodeHandler, NodeStatHandler } from './Routes';
+import { NodeLogHandler, NodeHandler, NodeStatHandler, RegionConfigHandler, IniConfigHandler } from './Routes';
 
 clusterApp.get('/', (req, res) => { res.send('MGM Node Portal'); });
 
 clusterApp.post('/logs/:uuid', middleware.isNode(), NodeLogHandler(store, regionLogs));
 clusterApp.post('/node', middleware.isNode(), NodeHandler(store));
 clusterApp.post('/stats', formParser, middleware.isNode(), NodeStatHandler(store));
+clusterApp.get('/region/:id', middleware.isNode(), RegionConfigHandler(store));
+clusterApp.get('/process/:id', middleware.isNode(), IniConfigHandler(store, conf));
 
 clusterApp.listen(3001, function () {
   console.log('MGM listening for nodes on port 3001!');

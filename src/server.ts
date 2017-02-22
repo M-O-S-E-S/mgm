@@ -24,11 +24,6 @@ import { getStore, Store } from './Store';
 let store: Store = getStore(conf.mgm.db, conf.halcyon.db);
 
 let clientApp = express();
-clientApp.use(bodyParser.json({ limit: '1gb' }));       // to support JSON-encoded bodies
-clientApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  extended: true,
-  limit: '1gb'
-}));
 
 clientApp.use(express.static(__dirname + '/public'));
 
@@ -139,7 +134,21 @@ clientApp.listen(3000, function () {
 
 
 let clusterApp = express();
-clientApp.listen(3001, function () {
+clusterApp.use(bodyParser.json({ limit: '1gb' }));       // to support JSON-encoded bodies
+clusterApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true,
+  limit: '1gb'
+}));
+
+import { NodeLogHandler, NodeHandler, NodeStatHandler } from './Routes';
+
+clusterApp.get('/', (req, res) => { res.send('MGM Node Portal'); });
+
+clusterApp.post('/logs/:uuid', middleware.isNode(), NodeLogHandler(store, regionLogs));
+clusterApp.post('/node', middleware.isNode(), NodeHandler(store));
+clusterApp.post('/stats', formParser, middleware.isNode(), NodeStatHandler(store));
+
+clusterApp.listen(3001, function () {
   console.log('MGM listening for nodes on port 3001!');
 });
 

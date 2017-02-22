@@ -18,11 +18,14 @@ export interface Store {
     create(address: string): Promise<IHost>
     destroy(id: number): Promise<void>
     getByAddress(address: string): Promise<IHost>
+    setStatus(host: IHost, status: string): Promise<IHost>
   },
   Regions: {
     getAll(): Promise<IRegion[]>
     getByUUID(uuid: string): Promise<IRegion>
+    setStatus(region: IRegion, isRunning: boolean, status: string): Promise<IRegion>
     setHost(region: IRegion, host: IHost): Promise<IRegion>
+    getByNode(host: IHost): Promise<IRegion[]>
   }
   Users: {
     getAll(): Promise<IUser[]>

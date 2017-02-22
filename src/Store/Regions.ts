@@ -63,11 +63,37 @@ export class Regions {
     });
   }
 
+  setStatus(region: IRegion, isRunning: boolean, status: string): Promise<IRegion> {
+    return this.db.query('UPDATE regions SET status=?, isRunning=?  WHERE uuid=?', [status, isRunning, region.uuid]).then(() => {
+      region.isRunning = isRunning;
+      region.status = status;
+      return region;
+    });
+  }
+
   setHost(region: IRegion, host: IHost): Promise<IRegion> {
     let address: string = host ? host.address : '';
     return this.db.query('UPDATE regions SET slaveAddress=? WHERE uuid=?', [address, region.uuid]).then(() => {
       region.node = address;
       return region;
+    });
+  }
+
+  getByNode(host: IHost): Promise<IRegion[]> {
+    return this.db.query('SELECT * FROM regions WHERE slaveAddress=?', host.address).then((rows: region_row[]) => {
+      return rows.map((r: region_row): IRegion => {
+        return {
+          uuid: r.uuid,
+          name: r.name,
+          x: r.locX,
+          y: r.locY,
+          status: r.status,
+          node: r.slaveAddress,
+          publicAddress: r.externalAddress,
+          port: r.httpPort,
+          isRunning: r.isRunning ? true : false
+        }
+      });
     });
   }
 

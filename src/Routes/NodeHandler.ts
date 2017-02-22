@@ -1,62 +1,104 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
-import { IJob } from '../Types';
+import { IRegion } from '../Types';
 import { AuthenticatedRequest } from '../Auth';
+import { RegionLogs } from '../lib';
 
-export function DispatchHandler(db: Store, config: Config): express.Router {
-  let router: express.Router = express.Router();
+//let remoteIP: string = req.ip.split(':').pop();
 
-  let logger = new RegionLogs(config.mgm.log_dir);
+export function NodeLogHandler(store: Store, logger: RegionLogs): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let regionID = req.params.uuid;
 
-  router.post('/logs/:uuid', (req, res) => {
-    let regionID = new UUIDString(req.params.uuid);
-    let remoteIP: string = req.ip.split(':').pop();
-    db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
+    store.Regions.getByUUID(regionID.toString()).then((r: IRegion) => {
       let logs: string[] = JSON.parse(req.body.log);
-      return logger.append(new UUIDString(r.uuid), logs);
+      return logger.append(r, logs);
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
-      console.log('Error handling logs for host ' + remoteIP + ': ' + err.message);
       res.json({ Success: false, Message: err.message });
     });
-  });
+  };
+}
 
-  router.post('/stats/:host', (req, res) => {
-    //let host = req.params.host; //url parameter, not really used
-    let remoteIP: string = req.ip.split(':').pop();
-    db.Hosts.getByAddress(remoteIP).then((h: HostInstance) => {
-      //this is from mgmNode, which isnt following the rules
-      let stats = JSON.parse(req.body.json);
+export function NodeHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let payload = req.body;
+    store.Regions.getByNode(req.node).then((regions: IRegion[]) => {
+      let result = []
+      for (let r of regions) {
+        result.push({
+          name: r.name,
+          uuid: r.uuid,
+          locX: r.x,
+          locY: r.y
+        });
+      }
+      return res.json({
+        Success: true,
+        Regions: result
+      });
+    }).catch((err: Error) => {
+      return res.json({ Success: false, Message: err.message });
+    });
+  };
+}
 
-      let workers = [];
-      h.status = JSON.stringify(stats.host);
-      h.save();
 
-      let halted = 0;
-      let running = 0;
-      for (let proc of stats.processes) {
-        let w = db.Regions.getByUUID(proc.id).then((r: RegionInstance) => {
+interface hostStat {
+  cpuPercent: number[],
+  timestamp: Date,
+  netSentPer: number,
+  netRecvPer: number,
+  memPercent: number,
+  memKB: number
+}
+
+interface procStat {
+  id: string
+  running: boolean,
+  stats: {
+    timestamp: Date
+  }
+}
+
+interface statUpload {
+  host: hostStat,
+  processes: procStat[]
+}
+
+
+export function NodeStatHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let stats: statUpload = JSON.parse(req.body.json);
+    let running = 0;
+    let halted = 0;
+
+    store.Hosts.setStatus(req.node, JSON.stringify(stats.host)).then(() => {
+      return Promise.all(
+        stats.processes.map((proc: procStat) => {
           if (proc.running)
             running++;
           else
             halted++;
-          r.isRunning = proc.running;
-          r.status = JSON.stringify(proc.stats);
-          return r.save();
-        });
-        workers.push(w);
-      }
-
-      return Promise.all(workers).then(() => {
-        res.send('Stats recieved: ' + running + ' running processes, and ' + halted + ' halted processes');
-      });
-
+          return store.Regions.getByUUID(proc.id).then((r: IRegion) => {
+            return store.Regions.setStatus(r, proc.running, JSON.stringify(proc.stats));
+          });
+        })
+      );
+    }).then(() => {
+      res.send('Stats recieved: ' + running + ' running processes, and ' + halted + ' halted processes');
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
+  };
+}
 
+/*
+export function DispatchHandler(db: Store, config: Config): express.Router {
+  let router: express.Router = express.Router();
+
+  let logger = new RegionLogs(config.mgm.log_dir);
 
   router.get('/region/:id', (req, res) => {
     let uuid = new UUIDString(req.params.id);
@@ -110,37 +152,6 @@ export function DispatchHandler(db: Store, config: Config): express.Router {
     });
   });
 
-
-  router.post('/node', (req, res) => {
-    let remoteIP: string = req.ip.split(':').pop();
-    let payload = req.body;
-    db.Hosts.getByAddress(remoteIP).then((h: HostInstance) => {
-      console.log('Received registration for node at ' + remoteIP);
-      h.port = payload.port;
-      h.name = payload.host;
-      h.slots = payload.slots;
-      return h.save();
-    }).then((h: HostInstance) => {
-      return db.Regions.getBySlave(h.address);
-    }).then((regions: RegionInstance[]) => {
-      let result = []
-      for (let r of regions) {
-        result.push({
-          name: r.name,
-          uuid: r.uuid,
-          locX: r.locX,
-          locY: r.locY
-        });
-      }
-      return res.json({
-        Success: true,
-        Regions: result
-      });
-    }).catch((err: Error) => {
-      console.log('Error with host registration from ' + remoteIP);
-      return res.json({ Success: false, Message: err.message });
-    });
-  });
-
   return router;
 }
+*/

@@ -35,6 +35,12 @@ import {
 } from './HostHandler';
 import { ConsoleHandler } from './ConsoleHandler';
 
+import {
+  NodeLogHandler,
+  NodeHandler,
+  NodeStatHandler
+} from './NodeHandler';
+
 export {
   RenewTokenHandler,
   LoginHandler,
@@ -61,5 +67,9 @@ export {
 
   GetHostHandler,
   AddHostHandler,
-  RemoveHostHandler
+  RemoveHostHandler,
+
+  NodeLogHandler,
+  NodeHandler,
+  NodeStatHandler
 }

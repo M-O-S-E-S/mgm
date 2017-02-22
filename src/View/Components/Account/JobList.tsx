@@ -36,13 +36,16 @@ export class JobList extends React.Component<props, {}> {
       this.props.jobs.toArray().map((j: Job) => {
         return this.deleteJob(j);
       })
-    ).then(() =>{}) // eat the Promise<void[]> and return Promise<void>
+    ).then(() => { }) // eat the Promise<void[]> and return Promise<void>
   }
 
   render() {
-    let jobs = this.props.jobs.toList().map((job: Job) => {
-      return <JobView key={job.id} job={job} deleteJob={this.deleteJob.bind(this)} regions={this.props.regions}/>
-    })
+    let jobs = this.props.jobs.toArray()
+      .sort((a: Job, b: Job) => { return b.timestamp.valueOf() - a.timestamp.valueOf(); })
+      .map((job: Job) => {
+        console.log(job);
+        return <JobView key={job.id} job={job} deleteJob={this.deleteJob.bind(this)} regions={this.props.regions} />
+      })
 
     return (
       <Grid>

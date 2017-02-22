@@ -76,6 +76,7 @@ function jobs(store: ReduxStore): Promise<void> {
   return ClientStack.Job.Get().then((jobs: IJob[]) => {
     return jobs.map((j: IJob) => {
       stale = stale.delete(j.id);
+      j.timestamp = new Date(j.timestamp);  // convert serialized Date back to date object
       let job = new Job(j);
       return job;
     })

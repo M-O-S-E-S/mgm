@@ -1,11 +1,13 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
-import { IRegion } from '../Types';
+import { IRegion, IHost } from '../Types';
 import { AuthenticatedRequest } from '../Auth';
 import { Set } from 'immutable';
 import { RegionLogs } from '../lib';
 
 import { Response, GetRegionsResponse } from '../View/ClientStack';
+
+import { RemoveRegionFromHost, PutRegionOnHost, StopRegion, KillRegion, StartRegion, RegionINI } from '../lib/Region';
 
 export function GetRegionsHandler(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {
@@ -28,9 +30,33 @@ export function GetRegionsHandler(store: Store): RequestHandler {
   }
 }
 
+export function StartRegionHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let regionID = req.params.regionID;
+    let r: IRegion
+
+    if (!req.user.isAdmin && !req.user.regions.has(regionID))
+      return res.json({ Success: false, Message: 'Permission Denied' });
+
+    store.Regions.getByUUID(regionID.toString()).then((region: IRegion) => {
+      r = region;
+      return store.Hosts.getByAddress(r.node);
+    }).then((h: IHost) => {
+      return StartRegion(r, h);
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err: Error) => {
+      res.json({ Success: false, Message: err.message });
+    })
+  };
+}
+
 export function GetRegionLogsHandler(store: Store, logger: RegionLogs): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {
     let regionID = req.params.uuid;
+
+    if (!req.user.isAdmin && !req.user.regions.has(regionID))
+      return res.json({ Success: false, Message: 'Permission Denied' });
 
     store.Regions.getByUUID(regionID).then((r: IRegion) => {
       return logger.getLogs(r);
@@ -46,11 +72,6 @@ export function GetRegionLogsHandler(store: Store, logger: RegionLogs): RequestH
 }
 
 /*
-export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAdmin): express.Router {
-  let router = express.Router();
-
-  let logger = new RegionLogs(config.mgm.log_dir);
-
   router.post('/destroy/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
 
@@ -255,24 +276,6 @@ export function RegionHandler(db: PersistanceLayer, config: Config, isUser, isAd
     }).catch((err) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
-
-  router.post('/start/:regionID', isAdmin, (req: AuthenticatedRequest, res) => {
-    let regionID = new UUIDString(req.params.regionID);
-    let r: RegionInstance
-
-    db.Regions.getByUUID(regionID.toString()).then((region: RegionInstance) => {
-      r = region;
-      if (r.isRunning)
-        throw new Error('Region ' + r.name + ' is already running');
-      return db.Hosts.getByAddress(r.slaveAddress);
-    }).then((h: HostInstance) => {
-      return StartRegion(r, h);
-    }).then(() => {
-      res.json({ Success: true });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    })
   });
 
   router.get('/config/:uuid?', isAdmin, (req: AuthenticatedRequest, res) => {

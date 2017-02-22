@@ -41,6 +41,7 @@ export interface IMember {
 export interface IHost {
   id: number
   address: string
+  port: number
   name: string
   slots: number
   status: string

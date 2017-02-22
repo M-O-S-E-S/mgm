@@ -22,6 +22,7 @@ export interface Store {
   Regions: {
     getAll(): Promise<IRegion[]>
     getByUUID(uuid: string): Promise<IRegion>
+    setHost(region: IRegion, host: IHost): Promise<IRegion>
   }
   Users: {
     getAll(): Promise<IUser[]>

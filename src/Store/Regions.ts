@@ -1,7 +1,7 @@
 
 import { IPool } from 'promise-mysql';
 
-import { IRegion } from '../Types';
+import { IRegion, IHost } from '../Types';
 
 interface region_row {
   uuid: string
@@ -60,6 +60,14 @@ export class Regions {
         port: r.httpPort,
         isRunning: r.isRunning ? true : false
       };
+    });
+  }
+
+  setHost(region: IRegion, host: IHost): Promise<IRegion> {
+    let address: string = host ? host.address : '';
+    return this.db.query('UPDATE regions SET slaveAddress=? WHERE uuid=?', [address, region.uuid]).then(() => {
+      region.node = address;
+      return region;
     });
   }
 

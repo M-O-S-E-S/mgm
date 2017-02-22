@@ -1,24 +1,22 @@
-import { RegionInstance, HostInstance, JobInstance } from '../database';
+import { IRegion, IHost, IJob } from '../Types';
 import { Config } from '../Config';
-var urllib = require('urllib');
+import { Store } from '../Store';
+import * as urllib from 'urllib';
 
-export function RemoveRegionFromHost(r: RegionInstance, h: HostInstance): Promise<void> {
+export function RemoveRegionFromHost(r: IRegion, h: IHost): Promise<void> {
   return urllib.request('http://' + h.address + ':' + h.port + '/remove/' + r.uuid);
 }
 
-export function PutRegionOnHost(r: RegionInstance, h: HostInstance): Promise<void> {
-  //host may be null
-  r.slaveAddress = h ? h.address : '';
-  return r.save().then(() => {
+export function PutRegionOnHost(store: Store, r: IRegion, h: IHost): Promise<void> {
+  return store.Regions.setHost(r, h).then((r: IRegion) => {
     if (h === null) {
       return Promise.resolve();
     }
-
-    urllib.request('http://' + h.address + ':' + h.port + '/add/' + r.uuid + '/' + r.name, { timeout: 10000 });
-  })
+    return urllib.request('http://' + h.address + ':' + h.port + '/add/' + r.uuid + '/' + r.name, { timeout: 10000 });;
+  });
 }
 
-export function StopRegion(r: RegionInstance, h: HostInstance): Promise<void> {
+export function StopRegion(r: IRegion, h: IHost): Promise<void> {
   console.log('halting ' + r.uuid);
   let url = 'http://' + h.address + ':' + h.port + '/stop/' + r.uuid;
   return urllib.request(url).then((body) => {
@@ -29,7 +27,7 @@ export function StopRegion(r: RegionInstance, h: HostInstance): Promise<void> {
   });
 }
 
-export function KillRegion(r: RegionInstance, h: HostInstance): Promise<void> {
+export function KillRegion(r: IRegion, h: IHost): Promise<void> {
   console.log('killing ' + r.uuid);
   let url = 'http://' + h.address + ':' + h.port + '/kill/' + r.uuid;
   return urllib.request(url).then((body) => {
@@ -40,7 +38,7 @@ export function KillRegion(r: RegionInstance, h: HostInstance): Promise<void> {
   });
 }
 
-export function StartRegion(r: RegionInstance, h: HostInstance): Promise<void> {
+export function StartRegion(r: IRegion, h: IHost): Promise<void> {
   console.log('starting ' + r.uuid);
   let url = 'http://' + h.address + ':' + h.port + '/start/' + r.uuid;
   return urllib.request(url).then((body) => {
@@ -51,7 +49,7 @@ export function StartRegion(r: RegionInstance, h: HostInstance): Promise<void> {
   });
 }
 
-export function SaveOar(r: RegionInstance, h: HostInstance, j: JobInstance): Promise<void> {
+export function SaveOar(r: IRegion, h: IHost, j: IJob): Promise<void> {
   console.log('triggering oar save for ' + r.uuid);
   let url = 'http://' + h.address + ':' + h.port + '/saveOar/' + r.uuid + '/' + j.id;
   return urllib.request(url).then((body) => {
@@ -62,7 +60,7 @@ export function SaveOar(r: RegionInstance, h: HostInstance, j: JobInstance): Pro
   });
 }
 
-export function LoadOar(r: RegionInstance, h: HostInstance, j: JobInstance): Promise<void> {
+export function LoadOar(r: IRegion, h: IHost, j: IJob): Promise<void> {
   console.log('triggering oar load for ' + r.uuid);
   let url = 'http://' + h.address + ':' + h.port + '/loadOar/' + r.uuid + '/' + j.id;
   return urllib.request(url).then((body) => {
@@ -73,7 +71,7 @@ export function LoadOar(r: RegionInstance, h: HostInstance, j: JobInstance): Pro
   });
 }
 
-export function RegionINI(r: RegionInstance, conf: Config): { [key: string]: { [key: string]: string } } {
+export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: string]: string } } {
   let connString: string = 'Data Source=' + conf.halcyon.db.host +
     ';Database=' + conf.halcyon.db.name +
     ';User ID=' + conf.halcyon.db.user +
@@ -120,10 +118,10 @@ export function RegionINI(r: RegionInstance, conf: Config): { [key: string]: { [
   config['Inventory']['migration_active'] = 'true';
 
   config['Network'] = {};
-  config['Network']['http_listener_port'] = '' + r.httpPort;
-  config['Network']['default_location_x'] = '' + r.locX;
-  config['Network']['default_location_y'] = '' + r.locY;
-  config['Network']['hostname'] = r.externalAddress;
+  config['Network']['http_listener_port'] = '' + r.port;
+  config['Network']['default_location_x'] = '' + r.x;
+  config['Network']['default_location_y'] = '' + r.y;
+  config['Network']['hostname'] = r.publicAddress;
   config['Network']['http_listener_ssl'] = 'false';
   config['Network']['grid_server_url'] = conf.halcyon.grid_server;
   config['Network']['grid_send_key'] = 'null';

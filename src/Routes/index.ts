@@ -9,6 +9,7 @@ import {
 } from './UserHandler';
 import {
   GetJobsHandler,
+  DeleteJobHandler,
   PasswordResetCodeHandler,
   PasswordResetHandler
 } from './JobHandler';
@@ -40,6 +41,7 @@ export {
   SetPasswordHandler,
 
   GetJobsHandler,
+  DeleteJobHandler,
   PasswordResetCodeHandler,
   PasswordResetHandler,
 

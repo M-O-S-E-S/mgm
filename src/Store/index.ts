@@ -43,7 +43,9 @@ export interface Store {
   },
   Jobs: {
     getFor(uuid: string): Promise<IJob[]>
+    getByID(id: number): Promise<IJob>
     create(type: string, owner: IUser, content: string): Promise<IJob>
+    destroy(j: IJob): Promise<void>
   },
   Estates: {
     create(name: string, owner: string): Promise<IEstate>

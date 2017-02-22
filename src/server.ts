@@ -50,7 +50,7 @@ apiRouter.post('/auth/login', formParser, LoginHandler(store, certificate));
 
 
 // Jobs
-import { GetJobsHandler, PasswordResetCodeHandler, PasswordResetHandler } from './Routes';
+import { GetJobsHandler, DeleteJobHandler, PasswordResetCodeHandler, PasswordResetHandler } from './Routes';
 let uploadDir = conf.mgm.upload_dir;
 let defaultOar = conf.mgm.default_oar_path;
 
@@ -66,6 +66,7 @@ if (!fs.existsSync(defaultOar)) {
   throw new Error('Default oar does not exist at ' + defaultOar);
 }
 apiRouter.get('/job', middleware.isUser(), GetJobsHandler(store));
+apiRouter.post('/job/delete/:id', formParser, middleware.isUser(), DeleteJobHandler(store));
 apiRouter.post('/job/resetCode', formParser, PasswordResetCodeHandler(store, certificate));
 apiRouter.post('/job/resetPassword', formParser, PasswordResetHandler(store, certificate));
 

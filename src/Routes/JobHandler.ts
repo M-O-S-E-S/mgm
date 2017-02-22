@@ -5,6 +5,8 @@ import { AuthenticatedRequest, Credential } from '../Auth';
 import { sign, verify } from 'jsonwebtoken';
 import { EmailMgr } from '../lib'
 
+import * as fs from 'fs';
+
 import { Response, GetJobsResponse } from '../View/ClientStack';
 
 export function GetJobsHandler(store: Store): RequestHandler {
@@ -87,6 +89,31 @@ export function PasswordResetHandler(store: Store, cert: Buffer): RequestHandler
   }
 }
 
+export function DeleteJobHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let taskID = parseInt(req.params.id);
+
+    // some jobs have files associated with them, purge if present
+    store.Jobs.getByID(taskID).then((j: IJob) => {
+      try {
+        let datum = JSON.parse(j.data);
+        if (datum.File && datum.File !== '') {
+          fs.exists(datum.File, (exists) => {
+            if (exists) {
+              fs.unlink(datum.File);
+            }
+          });
+        }
+      } catch (e) {/*not all jobs contain json*/ }
+      return store.Jobs.destroy(j);
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err: Error) => {
+      res.json({ Success: false, Message: err.message });
+    });
+  };
+}
+
 
 /*
   router.post('/loadOar/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
@@ -111,29 +138,6 @@ export function PasswordResetHandler(store: Store, cert: Buffer): RequestHandler
       );
     }).then((j: JobInstance) => {
       res.json({ Success: true, ID: j.id });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    });
-  });
-
-  router.post('/delete/:id', isUser, (req: AuthenticatedRequest, res) => {
-    let taskID = parseInt(req.params.id);
-    console.log('deleting job ' + taskID);
-
-    db.Jobs.getByID(taskID).then((j: JobInstance) => {
-      try {
-        let datum = JSON.parse(j.data);
-        if (datum.File && datum.File !== '') {
-          fs.exists(datum.File, (exists) => {
-            if (exists) {
-              fs.unlink(datum.File);
-            }
-          });
-        }
-      } catch (e) {/*not all jobs contain json }
-      return j.destroy();
-    }).then(() => {
-      res.json({ Success: true });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });

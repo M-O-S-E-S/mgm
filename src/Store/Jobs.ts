@@ -35,12 +35,15 @@ export class Jobs {
     });
   }
 
-  /*getByID(id: number): Promise<JobInstance> {
-    return this.db.findOne({
-      where: {
-        id: id
-      }
+  getByID(id: number): Promise<IJob> {
+    return this.db.query('SELECT * FROM jobs WHERE id=?', id).then((rows: job_row[]) => {
+      if (rows.length !== 1)
+        throw new Error('Job ' + id + ' does not exist');
+      return rows[0];
     });
   }
-  */
+
+  destroy(j: IJob): Promise<void> {
+    return this.db.query('DELETE FROM jobs WHERE id=?', j.id);
+  }
 }

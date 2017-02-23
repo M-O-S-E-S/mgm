@@ -21,24 +21,26 @@ interface props {
   store: ReduxStore
 }
 
+interface state {
+  deleteError?: string
+  selectedEstate?: string
+  estateError?: string
+  estateSuccess?: string
+  selectedHost?: Host
+  hostError?: string
+  hostSuccess?: string
+  x?: number
+  y?: number
+  coordMessage?: string
+  pickingCoords?: boolean
+  coordsSuccess?: string
+  coordsError?: string
+}
+
 const ipRegExp = /(^127\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^192\.168\.)/;
 
-export class ManageModal extends React.Component<props, {}> {
-  state: {
-    deleteError: string
-    selectedEstate: string
-    estateError: string
-    estateSuccess: string
-    selectedHost: string
-    hostError: string
-    hostSuccess: string
-    x: number
-    y: number
-    coordMessage: string
-    pickingCoords: boolean
-    coordsSuccess: string
-    coordsError: string
-  }
+export class ManageModal extends React.Component<props, state> {
+
 
   constructor(props: props) {
     super(props);
@@ -47,7 +49,7 @@ export class ManageModal extends React.Component<props, {}> {
       selectedEstate: '',
       estateError: '',
       estateSuccess: '',
-      selectedHost: '',
+      selectedHost: new Host(),
       hostError: '',
       hostSuccess: '',
       x: undefined,
@@ -129,12 +131,16 @@ export class ManageModal extends React.Component<props, {}> {
   }
 
   onSelectHost(e: { target: { value: string } }) {
+    let host: Host = this.props.hosts.find( (h: Host): boolean => {
+      return h.address === e.target.value;
+    })
+
     this.setState({
-      selectedHost: e.target.value
+      selectedHost: host || new Host()
     });
   }
   onChangeHost(): Promise<void> {
-    if (this.state.selectedHost === this.props.region.node) {
+    if (this.state.selectedHost.address === this.props.region.node) {
       this.setState({
         hostSuccess: '',
         hostError: 'No host change detected, not setting'
@@ -149,19 +155,19 @@ export class ManageModal extends React.Component<props, {}> {
       return Promise.resolve();
     }
 
-    return ClientStack.Region.AssignHost(this.props.region, this.props.hosts.get(parseInt(this.state.selectedHost))).then(() => {
+    return ClientStack.Region.AssignHost(this.props.region, this.state.selectedHost).then(() => {
       this.setState({
         hostSuccess: 'Host Successfully assigned',
         hostError: ''
       })
 
       // update region in redux 
-      this.props.store.Region.Update(this.props.region.set('node', this.state.selectedHost));
+      this.props.store.Region.Update(this.props.region.set('node', this.state.selectedHost.address));
 
     }).catch((err: Error) => {
       this.setState({
-        estateSuccess: '',
-        estateError: 'Cannot change estate: ' + err.message
+        hostSuccess: '',
+        hostError: 'Cannot assign host: ' + err.message
       })
     });
   }
@@ -281,7 +287,7 @@ export class ManageModal extends React.Component<props, {}> {
                   {this.props.hosts.toArray().map((h: Host) => {
                     return <option
                       key={h.address}
-                      value={h.id.toString()}>
+                      value={h.address}>
                       {h.name}
                     </option>
                   })}

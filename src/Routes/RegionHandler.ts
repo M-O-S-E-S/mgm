@@ -32,7 +32,7 @@ export function GetRegionsHandler(store: Store): RequestHandler {
 
 export function StartRegionHandler(store: Store): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
-    let regionID = req.params.regionID;
+    let regionID = req.params.uuid;
     let r: IRegion
 
     if (!req.user.isAdmin && !req.user.regions.has(regionID))
@@ -141,7 +141,7 @@ export function SetRegionEstateHandler(store: Store): RequestHandler {
       return store.Regions.getByUUID(regionID.toString());
     }).then((r: IRegion) => {
       //confirmed
-       return store.Estates.setEstateForRegion(estate, r);
+      return store.Estates.setEstateForRegion(estate, r);
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
@@ -151,7 +151,7 @@ export function SetRegionEstateHandler(store: Store): RequestHandler {
 }
 
 export function SetRegionCoordinatesHandler(store: Store): RequestHandler {
- return (req: AuthenticatedRequest, res) => {
+  return (req: AuthenticatedRequest, res) => {
     let regionID = req.params.uuid;
     let x = parseInt(req.body.x);
     let y = parseInt(req.body.y);
@@ -172,6 +172,59 @@ export function SetRegionCoordinatesHandler(store: Store): RequestHandler {
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
+      res.json({ Success: false, Message: err.message });
+    });
+  };
+}
+
+export function SetRegionHostHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let regionID = req.params.uuid;
+    let hostAddress: string = req.body.host || '';
+    let region: IRegion;
+    let newHost: IHost;
+
+    if (!req.user.isAdmin && !req.user.regions.has(regionID))
+      return res.json({ Success: false, Message: 'Permission Denied' });
+
+    store.Regions.getByUUID(regionID.toString()).then((r: IRegion) => {
+      if (r.isRunning) {
+        throw new Error('Region is currently running');
+      }
+      region = r;
+      if (r.node === hostAddress) {
+        throw new Error('Region is already on that host');
+      }
+    }).then(() => {
+      if (hostAddress)
+        return store.Hosts.getByAddress(hostAddress);
+      else
+        return null
+    }).then((h: IHost) => {
+      newHost = h;
+
+      //try to get region's current host
+      if (region.node)
+        return store.Hosts.getByAddress(region.node);
+      else
+        return null;
+    }).then((fromHost: IHost) => {
+      //if the old host does not exist, skip to the next step
+      if (fromHost) {
+        // try to remove the host, but we dont care if we fail
+        // as the host may be unavailable or offline
+        RemoveRegionFromHost(region, fromHost);
+      }
+    }).then(() => {
+      //we are removed from the old host
+      if (newHost)
+        return PutRegionOnHost(store, region, newHost);
+      else
+        return Promise.resolve();
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err: Error) => {
+      console.log(err);
       res.json({ Success: false, Message: err.message });
     });
   };
@@ -233,69 +286,5 @@ export function SetRegionCoordinatesHandler(store: Store): RequestHandler {
       console.log(err);
     });
   });
-
-  router.post('/host/:regionID', isAdmin, (req: AuthenticatedRequest, res) => {
-    //moving a region to a new host
-
-    //get region
-    let regionID = new UUIDString(req.params.regionID);
-    let hostAddress: string = req.body.host || '';
-    let region: RegionInstance;
-    let newHost: HostInstance;
-
-    console.log('Setting host for region ' + regionID.toString() + ' to host: ' + hostAddress);
-
-    db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
-      if (r.isRunning) {
-        throw new Error('Region is currently running');
-      }
-      region = r;
-      if (r.slaveAddress === hostAddress) {
-        throw new Error('Region is already on that host');
-      }
-    }).then(() => {
-      //get new host
-      return new Promise<HostInstance>((resolve, reject) => {
-        db.Hosts.getByAddress(hostAddress).then((h: HostInstance) => {
-          resolve(h);
-        }).catch(() => {
-          resolve(null);
-        })
-      });
-    }).then((h: HostInstance) => {
-      newHost = h;
-
-      //try to get region's current host
-      return new Promise<HostInstance>((resolve, reject) => {
-        db.Hosts.getByAddress(region.slaveAddress).then((h: HostInstance) => {
-          resolve(h);
-        }).catch(() => {
-          resolve(null);
-        })
-      });
-    }).then((fromHost: HostInstance) => {
-      //if the old host does not exist, skip to the next step
-      if (fromHost === null) {
-        return Promise.resolve();
-      }
-
-      //try to remove the host, but we dont care if we fail
-      return new Promise<void>((resolve, reject) => {
-        RemoveRegionFromHost(region, fromHost).then(() => {
-          resolve();
-        }).catch(() => {
-          resolve();
-        });
-      });
-    }).then(() => {
-      //we are removed from the old host
-      return PutRegionOnHost(region, newHost);
-    }).then(() => {
-      res.json({ Success: true });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    });
-  });
-
 
 }*/

@@ -158,15 +158,18 @@ export class Regions {
       this.simDB.query('DELETE FROM terrain WHERE RegionUUID=?', r.uuid),
       this.simDB.query('DELETE FROM allparcels WHERE regionUUID=?', r.uuid),
       this.simDB.query('DELETE FROM estate_map WHERE RegionID=?', r.uuid),
-      this.simDB.query('DELETE FROM landaccesslist WHERE LandUUID IN (SELECT UUID FROM land WHERE RegionUUID=?)', r.uuid),
-      this.simDB.query('DELETE FROM land WHERE RegionUUID=?', r.uuid),
+      this.simDB.query('DELETE FROM landaccesslist WHERE LandUUID IN (SELECT UUID FROM land WHERE RegionUUID=?)', r.uuid).then(() => {
+        return this.simDB.query('DELETE FROM land WHERE RegionUUID=?', r.uuid);
+      }),
       this.simDB.query('DELETE FROM objects WHERE regionuuid=?', r.uuid),
       this.simDB.query('DELETE FROM parcels WHERE regionUUID=?', r.uuid),
       this.simDB.query('DELETE FROM parcelsales WHERE regionUUID=?', r.uuid),
       this.simDB.query('DELETE FROM regionsettings WHERE regionUUID=?', r.uuid),
-      this.simDB.query('DELETE FROM primitems WHERE primID IN (SELECT UUID FROM prims WHERE RegionUUID=?)', r.uuid),
-      this.simDB.query('DELETE FROM primshapes WHERE UUID IN (SELECT UUID FROM prims WHERE RegionUUID=?)', r.uuid),
-      this.simDB.query('DELETE FROM prims WHERE RegionUUID=?', r.uuid),
+      this.simDB.query('DELETE FROM primitems WHERE primID IN (SELECT UUID FROM prims WHERE RegionUUID=?)', r.uuid).then(() => {
+        return this.simDB.query('DELETE FROM primshapes WHERE UUID IN (SELECT UUID FROM prims WHERE RegionUUID=?)', r.uuid);
+      }).then(() => {
+        this.simDB.query('DELETE FROM prims WHERE RegionUUID=?', r.uuid);
+      }),
       this.simDB.query('DELETE FROM prims_copy_temps WHERE RegionUUID=?', r.uuid),
     ]).then(() => { });
   }

@@ -124,17 +124,52 @@ export class Users {
   }
 
   setAccessLevel(u: IUser, accessLevel: number): Promise<IUser> {
-    return this.db.query('UPDATE users SET godLevel=? WHERE UUID=?', [accessLevel, u.UUID]).then( () => {
+    return this.db.query('UPDATE users SET godLevel=? WHERE UUID=?', [accessLevel, u.UUID]).then(() => {
       (<UserObj>u).godLevel = accessLevel;
       return u;
     });
   }
 
   setEmail(u: IUser, email: string): Promise<IUser> {
-    return this.db.query('UPDATE users SET email=? WHERE UUID=?', [email, u.UUID]).then( () => {
+    return this.db.query('UPDATE users SET email=? WHERE UUID=?', [email, u.UUID]).then(() => {
       u.email = email;
       return u;
     });
+  }
+
+  delete(u: IUser): Promise<void> {
+    return Promise.all([
+      this.db.query('DELETE FROM agents WHERE UUID=?', u.UUID),
+      this.db.query('DELETE FROM avatarappearance WHERE Owner=?', u.UUID),
+      this.db.query('DELETE FROM avatarattachments WHERE UUID=?', u.UUID),
+      this.db.query('DELETE FROM botattachments WHERE UUID=?', u.UUID),
+      this.db.query('DELETE FROM botappearance WHERE Owner=?', u.UUID),
+      this.db.query('DELETE FROM classifieds WHERE creatoruuid=?', u.UUID),
+      this.db.query('DELETE FROM economy_totals WHERE user_id=?', u.UUID),
+      this.db.query('DELETE FROM estateban WHERE bannedUUID=?', u.UUID),
+      this.db.query('DELETE FROM estate_managers WHERE uuid=?', u.UUID),
+      this.db.query('DELETE FROM estate_users WHERE uuid=?', u.UUID),
+      this.db.query('DELETE FROM events WHERE owneruuid=?', u.UUID),
+      this.db.query('DELETE FROM inventoryfolders WHERE agentID=?', u.UUID),
+      this.db.query('DELETE FROM inventoryitems WHERE avatarID=?', u.UUID),
+      this.db.query('DELETE FROM InventoryMigrationStatus WHERE user_id=?', u.UUID),
+      this.db.query('DELETE FROM landaccesslist WHERE LandUUID in (SELECT UUID FROM land WHERE OwnerUUID=?)', u.UUID).then(() => {
+        return this.db.query('DELETE FROM land WHERE OwnerUUID=?', u.UUID);
+      }),
+      this.db.query('DELETE FROM LoginHistory WHERE user_id=?', u.UUID),
+      this.db.query('DELETE FROM mutelist WHERE AgentID=?', u.UUID),
+      this.db.query('DELETE FROM osagent WHERE AgentID=?', u.UUID),
+      this.db.query('DELETE FROM osgroupmembership WHERE AgentID=?', u.UUID),
+      this.db.query('DELETE FROM osgrouprolemembership WHERE AgentID=?', u.UUID),
+      this.db.query('DELETE FROM userfriends WHERE ownerID=? OR friendID=?', [u.UUID, u.UUID]),
+      this.db.query('DELETE FROM userfriends_old WHERE ownerID=? OR friendID=?', [u.UUID, u.UUID]),
+      this.db.query('DELETE FROM usernotes WHERE useruuid=?', u.UUID),
+      this.db.query('DELETE FROM userpicks WHERE creatoruuid=?', u.UUID),
+      this.db.query('DELETE FROM userpreferences WHERE user_id=?', u.UUID),
+      this.db.query('DELETE FROM userprefs_bak WHERE user_id=?', u.UUID),
+      this.db.query('DELETE FROM users WHERE UUID=?', u.UUID),
+      this.db.query('DELETE FROM users_bak WHERE UUID=?', u.UUID)
+    ]).then(() => { });
   }
 
   /*

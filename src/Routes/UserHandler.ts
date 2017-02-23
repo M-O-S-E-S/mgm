@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { IUser, IPendingUser } from '../Types';
+import { IUser, IPendingUser, IEstate, IManager, IGroup } from '../Types';
 import { Store } from '../Store';
 import { AuthenticatedRequest } from '../Auth';
 
@@ -100,22 +100,49 @@ export function SetEmailHandler(store: Store): RequestHandler {
   };
 }
 
-/*
+export function DeleteUserHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let userID = req.params.uuid;
 
-  router.post('/destroy/:id', isAdmin, (req: AuthenticatedRequest, res) => {
-    let userID = new UUIDString(req.params.id);
+    if (userID === req.user.uuid) {
+      return res.json({ Success: false, Message: 'You cannot delete yourself' });
+    }
 
-    // TODO: dont delete user if they own an estate or group, unless empty, then cascade
-    // delete users inventory, appearance, memberships, etc.
+    let user: IUser;
 
-    db.Users.getByID(userID.toString()).then((u: UserInstance) => {
-      return u.destroy();
+    return store.Users.getByID(userID).then((u: IUser) => {
+      user = u;
+
+      return store.Estates.getAll();
+    }).then((estates: IEstate[]) => {
+      estates.map((e: IEstate) => {
+        if (e.EstateOwner === userID)
+          throw new Error('Refusing to delete user, they are an estate owner');
+      });
+
+      return store.Estates.getManagers();
+    }).then(( managers: IManager[]) => {
+      managers.map( (m: IManager) => {
+        if(m.uuid === userID)
+          throw new Error('Refusing to delete user, they are an estate manager');
+      });
+
+      return store.Groups.getAll();      
+    }).then( (groups: IGroup[]) => {
+      // can check for group ownership or similar here
+
+      return store.Users.delete(user);
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
+  };
+}
+
+/*
+
+  
 
   router.post('/create', isAdmin, (req: AuthenticatedRequest, res) => {
     let fullname: string = req.body.name.trim() || '';

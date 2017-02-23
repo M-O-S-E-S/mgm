@@ -104,7 +104,9 @@ export class ManageUserModal extends React.Component<props, state> {
       this.props.store.User.Destroy(this.props.user);
       this.props.cancel();
     }).catch((err: Error) => {
-      alertify.error('Error Deleting ' + this.props.user.name + ': ' + err.message);
+      this.setState({
+        error: 'Error Deleting ' + this.props.user.name() + ': ' + err.message
+      });
     })
   }
 
@@ -136,7 +138,7 @@ export class ManageUserModal extends React.Component<props, state> {
       <Modal show={this.props.show} onHide={this.props.cancel} >
         <Modal.Header>
           <Modal.Title>
-            Manage User: {this.props.user ? this.props.user.name : ''}
+            Manage User: {this.props.user ? this.props.user.name() : ''}
             {this.props.user && this.props.user.godLevel < 2 ? <BusyButton bsSize="xsmall" bsStyle="danger" onClick={this.deleteUser.bind(this)}>Delete</BusyButton> : <span />}
           </Modal.Title>
         </Modal.Header>

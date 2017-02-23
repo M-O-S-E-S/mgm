@@ -2,7 +2,7 @@ import * as React from "react";
 import { Map } from 'immutable';
 import { Action } from 'redux';
 
-import { Region, Estate, Host } from '../../Immutable';
+import { Region, Estate, Host, EstateMap } from '../../Immutable';
 import { MapPicker } from '../MapPicker';
 import { Modal, Form, FormGroup, ControlLabel, FormControl, Button, Grid, Row, Col, Alert } from 'react-bootstrap';
 import { BusyButton } from '../BusyButton';
@@ -88,6 +88,9 @@ export class AddRegionModal extends React.Component<props, {}> {
         .set('x', this.state.x)
         .set('y', this.state.y);
       this.props.store.Region.Update(r);
+      let m = new EstateMap();
+      m = m.set('EstateID', this.state.estate).set('RegionID', uuid);
+      this.props.store.EstateMap.Update(m);
       this.props.dismiss();
     }).catch((err: Error) => {
       this.setState({

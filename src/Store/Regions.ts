@@ -2,6 +2,7 @@
 import { IPool } from 'promise-mysql';
 
 import { IRegion, IHost } from '../Types';
+import { UUID } from '../lib';
 
 interface region_row {
   uuid: string
@@ -113,10 +114,9 @@ export class Regions {
     });
   }
 
-  /*
-  create(name: string, x: number, y: number): Promise<RegionInstance> {
-    return this.db.create({
-      uuid: UUIDString.random().toString(),
+  create(name: string, x: number, y: number): Promise<IRegion> {
+    let r: region_row = {
+      uuid: UUID.random().toString(),
       name: name,
       locX: x,
       locY: y,
@@ -129,8 +129,19 @@ export class Regions {
       slaveAddress: '',
       isRunning: false,
       status: ''
-    })
+    }
+    return this.db.query('INSERT INTO regions SET ?', r).then(() => {
+      return {
+        uuid: r.uuid,
+        name: r.name,
+        x: r.locX,
+        y: r.locY,
+        status: r.status,
+        node: r.slaveAddress,
+        publicAddress: r.externalAddress,
+        port: r.httpPort,
+        isRunning: r.isRunning ? true : false
+      };
+    });
   }
-
-  */
 }

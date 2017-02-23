@@ -14,7 +14,7 @@ export function GetRegionsHandler(store: Store): RequestHandler {
     store.Regions.getAll()
       .then((regions: IRegion[]) => {
         return regions.filter((r: IRegion) => {
-          return req.user.regions.has(r.uuid);
+          return req.user.isAdmin || req.user.regions.has(r.uuid);
         });
       }).then((regions: IRegion[]) => {
         res.json(<GetRegionsResponse>{
@@ -229,6 +229,49 @@ export function SetRegionHostHandler(store: Store): RequestHandler {
     });
   };
 }
+
+export function CreateRegionHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let name = req.body.name;
+
+    if (!req.body.x || isNaN(parseInt(req.body.x, 10))) return res.json({ Success: false, Message: "Integer X coordinate required" });
+    if (!req.body.y || isNaN(parseInt(req.body.y, 10))) return res.json({ Success: false, Message: "Integer Y coordinate required" });
+    if (!name) return res.json({ Success: false, Message: "Region name cannot be blank" });
+    if (!req.body.estate || isNaN(parseInt(req.body.estate, 10))) return res.json({ Success: false, Message: "Invalid Estate Assignment" });
+
+    let estateID = parseInt(req.body.estate, 10);
+    let x = parseInt(req.body.x, 10);
+    let y = parseInt(req.body.y, 10);
+
+    if (x < 0 || y < 0)
+      return res.json({ Success: false, Message: "Invalid region coordinates" });
+
+    let newRegion: IRegion;
+    let newEstate: IEstate;
+
+    store.Estates.getById(estateID).then((e: IEstate) => {
+      newEstate = e;
+      return store.Regions.getAll();
+    }).then((regions: IRegion[]) => {
+      regions.map( (r: IRegion) => {
+        if (r.name === name) throw new Error('That region name is already taken');
+        if (r.x === x && r.y === y) throw new Error('Those coordinates are not available');
+      });
+      return Promise.resolve();
+    }).then(() => {
+      return store.Regions.create(name, x, y);
+    }).then((r: IRegion) => {
+      newRegion = r;
+      return store.Estates.setEstateForRegion(newEstate, r);
+    }).then(() => {
+      return res.json({ Success: true, Message: newRegion.uuid });
+    }).catch((err: Error) => {
+      res.json({ Success: false, Message: err.message });
+      console.log(err);
+    });
+  };
+}
+
 /*
   router.post('/destroy/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
@@ -245,45 +288,6 @@ export function SetRegionHostHandler(store: Store): RequestHandler {
       res.json({ Success: true });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
-    });
-  });
-
-  router.post('/create', isAdmin, (req: AuthenticatedRequest, res) => {
-    let name = req.body.name;
-
-    if(!req.body.x || isNaN(parseInt(req.body.x, 10))) return res.json({ Success: false, Message: "Integer X coordinate required" });
-    if(!req.body.y || isNaN(parseInt(req.body.y, 10))) return res.json({ Success: false, Message: "Integer Y coordinate required" });
-    if(!name) return res.json({ Success: false, Message: "Region name cannot be blank" });
-    if(!req.body.estate || isNaN(parseInt(req.body.estate,10))) return res.json({ Success: false, Message: "Invalid Estate Assignment" });
-
-    let estateID = parseInt(req.body.estate, 10);
-    let x = parseInt(req.body.x, 10);
-    let y = parseInt(req.body.y, 10);
-
-    if(x < 0 || y < 0)
-      return res.json({ Success: false, Message: "Invalid region coordinates" });
-
-    let newRegion: RegionInstance;
-
-    // confirm estate exists
-    db.Estates.getEstateByID(estateID).then((e: EstateInstance) => {
-      //confirmed. check for region name and location
-      return db.Regions.getAll();
-    }).then((regions: RegionInstance[]) => {
-      for (let r of regions) {
-        if (r.name === name) throw new Error('That region name is already taken');
-        if (r.locX === x && r.locY === y) throw new Error('Those corrdinates are not available');
-      }
-    }).then(() => {
-      return db.Regions.create(name, x, y);
-    }).then((r: RegionInstance) => {
-      newRegion = r;
-      return db.Estates.setMapForRegion(estateID, r.uuid);
-    }).then(() => {
-      return res.json({ Success: true, Message: newRegion.uuid });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-      console.log(err);
     });
   });
 

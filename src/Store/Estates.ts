@@ -135,18 +135,10 @@ export class Estates {
   }
 
   setEstateForRegion(estate: IEstate, region: IRegion): Promise<void> {
-    return this.db.query('UPDATE estate_map SET EstateID=? WHERE RegionID=?', [estate.EstateID, region.uuid]);
+    let row: estate_map_row = {
+      RegionID: region.uuid,
+      EstateID: estate.EstateID
+    }
+    return this.db.query('INSERT INTO estate_map SET ? ON DUPLICATE KEY UPDATE EstateID=VALUES(EstateID)', row);
   }
-
-  /*
-
-  getMapForRegion(region: string): Promise<EstateMapInstance> {
-    return this.estateMap.findOne({
-      where: {
-        RegionID: region
-      }
-    });
-  }
-
-  */
 }

@@ -22,6 +22,7 @@ export interface Store {
   },
   Regions: {
     getAll(): Promise<IRegion[]>
+    create(name: string, x: number, y: number): Promise<IRegion>
     getByUUID(uuid: string): Promise<IRegion>
     setStatus(region: IRegion, isRunning: boolean, status: string): Promise<IRegion>
     setHost(region: IRegion, host: IHost): Promise<IRegion>

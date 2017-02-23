@@ -12,17 +12,17 @@ export function GetEstatesHandler(store: Store): RequestHandler {
     let outMap: IEstateMap[];
     store.Estates.getAll().then((estates: IEstate[]) => {
       outEstates = estates.filter((e: IEstate) => {
-        return req.user.estates.has(e.EstateID);
+        return req.user.isAdmin || req.user.estates.has(e.EstateID);
       });
       return store.Estates.getManagers();
     }).then((managers: IManager[]) => {
       outManagers = managers.filter((m: IManager) => {
-        return req.user.estates.has(m.EstateID);
+        return req.user.isAdmin ||  req.user.estates.has(m.EstateID);
       });
       return store.Estates.getMapping();
     }).then((regs: IEstateMap[]) => {
       outMap = regs.filter((r: IEstateMap) => {
-        return req.user.estates.has(r.EstateID);
+        return req.user.isAdmin || req.user.estates.has(r.EstateID);
       })
       res.json(<GetEstatesResponse>{
         Success: true,

@@ -22,9 +22,11 @@ interface region_row {
 
 export class Regions {
   private db: IPool
+  private simDB: IPool
 
-  constructor(db: IPool) {
+  constructor(db: IPool, simDB: IPool) {
     this.db = db;
+    this.simDB = simDB;
   }
 
   getAll(): Promise<IRegion[]> {
@@ -143,5 +145,29 @@ export class Regions {
         isRunning: r.isRunning ? true : false
       };
     });
+  }
+
+  delete(r: IRegion): Promise<void> {
+    if (r.isRunning || r.node)
+      return Promise.reject('Refusing to delete region that is running or has a host assignment');
+    return Promise.all([
+      this.db.query('DELETE FROM regions WHERE uuid=?', r.uuid),
+      this.simDB.query('DELETE FROM regionsettings WHERE regionUUID=?', r.uuid),
+      this.simDB.query('DELETE FROM regionenvironment WHERE regionUUID=?', r.uuid),
+      this.simDB.query('DELETE FROM telehubs WHERE RegionID=?', r.uuid),
+      this.simDB.query('DELETE FROM terrain WHERE RegionUUID=?', r.uuid),
+      this.simDB.query('DELETE FROM allparcels WHERE regionUUID=?', r.uuid),
+      this.simDB.query('DELETE FROM estate_map WHERE RegionID=?', r.uuid),
+      this.simDB.query('DELETE FROM landaccesslist WHERE LandUUID IN (SELECT UUID FROM land WHERE RegionUUID=?)', r.uuid),
+      this.simDB.query('DELETE FROM land WHERE RegionUUID=?', r.uuid),
+      this.simDB.query('DELETE FROM objects WHERE regionuuid=?', r.uuid),
+      this.simDB.query('DELETE FROM parcels WHERE regionUUID=?', r.uuid),
+      this.simDB.query('DELETE FROM parcelsales WHERE regionUUID=?', r.uuid),
+      this.simDB.query('DELETE FROM regionsettings WHERE regionUUID=?', r.uuid),
+      this.simDB.query('DELETE FROM primitems WHERE primID IN (SELECT UUID FROM prims WHERE RegionUUID=?)', r.uuid),
+      this.simDB.query('DELETE FROM primshapes WHERE UUID IN (SELECT UUID FROM prims WHERE RegionUUID=?)', r.uuid),
+      this.simDB.query('DELETE FROM prims WHERE RegionUUID=?', r.uuid),
+      this.simDB.query('DELETE FROM prims_copy_temps WHERE RegionUUID=?', r.uuid),
+    ]).then(() => { });
   }
 }

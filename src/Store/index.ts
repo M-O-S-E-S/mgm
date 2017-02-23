@@ -23,6 +23,7 @@ export interface Store {
   Regions: {
     getAll(): Promise<IRegion[]>
     create(name: string, x: number, y: number): Promise<IRegion>
+    delete(r: IRegion): Promise<void>
     getByUUID(uuid: string): Promise<IRegion>
     setStatus(region: IRegion, isRunning: boolean, status: string): Promise<IRegion>
     setHost(region: IRegion, host: IHost): Promise<IRegion>
@@ -108,7 +109,7 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
 
   return {
     Hosts: new Hosts(mgmDB),
-    Regions: new Regions(mgmDB),
+    Regions: new Regions(mgmDB, halDB),
     Users: new Users(halDB),
     Groups: new Groups(halDB),
     PendingUsers: new PendingUsers(mgmDB),

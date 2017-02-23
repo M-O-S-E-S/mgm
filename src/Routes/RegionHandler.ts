@@ -253,7 +253,7 @@ export function CreateRegionHandler(store: Store): RequestHandler {
       newEstate = e;
       return store.Regions.getAll();
     }).then((regions: IRegion[]) => {
-      regions.map( (r: IRegion) => {
+      regions.map((r: IRegion) => {
         if (r.name === name) throw new Error('That region name is already taken');
         if (r.x === x && r.y === y) throw new Error('Those coordinates are not available');
       });
@@ -272,23 +272,20 @@ export function CreateRegionHandler(store: Store): RequestHandler {
   };
 }
 
-/*
-  router.post('/destroy/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
-    let regionID = new UUIDString(req.params.uuid);
+export function DeleteRegionHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let regionID = req.params.uuid;
 
-    db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
-      if (r.isRunning) {
-        return res.json({ Success: false, Message: 'cannot delete a running region' });
-      }
-      if (r.slaveAddress !== null && r.slaveAddress !== '') {
-        return res.json({ Success: false, Message: 'region is still allocated a host' });
-      }
-      return r.destroy();
+    store.Regions.getByUUID(regionID).then((r: IRegion) => {
+      if (r.isRunning)
+        throw new Error('cannot delete a running region');
+      if (r.node)
+        throw new Error('region is still allocated a host');
+      return store.Regions.delete(r);
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
-
-}*/
+  };
+}

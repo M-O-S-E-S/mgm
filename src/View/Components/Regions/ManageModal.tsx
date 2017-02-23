@@ -62,6 +62,23 @@ export class ManageModal extends React.Component<props, state> {
   }
 
   componentWillReceiveProps(nextProps: props) {
+    if (!this.props.show && nextProps.show) {
+      this.setState({
+        deleteError: '',
+        selectedEstate: '',
+        estateError: '',
+        estateSuccess: '',
+        selectedHost: new Host(),
+        hostError: '',
+        hostSuccess: '',
+        x: undefined,
+        y: undefined,
+        coordMessage: '',
+        pickingCoords: false,
+        coordsSuccess: '',
+        coordsError: ''
+      });
+    }
     if (nextProps.region) {
       this.setState({
         x: nextProps.region.x,
@@ -70,18 +87,20 @@ export class ManageModal extends React.Component<props, state> {
     }
   }
 
-  onDelete() {
+  onDelete(): Promise<void> {
     if (this.props.region.isRunning) {
-      return this.setState({
+      this.setState({
         deleteError: 'Cannot delete a running region'
       });
+      return Promise.resolve();
     }
     if (this.props.region.node !== '') {
-      return this.setState({
+      this.setState({
         deleteError: 'Cannot delete a region that is still assigned a host'
       });
+      return Promise.resolve();
     }
-    ClientStack.Region.Destroy(this.props.region).then(() => {
+    return ClientStack.Region.Destroy(this.props.region).then(() => {
       this.props.store.Region.Destroy(this.props.region);
       this.props.dismiss();
     }).catch((err: Error) => {
@@ -131,7 +150,7 @@ export class ManageModal extends React.Component<props, state> {
   }
 
   onSelectHost(e: { target: { value: string } }) {
-    let host: Host = this.props.hosts.find( (h: Host): boolean => {
+    let host: Host = this.props.hosts.find((h: Host): boolean => {
       return h.address === e.target.value;
     })
 

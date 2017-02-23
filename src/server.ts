@@ -81,12 +81,14 @@ import {
   SetRegionEstateHandler,
   SetRegionCoordinatesHandler,
   SetRegionHostHandler,
-  CreateRegionHandler
+  CreateRegionHandler,
+  DeleteRegionHandler
 } from './Routes';
 import { RegionLogs } from './lib';
 let regionLogs = new RegionLogs(conf.mgm.log_dir);
 apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
 apiRouter.post('/region/create', formParser, middleware.isAdmin(), CreateRegionHandler(store));
+apiRouter.post('/region/destroy/:uuid', middleware.isAdmin(), DeleteRegionHandler(store));
 apiRouter.get('/region/logs/:uuid', middleware.isUser(), GetRegionLogsHandler(store, regionLogs));
 apiRouter.post('/region/start/:uuid', middleware.isUser(), StartRegionHandler(store));
 apiRouter.post('/region/stop/:uuid', middleware.isUser(), StopRegionHandler(store));

@@ -19,7 +19,8 @@ import {
   StartRegionHandler,
   StopRegionHandler,
   KillRegionHandler,
-  SetRegionEstateHandler
+  SetRegionEstateHandler,
+  SetRegionCoordinatesHandler
 } from './RegionHandler';
 import {
   GetEstatesHandler,
@@ -64,6 +65,7 @@ export {
   StopRegionHandler,
   KillRegionHandler,
   SetRegionEstateHandler,
+  SetRegionCoordinatesHandler,
 
   GetEstatesHandler,
   CreateEstateHandler,

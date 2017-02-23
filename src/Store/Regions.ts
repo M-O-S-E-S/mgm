@@ -87,6 +87,14 @@ export class Regions {
     });
   }
 
+  setXY(region: IRegion, x: number, y: number): Promise<IRegion> {
+    return this.db.query('UPDATE regions SET locX=?, locY=? WHERE uuid=?', [x, y, region.uuid]).then(() => {
+      region.x = x;
+      region.y = y;
+      return region;
+    });
+  }
+
   getByNode(host: IHost): Promise<IRegion[]> {
     return this.db.query('SELECT * FROM regions WHERE slaveAddress=?', host.address).then((rows: region_row[]) => {
       return rows.map((r: region_row): IRegion => {
@@ -124,12 +132,5 @@ export class Regions {
     })
   }
 
-  getBySlave(address: string): Promise<RegionInstance[]> {
-    return this.db.findAll({
-      where: {
-        slaveAddress: address
-      }
-    })
-  }
   */
 }

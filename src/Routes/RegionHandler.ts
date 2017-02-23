@@ -150,6 +150,32 @@ export function SetRegionEstateHandler(store: Store): RequestHandler {
   };
 }
 
+export function SetRegionCoordinatesHandler(store: Store): RequestHandler {
+ return (req: AuthenticatedRequest, res) => {
+    let regionID = req.params.uuid;
+    let x = parseInt(req.body.x);
+    let y = parseInt(req.body.y);
+
+    if (!req.user.isAdmin && !req.user.regions.has(regionID))
+      return res.json({ Success: false, Message: 'Permission Denied' });
+
+    store.Regions.getAll().then((regions: IRegion[]) => {
+      let region: IRegion;
+      for (let r of regions) {
+        if (r.x === x && r.y === y) throw new Error('Those coordinates are not available');
+        if (r.uuid === regionID) region = r;
+      }
+      return region;
+    }).then((r: IRegion) => {
+      if (r.isRunning) throw new Error('Cannot move a region while it is running');
+      return store.Regions.setXY(r, x, y);
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err: Error) => {
+      res.json({ Success: false, Message: err.message });
+    });
+  };
+}
 /*
   router.post('/destroy/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);
@@ -162,30 +188,6 @@ export function SetRegionEstateHandler(store: Store): RequestHandler {
         return res.json({ Success: false, Message: 'region is still allocated a host' });
       }
       return r.destroy();
-    }).then(() => {
-      res.json({ Success: true });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    });
-  });
-
-  router.post('/setXY/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
-    let regionID = new UUIDString(req.params.uuid);
-    let x = parseInt(req.body.x);
-    let y = parseInt(req.body.y);
-
-    db.Regions.getAll().then((regions: RegionInstance[]) => {
-      let region: RegionInstance;
-      for (let r of regions) {
-        if (r.locX === x && r.locY === y) throw new Error('Those coordinates are not available');
-        if (r.uuid === regionID.toString()) region = r;
-      }
-      return region;
-    }).then((r: RegionInstance) => {
-      if (r.isRunning) throw new Error('Cannot move a region while it is running');
-      r.locX = x;
-      r.locY = y;
-      return r.save();
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {

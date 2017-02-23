@@ -123,6 +123,13 @@ export class Users {
     });
   }
 
+  setAccessLevel(u: IUser, accessLevel: number): Promise<IUser> {
+    return this.db.query('UPDATE users SET godLevel=? WHERE UUID=?', [accessLevel, u.UUID]).then( () => {
+      (<UserObj>u).godLevel = accessLevel;
+      return u;
+    });
+  }
+
   /*
   
     createUserFromTemplate(fname: string, lname: string, cred: Credential, email: string, template: UserInstance): Promise<UserInstance> {

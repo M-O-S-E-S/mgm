@@ -58,13 +58,12 @@ export function SetPasswordHandler(store: Store): RequestHandler {
   };
 }
 
-/*
-  router.post('/accessLevel', isAdmin, (req: AuthenticatedRequest, res) => {
+export function SetAccessLevelHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
     let accessLevel = parseInt(req.body.accessLevel);
-    let userID = new UUIDString(req.body.uuid);
-    let controllingUser = new UUIDString(req.user.uuid);
+    let userID = req.body.uuid;
 
-    if (userID.getShort() === controllingUser.getShort()) {
+    if (userID === req.user.uuid) {
       return res.json({ Success: false, Message: 'You cannot change your own access level' });
     }
 
@@ -72,16 +71,17 @@ export function SetPasswordHandler(store: Store): RequestHandler {
       return res.json({ Success: false, Message: 'Invalid access level' });
     }
 
-    db.Users.getByID(userID.toString()).then((u: UserInstance) => {
-      console.log('setting access level for user ' + userID + ' to ' + accessLevel);
-      u.godLevel = accessLevel;
-      return u.save();
+    store.Users.getByID(userID.toString()).then((u: IUser) => {
+      return store.Users.setAccessLevel(u, accessLevel);
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
+  };
+}
+
+/*
 
   router.post('/email', isAdmin, (req: AuthenticatedRequest, res) => {
     let email = req.body.email;

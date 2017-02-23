@@ -67,9 +67,10 @@ apiRouter.post('/job/resetPassword', formParser, PasswordResetHandler(store, cer
 
 
 // User
-import { GetUsersHandler, SetPasswordHandler } from './Routes';
+import { GetUsersHandler, SetPasswordHandler, SetAccessLevelHandler } from './Routes';
 apiRouter.get('/user', middleware.isUser(), GetUsersHandler(store));
 apiRouter.post('/user/password', middleware.isUser(), formParser, SetPasswordHandler(store));
+apiRouter.post('/user/accessLevel', formParser, middleware.isAdmin(), SetAccessLevelHandler(store));
 
 // Region
 import {

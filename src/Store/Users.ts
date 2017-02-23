@@ -130,6 +130,13 @@ export class Users {
     });
   }
 
+  setEmail(u: IUser, email: string): Promise<IUser> {
+    return this.db.query('UPDATE users SET email=? WHERE UUID=?', [email, u.UUID]).then( () => {
+      u.email = email;
+      return u;
+    });
+  }
+
   /*
   
     createUserFromTemplate(fname: string, lname: string, cred: Credential, email: string, template: UserInstance): Promise<UserInstance> {

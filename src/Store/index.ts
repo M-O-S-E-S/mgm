@@ -38,6 +38,7 @@ export interface Store {
     getByName(name: string): Promise<IUser>
     setPassword(user: IUser, credential: Credential): Promise<void>
     setAccessLevel(u: IUser, accessLevel: number): Promise<IUser>
+    setEmail(u: IUser, email: string): Promise<IUser>
   },
   Groups: {
     getAll(): Promise<IGroup[]>

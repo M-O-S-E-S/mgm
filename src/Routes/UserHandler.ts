@@ -81,29 +81,26 @@ export function SetAccessLevelHandler(store: Store): RequestHandler {
   };
 }
 
-/*
-
-  router.post('/email', isAdmin, (req: AuthenticatedRequest, res) => {
+export function SetEmailHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
     let email = req.body.email;
-    let userID = new UUIDString(req.body.id);
+    let userID = req.body.id;
 
     if (!/(.+)@(.+){2,}\.(.+){2,}/.test(email)) {
       return res.json({ Success: false, Message: 'Invalid Email' });
     }
 
-    db.Users.getByID(userID.toString()).then((u: UserInstance) => {
-      u.email = email;
-      return u.save();
+    store.Users.getByID(userID.toString()).then((u: IUser) => {
+      return store.Users.setEmail(u, email);
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
+  };
+}
 
-  router.post('/suspend', isAdmin, (req: AuthenticatedRequest, res) => {
-    res.json({ Success: false, Message: 'Not Implemented' });
-  });
+/*
 
   router.post('/destroy/:id', isAdmin, (req: AuthenticatedRequest, res) => {
     let userID = new UUIDString(req.params.id);

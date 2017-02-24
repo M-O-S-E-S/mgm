@@ -215,6 +215,7 @@ function users(store: ReduxStore): Promise<void> {
     let stalePending = store.GetState().pendingUsers.keySeq().toSet();
     store.PendingUser.Update(res.Pending.map((u: IPendingUser) => {
       stalePending = stalePending.delete(u.name);
+      u.registered = new Date(u.registered);
       return new PendingUser(u);
     }));
     store.PendingUser.Destroy(stalePending.toArray());

@@ -41,7 +41,9 @@ import { RenewTokenHandler, LoginHandler } from './Routes';
 apiRouter.get('/auth', middleware.isUser(), RenewTokenHandler(store, certificate));
 apiRouter.post('/auth/login', formParser, LoginHandler(store, certificate));
 
-
+// Registration
+import { RegisterHandler } from './Routes';
+apiRouter.post('/register', formParser, RegisterHandler(store, conf.mgm.templates));
 
 
 // Jobs
@@ -74,6 +76,11 @@ apiRouter.post('/user/accessLevel', formParser, middleware.isAdmin(), SetAccessL
 apiRouter.post('/user/email', formParser, middleware.isAdmin(), SetEmailHandler(store));
 apiRouter.post('/user/destroy/:uuid', middleware.isAdmin(), DeleteUserHandler(store));
 apiRouter.post('/user/create', formParser, middleware.isAdmin(), CreateUserHandler(store, conf.mgm.templates));
+
+// Pending User
+import { DenyPendingUserHandler, ApprovePendingUserHandler } from './Routes';
+apiRouter.post('/user/deny', formParser, middleware.isAdmin(), DenyPendingUserHandler(store));
+apiRouter.post('/user/approve', formParser, middleware.isAdmin(), ApprovePendingUserHandler(store, conf.mgm.templates));
 
 // Region
 import {

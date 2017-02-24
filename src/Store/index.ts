@@ -52,6 +52,8 @@ export interface Store {
   PendingUsers: {
     getAll(): Promise<IPendingUser[]>
     create(name: string, email: string, template: string, cred: Credential, summary: string): Promise<IPendingUser>
+    getByName(name: string): Promise<IPendingUser>
+    delete(user: IPendingUser): Promise<void>
   },
   Jobs: {
     getFor(uuid: string): Promise<IJob[]>

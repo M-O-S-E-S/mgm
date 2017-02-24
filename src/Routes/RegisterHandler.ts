@@ -1,17 +1,18 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
 import { IUser, IPendingUser } from '../Types';
+import { AuthenticatedRequest } from '../Auth';
 
 import { EmailMgr } from '../lib';
 import { Credential } from '../Auth';
 
 export function RegisterHandler(store: Store, templates: { [key: string]: string }): RequestHandler {
-  return (req, res) => {
+  return (req: AuthenticatedRequest, res) => {
     let name: string = req.body.name;
-    let email = req.body.email;
-    let template = req.body.gender;
-    let password = req.body.password;
-    let summary = req.body.summary;
+    let email: string = req.body.email;
+    let template: string = req.body.gender;
+    let password: string = req.body.password;
+    let summary: string = req.body.summary;
 
     // FORM VALIDATION
     if (!name || !email || !template || !password || !summary) {

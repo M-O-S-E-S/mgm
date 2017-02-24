@@ -215,7 +215,7 @@ export class ClientStack {
         });
     }
     static SubmitRegistration(name: string, email: string, gender: string, password: string, summary: string): Promise<void> {
-        return performCall('POST', '/api/register/submit', {
+        return performCall('POST', '/api/register', {
             name: name,
             email: email,
             gender: gender,

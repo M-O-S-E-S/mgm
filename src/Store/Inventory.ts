@@ -121,7 +121,6 @@ export function CloneFrom(db: IPool, target: IUser, template: IUser): Promise<IU
     // read folders, and generate the uuid map
     return db.query('SELECT * FROM inventoryfolders WHERE agentID=?', template.UUID);
   }).then((rows: inventoryFolder[]) => {
-    console.log('wipe inventory complete');
     // insert into the map
     rows.map((r: inventoryFolder) => {
       uuidMap[r.folderID] = UUID.random().toString();
@@ -141,7 +140,6 @@ export function CloneFrom(db: IPool, target: IUser, template: IUser): Promise<IU
       return db.query('INSERT INTO inventoryfolders SET ?', v);
     }))
   }).then(() => {
-    console.log('clone inventory folders complete');
     // read items
     return db.query('SELECT * FROM inventoryitems WHERE avatarID=?', template.UUID);
   }).then((rows: inventoryItem[]) => {
@@ -177,7 +175,6 @@ export function CloneFrom(db: IPool, target: IUser, template: IUser): Promise<IU
       return db.query('INSERT INTO inventoryitems SET ?', v);
     }))
   }).then(() => {
-    console.log('clone inventory items complete')
     // copy the avatar appearance
     return db.query('SELECT * FROM avatarappearance WHERE Owner=?', template.UUID);
   }).then((rows: avatarAppearance[]) => {

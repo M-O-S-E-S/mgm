@@ -38,13 +38,15 @@ export class PendingUsers {
     });
   }
 
-  /*
-  getByName(name: string): Promise<PendingUser> {
-    return this.db.findOne({
-      where: {
-        Name: name
-      }
+  getByName(name: string): Promise<IPendingUser> {
+    return this.db.query('SELECT * FROM users WHERE name=?', name).then((rows: pending_user_row[]) => {
+      if (rows.length !== 1)
+        throw new Error('Pending User ' + name + ' does not exist');
+      return rows[0];
     });
   }
-  */
+
+  delete(user: IPendingUser): Promise<void> {
+    return this.db.query('DELETE FROM users WHERE email=?', user.email);
+  }
 }

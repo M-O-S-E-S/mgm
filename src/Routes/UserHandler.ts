@@ -174,49 +174,46 @@ export function CreateUserHandler(store: Store, templates: { [key: string]: stri
   };
 }
 
-/*
-  //deny a pending user
-  router.post('/deny', isAdmin, (req: AuthenticatedRequest, res) => {
+
+import { EmailMgr } from '../lib';
+
+export function DenyPendingUserHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
     let name = req.body.name;
     let reason = req.body.reason;
-    let user: PendingUserInstance
-    db.PendingUsers.getByName(name).then((u: PendingUserInstance) => {
+    let user: IPendingUser;
+    store.PendingUsers.getByName(name).then((u: IPendingUser) => {
       user = u;
       return EmailMgr.instance().accountDenied(u.email, reason);
     }).then(() => {
-      return user.destroy();
+      return store.PendingUsers.delete(user);
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });;
-  });
+  };
+}
 
-  //approve a pending user, creating their halcyon account
-  router.post('/approve', isAdmin, (req: AuthenticatedRequest, res) => {
+
+export function ApprovePendingUserHandler(store: Store, templates: { [key: string]: string }): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
     let name = req.body.name;
-    let pUser: PendingUserInstance
-    let newUser: UserInstance
-    db.PendingUsers.getByName(name).then((u: PendingUserInstance) => {
+    let pUser: IPendingUser
+    let newUser: IUser
+    store.PendingUsers.getByName(name).then((u: IPendingUser) => {
       pUser = u;
       if (!(u.gender in templates)) {
         throw new Error('Invalid template selector');
       }
-      let templateID: UUIDString;
-      try {
-        templateID = new UUIDString(templates[u.gender]);
-      } catch (e) {
-        return res.json({ Success: false, Message: 'Selected template does not contain a user uuid' });
-      }
-      return templateID;
-    }).then((templateID: UUIDString) => {
-      return db.Users.getByID(templateID.toString());
-    }).then((t: UserInstance) => {
+      let templateID=  templates[u.gender]
+      return store.Users.getByID(templateID.toString());
+    }).then((t: IUser) => {
       let names = pUser.name.trim().split(' ');
-      return db.Users.createUserFromTemplate(names[0], names[1], Credential.fromHalcyon(pUser.password), pUser.email, t);
-    }).then((nu: UserInstance) => {
+      return store.Users.createUserFromTemplate(names[0], names[1], Credential.fromPlaintext(pUser.password), pUser.email, t);
+    }).then((nu: IUser) => {
       newUser = nu;
-      return pUser.destroy();
+      return store.PendingUsers.delete(pUser);
     }).then(() => {
       return EmailMgr.instance().accountApproved(pUser.name, pUser.email);
     }).then(() => {
@@ -224,6 +221,5 @@ export function CreateUserHandler(store: Store, templates: { [key: string]: stri
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-
-  });
-  */
+  };
+}

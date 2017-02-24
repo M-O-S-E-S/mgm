@@ -3,13 +3,18 @@ import {
   RenewTokenHandler,
   LoginHandler
 } from './AuthHandler';
+import { 
+  RegisterHandler
+} from './RegisterHandler';
 import {
   GetUsersHandler,
   SetPasswordHandler,
   SetAccessLevelHandler,
   SetEmailHandler,
   DeleteUserHandler,
-  CreateUserHandler
+  CreateUserHandler,
+  DenyPendingUserHandler,
+  ApprovePendingUserHandler
 } from './UserHandler';
 import {
   GetJobsHandler,
@@ -58,12 +63,16 @@ export {
   RenewTokenHandler,
   LoginHandler,
 
+  RegisterHandler,
+
   GetUsersHandler,
   SetPasswordHandler,
   SetAccessLevelHandler,
   SetEmailHandler,
   DeleteUserHandler,
   CreateUserHandler,
+  DenyPendingUserHandler,
+  ApprovePendingUserHandler,
 
   GetJobsHandler,
   DeleteJobHandler,

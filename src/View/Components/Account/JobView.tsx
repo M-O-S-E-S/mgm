@@ -60,7 +60,7 @@ export class JobView extends React.Component<props, {}> {
                 data = JSON.parse(this.props.job.data);
                 description = 'save oar ' + this.props.regions.get(data.Region, new Region()).name
                 if (data.Status === "Done") {
-                    status = <a href={'/api/task/ready/' + this.props.job.id}>Download {data.FileName}.oar</a>;
+                    status = <a href={'/api/job/download/' + this.props.job.id}>Download {data.FileName}.oar</a>;
                 } else {
                     status = <span>{data.Status}</span>;
                 }

@@ -54,7 +54,9 @@ import {
   PasswordResetHandler,
   NukeContentHandler,
   LoadOarHandler,
-  UserUploadHandler
+  SaveOarHandler,
+  UserUploadHandler,
+  UserDownloadHandler
 } from './Routes/JobHandler';
 let uploadDir = conf.mgm.upload_dir;
 
@@ -72,6 +74,8 @@ apiRouter.post('/job/resetPassword', formParser, PasswordResetHandler(store, cer
 apiRouter.post('/job/nukeContent/:uuid', middleware.isUser(), NukeContentHandler(store));
 apiRouter.post('/job/loadOar/:uuid', middleware.isUser(), LoadOarHandler(store));
 apiRouter.post('/job/upload/:id', middleware.isUser(), multer({ dest: uploadDir }).single('file'), UserUploadHandler(store));
+apiRouter.post('/job/saveOar/:uuid', middleware.isUser(), SaveOarHandler(store));
+apiRouter.get('/job/download/:id', middleware.isUser(), UserDownloadHandler(store));
 
 // User
 import {
@@ -182,14 +186,15 @@ clusterApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   limit: '1gb'
 }));
 
-import { 
-  NodeLogHandler, 
-  NodeHandler, 
-  NodeStatHandler, 
-  RegionConfigHandler, 
-  IniConfigHandler, 
-  NodeDownloadHandler, 
-  NodeReportHandler 
+import {
+  NodeLogHandler,
+  NodeHandler,
+  NodeStatHandler,
+  RegionConfigHandler,
+  IniConfigHandler,
+  NodeDownloadHandler,
+  NodeReportHandler,
+  NodeUploadHandler
 } from './Routes/NodeHandler';
 
 let defaultOar = conf.mgm.default_oar_path;
@@ -206,6 +211,7 @@ clusterApp.get('/region/:id', middleware.isNode(), RegionConfigHandler(store));
 clusterApp.get('/process/:id', middleware.isNode(), IniConfigHandler(store, conf));
 clusterApp.get('/ready/:id', middleware.isNode(), NodeDownloadHandler(store, defaultOar));
 clusterApp.post('/report/:id', middleware.isNode(), NodeReportHandler(store));
+clusterApp.post('/upload/:id', middleware.isNode(), multer({ dest: uploadDir }).single('file'), NodeUploadHandler(store));
 /*
 /upload
 */

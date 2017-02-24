@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
-import { IRegion, IJob } from '../Types';
+import { IRegion, IJob, IUser } from '../Types';
 import { AuthenticatedRequest } from '../Auth';
 import { RegionLogs } from '../lib';
 import { RegionINI } from '../lib/Region';
@@ -178,6 +178,51 @@ export function NodeReportHandler(store: Store): RequestHandler {
       res.send('OK');
     }).catch((err) => {
       console.log(err);
+    });
+  };
+}
+
+interface uploadRequest extends AuthenticatedRequest {
+  file: {
+    path: string
+    originalname: string
+    size: string
+  }
+}
+import { EmailMgr } from '../lib';
+
+export function NodeUploadHandler(store: Store): RequestHandler {
+  return (req: uploadRequest, res) => {
+    let taskID = parseInt(req.params.id);
+
+    console.log('upload file received for job ' + taskID);
+
+    store.Jobs.getByID(taskID).then((j: IJob) => {
+      switch (j.type) {
+        case 'save_oar':
+          let remoteIP: string = req.ip.split(':').pop();
+          let fileName: string;
+          return Promise.resolve().then(() => {
+            let datum = JSON.parse(j.data);
+            datum.Status = 'Done';
+            datum.File = req.file.path;
+            datum.FileName = req.file.originalname;
+            datum.Size = req.file.size;
+            fileName = datum.FileName;
+            return store.Jobs.setData(j, JSON.stringify(datum));
+          }).then(() => {
+            return store.Users.getByID(j.user);
+          }).then((u: IUser) => {
+            return EmailMgr.instance().sendSaveOarComplete(u.email, fileName);
+          })
+        default:
+          throw new Error('invalid upload for job type: ' + j.type);
+      }
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err: Error) => {
+      console.log(err);
+      res.json({ Success: false, Message: err.message });
     });
   };
 }

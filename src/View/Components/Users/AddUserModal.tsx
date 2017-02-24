@@ -127,8 +127,10 @@ export class AddUserModal extends React.Component<props, state> {
       this.state.password
     ).then((uuid: string) => {
       let u = new User();
-      u = u.set('uuid', uuid)
-        .set('name', this.state.name)
+      let names = this.state.name.trim().split(' ');
+      u = u.set('UUID', uuid)
+        .set('username', names[0])
+        .set('lastname', names[1])
         .set('email', this.state.email);
       this.props.store.User.Update(u);
       this.setState({

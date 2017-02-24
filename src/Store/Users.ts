@@ -1,9 +1,9 @@
 
 import { IPool } from 'promise-mysql';
-
 import { IUser } from '../Types';
-
 import { Credential } from '../Auth';
+import { UUID } from '../lib';
+import { CloneFrom } from './Inventory';
 
 interface user_row {
   UUID: string
@@ -172,32 +172,32 @@ export class Users {
     ]).then(() => { });
   }
 
-  /*
-  
-    createUserFromTemplate(fname: string, lname: string, cred: Credential, email: string, template: UserInstance): Promise<UserInstance> {
-      if (!template) {
-        return Promise.reject('MGM only supports creating users from a template');
-      }
-  
-      let newUser: UserInstance;
-  
-      console.log('Creating new user account ' + fname + ' ' + lname);
-  
-      return this.user.create({
-        UUID: UUIDString.random().toString(),
+  createUserFromTemplate(fname: string, lname: string, cred: Credential, email: string, template: IUser): Promise<IUser> {
+    if (!template) {
+      return Promise.reject('MGM only supports creating users from a template');
+    }
+
+    let newUser: user_row;
+    let t: user_row;
+    return this.db.query('SELECT * FROM users WHERE UUID=?', template.UUID).then((rows: user_row[]) => {
+      t = rows[0];
+    }).then(() => {
+
+      newUser = {
+        UUID: UUID.random().toString(),
         username: fname,
         lastname: lname,
         passwordHash: cred.hash,
         passwordSalt: '',
-        homeRegion: template.homeRegion,
-        homeRegionID: template.homeRegionID,
-        homeLocationX: template.homeLocationX,
-        homeLocationY: template.homeLocationY,
-        homeLocationZ: template.homeLocationZ,
-        homeLookAtX: template.homeLookAtX,
-        homeLookAtY: template.homeLookAtY,
-        homeLookAtZ: template.homeLookAtZ,
-        created: 0,
+        homeRegion: t.homeRegion,
+        homeRegionID: t.homeRegionID,
+        homeLocationX: t.homeLocationX,
+        homeLocationY: t.homeLocationY,
+        homeLocationZ: t.homeLocationZ,
+        homeLookAtX: t.homeLookAtX,
+        homeLookAtY: t.homeLookAtY,
+        homeLookAtZ: t.homeLookAtZ,
+        created: new Date(),
         lastLogin: 0,
         userInventoryURI: '',
         userAssetURI: '',
@@ -220,16 +220,10 @@ export class Users {
         wantToMask: 0,
         wantToText: '',
         languagesText: ''
-      }).then((u: UserInstance) => {
-        newUser = u;
-        console.log('Cloning inventory for ' + fname + ' ' + lname);
-        // clone inventory and appearance
-        let t = new Inventory(template.UUID, this.items, this.folders, this.appearance);
-        return t.cloneInventoryOnto(newUser.UUID);
-      }).then(() => {
-        return newUser;
-      })
-    }
-
-    */
+      }
+      return this.db.query('INSERT INTO users SET ?', newUser);
+    }).then(() => {
+      return CloneFrom(this.db, new UserObj(newUser), template);
+    });
+  }
 }

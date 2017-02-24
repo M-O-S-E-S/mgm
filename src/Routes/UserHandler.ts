@@ -121,14 +121,14 @@ export function DeleteUserHandler(store: Store): RequestHandler {
       });
 
       return store.Estates.getManagers();
-    }).then(( managers: IManager[]) => {
-      managers.map( (m: IManager) => {
-        if(m.uuid === userID)
+    }).then((managers: IManager[]) => {
+      managers.map((m: IManager) => {
+        if (m.uuid === userID)
           throw new Error('Refusing to delete user, they are an estate manager');
       });
 
-      return store.Groups.getAll();      
-    }).then( (groups: IGroup[]) => {
+      return store.Groups.getAll();
+    }).then((groups: IGroup[]) => {
       // can check for group ownership or similar here
 
       return store.Users.delete(user);
@@ -140,15 +140,12 @@ export function DeleteUserHandler(store: Store): RequestHandler {
   };
 }
 
-/*
-
-  
-
-  router.post('/create', isAdmin, (req: AuthenticatedRequest, res) => {
+export function CreateUserHandler(store: Store, templates: { [key: string]: string }): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
     let fullname: string = req.body.name.trim() || '';
-    let email = req.body.email || '';
+    let email: string = req.body.email || '';
     let template: string = req.body.template || '';
-    let password = req.body.password || '';
+    let password: string = req.body.password || '';
 
 
     if (!fullname.trim().match('^[A-z]+ [A-z]+') || template === '' || password === '') {
@@ -161,26 +158,23 @@ export function DeleteUserHandler(store: Store): RequestHandler {
       return res.json({ Success: false, Message: 'Invalid template selector' });
     }
 
-    let templateID: UUIDString;
-    try {
-      templateID = new UUIDString(templates[template]);
-    } catch (e) {
-      return res.json({ Success: false, Message: 'Selected template does not contain a user uuid' });
-    }
+    let templateID = templates[template];
 
-    let templateUser: UserInstance;
-    db.Users.getByID(templateID.toString()).then((t: UserInstance) => {
+    let templateUser: IUser;
+    store.Users.getByID(templateID).then((t: IUser) => {
       templateUser = t;
       //create the user account
-      return db.Users.createUserFromTemplate(names[0], names[1], Credential.fromPlaintext(password), email, templateUser);
-    }).then((u: UserInstance) => {
+      return store.Users.createUserFromTemplate(names[0], names[1], Credential.fromPlaintext(password), email, templateUser);
+    }).then((u: IUser) => {
       res.json({ Success: true, Message: u.UUID });
     }).catch((err: Error) => {
       console.log(err);
       res.json({ Success: false, Message: err.message });
     });
-  });
+  };
+}
 
+/*
   //deny a pending user
   router.post('/deny', isAdmin, (req: AuthenticatedRequest, res) => {
     let name = req.body.name;

@@ -8,7 +8,8 @@ import {
   SetPasswordHandler,
   SetAccessLevelHandler,
   SetEmailHandler,
-  DeleteUserHandler
+  DeleteUserHandler,
+  CreateUserHandler
 } from './UserHandler';
 import {
   GetJobsHandler,
@@ -62,6 +63,7 @@ export {
   SetAccessLevelHandler,
   SetEmailHandler,
   DeleteUserHandler,
+  CreateUserHandler,
 
   GetJobsHandler,
   DeleteJobHandler,

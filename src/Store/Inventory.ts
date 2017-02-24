@@ -1,194 +1,243 @@
 
-import * as Sequelize from 'sequelize';
-import {
-  InventoryItemInstance, InventoryItemAttribute,
-  InventoryFolderInstance, InventoryFolderAttribute,
-  AvatarAppearanceInstance, AvatarAppearanceAttribute
-} from './mysql';
+import { IPool } from 'promise-mysql';
+import { Store } from '.';
+import { UUID } from '../lib';
+import { IUser } from '../Types';
 
-import { UUIDString } from '../lib/UUID';
+function wipeInventory(db: IPool, user: IUser): Promise<void> {
+  return db.query('DELETE FROM inventoryfolders WHERE agentID=?', user.UUID).then(() => {
+    return db.query('DELETE FROM inventoryitems WHERE avatarID=?', user.UUID);
+  });
+}
 
-export class Inventory {
-  private user: string;
-  private items: Sequelize.Model<InventoryItemInstance, InventoryItemAttribute>
-  private folders: Sequelize.Model<InventoryFolderInstance, InventoryFolderAttribute>
-  private appearance: Sequelize.Model<AvatarAppearanceInstance, AvatarAppearanceAttribute>
+export function ApplySkeleton(db: IPool, user: IUser): Promise<void> {
+  let rootID = UUID.random().toString();
 
-  constructor(
-    userID: string,
-    items: Sequelize.Model<InventoryItemInstance, InventoryItemAttribute>,
-    folders: Sequelize.Model<InventoryFolderInstance, InventoryFolderAttribute>,
-    appearance: Sequelize.Model<AvatarAppearanceInstance, AvatarAppearanceAttribute>
-  ) {
-    this.user = userID;
-    this.items = items;
-    this.folders = folders;
-    this.appearance = appearance;
-  }
+  let values = [
+    ['My Inventory', 8, 0, rootID, user.UUID, UUID.zero().toString()],
+    ['Textures', 0, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Sounds', 1, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Calling Cards', 2, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Landmarks', 3, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Clothing', 5, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Objects', 6, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Notecards', 7, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Scripts', 10, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Body Parts', 13, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Trash', 14, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Photo Album', 15, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Lost And Found', 16, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Animations', 20, 0, UUID.random().toString(), user.UUID, rootID],
+    ['Gestures', 21, 0, UUID.random().toString(), user.UUID, rootID],
+  ]
 
-  cloneInventoryOnto(destination: string): Promise<void> {
-    let folders: InventoryFolderInstance[];
-    let items: InventoryItemInstance[];
-    let uuidMap: { [key: string]: string } = {};
-    return this.destroy(destination).then(() => {
-      return this.folders.findAll({
-        where: {
-          agentID: this.user
-        }
-      })
-    }).then((res: InventoryFolderInstance[]) => {
-      folders = res;
-      return this.items.findAll({
-        where: {
-          avatarID: this.user
-        }
-      })
-    }).then((res: InventoryItemInstance[]) => {
-      items = res;
-    }).then(() => {
-      // generate uuid map
+  return db.query('INSERT INTO inventoryfolders (folderName, type, version, folderID, agentID, parentFolderID) VALUES ?', values);
+}
 
-      for (let f of folders) {
-        uuidMap[f.folderID] = UUIDString.random().toString();
-        uuidMap[f.parentFolderID] = UUIDString.random().toString();
+interface inventoryFolder {
+  folderName: string
+  type: number
+  version: number
+  folderID: string
+  agentID: string
+  parentFolderID: string
+}
+
+interface inventoryItem {
+  assetID: string
+  assetType: number
+  inventoryName: string
+  inventoryDescription: string
+  inventoryNextPermissions: number
+  inventoryCurrentPermissions: number
+  invType: number
+  creatorID: string
+  inventoryBasePermissions: number
+  inventoryEveryOnePermissions: number
+  salePrice: number
+  saleType: number
+  creationDate: number
+  groupID: string
+  groupOwned: number
+  flags: number
+  inventoryID: string
+  avatarID: string
+  parentFolderID: string
+  inventoryGroupPermissions: string
+}
+
+interface avatarAppearance {
+  Owner: string
+  Serial: number
+  Visual_Params: string
+  Texture: string
+  Avatar_Height: number
+  Body_Item: string
+  Body_Asset: string
+  Skin_Item: string
+  Skin_Asset: string
+  Hair_Item: string
+  Hair_Asset: string
+  Eyes_Item: string
+  Eyes_Asset: string
+  Shirt_Item: string
+  Shirt_Asset: string
+  Pants_Item: string
+  Pants_Asset: string
+  Shoes_Item: string
+  Shoes_Asset: string
+  Socks_Item: string
+  Socks_Asset: string
+  Jacket_Item: string
+  Jacket_Asset: string
+  Gloves_Item: string
+  Gloves_Asset: string
+  Undershirt_Item: string
+  Undershirt_Asset: string
+  Underpants_Item: string
+  Underpants_Asset: string
+  Skirt_Item: string
+  Skirt_Asset: string
+  alpha_item: string
+  alpha_asset: string
+  tattoo_item: string
+  tattoo_asset: string
+  physics_item: string
+  physics_asset: string
+}
+
+interface attachment {
+  UUID: string
+  attachpoint: number
+  item: string
+  asset: string
+}
+
+export function CloneFrom(db: IPool, target: IUser, template: IUser): Promise<IUser> {
+  let uuidMap: { [key: string]: string } = {}
+  let invMap: { [key: string]: string } = {};
+
+  return wipeInventory(db, target).then(() => {
+    // read folders, and generate the uuid map
+    return db.query('SELECT * FROM inventoryfolders WHERE agentID=?', template.UUID);
+  }).then((rows: inventoryFolder[]) => {
+    console.log('wipe inventory complete');
+    // insert into the map
+    rows.map((r: inventoryFolder) => {
+      uuidMap[r.folderID] = UUID.random().toString();
+    });
+
+    // uuid zero is special and can't map anywhere else
+    uuidMap[UUID.zero().toString()] = UUID.zero().toString();
+    return Promise.all(rows.map((r: inventoryFolder) => {
+      let v: inventoryFolder = {
+        folderName: r.folderName,
+        type: r.type,
+        version: 0,
+        folderID: uuidMap[r.folderID],
+        agentID: target.UUID,
+        parentFolderID: uuidMap[r.parentFolderID]
       }
-      for (let i of items) {
-        uuidMap[i.inventoryID] = UUIDString.random().toString();
+      return db.query('INSERT INTO inventoryfolders SET ?', v);
+    }))
+  }).then(() => {
+    console.log('clone inventory folders complete');
+    // read items
+    return db.query('SELECT * FROM inventoryitems WHERE avatarID=?', template.UUID);
+  }).then((rows: inventoryItem[]) => {
+    // generate a mini-map for inventory IDs.  This is needed for asset type 24 which is a reference
+    rows.map((r: inventoryItem) => {
+      invMap[r.inventoryID] = UUID.random().toString();
+    })
+    // UUID zero is special here too
+    invMap[UUID.zero().toString()] = UUID.zero().toString();
+    return Promise.all(rows.map((r: inventoryItem) => {
+      let v: inventoryItem = {
+        assetID: r.assetType == 24 ? uuidMap[r.assetID] : r.assetID,  // type 24 is a link
+        assetType: r.assetType,
+        inventoryName: r.inventoryName,
+        inventoryDescription: r.inventoryDescription,
+        inventoryNextPermissions: r.inventoryNextPermissions,
+        inventoryCurrentPermissions: r.inventoryCurrentPermissions,
+        invType: r.invType,
+        creatorID: r.creatorID,
+        inventoryBasePermissions: r.inventoryBasePermissions,
+        inventoryEveryOnePermissions: r.inventoryEveryOnePermissions,
+        salePrice: r.salePrice,
+        saleType: r.saleType,
+        creationDate: r.creationDate,
+        groupID: r.groupID,
+        groupOwned: r.groupOwned,
+        flags: r.flags,
+        inventoryID: invMap[r.inventoryID],
+        avatarID: target.UUID,
+        parentFolderID: uuidMap[r.parentFolderID],
+        inventoryGroupPermissions: r.inventoryGroupPermissions
       }
-      // UUID zero is special and needs to stick
-      uuidMap[UUIDString.zero().toString()] = UUIDString.zero().toString();
-    }).then(() => {
-      //clone all of the folders accross
-      return Promise.all(folders.map((t: InventoryFolderInstance) => {
-        return this.folders.create({
-          folderName: t.folderName,
-          type: t.type,
-          version: t.version,
-          folderID: uuidMap[t.folderID],
-          agentID: destination,
-          parentFolderID: uuidMap[t.parentFolderID]
-        })
-      }))
-    }).then(() => {
-      //clone all of the items accross
-      return Promise.all(items.map((t: InventoryItemInstance) => {
-        return this.items.create({
-          assetID: t.assetType == 24 ? uuidMap[t.assetID] : t.assetID,
-          assetType: t.assetType,
-          inventoryName: t.inventoryName,
-          inventoryDescription: t.inventoryDescription,
-          inventoryNextPermissions: t.inventoryNextPermissions,
-          inventoryCurrentPermissions: t.inventoryCurrentPermissions,
-          invType: t.invType,
-          creatorID: t.creatorID,
-          inventoryBasePermissions: t.inventoryBasePermissions,
-          inventoryEveryOnePermissions: t.inventoryEveryOnePermissions,
-          salePrice: t.salePrice,
-          saleType: t.saleType,
-          creationDate: t.creationDate,
-          groupID: t.groupID,
-          groupOwned: t.groupOwned,
-          flags: t.flags,
-          inventoryID: uuidMap[t.inventoryID],
-          avatarID: destination,
-          parentFolderID: uuidMap[t.parentFolderID],
-          inventoryGroupPermissions: t.inventoryGroupPermissions
-        })
-      }))
-    }).then(() => {
-      // clone the avatar appearance
-      return this.appearance.findAll({
-        where: {
-          Owner: this.user
-        }
-      })
-    }).then((pieces: AvatarAppearanceInstance[]) => {
-      return Promise.all(pieces.map((p: AvatarAppearanceInstance) => {
-        return this.appearance.create({
-          Owner: destination,
-          Serial: p.Serial,
-          Visual_Params: p.Visual_Params,
-          Texture: p.Texture,
-          Avatar_Height: p.Avatar_Height,
-          Body_Item: uuidMap[p.Body_Item],
-          Body_Asset: p.Body_Asset,
-          Skin_Item: uuidMap[p.Skin_Item.toString()],
-          Skin_Asset: p.Skin_Asset,
-          Hair_Item: uuidMap[p.Hair_Item.toString()],
-          Hair_Asset: p.Hair_Asset,
-          Eyes_Item: uuidMap[p.Eyes_Item.toString()],
-          Eyes_Asset: p.Eyes_Asset,
-          Shirt_Item: uuidMap[p.Shirt_Item.toString()],
-          Shirt_Asset: p.Shirt_Asset,
-          Pants_Item: uuidMap[p.Pants_Item.toString()],
-          Pants_Asset: p.Pants_Asset,
-          Shoes_Item: uuidMap[p.Shoes_Item.toString()],
-          Shoes_Asset: p.Shoes_Asset,
-          Socks_Item: uuidMap[p.Socks_Item.toString()],
-          Socks_Asset: p.Socks_Asset,
-          Jacket_Item: uuidMap[p.Jacket_Item.toString()],
-          Jacket_Asset: p.Jacket_Asset,
-          Gloves_Item: uuidMap[p.Gloves_Item.toString()],
-          Gloves_Asset: p.Gloves_Asset,
-          Undershirt_Item: uuidMap[p.Undershirt_Item.toString()],
-          Undershirt_Asset: p.Undershirt_Asset,
-          Underpants_Item: uuidMap[p.Underpants_Item.toString()],
-          Underpants_Asset: p.Underpants_Asset,
-          Skirt_Item: uuidMap[p.Skirt_Item.toString()],
-          Skirt_Asset: p.Skirt_Asset,
-          alpha_item: uuidMap[p.alpha_item.toString()],
-          alpha_asset: p.alpha_asset,
-          tattoo_item: uuidMap[p.tattoo_item.toString()],
-          tattoo_asset: p.tattoo_asset,
-          physics_item: uuidMap[p.physics_item.toString()],
-          physics_asset: p.physics_asset
-        })
-      }));
-    }).then(() => { });
-  }
-
-  private destroy(target: string): Promise<void> {
-    return this.folders.findAll({
-      where: {
-        agentID: target
+      return db.query('INSERT INTO inventoryitems SET ?', v);
+    }))
+  }).then(() => {
+    console.log('clone inventory items complete')
+    // copy the avatar appearance
+    return db.query('SELECT * FROM avatarappearance WHERE Owner=?', template.UUID);
+  }).then((rows: avatarAppearance[]) => {
+    // this is 1 per account, so we only use the first
+    let t = rows[0];
+    // copy it over in case there are dangling mysql properties
+    let appearance: avatarAppearance = {
+      Owner: target.UUID,
+      Serial: t.Serial,
+      Visual_Params: t.Visual_Params,
+      Texture: t.Texture,
+      Avatar_Height: t.Avatar_Height,
+      Body_Item: invMap[t.Body_Item],
+      Body_Asset: t.Body_Asset,
+      Skin_Item: invMap[t.Skin_Item],
+      Skin_Asset: t.Skin_Asset,
+      Hair_Item: invMap[t.Hair_Item],
+      Hair_Asset: t.Hair_Asset,
+      Eyes_Item: invMap[t.Eyes_Item],
+      Eyes_Asset: t.Eyes_Asset,
+      Shirt_Item: invMap[t.Shirt_Item],
+      Shirt_Asset: t.Shirt_Asset,
+      Pants_Item: invMap[t.Pants_Item],
+      Pants_Asset: t.Pants_Asset,
+      Shoes_Item: invMap[t.Shoes_Item],
+      Shoes_Asset: t.Shoes_Asset,
+      Socks_Item: invMap[t.Socks_Item],
+      Socks_Asset: t.Socks_Asset,
+      Jacket_Item: invMap[t.Jacket_Item],
+      Jacket_Asset: t.Jacket_Asset,
+      Gloves_Item: invMap[t.Gloves_Item],
+      Gloves_Asset: t.Gloves_Asset,
+      Undershirt_Item: invMap[t.Undershirt_Item],
+      Undershirt_Asset: t.Undershirt_Asset,
+      Underpants_Item: invMap[t.Underpants_Item],
+      Underpants_Asset: t.Underpants_Asset,
+      Skirt_Item: invMap[t.Skirt_Item],
+      Skirt_Asset: t.Skirt_Asset,
+      alpha_item: invMap[t.alpha_item],
+      alpha_asset: t.alpha_asset,
+      tattoo_item: invMap[t.tattoo_item],
+      tattoo_asset: t.tattoo_asset,
+      physics_item: invMap[t.physics_item],
+      physics_asset: t.physics_asset
+    }
+    return db.query('INSERT INTO avatarappearance SET ?', appearance);
+  }).then(() => {
+    // copy the avatar attachments
+    return db.query('SELECT * FROM avatarattachments WHERE UUID=?', template.UUID);
+  }).then((rows: attachment[]) => {
+    return Promise.all(rows.map((r: attachment) => {
+      let v: attachment = {
+        UUID: target.UUID,
+        attachpoint: r.attachpoint,
+        item: invMap[r.item],
+        asset: r.asset
       }
-    }).then((folders: InventoryFolderInstance[]) => {
-      return Promise.all(folders.map((f: InventoryFolderInstance) => {
-        return f.destroy();
-      }))
-    }).then(() => {
-      return this.items.findAll({
-        where: {
-          avatarID: target
-        }
-      })
-    }).then((items: InventoryItemInstance[]) => {
-      return Promise.all(items.map((i: InventoryItemInstance) => {
-        return i.destroy();
-      }))
-    }).then(() => { });
-  }
-
-  /*static skeleton(owner: UUIDString): Inventory {
-    let folders: Folder[] = [];
-    let rootID = UUIDString.random();
-    folders = [
-      new Folder('My Inventory', 8, 0, rootID, owner, UUIDString.zero()),
-      new Folder('Textures', 0, 0, UUIDString.random(), owner, rootID),
-      new Folder('Sounds', 1, 0, UUIDString.random(), owner, rootID),
-      new Folder('Calling Cards', 2, 0, UUIDString.random(), owner, rootID),
-      new Folder('Landmarks', 3, 0, UUIDString.random(), owner, rootID),
-      new Folder('Clothing', 5, 0, UUIDString.random(), owner, rootID),
-      new Folder('Objects', 6, 0, UUIDString.random(), owner, rootID),
-      new Folder('Notecards', 7, 0, UUIDString.random(), owner, rootID),
-      new Folder('Scripts', 10, 0, UUIDString.random(), owner, rootID),
-      new Folder('Body Parts', 13, 0, UUIDString.random(), owner, rootID),
-      new Folder('Trash', 14, 0, UUIDString.random(), owner, rootID),
-      new Folder('Photo Album', 15, 0, UUIDString.random(), owner, rootID),
-      new Folder('Lost And Found', 16, 0, UUIDString.random(), owner, rootID),
-      new Folder('Animations', 20, 0, UUIDString.random(), owner, rootID),
-      new Folder('Gestures', 21, 0, UUIDString.random(), owner, rootID),
-    ]
-    return new Inventory(folders, []);
-  }*/
+      return db.query('INSERT INTO avatarattachments SET ?', v)
+    }))
+  }).then(() => {
+    return target;
+  })
 }

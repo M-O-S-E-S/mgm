@@ -43,3 +43,20 @@ export function performCall(method: string, route: string, args?: any): Promise<
     }
   });
 }
+
+export function downloadFile(route: string): Promise<Blob> {
+  return new Promise<Blob>((resolve, reject) => {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', route, true);
+    xhr.responseType = "blob";
+    xhr.onload = () => {
+      if (xhr.status !== 200) {
+        reject(new Error('Request failed'));
+      } else {
+        resolve(xhr.response);
+      }
+    };
+    xhr.setRequestHeader('x-access-token', authToken);
+    xhr.send();
+  });
+}

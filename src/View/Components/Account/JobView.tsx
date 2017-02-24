@@ -28,6 +28,8 @@ interface props {
     regions: Map<string, Region>
 }
 
+import { downloadFile } from '../../ClientStack/call';
+
 export class JobView extends React.Component<props, {}> {
 
     shouldComponentUpdate(nextProps: props) {
@@ -47,6 +49,25 @@ export class JobView extends React.Component<props, {}> {
         });
     }
 
+    downloadFile(): Promise<void> {
+        return downloadFile('/api/job/download/' + this.props.job.id).then((blob) => {
+            let data = JSON.parse(this.props.job.data);
+            let uri = URL.createObjectURL(blob);
+            var link = document.createElement('a');
+            if (typeof link.download === 'string') {
+                document.body.appendChild(link); //Firefox requires the link to be in the body
+                link.download = data.FileName + '.oar';
+                link.href = uri;
+                link.click();
+                document.body.removeChild(link); //remove the link when done
+            } else {
+                location.replace(uri);
+            }
+        }).catch((err: Error) => {
+            alertify.error(err.message);
+        })
+    }
+
     render() {
         let status = <span />;
         let description = this.props.job.type;
@@ -60,7 +81,7 @@ export class JobView extends React.Component<props, {}> {
                 data = JSON.parse(this.props.job.data);
                 description = 'save oar ' + this.props.regions.get(data.Region, new Region()).name
                 if (data.Status === "Done") {
-                    status = <a href={'/api/job/download/' + this.props.job.id}>Download {data.FileName}.oar</a>;
+                    status = <BusyButton bsSize="xsmall" onClick={this.downloadFile.bind(this)}>Download {data.FileName}.oar</BusyButton>;
                 } else {
                     status = <span>{data.Status}</span>;
                 }

@@ -7,7 +7,7 @@ import { EmailMgr } from '../lib'
 
 import * as fs from 'fs';
 
-import { Response, GetJobsResponse } from '../View/ClientStack';
+import { Response, GetJobsResponse, JobResponse } from '../View/ClientStack';
 
 export function GetJobsHandler(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res) {
@@ -158,34 +158,85 @@ export function NukeContentHandler(store: Store): RequestHandler {
   };
 }
 
-/*
-  router.post('/loadOar/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
-    let merge = req.body.merge;
-    let regionID = new UUIDString(req.params.uuid);
-    let user = new UUIDString(req.user.uuid);
+export function LoadOarHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let regionID = req.params.uuid;
 
-    console.log('User ' + user + ' requesting load oar for region ' + regionID);
+    if (!req.user.isAdmin && !req.user.regions.has(regionID)) {
+      return res.json({ Success: false, Message: 'Access Denied' });
+    }
 
-    db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
+    let user: IUser;
+
+    store.Users.getByID(req.user.uuid).then((u: IUser) => {
+      user = u;
+      return store.Regions.getByUUID(regionID);
+    }).then((r: IRegion) => {
       if (!r.isRunning) {
         throw new Error('Region is not running');
       }
-      return db.Jobs.create(
+      return store.Jobs.create(
         'load_oar',
-        user.toString(),
+        user,
         JSON.stringify({
           Status: 'Pending...',
-          Region: regionID.toString(),
-          merge: merge
+          Region: regionID.toString()
         })
       );
-    }).then((j: JobInstance) => {
+    }).then((j: IJob) => {
       res.json({ Success: true, ID: j.id });
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
+  };
+}
 
+interface uploadRequest extends AuthenticatedRequest {
+  file: {
+    path: string
+  }
+}
+
+export function UserUploadHandler(store: Store): RequestHandler {
+  return (req: uploadRequest, res) => {
+    let taskID = parseInt(req.params.id);
+
+    store.Jobs.getByID(taskID).then((j: IJob) => {
+      switch (j.type) {
+        case 'load_oar':
+          let user = req.user.uuid;
+          if (user !== j.user) {
+            throw new Error('Permission Denied');
+          }
+          let datum = JSON.parse(j.data);
+          datum.Status = "Loading";
+          datum.File = req.file.path;
+          let region: IRegion;
+
+          return store.Jobs.setData(j, JSON.stringify(datum)).then((j: IJob) => {
+            return store.Regions.getByUUID(datum.Region);
+          }).then((r: IRegion) => {
+            region = r;
+            if (!r.isRunning) {
+              throw new Error('Region is not running');
+            }
+            return store.Hosts.getByAddress(r.node);
+          }).then((h: IHost) => {
+            return LoadOar(region, h, j);
+          })
+        default:
+          throw new Error('invalid upload for job type: ' + j.type);
+      }
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err: Error) => {
+      console.log(err);
+      res.json({ Success: false, Message: err.message });
+    });
+  };
+}
+
+/*
   // we do not check per-user permissions, only admins may do this
   router.post('/saveOar/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
     let regionID = new UUIDString(req.params.uuid);

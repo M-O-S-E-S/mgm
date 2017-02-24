@@ -37,17 +37,25 @@ import * as multer from 'multer'
 let formParser = multer().array('');
 
 // Auth
-import { RenewTokenHandler, LoginHandler } from './Routes';
+import { RenewTokenHandler, LoginHandler } from './Routes/AuthHandler';
 apiRouter.get('/auth', middleware.isUser(), RenewTokenHandler(store, certificate));
 apiRouter.post('/auth/login', formParser, LoginHandler(store, certificate));
 
 // Registration
-import { RegisterHandler } from './Routes';
+import { RegisterHandler } from './Routes/RegisterHandler';
 apiRouter.post('/register', formParser, RegisterHandler(store, conf.mgm.templates));
 
 
 // Jobs
-import { GetJobsHandler, DeleteJobHandler, PasswordResetCodeHandler, PasswordResetHandler, NukeContentHandler } from './Routes';
+import {
+  GetJobsHandler,
+  DeleteJobHandler,
+  PasswordResetCodeHandler,
+  PasswordResetHandler,
+  NukeContentHandler,
+  LoadOarHandler,
+  UserUploadHandler
+} from './Routes/JobHandler';
 let uploadDir = conf.mgm.upload_dir;
 
 //ensure the directory for logs exists
@@ -62,9 +70,18 @@ apiRouter.post('/job/delete/:id', formParser, middleware.isUser(), DeleteJobHand
 apiRouter.post('/job/resetCode', formParser, PasswordResetCodeHandler(store, certificate));
 apiRouter.post('/job/resetPassword', formParser, PasswordResetHandler(store, certificate));
 apiRouter.post('/job/nukeContent/:uuid', middleware.isUser(), NukeContentHandler(store));
+apiRouter.post('/job/loadOar/:uuid', middleware.isUser(), LoadOarHandler(store));
+apiRouter.post('/job/upload/:id', middleware.isUser(), multer({ dest: uploadDir }).single('file'), UserUploadHandler(store));
 
 // User
-import { GetUsersHandler, SetPasswordHandler, SetAccessLevelHandler, SetEmailHandler, DeleteUserHandler, CreateUserHandler } from './Routes';
+import {
+  GetUsersHandler,
+  SetPasswordHandler,
+  SetAccessLevelHandler,
+  SetEmailHandler,
+  DeleteUserHandler,
+  CreateUserHandler
+} from './Routes/UserHandler';
 apiRouter.get('/user', middleware.isUser(), GetUsersHandler(store));
 apiRouter.post('/user/password', middleware.isUser(), formParser, SetPasswordHandler(store));
 apiRouter.post('/user/accessLevel', formParser, middleware.isAdmin(), SetAccessLevelHandler(store));
@@ -72,8 +89,9 @@ apiRouter.post('/user/email', formParser, middleware.isAdmin(), SetEmailHandler(
 apiRouter.post('/user/destroy/:uuid', middleware.isAdmin(), DeleteUserHandler(store));
 apiRouter.post('/user/create', formParser, middleware.isAdmin(), CreateUserHandler(store, conf.mgm.templates));
 
+
 // Pending User
-import { DenyPendingUserHandler, ApprovePendingUserHandler } from './Routes';
+import { DenyPendingUserHandler, ApprovePendingUserHandler } from './Routes/UserHandler';
 apiRouter.post('/user/deny', formParser, middleware.isAdmin(), DenyPendingUserHandler(store));
 apiRouter.post('/user/approve', formParser, middleware.isAdmin(), ApprovePendingUserHandler(store, conf.mgm.templates));
 
@@ -89,7 +107,7 @@ import {
   SetRegionHostHandler,
   CreateRegionHandler,
   DeleteRegionHandler
-} from './Routes';
+} from './Routes/RegionHandler';
 import { RegionLogs } from './lib';
 let regionLogs = new RegionLogs(conf.mgm.log_dir);
 apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
@@ -104,19 +122,19 @@ apiRouter.post('/region/setXY/:uuid', formParser, middleware.isUser(), SetRegion
 apiRouter.post('/region/host/:uuid', formParser, middleware.isUser(), SetRegionHostHandler(store));
 
 // Estate
-import { GetEstatesHandler, CreateEstateHandler, DeleteEstateHandler } from './Routes';
+import { GetEstatesHandler, CreateEstateHandler, DeleteEstateHandler } from './Routes/EstateHandler';
 apiRouter.get('/estate', middleware.isUser(), GetEstatesHandler(store));
 apiRouter.post('/estate/create', formParser, middleware.isAdmin(), CreateEstateHandler(store));
 apiRouter.post('/estate/destroy/:id', middleware.isAdmin(), DeleteEstateHandler(store));
 
 // Group
-import { GetGroupsHandler, AddMemberHandler, RemoveMemberHandler } from './Routes';
+import { GetGroupsHandler, AddMemberHandler, RemoveMemberHandler } from './Routes/GroupHandler';
 apiRouter.get('/group', middleware.isUser(), GetGroupsHandler(store));
 apiRouter.post('/group/addMember/:id', formParser, middleware.isAdmin(), AddMemberHandler(store));
 apiRouter.post('/group/removeMember/:id', formParser, middleware.isAdmin(), RemoveMemberHandler(store));
 
 // Host
-import { GetHostHandler, AddHostHandler, RemoveHostHandler } from './Routes';
+import { GetHostHandler, AddHostHandler, RemoveHostHandler } from './Routes/HostHandler';
 apiRouter.get('/host', middleware.isAdmin(), GetHostHandler(store));
 apiRouter.post('/host/add', formParser, middleware.isAdmin(), AddHostHandler(store));
 apiRouter.post('/host/remove', formParser, middleware.isAdmin(), RemoveHostHandler(store));
@@ -164,7 +182,15 @@ clusterApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   limit: '1gb'
 }));
 
-import { NodeLogHandler, NodeHandler, NodeStatHandler, RegionConfigHandler, IniConfigHandler, NodeDownloadHandler, NodeReportHandler } from './Routes';
+import { 
+  NodeLogHandler, 
+  NodeHandler, 
+  NodeStatHandler, 
+  RegionConfigHandler, 
+  IniConfigHandler, 
+  NodeDownloadHandler, 
+  NodeReportHandler 
+} from './Routes/NodeHandler';
 
 let defaultOar = conf.mgm.default_oar_path;
 if (!fs.existsSync(defaultOar)) {

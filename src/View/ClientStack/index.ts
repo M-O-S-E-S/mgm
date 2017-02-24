@@ -62,6 +62,10 @@ class GroupStack {
     }
 }
 
+export interface JobResponse {
+    ID: string
+}
+
 class JobStack {
     static Get(): Promise<IJob[]> {
         return performCall('GET', '/api/job').then((res: GetJobsResponse) => {
@@ -72,8 +76,8 @@ class JobStack {
         return performCall('POST', '/api/job/delete/' + job.id);
     }
     static LoadOar(region: Region): Promise<number> {
-        return performCall('POST', '/api/job/loadOar/' + region.uuid).then((res: NetworkResponse) => {
-            return parseInt(res.Message, 10);
+        return performCall('POST', '/api/job/loadOar/' + region.uuid).then((res: JobResponse) => {
+            return parseInt(res.ID, 10);
         });
     }
     static Upload(job: Job, file: any): Promise<void> {

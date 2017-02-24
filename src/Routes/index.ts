@@ -20,7 +20,8 @@ import {
   GetJobsHandler,
   DeleteJobHandler,
   PasswordResetCodeHandler,
-  PasswordResetHandler
+  PasswordResetHandler,
+  NukeContentHandler,
 } from './JobHandler';
 import {
   GetRegionsHandler,
@@ -56,7 +57,9 @@ import {
   NodeHandler,
   NodeStatHandler,
   RegionConfigHandler,
-  IniConfigHandler
+  IniConfigHandler,
+  NodeDownloadHandler,
+  NodeReportHandler
 } from './NodeHandler';
 
 export {
@@ -78,6 +81,7 @@ export {
   DeleteJobHandler,
   PasswordResetCodeHandler,
   PasswordResetHandler,
+  NukeContentHandler,
 
   GetRegionsHandler,
   GetRegionLogsHandler,
@@ -106,5 +110,7 @@ export {
   NodeHandler,
   NodeStatHandler,
   RegionConfigHandler,
-  IniConfigHandler
+  IniConfigHandler,
+  NodeDownloadHandler,
+  NodeReportHandler
 }

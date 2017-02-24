@@ -46,4 +46,8 @@ export class Jobs {
   destroy(j: IJob): Promise<void> {
     return this.db.query('DELETE FROM jobs WHERE id=?', j.id);
   }
+
+  setData(j: IJob, data: string): Promise<IJob> {
+    return this.db.query('UPDATE jobs SET data=? WHERE id=?', [data, j.id])
+  }
 }

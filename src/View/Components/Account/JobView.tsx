@@ -35,7 +35,6 @@ export class JobView extends React.Component<props, {}> {
     }
 
     timestamptoDate(timestamp: Date): string {
-        console.log(typeof (timestamp));
         let date = timestamp;//new Date(timestamp);
         return monthNames[date.getMonth()] + ' ' + date.getDate() + ' ' + date.getFullYear() + ' ' +
             ('00' + date.getHours()).slice(-2) + ':' +

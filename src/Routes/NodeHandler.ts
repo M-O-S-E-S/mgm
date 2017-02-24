@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
-import { IRegion } from '../Types';
+import { IRegion, IJob } from '../Types';
 import { AuthenticatedRequest } from '../Auth';
 import { RegionLogs } from '../lib';
 import { RegionINI } from '../lib/Region';
@@ -143,6 +143,41 @@ export function IniConfigHandler(store: Store, config: Config): RequestHandler {
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
       return;
+    });
+  };
+}
+
+export function NodeDownloadHandler(store: Store, defaultOar: string): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let jobID = parseInt(req.params.id);
+
+    store.Jobs.getByID(jobID).then((j: IJob) => {
+      switch (j.type) {
+        case 'load_oar':
+          let datum = JSON.parse(j.data);
+          res.sendFile(datum.File);
+        case 'nuke':
+          res.sendFile(defaultOar);
+      }
+
+    }).catch((err) => {
+      console.log('An error occurred sending a file to a user: ' + err);
+    });
+  };
+}
+
+export function NodeReportHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let taskID = parseInt(req.params.id);
+
+    store.Jobs.getByID(taskID).then((j: IJob) => {
+      let datum = JSON.parse(j.data);
+      datum.Status = req.body.Status;
+      return store.Jobs.setData(j, JSON.stringify(datum));
+    }).then(() => {
+      res.send('OK');
+    }).catch((err) => {
+      console.log(err);
     });
   };
 }

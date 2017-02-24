@@ -60,6 +60,7 @@ export interface Store {
     getByID(id: number): Promise<IJob>
     create(type: string, owner: IUser, content: string): Promise<IJob>
     destroy(j: IJob): Promise<void>
+    setData(j: IJob, data: string): Promise<IJob>
   },
   Estates: {
     create(name: string, owner: string): Promise<IEstate>

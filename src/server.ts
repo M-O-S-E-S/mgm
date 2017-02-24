@@ -47,9 +47,8 @@ apiRouter.post('/register', formParser, RegisterHandler(store, conf.mgm.template
 
 
 // Jobs
-import { GetJobsHandler, DeleteJobHandler, PasswordResetCodeHandler, PasswordResetHandler } from './Routes';
+import { GetJobsHandler, DeleteJobHandler, PasswordResetCodeHandler, PasswordResetHandler, NukeContentHandler } from './Routes';
 let uploadDir = conf.mgm.upload_dir;
-let defaultOar = conf.mgm.default_oar_path;
 
 //ensure the directory for logs exists
 if (!fs.existsSync(uploadDir)) {
@@ -58,15 +57,11 @@ if (!fs.existsSync(uploadDir)) {
       throw new Error('Cannot create region log directory at ' + uploadDir);
   });
 }
-
-if (!fs.existsSync(defaultOar)) {
-  throw new Error('Default oar does not exist at ' + defaultOar);
-}
 apiRouter.get('/job', middleware.isUser(), GetJobsHandler(store));
 apiRouter.post('/job/delete/:id', formParser, middleware.isUser(), DeleteJobHandler(store));
 apiRouter.post('/job/resetCode', formParser, PasswordResetCodeHandler(store, certificate));
 apiRouter.post('/job/resetPassword', formParser, PasswordResetHandler(store, certificate));
-
+apiRouter.post('/job/nukeContent/:uuid', middleware.isUser(), NukeContentHandler(store));
 
 // User
 import { GetUsersHandler, SetPasswordHandler, SetAccessLevelHandler, SetEmailHandler, DeleteUserHandler, CreateUserHandler } from './Routes';
@@ -169,7 +164,12 @@ clusterApp.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   limit: '1gb'
 }));
 
-import { NodeLogHandler, NodeHandler, NodeStatHandler, RegionConfigHandler, IniConfigHandler } from './Routes';
+import { NodeLogHandler, NodeHandler, NodeStatHandler, RegionConfigHandler, IniConfigHandler, NodeDownloadHandler, NodeReportHandler } from './Routes';
+
+let defaultOar = conf.mgm.default_oar_path;
+if (!fs.existsSync(defaultOar)) {
+  throw new Error('Default oar does not exist at ' + defaultOar);
+}
 
 clusterApp.get('/', (req, res) => { res.send('MGM Node Portal'); });
 
@@ -178,6 +178,11 @@ clusterApp.post('/node', middleware.isNode(), NodeHandler(store));
 clusterApp.post('/stats', formParser, middleware.isNode(), NodeStatHandler(store));
 clusterApp.get('/region/:id', middleware.isNode(), RegionConfigHandler(store));
 clusterApp.get('/process/:id', middleware.isNode(), IniConfigHandler(store, conf));
+clusterApp.get('/ready/:id', middleware.isNode(), NodeDownloadHandler(store, defaultOar));
+clusterApp.post('/report/:id', middleware.isNode(), NodeReportHandler(store));
+/*
+/upload
+*/
 
 clusterApp.listen(3001, function () {
   console.log('MGM listening for nodes on port 3001!');

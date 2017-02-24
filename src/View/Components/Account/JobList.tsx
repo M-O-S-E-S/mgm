@@ -31,7 +31,6 @@ export class JobList extends React.Component<props, {}> {
   }
 
   deleteAllJobs(): Promise<void> {
-    console.log('delete all jobs here');
     return Promise.all(
       this.props.jobs.toArray().map((j: Job) => {
         return this.deleteJob(j);
@@ -43,7 +42,6 @@ export class JobList extends React.Component<props, {}> {
     let jobs = this.props.jobs.toArray()
       .sort((a: Job, b: Job) => { return b.timestamp.valueOf() - a.timestamp.valueOf(); })
       .map((job: Job) => {
-        console.log(job);
         return <JobView key={job.id} job={job} deleteJob={this.deleteJob.bind(this)} regions={this.props.regions} />
       })
 

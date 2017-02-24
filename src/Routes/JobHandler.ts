@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
-import { IJob, IUser } from '../Types';
+import { IJob, IUser, IRegion, IHost } from '../Types';
 import { AuthenticatedRequest, Credential } from '../Auth';
 import { sign, verify } from 'jsonwebtoken';
 import { EmailMgr } from '../lib'
@@ -114,6 +114,49 @@ export function DeleteJobHandler(store: Store): RequestHandler {
   };
 }
 
+import { LoadOar } from '../lib/Region';
+
+export function NukeContentHandler(store: Store): RequestHandler {
+  return (req: AuthenticatedRequest, res) => {
+    let regionID: string = req.params.uuid;
+    let userID: string = req.user.uuid;
+
+    if (!req.user.isAdmin && !req.user.regions.has(regionID)) {
+      return res.json({ Success: false, Message: 'Access Denied' });
+    }
+
+    let region: IRegion;
+    let host: IHost;
+    let user: IUser;
+
+    store.Users.getByID(userID).then((u: IUser) => {
+      user = u;
+      return store.Regions.getByUUID(regionID.toString())
+    }).then((r: IRegion) => {
+      if (!r.isRunning) {
+        throw new Error('Region is not running');
+      }
+      region = r;
+      return store.Hosts.getByAddress(r.node);
+    }).then((h: IHost) => {
+      host = h;
+      return store.Jobs.create(
+        'nuke',
+        user,
+        JSON.stringify({
+          Status: 'Pending...',
+          Region: region.uuid
+        })
+      )
+    }).then((j: IJob) => {
+      return LoadOar(region, host, j);
+    }).then(() => {
+      res.json({ Success: true });
+    }).catch((err: Error) => {
+      res.json({ Success: false, Message: err.message });
+    });
+  };
+}
 
 /*
   router.post('/loadOar/:uuid', isAdmin, (req: AuthenticatedRequest, res) => {
@@ -177,42 +220,6 @@ export function DeleteJobHandler(store: Store): RequestHandler {
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
     });
-  });
-
-  router.post('/nukeContent/:uuid', isUser, (req: AuthenticatedRequest, res) => {
-    let regionID = new UUIDString(req.params.uuid);
-    let user = new UUIDString(req.user.uuid);
-
-    let region: RegionInstance;
-    let host: HostInstance;
-
-    db.Regions.getByUUID(regionID.toString()).then((r: RegionInstance) => {
-      console.log('User ' + user + ' requesting nuke for region ' + regionID);
-      if (!r.isRunning) {
-        throw new Error('Region is not running');
-      }
-      region = r;
-      return db.Hosts.getByAddress(r.slaveAddress);
-    }).then((h: HostInstance) => {
-      host = h;
-
-      console.log('TODO: User Permissions over ')
-      return db.Jobs.create(
-        'nuke',
-        user.toString(),
-        JSON.stringify({
-          Status: 'Pending...',
-          Region: regionID.toString()
-        })
-      )
-    }).then((j: JobInstance) => {
-      return LoadOar(region, host, j);
-    }).then(() => {
-      res.json({ Success: true });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-    });
-
   });
 
   router.get('/ready/:id', (req, res) => {

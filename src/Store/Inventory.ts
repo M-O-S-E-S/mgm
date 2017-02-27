@@ -10,28 +10,33 @@ function wipeInventory(db: IPool, user: IUser): Promise<void> {
   });
 }
 
-export function ApplySkeleton(db: IPool, user: IUser): Promise<void> {
+export function ApplySkeleton(db: IPool, user: IUser): Promise<IUser> {
   let rootID = UUID.random().toString();
 
-  let values = [
-    ['My Inventory', 8, 0, rootID, user.UUID, UUID.zero().toString()],
-    ['Textures', 0, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Sounds', 1, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Calling Cards', 2, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Landmarks', 3, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Clothing', 5, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Objects', 6, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Notecards', 7, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Scripts', 10, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Body Parts', 13, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Trash', 14, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Photo Album', 15, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Lost And Found', 16, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Animations', 20, 0, UUID.random().toString(), user.UUID, rootID],
-    ['Gestures', 21, 0, UUID.random().toString(), user.UUID, rootID],
-  ]
-
-  return db.query('INSERT INTO inventoryfolders (folderName, type, version, folderID, agentID, parentFolderID) VALUES ?', values);
+  return wipeInventory(db, user).then(() => {
+    let values: inventoryFolder[] = [
+      { folderName: 'My Inventory', type: 8, version: 0, folderID: rootID, agentID: user.UUID, parentFolderID: UUID.zero().toString() },
+      { folderName: 'Textures', type: 0, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Sounds', type: 1, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Calling Cards', type: 2, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Landmarks', type: 3, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Clothing', type: 5, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Objects', type: 6, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Notecards', type: 7, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Scripts', type: 10, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Body Parts', type: 13, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Trash', type: 14, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Photo Album', type: 15, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Lost And Found', type: 16, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Animations', type: 20, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID },
+      { folderName: 'Gestures', type: 21, version: 0, folderID: UUID.random().toString(), agentID: user.UUID, parentFolderID: rootID }
+    ];
+    return Promise.all(values.map((r: inventoryFolder) => {
+      return db.query('INSERT INTO inventoryfolders SET ?', r);
+    }));
+  }).then(() => {
+    return user;
+  });
 }
 
 interface inventoryFolder {

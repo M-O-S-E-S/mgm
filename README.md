@@ -35,6 +35,7 @@ compile client in production mode:  npm run build-client-production
 
 There are cli js scripts that are compiled when you compile the server that may prove useful:
   migrate-db: test and migrate the sql database using the sql files found in server/Files, in order.
+  create-user: create a valid halcyon/mgm user from the command line.  Useful for batch scripting, or creating your initial template and administrative accounts.
 
 # Deployment
 

@@ -39,6 +39,7 @@ export interface Store {
     setPassword(user: IUser, credential: Credential): Promise<void>
     setAccessLevel(u: IUser, accessLevel: number): Promise<IUser>
     setEmail(u: IUser, email: string): Promise<IUser>
+    createUserFromSkeleton(fname: string, lname: string, cred: Credential, email: string): Promise<IUser>
     createUserFromTemplate(fname: string, lname: string, cred: Credential, email: string, template: IUser): Promise<IUser>
     delete(u: IUser): Promise<void>
   },
@@ -97,7 +98,6 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
   mgmDB.getConnection((err, connection) => {
     if (err)
       throw err;
-    console.log('connected to the MGM database');
   });
 
   let halDB: IPool = createPool({
@@ -111,7 +111,6 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
   halDB.getConnection((err, connection) => {
     if (err)
       throw err;
-    console.log('connected to the Halcyon database');
   })
 
   return {

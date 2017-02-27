@@ -18,7 +18,7 @@ interface user_row {
   homeLookAtX: number
   homeLookAtY: number
   homeLookAtZ: number
-  created: Date
+  created: number
   lastLogin: number
   userInventoryURI: string
   userAssetURI: string
@@ -61,7 +61,7 @@ class UserObj implements IUser {
     this.godLevel = u.godLevel;
     this.email = u.email;
     this.passwordHash = u.passwordHash;
-    this.created = u.created;
+    this.created = new Date(u.created);
     this.partner = u.partner;
   }
 
@@ -181,15 +181,15 @@ export class Users {
       lastname: lname,
       passwordHash: cred.hash,
       passwordSalt: '',
-      homeRegion: null,
+      homeRegion: 0,
       homeRegionID: '00000000-0000-0000-0000-000000000000',
-      homeLocationX: null,
-      homeLocationY: null,
-      homeLocationZ: null,
-      homeLookAtX: null,
-      homeLookAtY: null,
-      homeLookAtZ: null,
-      created: new Date(),
+      homeLocationX: 128,
+      homeLocationY: 128,
+      homeLocationZ: 128,
+      homeLookAtX: 0,
+      homeLookAtY: 0,
+      homeLookAtZ: 0,
+      created: new Date().getTime() / 1000,
       lastLogin: 0,
       userInventoryURI: '',
       userAssetURI: '',
@@ -197,7 +197,7 @@ export class Users {
       profileWantDoMask: 0,
       profileAboutText: '',
       profileFirstText: '00000000-0000-0000-0000-000000000000',
-      profileImage: '',
+      profileImage: '00000000-0000-0000-0000-000000000000',
       profileFirstImage: '00000000-0000-0000-0000-000000000000',
       webLoginKey: '00000000-0000-0000-0000-000000000000',
       userFlags: 0,
@@ -243,7 +243,7 @@ return this.db.query('SELECT * FROM users WHERE UUID=?', template.UUID).then((ro
     homeLookAtX: t.homeLookAtX,
     homeLookAtY: t.homeLookAtY,
     homeLookAtZ: t.homeLookAtZ,
-    created: new Date(),
+    created: new Date().getTime() / 1000,
     lastLogin: 0,
     userInventoryURI: '',
     userAssetURI: '',

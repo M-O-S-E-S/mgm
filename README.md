@@ -10,6 +10,8 @@ This codebase is in active use, and is updated as problems are found.  It is cur
 
 It uses two separate ports, 3000 and 3001.  3000 is for html client interaction, while 3001 is for receiving updates and uploads from mgmNode processes.
 
+User templating is functional, with 2 templates 'M/F' enabled in the web gui.  The server does not have a template restriction.  Templating is done by cloning another user's inventory and appearance, which means that the template accounts must be active, but they can also be updated at any time.
+
 MGM is entirely JWT based, and does not use html cookies in any way.
 
 This is open development.  Both issues and pull requests are welcome.
@@ -23,6 +25,10 @@ This branch does not perform any MySQL migration.  If you are on an older versio
 typings install
 npm install
 cp settings.js.example settings.js && vim settings.js
+
+Update settings.js to match your specific setup.
+
+To create your initial users (likely 1 admin and 2 template accounts), run node dist/scripts/create-user.js [...] which reports back the UUID of the created accounts.  Use the UUIDs of the template accounts to complete your templates secion in settings.js.
 
 # Compilation
 

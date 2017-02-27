@@ -91,7 +91,7 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
     connectionLimit: 10,
     host: mgmCredentials.host,
     user: mgmCredentials.user,
-    password: mgmCredentials.user,
+    password: mgmCredentials.pass,
     database: mgmCredentials.name
   });
 
@@ -104,7 +104,7 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
     connectionLimit: 10,
     host: halcyonCredentials.host,
     user: halcyonCredentials.user,
-    password: halcyonCredentials.user,
+    password: halcyonCredentials.pass,
     database: halcyonCredentials.name
   });
 

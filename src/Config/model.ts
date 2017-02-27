@@ -101,7 +101,7 @@ export function Validate(config: Config): boolean {
     return false;
   }
   if (!config.mgm.privateKeyPath) {
-    console.log('Error loading config: JWT token string is missing');
+    console.log('Error loading config: privateKeyPath is mising');
     return false;
   }else {
     if (!fs.existsSync(config.mgm.privateKeyPath)) {

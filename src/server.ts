@@ -6,7 +6,6 @@ import * as bodyParser from 'body-parser';
 import * as path from 'path';
 import * as fs from 'fs';
 
-//import { SetupRoutes } from './routes';
 import { Config, Validate } from './Config';
 
 let conf: Config = require('../settings.js');

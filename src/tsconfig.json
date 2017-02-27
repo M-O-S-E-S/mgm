@@ -13,7 +13,8 @@
     "./**/*.ts"
   ],
   "files": [
-    "./server.ts"
+    "./server.ts",
+    "./scripts/migrate-db.ts"
   ],
   "atom": {
     "rewriteTsconfig": true

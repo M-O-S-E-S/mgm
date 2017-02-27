@@ -6,9 +6,13 @@ MGM is one half of a grid management solution for OpenSimulator, and now specifi
 
 # Current Status
 
-The mgm codebase has been refactored.  It now uses ReactJS instead of AngularJS.  It is using NodeJS and Sequelize instead of PHP or the transitory nodeJs implementation.  It is mostly funcitonal, though it is not completely tested.  Please issue bugs and pull requests when issues are found.  The old Opensim code will be retired to an opensim branch, and is no longer maintained.
+This codebase is in active use, and is updated as problems are found.  It is currently in the process of separating concerns to enable microservice deployment and partial functionality replacements, but is currently a single process.
 
-This codebase is deployed on a publicly available grid, and will receive fixes as problems are discovered.
+It uses two separate ports, 3000 and 3001.  3000 is for html client interaction, while 3001 is for receiving updates and uploads from mgmNode processes.
+
+MGM is entirely JWT based, and does not use html cookies in any way.
+
+This is open development.  Both issues and pull requests are welcome.
 
 # Upgrading
 
@@ -24,20 +28,18 @@ cp settings.js.example settings.js && vim settings.js
 
 This project is written in typescript, and must be compiled before it can be used
 
-compile client:  npm run build-client
+compile client: npm run build-client
 compile server: npm run build-server
 
 compile client in production mode:  npm run build-client-production
 
-- The mechansim to create users via the command line is not functional at this time.
-
-Initialize the mgm database by applying the sql files under serverFiles in order.
+There are cli js scripts that are compiled when you compile the server that may prove useful:
+  migrate-db: test and migrate the sql database using the sql files found in server/Files, in order.
 
 # Deployment
 
-MGM's server.js file does not serve static files.  Instead host this behind an nginx instance, an example config file for which is located inside serverFiles.
-
-The nginx instance should redirect all traffic on the /api prefix to the mgm instance.  All other routes should either match and serve a static file or serve index.html for html5 pushstate.
+The server on port 3000 serves the MGM Single-Page-Application with html5 pushstate.  As all of the client files are located in the same directory, it is possible and recommended to set up nginx with ssl, and proxy only the /api routes to MGM.
+ 
 
 # Migration
 

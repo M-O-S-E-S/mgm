@@ -10,7 +10,7 @@ This codebase is in active use, and is updated as problems are found.  It is cur
 
 It uses two separate ports, 3000 and 3001.  3000 is for html client interaction, while 3001 is for receiving updates and uploads from mgmNode processes.
 
-User templating is functional, with 2 templates 'M/F' enabled in the web gui.  The server does not have a template restriction.  Templating is done by cloning another user's inventory and appearance, which means that the template accounts must be active, but they can also be updated at any time.
+User templating is functional, with 2 templates 'M/F' enabled in the web gui.  The server does not have a restriction on the type/number of templates, but the web gui will need to match.  Templating is done by cloning another user's inventory and appearance, which means that the template accounts must be active, but they can also be updated at any time.
 
 MGM is entirely JWT based, and does not use html cookies in any way.
 
@@ -29,6 +29,10 @@ cp settings.js.example settings.js && vim settings.js
 Update settings.js to match your specific setup.
 
 To create your initial users (likely 1 admin and 2 template accounts), run node dist/scripts/create-user.js [...] which reports back the UUID of the created accounts.  Use the UUIDs of the template accounts to complete your templates secion in settings.js.
+
+Log into the mgm web portal using your administrative user, and add the internal IP addresses of any region hosts you will use to the hosts tab.
+
+Install and runn mgmNode on each of your region hosts, configuring it to communicate with mgm using internal IP: 3001.
 
 # Compilation
 

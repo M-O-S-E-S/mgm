@@ -30,6 +30,8 @@ Update settings.js to match your specific setup.
 
 To create your initial users (likely 1 admin and 2 template accounts), run node dist/scripts/create-user.js [...] which reports back the UUID of the created accounts.  Use the UUIDs of the template accounts to complete your templates secion in settings.js.
 
+You must provide an x509 certificate for creating the JWT tokens MGM uses for Authorization.  you can do so by running:  openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+
 Log into the mgm web portal using your administrative user, and add the internal IP addresses of any region hosts you will use to the hosts tab.
 
 Install and runn mgmNode on each of your region hosts, configuring it to communicate with mgm using internal IP: 3001.

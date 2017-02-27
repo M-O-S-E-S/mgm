@@ -1,7 +1,7 @@
 var webpack = require('webpack');
 
 module.exports = {
-    entry: "./src/client/index.tsx",
+    entry: "./src/View/app.tsx",
     output: {
         filename: "./dist/public/bundle.js",
     },

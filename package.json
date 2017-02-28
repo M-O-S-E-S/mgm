@@ -40,8 +40,8 @@
   },
   "scripts": {
     "start": "node dist/server.js",
-    "build-client": "node_modules/.bin/webpack && cp -a src/View/static dist/public",
-    "build-client-production": "node_modules/.bin/webpack -p --config ./webpack.production.config.js && cp -a src/View/static dist/public",
+    "build-client": "mkdir -p dist/public && node_modules/.bin/webpack && cp -a src/View/static/* dist/public/",
+    "build-client-production": "mkdir -p dist/public && node_modules/.bin/webpack -p --config ./webpack.production.config.js && cp -a src/View/static/* dist/public/",
     "build-server": "node_modules/.bin/tsc --project src/tsconfig.json"
   }
 }

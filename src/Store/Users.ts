@@ -214,62 +214,62 @@ export class Users {
       languagesText: ''
     }
     return this.db.query('INSERT INTO users SET ?', newUser).then(() => {
-    return ApplySkeleton(this.db, new UserObj(newUser));
-  });
+      return ApplySkeleton(this.db, new UserObj(newUser));
+    });
   }
 
-createUserFromTemplate(fname: string, lname: string, cred: Credential, email: string, template: IUser): Promise < IUser > {
-  if(!template) {
-  return Promise.reject('MGM only supports creating users from a template');
-}
+  createUserFromTemplate(fname: string, lname: string, cred: Credential, email: string, template: IUser): Promise<IUser> {
+    if (!template) {
+      return Promise.reject('MGM only supports creating users from a template');
+    }
 
-let newUser: user_row;
-let t: user_row;
-return this.db.query('SELECT * FROM users WHERE UUID=?', template.UUID).then((rows: user_row[]) => {
-  t = rows[0];
-}).then(() => {
+    let newUser: user_row;
+    let t: user_row;
+    return this.db.query('SELECT * FROM users WHERE UUID=?', template.UUID).then((rows: user_row[]) => {
+      t = rows[0];
+    }).then(() => {
 
-  newUser = {
-    UUID: UUID.random().toString(),
-    username: fname,
-    lastname: lname,
-    passwordHash: cred.hash,
-    passwordSalt: '',
-    homeRegion: t.homeRegion,
-    homeRegionID: t.homeRegionID,
-    homeLocationX: t.homeLocationX,
-    homeLocationY: t.homeLocationY,
-    homeLocationZ: t.homeLocationZ,
-    homeLookAtX: t.homeLookAtX,
-    homeLookAtY: t.homeLookAtY,
-    homeLookAtZ: t.homeLookAtZ,
-    created: new Date(),
-    lastLogin: 0,
-    userInventoryURI: '',
-    userAssetURI: '',
-    profileCanDoMask: 0,
-    profileWantDoMask: 0,
-    profileAboutText: '',
-    profileFirstText: '00000000-0000-0000-0000-000000000000',
-    profileImage: '',
-    profileFirstImage: '00000000-0000-0000-0000-000000000000',
-    webLoginKey: '00000000-0000-0000-0000-000000000000',
-    userFlags: 0,
-    godLevel: 1,
-    iz_level: 0,
-    customType: '',
-    partner: '00000000-0000-0000-0000-000000000000',
-    email: email,
-    profileURL: '',
-    skillsMask: 0,
-    skillsText: '',
-    wantToMask: 0,
-    wantToText: '',
-    languagesText: ''
-  }
-  return this.db.query('INSERT INTO users SET ?', newUser);
-}).then(() => {
-  return CloneFrom(this.db, new UserObj(newUser), template);
-});
+      newUser = {
+        UUID: UUID.random().toString(),
+        username: fname,
+        lastname: lname,
+        passwordHash: cred.hash,
+        passwordSalt: '',
+        homeRegion: t.homeRegion,
+        homeRegionID: t.homeRegionID,
+        homeLocationX: t.homeLocationX,
+        homeLocationY: t.homeLocationY,
+        homeLocationZ: t.homeLocationZ,
+        homeLookAtX: t.homeLookAtX,
+        homeLookAtY: t.homeLookAtY,
+        homeLookAtZ: t.homeLookAtZ,
+        created: new Date(),
+        lastLogin: 0,
+        userInventoryURI: '',
+        userAssetURI: '',
+        profileCanDoMask: 0,
+        profileWantDoMask: 0,
+        profileAboutText: '',
+        profileFirstText: '00000000-0000-0000-0000-000000000000',
+        profileImage: '',
+        profileFirstImage: '00000000-0000-0000-0000-000000000000',
+        webLoginKey: '00000000-0000-0000-0000-000000000000',
+        userFlags: 0,
+        godLevel: 1,
+        iz_level: 0,
+        customType: '',
+        partner: '00000000-0000-0000-0000-000000000000',
+        email: email,
+        profileURL: '',
+        skillsMask: 0,
+        skillsText: '',
+        wantToMask: 0,
+        wantToText: '',
+        languagesText: ''
+      }
+      return this.db.query('INSERT INTO users SET ?', newUser);
+    }).then(() => {
+      return CloneFrom(this.db, new UserObj(newUser), template);
+    });
   }
 }

@@ -13,7 +13,7 @@ import { AddRegionModal } from './AddRegionModal';
 
 import { ReduxStore, StateModel } from '../../Redux';
 
-import { Grid, Row, Col, Button, FormControl } from 'react-bootstrap';
+import { Grid, Row, Col, Button, FormControl, Well } from 'react-bootstrap';
 
 interface props {
     store: ReduxStore,
@@ -25,18 +25,17 @@ interface props {
 }
 
 interface state {
-    showManage: boolean
-    showContent: boolean
-    showLog: boolean
-    showAddRegion: boolean
-    selectedRegion: Region
-    regionSearch: string
-    estateSearch: string
+    showManage?: boolean
+    showContent?: boolean
+    showLog?: boolean
+    showAddRegion?: boolean
+    selectedRegion?: Region
+    regionSearch?: string
+    estateSearch?: string
+    stateSearch?: string
 }
 
-export class RegionList extends React.Component<props, {}> {
-    state: state
-
+export class RegionList extends React.Component<props, state> {
     constructor(p: props) {
         super(p);
         this.state = {
@@ -46,7 +45,8 @@ export class RegionList extends React.Component<props, {}> {
             showAddRegion: false,
             selectedRegion: null,
             regionSearch: '',
-            estateSearch: ''
+            estateSearch: '',
+            stateSearch: 'all'
         }
     }
 
@@ -71,6 +71,12 @@ export class RegionList extends React.Component<props, {}> {
     onEstateChange(e: { target: { value: string } }) {
         this.setState({
             estateSearch: e.target.value
+        });
+    }
+    onSearchStatus(e: { target: { value: string } }) {
+        console.log(e.target.value)
+        this.setState({
+            stateSearch: e.target.value
         });
     }
 
@@ -141,6 +147,15 @@ export class RegionList extends React.Component<props, {}> {
                     .filter((r: Region) => {
                         return r.name.toLowerCase().indexOf(this.state.regionSearch.toLowerCase()) !== -1;
                     }, [])
+                    // we only want regions with the selected status
+                    .filter((r: Region) => {
+                        if (this.state.stateSearch === 'all')
+                            return true;
+                        if (this.state.stateSearch === 'running')
+                            return r.isRunning;
+                        if (this.state.stateSearch === 'stopped')
+                            return ! r.isRunning;
+                    }, [])
                     // sort remaining regions by name
                     .sort((a: Region, b: Region) => { return a.name.localeCompare(b.name) })
                     //convert Region class instances to JSX
@@ -174,13 +189,26 @@ export class RegionList extends React.Component<props, {}> {
         return (
             <Grid>
                 <Row>
-                    <Col md={2}><h3>Filter by:</h3></Col>
-                    <Col md={4}>Region Name <FormControl type="search" onChange={this.onSearchChange.bind(this)} /></Col>
-                    <Col md={4}>Estate
-                        <FormControl componentClass="select" placeholder="" onChange={this.onEstateChange.bind(this)}>
-                            <option value=''>all</option>
-                            {estateSelect}
-                        </FormControl>
+                    <Col md={10}>
+                        <Well>
+                            <Row>
+                                <Col md={2}><h3>Filter:</h3></Col>
+                                <Col md={2}>Running
+                                    <FormControl componentClass="select" placeholder="" onChange={this.onSearchStatus.bind(this)}>
+                                        <option value='all'>all</option>
+                                        <option value='running'>running</option>
+                                        <option value='stopped'>stopped</option>
+                                    </FormControl>
+                                </Col>
+                                <Col md={4}>Region Name <FormControl type="search" onChange={this.onSearchChange.bind(this)} /></Col>
+                                <Col md={4}>Estate
+                                    <FormControl componentClass="select" placeholder="" onChange={this.onEstateChange.bind(this)}>
+                                        <option value=''>all</option>
+                                        {estateSelect}
+                                    </FormControl>
+                                </Col>
+                            </Row>
+                        </Well>
                     </Col>
                     <Col md={2}>
                         {this.props.isAdmin ?

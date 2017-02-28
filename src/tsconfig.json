@@ -15,7 +15,8 @@
   "files": [
     "./server.ts",
     "./scripts/migrate-db.ts",
-    "./scripts/create-user.ts"
+    "./scripts/create-user.ts",
+    "./scripts/template-existing-user.ts"
   ],
   "atom": {
     "rewriteTsconfig": true

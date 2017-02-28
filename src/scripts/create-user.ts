@@ -76,4 +76,7 @@ store.Users.createUserFromSkeleton(username, lastname, Credential.fromPlaintext(
 }).then((u: IUser) => {
   console.log('User Created with UUID: ' + u.UUID);
   process.exit(0);
+}).catch( (err: Error) => {
+  console.log('Error creating user: ' + err.message);
+  process.exit(1);
 })

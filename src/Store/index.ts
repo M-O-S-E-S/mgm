@@ -39,6 +39,7 @@ export interface Store {
     setPassword(user: IUser, credential: Credential): Promise<void>
     setAccessLevel(u: IUser, accessLevel: number): Promise<IUser>
     setEmail(u: IUser, email: string): Promise<IUser>
+    retemplateUser(user: IUser, template: IUser): Promise<IUser>
     createUserFromSkeleton(fname: string, lname: string, cred: Credential, email: string): Promise<IUser>
     createUserFromTemplate(fname: string, lname: string, cred: Credential, email: string, template: IUser): Promise<IUser>
     delete(u: IUser): Promise<void>

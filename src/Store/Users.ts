@@ -272,4 +272,12 @@ export class Users {
       return CloneFrom(this.db, new UserObj(newUser), template);
     });
   }
+
+  retemplateUser(user: IUser, template: IUser): Promise<IUser> {
+    if (!user || !template) {
+      return Promise.reject('User and/or template missing');
+    }
+
+    return CloneFrom(this.db, user, template);
+  }
 }

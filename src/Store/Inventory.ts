@@ -5,8 +5,14 @@ import { UUID } from '../lib';
 import { IUser } from '../Types';
 
 function wipeInventory(db: IPool, user: IUser): Promise<void> {
-  return db.query('DELETE FROM inventoryfolders WHERE agentID=?', user.UUID).then(() => {
+  return Promise.resolve().then( () => {
+    return db.query('DELETE FROM inventoryfolders WHERE agentID=?', user.UUID)
+  }).then(() => {
     return db.query('DELETE FROM inventoryitems WHERE avatarID=?', user.UUID);
+  }).then(() => {
+    return db.query('DELETE FROM avatarappearance WHERE Owner=?', user.UUID);
+  }).then(() => {
+    return db.query('DELETE FROM avatarattachments WHERE UUID=?', user.UUID);
   });
 }
 

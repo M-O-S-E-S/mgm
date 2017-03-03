@@ -1,10 +1,17 @@
 
 import * as express from 'express';
+import * as bodyParser from 'body-parser';
 
 import { Freeswitch, FreeSwitchDirectory, FreeSwitchUser, FreeSwitchChannel } from './Freeswitch';
 
 export function FreeswitchClientHandler(fs: Freeswitch): express.Router {
   let router = express.Router();
+
+  router.use(bodyParser.json({ limit: '1gb' }));       // to support JSON-encoded bodies
+  router.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+    extended: true,
+    limit: '1gb'
+  }));
 
   router.get('/', (req, res) => {
     res.send('fsapi');

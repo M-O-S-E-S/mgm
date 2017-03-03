@@ -48,10 +48,12 @@ export class ReviewPendingModal extends React.Component<props, state> {
   onApprove(): Promise<void> {
     return ClientStack.PendingUser.Approve(this.props.user).then((uuid) => {
       // place user into redux
+      let names = this.props.user.name.split(' ');
       let u = new User();
-      u = u.set('name', this.props.user.name)
+      u = u.set('username', names[0])
+        .set('lastname', names[1])
         .set('email', this.props.user.email)
-        .set('uuid', uuid)
+        .set('UUID', uuid)
         .set('godLevel', 1);
       this.props.store.User.Update(u);
       // remove pending user from redux

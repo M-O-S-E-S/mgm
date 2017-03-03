@@ -57,19 +57,13 @@ export function LoginHandler(store: Store, cert: Buffer): RequestHandler {
     store.Users.getByName(username).then((u: IUser) => {
       if (u.authenticate(password)) {
         if (u.isSuspended()) {
-          res.json({
-            Success: false,
-            Message: 'Account Suspended'
-          });
+          throw new Error('Account Suspended');
         } else {
           return u;
         }
       } else {
         //reject
-        res.json({
-          Success: false,
-          Message: 'Invalid Credentials'
-        });
+        throw new Error('Invalid Credentials');
       }
     }).then((u: IUser) => {
       return GetUserPermissions(store, u);

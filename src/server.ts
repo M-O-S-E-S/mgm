@@ -142,6 +142,11 @@ apiRouter.get('/host', middleware.isAdmin(), GetHostHandler(store));
 apiRouter.post('/host/add', formParser, middleware.isAdmin(), AddHostHandler(store));
 apiRouter.post('/host/remove', formParser, middleware.isAdmin(), RemoveHostHandler(store));
 
+// freeswitch
+import { FreeswitchClientHandler, Freeswitch } from './Freeswitch';
+let freeswitch = new Freeswitch(conf.mgm.voiceIP);
+apiRouter.use('/fsapi', FreeswitchClientHandler(freeswitch));
+
 
 clientApp.use('/api', apiRouter);
 
@@ -211,9 +216,10 @@ clusterApp.get('/process/:id', middleware.isNode(), IniConfigHandler(store, conf
 clusterApp.get('/ready/:id', middleware.isNode(), NodeDownloadHandler(store, defaultOar));
 clusterApp.post('/report/:id', middleware.isNode(), NodeReportHandler(store));
 clusterApp.post('/upload/:id', middleware.isNode(), multer({ dest: uploadDir }).single('file'), NodeUploadHandler(store));
-/*
-/upload
-*/
+
+// freeswitch
+import { FreeswitchNodeHandler } from './Freeswitch';
+clusterApp.use('/fsapi', FreeswitchNodeHandler(freeswitch, middleware.isNode()));
 
 clusterApp.listen(3001, function () {
   console.log('MGM listening for nodes on port 3001!');

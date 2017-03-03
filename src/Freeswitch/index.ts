@@ -1,3 +1,3 @@
 
-export { FreeswitchHandler } from './FreeswitchHandler';
+export { FreeswitchClientHandler, FreeswitchNodeHandler } from './FreeswitchHandler';
 export { Freeswitch } from './Freeswitch';

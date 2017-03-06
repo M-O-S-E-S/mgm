@@ -210,7 +210,7 @@ export function ApprovePendingUserHandler(store: Store, templates: { [key: strin
       return store.Users.getByID(templateID.toString());
     }).then((t: IUser) => {
       let names = pUser.name.trim().split(' ');
-      return store.Users.createUserFromTemplate(names[0], names[1], Credential.fromPlaintext(pUser.password), pUser.email, t);
+      return store.Users.createUserFromTemplate(names[0], names[1], Credential.fromHalcyon(pUser.password), pUser.email, t);
     }).then((nu: IUser) => {
       newUser = nu;
       return store.PendingUsers.delete(pUser);

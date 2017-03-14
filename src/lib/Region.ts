@@ -72,10 +72,10 @@ export function LoadOar(r: IRegion, h: IHost, j: IJob): Promise<void> {
 }
 
 export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: string]: string } } {
-  let connString: string = 'Data Source=' + conf.halcyon.db.host +
-    ';Database=' + conf.halcyon.db.name +
-    ';User ID=' + conf.halcyon.db.user +
-    ';Password=' + conf.halcyon.db.pass + ';';
+  let connString: string = 'Data Source=' + conf.haldb.host +
+    ';Database=' + conf.haldb.database +
+    ';User ID=' + conf.haldb.user +
+    ';Password=' + conf.haldb.password + ';';
 
   let config: { [key: string]: { [key: string]: string } } = {}
   config['Startup'] = {};
@@ -143,7 +143,7 @@ export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: st
   config['Messaging']['InstantMessageModule'] = 'InstantMessageModule';
   config['Messaging']['MessageTransferModule'] = 'MessageTransferModule';
   config['Messaging']['OfflineMessageModule'] = 'OfflineMessageModule';
-  config['Messaging']['OfflineMessageURL'] = conf.mgm.internalUrl + 'offline';
+  config['Messaging']['OfflineMessageURL'] = '';//conf.main.internalUrl + 'offline';
   config['Messaging']['MuteListModule'] = 'MuteListModule';
   config['Messaging']['MuteListURL'] = '127.0.0.1';
 
@@ -203,9 +203,9 @@ export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: st
   config['AvatarRemoteCommands'] = {};
   config['AvatarRemoteCommands']['Enabled'] = 'false';
 
-  config['FreeSwitchVoice'] = {};
-  config['FreeSwitchVoice']['enabled'] = 'true';
-  config['FreeSwitchVoice']['account_service'] = conf.mgm.internalUrl + 'fsapi';
+  //config['FreeSwitchVoice'] = {};
+  //config['FreeSwitchVoice']['enabled'] = 'true';
+  //config['FreeSwitchVoice']['account_service'] = conf.mgm.internalUrl + 'fsapi';
 
   return config;
 }

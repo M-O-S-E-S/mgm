@@ -13,7 +13,7 @@ if (!Validate(conf)) {
   process.exit(1);
 }
 
-let creds = conf.mgm.db;
+let creds = conf.mgmdb;
 let conn: Connection
 
 let filesDir = path.resolve(__dirname, '../../serverFiles/');
@@ -54,8 +54,8 @@ new Promise((resolve, reject) => {
   return createConnection({
     host: creds.host,
     user: creds.user,
-    password: creds.user,
-    database: creds.name,
+    password: creds.password,
+    database: creds.database,
     multipleStatements: true
   });
 }).then((c: Connection) => {

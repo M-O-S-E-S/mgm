@@ -30,15 +30,15 @@ try {
   help();
 }
 
-if (!conf.mgm.templates[process.argv[3]]) {
+if (!conf.templates[process.argv[3]]) {
   console.log('\ninvalid template selector\n');
   help();
 }
 
 import { getStore, Store } from '../Store';
-let store: Store = getStore(conf.mgm.db, conf.halcyon.db);
+let store: Store = getStore(conf.mgmdb, conf.haldb);
 
-store.Users.getByID(conf.mgm.templates[process.argv[3]]).then((template: IUser) => {
+store.Users.getByID(conf.templates[process.argv[3]]).then((template: IUser) => {
   return store.Users.getByID(user).then((target: IUser) => {
     console.log('Users located, cloning inventory');
     return store.Users.retemplateUser(target, template);

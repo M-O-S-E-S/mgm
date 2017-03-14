@@ -64,7 +64,7 @@ if (!Validate(conf)) {
 }
 
 import { getStore, Store } from '../Store';
-let store: Store = getStore(conf.mgm.db, conf.halcyon.db);
+let store: Store = getStore(conf.mgmdb, conf.haldb);
 
 console.log('Creating user ' + username + ' ' + lastname + ' with email ' + email + ' identified by ' + password + ' with god level ' + userLevel);
 

@@ -83,8 +83,8 @@ export interface Store {
 interface DatabaseCredentials {
   host: string
   user: string
-  pass: string
-  name: string
+  password: string
+  database: string
 }
 
 export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials: DatabaseCredentials): Store {
@@ -92,8 +92,8 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
     connectionLimit: 10,
     host: mgmCredentials.host,
     user: mgmCredentials.user,
-    password: mgmCredentials.pass,
-    database: mgmCredentials.name
+    password: mgmCredentials.password,
+    database: mgmCredentials.database
   });
 
   mgmDB.getConnection((err, connection) => {
@@ -105,8 +105,8 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
     connectionLimit: 10,
     host: halcyonCredentials.host,
     user: halcyonCredentials.user,
-    password: halcyonCredentials.pass,
-    database: halcyonCredentials.name
+    password: halcyonCredentials.password,
+    database: halcyonCredentials.database
   });
 
   halDB.getConnection((err, connection) => {

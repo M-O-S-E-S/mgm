@@ -5,22 +5,42 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as ini from 'ini';
 
 import { Config, Validate } from './Config';
 
-let conf: Config = require('../settings.js');
-if (!Validate(conf)) {
-  process.exit(1);
-}
+let conf: Config = ini.parse(fs.readFileSync('./mgm.ini').toString());
+
+// environment variables override configs
+if (process.env.MGM_DB_HOST)
+  conf.mgmdb.host = process.env.MGM_DB_HOST;
+if (process.env.MGM_DB_DATABASE)
+  conf.mgmdb.database = process.env.MGM_DB_DATABASE;
+if (process.env.MGM_DB_USER)
+  conf.mgmdb.user = process.env.MGM_DB_USER;
+if (process.env.MGM_DB_PASS)
+  conf.mgmdb.password = process.env.MGM_DB_PASS;
+
+if (process.env.HAL_DB_HOST)
+  conf.haldb.host = process.env.HAL_DB_HOST;
+if (process.env.HAL_DB_DATABASE)
+  conf.haldb.database = process.env.HAL_DB_DATABASE;
+if (process.env.HAL_DB_USER)
+  conf.haldb.user = process.env.HAL_DB_USER;
+if (process.env.HAL_DB_PASS)
+  conf.haldb.password = process.env.HAL_DB_PASS;
+
+Validate(conf);
+
 
 //initialize singletons
 import { EmailMgr } from './lib';
-new EmailMgr(conf.mgm.mail);
+new EmailMgr(conf.mail);
 
-let certificate = fs.readFileSync(conf.mgm.privateKeyPath)
+let certificate = fs.readFileSync(conf.main.privateKeyPath)
 
 import { getStore, Store } from './Store';
-let store: Store = getStore(conf.mgm.db, conf.halcyon.db);
+let store: Store = getStore(conf.mgmdb, conf.haldb);
 
 let clientApp = express();
 
@@ -42,7 +62,7 @@ apiRouter.post('/auth/login', formParser, LoginHandler(store, certificate));
 
 // Registration
 import { RegisterHandler } from './Routes/RegisterHandler';
-apiRouter.post('/register', formParser, RegisterHandler(store, conf.mgm.templates));
+apiRouter.post('/register', formParser, RegisterHandler(store, conf.templates));
 
 
 // Jobs
@@ -57,7 +77,7 @@ import {
   UserUploadHandler,
   UserDownloadHandler
 } from './Routes/JobHandler';
-let uploadDir = conf.mgm.upload_dir;
+let uploadDir = conf.main.upload_dir;
 
 //ensure the directory for logs exists
 if (!fs.existsSync(uploadDir)) {
@@ -90,13 +110,13 @@ apiRouter.post('/user/password', middleware.isUser(), formParser, SetPasswordHan
 apiRouter.post('/user/accessLevel', formParser, middleware.isAdmin(), SetAccessLevelHandler(store));
 apiRouter.post('/user/email', formParser, middleware.isAdmin(), SetEmailHandler(store));
 apiRouter.post('/user/destroy/:uuid', middleware.isAdmin(), DeleteUserHandler(store));
-apiRouter.post('/user/create', formParser, middleware.isAdmin(), CreateUserHandler(store, conf.mgm.templates));
+apiRouter.post('/user/create', formParser, middleware.isAdmin(), CreateUserHandler(store, conf.templates));
 
 
 // Pending User
 import { DenyPendingUserHandler, ApprovePendingUserHandler } from './Routes/UserHandler';
 apiRouter.post('/user/deny', formParser, middleware.isAdmin(), DenyPendingUserHandler(store));
-apiRouter.post('/user/approve', formParser, middleware.isAdmin(), ApprovePendingUserHandler(store, conf.mgm.templates));
+apiRouter.post('/user/approve', formParser, middleware.isAdmin(), ApprovePendingUserHandler(store, conf.templates));
 
 // Region
 import {
@@ -112,7 +132,7 @@ import {
   DeleteRegionHandler
 } from './Routes/RegionHandler';
 import { RegionLogs } from './lib';
-let regionLogs = new RegionLogs(conf.mgm.log_dir);
+let regionLogs = new RegionLogs(conf.main.log_dir);
 apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
 apiRouter.post('/region/create', formParser, middleware.isAdmin(), CreateRegionHandler(store));
 apiRouter.post('/region/destroy/:uuid', middleware.isAdmin(), DeleteRegionHandler(store));
@@ -143,31 +163,31 @@ apiRouter.post('/host/add', formParser, middleware.isAdmin(), AddHostHandler(sto
 apiRouter.post('/host/remove', formParser, middleware.isAdmin(), RemoveHostHandler(store));
 
 // freeswitch
-import { FreeswitchClientHandler, Freeswitch } from './Freeswitch';
-let freeswitch = new Freeswitch(conf.mgm.voiceIP);
-apiRouter.use('/fsapi', FreeswitchClientHandler(freeswitch));
+//import { FreeswitchClientHandler, Freeswitch } from './Freeswitch';
+//let freeswitch = new Freeswitch(conf.mgm.voiceIP);
+//apiRouter.use('/fsapi', FreeswitchClientHandler(freeswitch));
 
 
 clientApp.use('/api', apiRouter);
 
 clientApp.get('/get_grid_info', (req, res) => {
-  let grid_info = conf.grid_info;
+  let grid_info = conf.get_grid_info;
   res.send('<?xml version="1.0"?><gridinfo><login>' +
-    grid_info.login +
+    grid_info.login_uri +
     '</login><register>' +
-    grid_info.mgm +
+    grid_info.manage +
     '</register><welcome>' +
-    grid_info.mgm + '\welcome.html' +
+    grid_info.manage + '\welcome.html' +
     '</welcome><password>' +
-    grid_info.mgm +
+    grid_info.manage +
     '</password><gridname>' +
-    grid_info.gridName +
+    grid_info.grid_name +
     '</gridname><gridnick>' +
-    grid_info.gridNick +
+    grid_info.grid_nick +
     '</gridnick><about>' +
-    grid_info.mgm +
+    grid_info.manage +
     '</about><economy>' +
-    grid_info.mgm +
+    grid_info.manage +
     '</economy></gridinfo>');
 });
 
@@ -201,11 +221,6 @@ import {
   NodeUploadHandler
 } from './Routes/NodeHandler';
 
-let defaultOar = conf.mgm.default_oar_path;
-if (!fs.existsSync(defaultOar)) {
-  throw new Error('Default oar does not exist at ' + defaultOar);
-}
-
 clusterApp.get('/', (req, res) => { res.send('MGM Node Portal'); });
 
 clusterApp.post('/logs/:uuid', middleware.isNode(), NodeLogHandler(store, regionLogs));
@@ -213,13 +228,13 @@ clusterApp.post('/node', middleware.isNode(), NodeHandler(store));
 clusterApp.post('/stats', formParser, middleware.isNode(), NodeStatHandler(store));
 clusterApp.get('/region/:id', middleware.isNode(), RegionConfigHandler(store));
 clusterApp.get('/process/:id', middleware.isNode(), IniConfigHandler(store, conf));
-clusterApp.get('/ready/:id', middleware.isNode(), NodeDownloadHandler(store, defaultOar));
+clusterApp.get('/ready/:id', middleware.isNode(), NodeDownloadHandler(store, path.join(conf.main.upload_dir, '00000000-0000-0000-0000-000000000000')));
 clusterApp.post('/report/:id', middleware.isNode(), NodeReportHandler(store));
 clusterApp.post('/upload/:id', middleware.isNode(), multer({ dest: uploadDir }).single('file'), NodeUploadHandler(store));
 
 // freeswitch
-import { FreeswitchNodeHandler } from './Freeswitch';
-clusterApp.use('/fsapi', FreeswitchNodeHandler(freeswitch, middleware.isNode()));
+//import { FreeswitchNodeHandler } from './Freeswitch';
+//clusterApp.use('/fsapi', FreeswitchNodeHandler(freeswitch, middleware.isNode()));
 
 clusterApp.listen(3001, function () {
   console.log('MGM listening for nodes on port 3001!');

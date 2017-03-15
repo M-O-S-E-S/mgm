@@ -96,11 +96,6 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
     database: mgmCredentials.database
   });
 
-  mgmDB.getConnection((err, connection) => {
-    if (err)
-      throw err;
-  });
-
   let halDB: IPool = createPool({
     connectionLimit: 10,
     host: halcyonCredentials.host,
@@ -108,11 +103,6 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
     password: halcyonCredentials.password,
     database: halcyonCredentials.database
   });
-
-  halDB.getConnection((err, connection) => {
-    if (err)
-      throw err;
-  })
 
   return {
     Hosts: new Hosts(mgmDB),

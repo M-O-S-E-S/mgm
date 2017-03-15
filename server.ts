@@ -10,6 +10,12 @@ import { Config, Validate } from './lib/Config';
 let conf: Config = ini.parse(fs.readFileSync('./mgm.ini').toString());
 
 // environment variables override configs
+conf.mgmdb = conf.mgmdb || {
+  host: '',
+  database: '',
+  user: '',
+  password: ''
+};
 if (process.env.MGM_DB_HOST)
   conf.mgmdb.host = process.env.MGM_DB_HOST;
 if (process.env.MGM_DB_DATABASE)
@@ -19,6 +25,12 @@ if (process.env.MGM_DB_USER)
 if (process.env.MGM_DB_PASS)
   conf.mgmdb.password = process.env.MGM_DB_PASS;
 
+conf.haldb = conf.haldb || {
+  host: '',
+  database: '',
+  user: '',
+  password: ''
+};
 if (process.env.HAL_DB_HOST)
   conf.haldb.host = process.env.HAL_DB_HOST;
 if (process.env.HAL_DB_DATABASE)

@@ -1,2 +1,0 @@
-
-export { RegionList } from './RegionList'

@@ -1,1 +1,0 @@
-export { PendingUserList } from './PendingUserList';

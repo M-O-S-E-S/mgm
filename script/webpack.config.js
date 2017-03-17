@@ -26,13 +26,9 @@ module.exports = {
     output: {
         filename: "./build/server.js",
     },
-
-    // Enable sourcemaps for debugging webpack's output.
     devtool: "source-map",
-
     resolve: {
-        // Add '.ts' and '.tsx' as resolvable extensions.
-        extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
+        extensions: [".ts"]
     },
 
     plugins: [
@@ -42,9 +38,11 @@ module.exports = {
     ],
 
     module: {
-        loaders: [
+        rules: [
             // All files with a '.ts' or '.tsx' extension will be handled by 'ts-loader'.
-            { test: /\.tsx?$/, loader: "ts-loader" }
+            { test: /\.ts$/, loader: "ts-loader" },
+            // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
+            //{ enforce: 'pre', test: /\.ts$/, loader: "source-map-loader" }
         ]
     },
     externals: nodeModules

@@ -1,5 +1,6 @@
 
 import { IPool } from 'promise-mysql';
+import Promise = require('bluebird');
 
 import { IPendingUser } from '../types';
 import { Credential } from '../Auth';

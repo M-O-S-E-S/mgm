@@ -1,5 +1,6 @@
 
 import { IPool } from 'promise-mysql';
+import Promise = require('bluebird');
 
 import { IGroup, IMember, IRole } from '../types';
 

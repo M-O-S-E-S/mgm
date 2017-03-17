@@ -16,6 +16,10 @@ export interface Config {
     privateKeyPath: string
   }
 
+  redis: {
+    host: string
+  }
+
   templates: { [key: string]: string }
 
   mail: {

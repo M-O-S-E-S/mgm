@@ -5,7 +5,7 @@ import { Estates } from './Estates';
 import { PendingUsers } from './PendingUsers';
 import { Jobs } from './Jobs';
 import { Groups } from './Groups';
-import { OfflineMessages } from './OfflineMessages';
+import Promise = require('bluebird');
 
 import { IUser, IHost, IRegion, IEstate, IManager, IEstateMap, IPendingUser, IJob, IGroup, IRole, IMember } from '../types';
 
@@ -72,11 +72,6 @@ export interface Store {
     getManagers(): Promise<IManager[]>
     getMapping(): Promise<IEstateMap[]>
     setEstateForRegion(estate: IEstate, region: IRegion): Promise<void>
-  },
-  OfflineMessages: {
-    save(to: string, message: string): Promise<void>
-    getFor(uuid: string): Promise<string[]>
-    destroyFor(uuid: string): Promise<void>
   }
 }
 
@@ -111,7 +106,6 @@ export function getStore(mgmCredentials: DatabaseCredentials, halcyonCredentials
     Groups: new Groups(halDB),
     PendingUsers: new PendingUsers(mgmDB),
     Estates: new Estates(halDB),
-    Jobs: new Jobs(mgmDB),
-    OfflineMessages: new OfflineMessages(mgmDB),
+    Jobs: new Jobs(mgmDB)
   };
 }

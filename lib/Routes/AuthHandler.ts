@@ -4,13 +4,17 @@ import Promise = require('bluebird');
 
 import { IUser } from '../types';
 import { Store } from '../Store';
-import { AuthenticatedRequest } from '../Auth';
-import { UserDetail, GetUserPermissions } from '../Auth';
+import { AuthenticatedRequest, TokenBody } from '../Auth';
+import { UserDetail, Session } from '../Auth';
 
-function signToken(ud: UserDetail, cert: Buffer): Promise<string> {
+
+function signToken(uuid: string, cert: Buffer): Promise<string> {
   return new Promise<string>((resolve, reject) => {
+    let payload: TokenBody = {
+      uuid: uuid
+    }
     sign(
-      ud,
+      payload,
       cert,
       {
         expiresIn: '1h'
@@ -24,12 +28,14 @@ function signToken(ud: UserDetail, cert: Buffer): Promise<string> {
   });
 }
 
-export function RenewTokenHandler(store: Store, cert: Buffer): RequestHandler {
+export function RenewTokenHandler(store: Store, session: Session, cert: Buffer): RequestHandler {
   return (req: AuthenticatedRequest, res: Response) => {
     let userDetail: UserDetail;
-    GetUserPermissions(store, req.user.uuid).then((ud: UserDetail) => {
+    store.Users.getByID(req.user.uuid).then((user: IUser) => {
+      return session.updateSession(user);
+    }).then((ud: UserDetail) => {
       userDetail = ud;
-      return signToken(ud, cert);
+      return signToken(ud.uuid, cert);
     }).then((token: string) => {
       res.json({
         Success: true,
@@ -48,7 +54,7 @@ export function RenewTokenHandler(store: Store, cert: Buffer): RequestHandler {
   }
 }
 
-export function LoginHandler(store: Store, cert: Buffer): RequestHandler {
+export function LoginHandler(store: Store, session: Session, cert: Buffer): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {
     let username: string = req.body.username || '';
     let password: string = req.body.password || '';
@@ -65,10 +71,10 @@ export function LoginHandler(store: Store, cert: Buffer): RequestHandler {
         throw new Error('Invalid Credentials');
       }
     }).then((u: IUser) => {
-      return GetUserPermissions(store, u);
+      return session.startSession(u);
     }).then((ud: UserDetail) => {
       userDetail = ud;
-      return signToken(ud, cert);
+      return signToken(ud.uuid, cert);
     }).then((token: string) => {
       res.json({
         Success: true,

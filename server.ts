@@ -40,17 +40,24 @@ if (process.env.HAL_DB_USER)
 if (process.env.HAL_DB_PASS)
   conf.haldb.password = process.env.HAL_DB_PASS;
 
+conf.redis = conf.redis || {
+  host: ''
+}
+if (process.env.REDIS_HOST)
+  conf.redis.host = process.env.REDIS_HOST;
+
 Validate(conf);
 
-
-//initialize singletons
+// initialize singletons
 import { EmailMgr } from './lib';
 new EmailMgr(conf.mail);
 
-let certificate = fs.readFileSync(conf.main.privateKeyPath)
-
 import { getStore, Store } from './lib/Store';
 let store: Store = getStore(conf.mgmdb, conf.haldb);
+
+import { Session } from './lib/Auth';
+let session = new Session(conf.redis, store);
+
 
 let clientApp = express();
 
@@ -58,7 +65,8 @@ clientApp.use(express.static(__dirname + '/public'));
 
 // jwt and host ip validation middleware
 import { Authorizer } from './lib/Auth';
-let middleware: Authorizer = new Authorizer(store, certificate);
+let certificate = fs.readFileSync(conf.main.privateKeyPath)
+let middleware: Authorizer = new Authorizer(store, session, certificate);
 let apiRouter = express.Router();
 
 // multipart form parsing middleware
@@ -67,8 +75,8 @@ let formParser = multer().array('');
 
 // Auth
 import { RenewTokenHandler, LoginHandler } from './lib/Routes/AuthHandler';
-apiRouter.get('/auth', middleware.isUser(), RenewTokenHandler(store, certificate));
-apiRouter.post('/auth/login', formParser, LoginHandler(store, certificate));
+apiRouter.get('/auth', middleware.isUser(), RenewTokenHandler(store, session, certificate));
+apiRouter.post('/auth/login', formParser, LoginHandler(store, session, certificate));
 
 // Registration
 import { RegisterHandler } from './lib/Routes/RegisterHandler';

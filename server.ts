@@ -227,14 +227,14 @@ import {
 
 clusterApp.get('/', (req, res) => { res.send('MGM Node Portal'); });
 
-clusterApp.post('/logs/:uuid', middleware.isNode(), NodeLogHandler(store, regionLogs));
-clusterApp.post('/node', middleware.isNode(), NodeHandler(store));
-clusterApp.post('/stats', formParser, middleware.isNode(), NodeStatHandler(store));
-clusterApp.get('/region/:id', middleware.isNode(), RegionConfigHandler(store));
-clusterApp.get('/process/:id', middleware.isNode(), IniConfigHandler(store, conf));
-clusterApp.get('/ready/:id', middleware.isNode(), NodeDownloadHandler(store, path.join(conf.main.upload_dir, '00000000-0000-0000-0000-000000000000')));
-clusterApp.post('/report/:id', middleware.isNode(), NodeReportHandler(store));
-clusterApp.post('/upload/:id', middleware.isNode(), multer({ dest: uploadDir }).single('file'), NodeUploadHandler(store));
+clusterApp.post('/logs/:uuid', NodeLogHandler(store, regionLogs));
+clusterApp.post('/node', NodeHandler(store));
+clusterApp.post('/stats', formParser, NodeStatHandler(store));
+clusterApp.get('/region/:id', RegionConfigHandler(store));
+clusterApp.get('/process/:id', IniConfigHandler(store, conf));
+clusterApp.get('/ready/:id', NodeDownloadHandler(store, path.join(conf.main.upload_dir, '00000000-0000-0000-0000-000000000000')));
+clusterApp.post('/report/:id', NodeReportHandler(store));
+clusterApp.post('/upload/:id', multer({ dest: uploadDir }).single('file'), NodeUploadHandler(store));
 
 clusterApp.listen(3001, function () {
   console.log('MGM listening for nodes on port 3001!');

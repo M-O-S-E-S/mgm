@@ -11,7 +11,6 @@ export interface AuthenticatedRequest extends Request {
   user: UserDetail
   body: any
   params: any
-  node: IHost
 }
 
 export class Authorizer {
@@ -57,20 +56,6 @@ export class Authorizer {
       }
 
       return res.json({ Success: false, Message: 'Access Denied' });
-    });
-  }
-
-  isNode(): (req: AuthenticatedRequest, res: Response, next: NextFunction) => void {
-    return this._isNode.bind(this);
-  }
-
-  private _isNode(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-    let remoteIP: string = req.ip.split(':').pop();
-    this.store.Hosts.getByAddress(remoteIP).then((h: IHost) => {
-      req.node = h;
-      return next();
-    }).catch(() => {
-      return res.json({ Success: false, Message: 'Permission Denied' });
     });
   }
 }

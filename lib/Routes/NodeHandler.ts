@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { Store } from '../Store';
-import { IRegion, IJob, IUser } from '../types';
+import { IRegion, IJob, IUser, IHost } from '../types';
 import { AuthenticatedRequest } from '../Auth';
 import { RegionLogs } from '../regionLogs';
 import { RegionINI } from '../Region';
@@ -13,7 +13,10 @@ export function NodeLogHandler(store: Store, logger: RegionLogs): RequestHandler
   return (req: AuthenticatedRequest, res) => {
     let regionID = req.params.uuid;
 
-    store.Regions.getByUUID(regionID.toString()).then((r: IRegion) => {
+    let remoteIP: string = req.ip.split(':').pop();
+    store.Hosts.getByAddress(remoteIP).then(() => {
+      return store.Regions.getByUUID(regionID.toString())
+    }).then((r: IRegion) => {
       let logs: string[] = JSON.parse(req.body.log);
       return logger.append(r, logs);
     }).then(() => {
@@ -27,7 +30,10 @@ export function NodeLogHandler(store: Store, logger: RegionLogs): RequestHandler
 export function NodeHandler(store: Store): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let payload = req.body;
-    store.Regions.getByNode(req.node).then((regions: IRegion[]) => {
+    let remoteIP: string = req.ip.split(':').pop();
+    store.Hosts.getByAddress(remoteIP).then( (node: IHost) => {
+      return store.Regions.getByNode(node);
+    }).then((regions: IRegion[]) => {
       let result = []
       for (let r of regions) {
         result.push({
@@ -77,7 +83,10 @@ export function NodeStatHandler(store: Store): RequestHandler {
     let running = 0;
     let halted = 0;
 
-    store.Hosts.setStatus(req.node, JSON.stringify(stats.host)).then(() => {
+    let remoteIP: string = req.ip.split(':').pop();
+    store.Hosts.getByAddress(remoteIP).then((node: IHost) => {
+      return store.Hosts.setStatus(node, JSON.stringify(stats.host));
+    }).then(() => {
       return Promise.all(
         stats.processes.map((proc: procStat) => {
           if (proc.running)
@@ -102,8 +111,10 @@ export function RegionConfigHandler(store: Store): RequestHandler {
     let uuid = req.params.id;
     //validate host
     let remoteIP: string = req.ip.split(':').pop();
-    store.Regions.getByUUID(uuid.toString()).then((r: IRegion) => {
-      if (r.node === req.node.address) {
+    store.Hosts.getByAddress(remoteIP).then( () => {
+      return store.Regions.getByUUID(uuid.toString());
+    }).then((r: IRegion) => {
+      if (r.node === remoteIP) {
         return r;
       }
       throw new Error('Requested region does not exist on the requesting host');
@@ -132,8 +143,11 @@ export function IniConfigHandler(store: Store, config: Config): RequestHandler {
     let httpPort = req.query['httpPort'];
     let externalAddress = req.query['externalAddress'];
     //validate host
-    store.Regions.getByUUID(uuid.toString()).then((r: IRegion) => {
-      if (r.node === req.node.address) {
+    let remoteIP: string = req.ip.split(':').pop();
+    store.Hosts.getByAddress(remoteIP).then( () => {
+      return store.Regions.getByUUID(uuid.toString());
+    }).then((r: IRegion) => {
+      if (r.node === remoteIP) {
         return store.Regions.setPortAndAddress(r, parseInt(httpPort), externalAddress);
       }
       throw new Error('Requested region does not exist on the requesting host');

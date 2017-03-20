@@ -16,6 +16,7 @@
     "nodemailer-smtp-transport": "^2.7.2",
     "promise-mysql": "^3.0.0",
     "redis": "^2.7.1",
+    "source-map-support": "^0.4.14",
     "ts-loader": "^2.0.1",
     "typescript": "^2.2.1",
     "urllib": "^2.21.0",

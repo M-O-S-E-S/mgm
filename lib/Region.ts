@@ -73,7 +73,7 @@ export function LoadOar(r: IRegion, h: IHost, j: IJob): Promise<void> {
 }
 
 export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: string]: string } } {
-  let connString: string = 'Data Source=' + conf.haldb.host +
+  let connString: string = 'Data Source=' + conf.main.lanIP +
     ';Database=' + conf.haldb.database +
     ';User ID=' + conf.haldb.user +
     ';Password=' + conf.haldb.password + ';';
@@ -124,14 +124,14 @@ export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: st
   config['Network']['default_location_y'] = '' + r.y;
   config['Network']['hostname'] = r.publicAddress;
   config['Network']['http_listener_ssl'] = 'false';
-  config['Network']['grid_server_url'] = conf.halcyon.grid_server;
+  config['Network']['grid_server_url'] = conf.main.lanIP+':8001';
   config['Network']['grid_send_key'] = 'null';
   config['Network']['grid_recv_key'] = 'null';
-  config['Network']['user_server_url'] = conf.halcyon.user_server;
+  config['Network']['user_server_url'] = conf.main.publicIP+':8002';
   config['Network']['user_send_key'] = 'null';
   config['Network']['user_recv_key'] = 'null';
   config['Network']['asset_server_url'] = conf.halcyon.whip;
-  config['Network']['messaging_server_url'] = conf.halcyon.messaging_server;
+  config['Network']['messaging_server_url'] = conf.main.lanIP+':8006';
   config['Network']['shard'] = 'HalcyonHome';
 
   config['Chat'] = {};
@@ -144,7 +144,7 @@ export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: st
   config['Messaging']['InstantMessageModule'] = 'InstantMessageModule';
   config['Messaging']['MessageTransferModule'] = 'MessageTransferModule';
   config['Messaging']['OfflineMessageModule'] = 'OfflineMessageModule';
-  config['Messaging']['OfflineMessageURL'] = '';//conf.main.internalUrl + 'offline';
+  config['Messaging']['OfflineMessageURL'] = conf.offlinemessages.api_url;
   config['Messaging']['MuteListModule'] = 'MuteListModule';
   config['Messaging']['MuteListURL'] = '127.0.0.1';
 
@@ -187,8 +187,8 @@ export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: st
   config['Mesh']['AllowMeshUpload'] = 'true';
 
   config['SimulatorFeatures'] = {};
-  config['SimulatorFeatures']['MapImageServerURI'] = conf.halcyon.user_server;
-  config['SimulatorFeatures']['SearchServerURI'] = conf.halcyon.user_server;
+  config['SimulatorFeatures']['MapImageServerURI'] = conf.main.publicIP;
+  config['SimulatorFeatures']['SearchServerURI'] = conf.main.publicIP;
   config['SimulatorFeatures']['MeshEnabled'] = 'true';
   config['SimulatorFeatures']['PhysicsMaterialsEnabled'] = 'false';
 
@@ -204,9 +204,9 @@ export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: st
   config['AvatarRemoteCommands'] = {};
   config['AvatarRemoteCommands']['Enabled'] = 'false';
 
-  //config['FreeSwitchVoice'] = {};
-  //config['FreeSwitchVoice']['enabled'] = 'true';
-  //config['FreeSwitchVoice']['account_service'] = conf.mgm.internalUrl + 'fsapi';
+  config['FreeSwitchVoice'] = {};
+  config['FreeSwitchVoice']['enabled'] = 'true';
+  config['FreeSwitchVoice']['account_service'] = conf.freeswitch.api_url + 'fsapi';
 
   return config;
 }

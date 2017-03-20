@@ -1,3 +1,3 @@
 
 
-export { Config, Validate } from './model';
+export { Config, Validate, BlankConfig } from './model';

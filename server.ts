@@ -4,47 +4,56 @@ import * as bodyParser from 'body-parser';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as ini from 'ini';
+import { install } from 'source-map-support';
 
-import { Config, Validate } from './lib/Config';
+install();
 
-let conf: Config = ini.parse(fs.readFileSync('./mgm.ini').toString());
+import { Config, BlankConfig, Validate } from './lib/Config';
 
-// environment variables override configs
-conf.mgmdb = conf.mgmdb || {
-  host: '',
-  database: '',
-  user: '',
-  password: ''
-};
-if (process.env.MGM_DB_HOST)
-  conf.mgmdb.host = process.env.MGM_DB_HOST;
-if (process.env.MGM_DB_DATABASE)
-  conf.mgmdb.database = process.env.MGM_DB_DATABASE;
-if (process.env.MGM_DB_USER)
-  conf.mgmdb.user = process.env.MGM_DB_USER;
-if (process.env.MGM_DB_PASS)
-  conf.mgmdb.password = process.env.MGM_DB_PASS;
+let conf: Config = BlankConfig();
+try {
+  conf = ini.parse(fs.readFileSync('./mgm.ini').toString());
+} catch (err) { }
 
-conf.haldb = conf.haldb || {
-  host: '',
-  database: '',
-  user: '',
-  password: ''
-};
-if (process.env.HAL_DB_HOST)
-  conf.haldb.host = process.env.HAL_DB_HOST;
-if (process.env.HAL_DB_DATABASE)
-  conf.haldb.database = process.env.HAL_DB_DATABASE;
-if (process.env.HAL_DB_USER)
-  conf.haldb.user = process.env.HAL_DB_USER;
-if (process.env.HAL_DB_PASS)
-  conf.haldb.password = process.env.HAL_DB_PASS;
-
-conf.redis = conf.redis || {
-  host: ''
+// override any or all ini values with any env settings
+conf = {
+  mgmdb: {
+    host: conf.mgmdb.host || process.env.MGM_DB_HOST,
+    database: conf.mgmdb.database || process.env.MGM_DB_DATABASE,
+    user: conf.mgmdb.user || process.env.MGM_DB_USER,
+    password: conf.mgmdb.password || process.env.MGM_DB_PASS
+  },
+  haldb: {
+    host: conf.haldb.host || process.env.HAL_DB_HOST,
+    database: conf.haldb.database || process.env.HAL_DB_DATABASE,
+    user: conf.haldb.user || process.env.HAL_DB_USER,
+    password: conf.haldb.password || process.env.HAL_DB_PASS
+  },
+  main: {
+    publicIP: conf.main.publicIP || process.env.PUBLIC_IP,
+    lanIP: conf.main.lanIP || process.env.LAN_IP,
+    log_dir: conf.main.log_dir || process.env.LOG_DIR,
+    upload_dir: conf.main.upload_dir || process.env.UPLOAD_DIR,
+    privateKeyPath: conf.main.privateKeyPath || process.env.PRIVATE_KEY
+  },
+  redis: { host: conf.redis.host || process.env.REDIS_HOST },
+  freeswitch: { api_url: conf.freeswitch.api_url || process.env.FREESWITCH_API },
+  offlinemessages: { api_url: conf.offlinemessages.api_url || process.env.OFFLINE_MESSAGES_API },
+  templates: conf.templates || process.env.TEMPLATES ? JSON.parse(process.env.TEMPLATES) : null,
+  mail: conf.mail || process.env.MAIL ? JSON.parse(process.env.MAIL) : null,
+  halcyon: {
+    grid_server: conf.halcyon.grid_server || process.env.GRID_SERVER,
+    user_server: conf.halcyon.user_server || process.env.USER_SERVER,
+    messaging_server: conf.halcyon.messaging_server || process.env.MESSAGING_SERVER,
+    whip: conf.halcyon.whip || process.env.WHIP_SERVER
+  },
+  get_grid_info: {
+    grid_name: conf.get_grid_info.grid_name || process.env.GRID_NAME,
+    grid_nick: conf.get_grid_info.grid_nick || process.env.GRID_NICK,
+    login_uri: conf.get_grid_info.login_uri || process.env.LOGIN_URI,
+    manage: conf.get_grid_info.manage || process.env.MGM_PUBLIC_ADDRESS
+  }
 }
-if (process.env.REDIS_HOST)
-  conf.redis.host = process.env.REDIS_HOST;
 
 Validate(conf);
 

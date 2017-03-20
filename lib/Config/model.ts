@@ -12,8 +12,9 @@ export interface Config {
   main: {
     log_dir: string
     upload_dir: string
-    default_oar_path: string
     privateKeyPath: string
+    publicIP: string
+    lanIP: string
   }
 
   redis: {
@@ -46,13 +47,13 @@ export interface Config {
     whip: string
   }
 
+  freeswitch: {
+    api_url: string
+  }
 
-
-
-  //privateKeyPath: string
-  //certificate: Buffer
-  //voiceIP: string
-  //internalUrl: string
+  offlinemessages: {
+    api_url: string
+  }
 
   get_grid_info: {
     login_uri: string,
@@ -62,51 +63,66 @@ export interface Config {
   }
 }
 
+export function BlankConfig(): Config {
+  return {
+    mgmdb: { host: null, user: null, password: null, database: null },
+    main: { log_dir: null, upload_dir: null, privateKeyPath: null, publicIP: null, lanIP: null },
+    redis: { host: null },
+    templates: null,
+    mail: null,
+    haldb: { host: null, user: null, password: null, database: null },
+    halcyon: { grid_server: null, user_server: null, messaging_server: null, whip: null },
+    freeswitch: { api_url: null },
+    offlinemessages: { api_url: null },
+    get_grid_info: { login_uri: null, manage: null, grid_name: null, grid_nick: null }
+  }
+}
+
 
 export function Validate(config: Config): void {
-  /** MGM Validation */
-  if (!config.main.log_dir) {
-    throw new Error('Error loading config: mgm log_dir is missing, region logs cannot be collected');
-  } else {
-    if (!fs.existsSync(config.main.log_dir)) {
-      throw new Error('Error loading config: mgm log_dir is present, but the folder does not exist');
-    }
-  }
-  if (!config.main.upload_dir) {
-    throw new Error('Error loading config: mgm upload_dir is missing, oar functions will not work');
-  } else {
-    if (!fs.existsSync(config.main.upload_dir)) {
-      throw new Error('Error loading config: mgm upload_dir is present, but the folder does not exist');
-    }
-  }
-  //if (!config.main.default_oar_path) {
-  //  throw new Error('Error loading config: mgm default oar path is missing, \'nuke\' functionality will not work');
-  //} else {
-  //  if (!fs.existsSync(config.main.default_oar_path)) {
-  //    throw new Error('Error loading config: mgm default_oar_path is present, but the location does not exist');
-  //  }
-  //}
-  if (!config.templates) {
-    throw new Error('Error loading config: templates section is missing');
-  }
-  //if (!config.mgm.voiceIP) {
-  //  console.log('Error loading config: mgm voice IP is missing, voice will not work');
-  //  return false;
-  //}
-  //if (!config.mgm.internalUrl) {
-  //  console.log('Error loading config: mgm internal ip address is missing');
-  //  return false;
-  //}
-  //if (!config.mail) {
-  //  console.log('Error loading config: mgm mail is missing, email notifications may not work');
-  //  return false;
-  //}
-  if (!config.main.privateKeyPath) {
-    throw new Error('Error loading config: privateKeyPath is mising');
-  } else {
-    if (!fs.existsSync(config.main.privateKeyPath)) {
-      console.log(config.main.privateKeyPath);
-      throw new Error('Error loading config: mgm privateKeyPath is present, but the location does not exist');
-    }
-  }
+  if (!config) throw new Error('INVALID CONFIG: config not provided');
+
+  if (!config.mgmdb) throw new Error('INVALID CONFIG: [mgmdb] missing');
+  if (!config.mgmdb.host) throw new Error('INVALID CONFIG: [mgmdb] host missing');
+  if (!config.mgmdb.user) throw new Error('INVALID CONFIG: [mgmdb] user missing');
+  if (!config.mgmdb.password) throw new Error('INVALID CONFIG: [mgmdb] password missing');
+  if (!config.mgmdb.database) throw new Error('INVALID CONFIG: [mgmdb] database missing');
+
+  if (!config.haldb) throw new Error('INVALID CONFIG: [haldb] missing');
+  if (!config.haldb.host) throw new Error('INVALID CONFIG: [haldb] host missing');
+  if (!config.haldb.user) throw new Error('INVALID CONFIG: [haldb] user missing');
+  if (!config.haldb.password) throw new Error('INVALID CONFIG: [haldb] password missing');
+  if (!config.haldb.database) throw new Error('INVALID CONFIG: [haldb] database missing');
+
+  if (!config.main) throw new Error('INVALID CONFIG: [main] missing');
+  if (!config.main.log_dir) throw new Error('INVALID CONFIG: [main] log_dir missing');
+  if (!config.main.upload_dir) throw new Error('INVALID CONFIG: [main] upload_dir missing');
+  if (!config.main.privateKeyPath) throw new Error('INVALID CONFIG: [main] privateKeyPath missing');
+  if (!config.main.publicIP) throw new Error('INVALID CONFIG: [main] publicIP missing');
+  if (!config.main.lanIP) throw new Error('INVALID CONFIG: [main] lanIP missing');
+
+  if (!config.redis) throw new Error('INVALID CONFIG: [redis] missing');
+  if (!config.redis.host) throw new Error('INVALID CONFIG: [redis] host missing');
+
+  if (!config.templates) throw new Error('INVALID CONFIG: [templates] missing');
+
+  if (!config.mail) throw new Error('INVALID CONFIG: [mail] missing');
+
+  if (!config.halcyon) throw new Error('INVALID CONFIG: [halcyon] missing');
+  if (!config.halcyon.grid_server) throw new Error('INVALID CONFIG: [halcyon] grid_server missing');
+  if (!config.halcyon.user_server) throw new Error('INVALID CONFIG: [halcyon] user_server missing');
+  if (!config.halcyon.messaging_server) throw new Error('INVALID CONFIG: [halcyon] messaging_server missing');
+  if (!config.halcyon.whip) throw new Error('INVALID CONFIG: [halcyon] whip missing');
+
+  if (!config.freeswitch) throw new Error('INVALID CONFIG: [freeswitch] missing');
+  if (!config.freeswitch.api_url) throw new Error('INVALID CONFIG: [freeswitch] api_url missing');
+
+  if (!config.offlinemessages) throw new Error('INVALID CONFIG: [offlinemessages] missing');
+  if (!config.offlinemessages.api_url) throw new Error('INVALID CONFIG: [offlinemessages] api_url missing');
+
+  if (!config.get_grid_info) throw new Error('INVALID CONFIG: [get_grid_info] missing');
+  if (!config.get_grid_info.login_uri) throw new Error('INVALID CONFIG: [get_grid_info] login_uri missing');
+  if (!config.get_grid_info.manage) throw new Error('INVALID CONFIG: [get_grid_info] manage missing');
+  if (!config.get_grid_info.grid_name) throw new Error('INVALID CONFIG: [get_grid_info] grid_name missing');
+  if (!config.get_grid_info.grid_nick) throw new Error('INVALID CONFIG: [get_grid_info] grid_nick missing');
 }

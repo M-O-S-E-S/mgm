@@ -7,8 +7,6 @@ import { RegionINI } from '../Region';
 import { Config } from '../Config';
 import Promise = require('bluebird');
 
-//let remoteIP: string = req.ip.split(':').pop();
-
 export function NodeLogHandler(store: Store, logger: RegionLogs): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let regionID = req.params.uuid;

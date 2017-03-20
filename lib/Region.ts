@@ -124,14 +124,14 @@ export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: st
   config['Network']['default_location_y'] = '' + r.y;
   config['Network']['hostname'] = r.publicAddress;
   config['Network']['http_listener_ssl'] = 'false';
-  config['Network']['grid_server_url'] = conf.main.lanIP+':8001';
+  config['Network']['grid_server_url'] = conf.halcyon.grid_server;
   config['Network']['grid_send_key'] = 'null';
   config['Network']['grid_recv_key'] = 'null';
-  config['Network']['user_server_url'] = conf.main.publicIP+':8002';
+  config['Network']['user_server_url'] = conf.halcyon.user_server;
   config['Network']['user_send_key'] = 'null';
   config['Network']['user_recv_key'] = 'null';
   config['Network']['asset_server_url'] = conf.halcyon.whip;
-  config['Network']['messaging_server_url'] = conf.main.lanIP+':8006';
+  config['Network']['messaging_server_url'] = conf.halcyon.messaging_server;
   config['Network']['shard'] = 'HalcyonHome';
 
   config['Chat'] = {};
@@ -206,7 +206,7 @@ export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: st
 
   config['FreeSwitchVoice'] = {};
   config['FreeSwitchVoice']['enabled'] = 'true';
-  config['FreeSwitchVoice']['account_service'] = conf.freeswitch.api_url + 'fsapi';
+  config['FreeSwitchVoice']['account_service'] = conf.freeswitch.api_url;
 
   return config;
 }

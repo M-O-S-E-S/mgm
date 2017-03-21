@@ -73,6 +73,8 @@ import { Authorizer } from './lib/Auth';
 let certificate = fs.readFileSync(conf.main.privateKeyPath)
 let middleware: Authorizer = new Authorizer(store, session, certificate);
 let apiRouter = express.Router();
+let checkUser = middleware.isUser();
+let checkAdmin = middleware.isAdmin();
 
 // initialize singletons
 import { EmailMgr } from './lib';
@@ -86,7 +88,7 @@ let formParser = multer().array('');
 
 // Auth
 import { RenewTokenHandler, LoginHandler } from './lib/Routes/AuthHandler';
-apiRouter.get('/auth', middleware.isUser(), RenewTokenHandler(store, session, certificate));
+apiRouter.get('/auth', checkUser, RenewTokenHandler(store, session, certificate));
 apiRouter.post('/auth/login', formParser, LoginHandler(store, session, certificate));
 
 // Registration
@@ -115,15 +117,15 @@ if (!fs.existsSync(uploadDir)) {
       throw new Error('Cannot create region log directory at ' + uploadDir);
   });
 }
-apiRouter.get('/job', middleware.isUser(), GetJobsHandler(store));
-apiRouter.post('/job/delete/:id', formParser, middleware.isUser(), DeleteJobHandler(store));
+apiRouter.get('/job', checkUser, GetJobsHandler(store));
+apiRouter.post('/job/delete/:id', formParser, checkUser, DeleteJobHandler(store));
 apiRouter.post('/job/resetCode', formParser, PasswordResetCodeHandler(store, certificate));
 apiRouter.post('/job/resetPassword', formParser, PasswordResetHandler(store, certificate));
-apiRouter.post('/job/nukeContent/:uuid', middleware.isUser(), NukeContentHandler(store, path.join(conf.main.upload_dir, '00000000-0000-0000-0000-000000000000') ));
-apiRouter.post('/job/loadOar/:uuid', middleware.isUser(), LoadOarHandler(store));
-apiRouter.post('/job/upload/:id', middleware.isUser(), multer({ dest: uploadDir }).single('file'), UserUploadHandler(store));
-apiRouter.post('/job/saveOar/:uuid', middleware.isUser(), SaveOarHandler(store));
-apiRouter.get('/job/download/:id', middleware.isUser(), UserDownloadHandler(store));
+apiRouter.post('/job/nukeContent/:uuid', checkUser, NukeContentHandler(store, path.join(conf.main.upload_dir, '00000000-0000-0000-0000-000000000000') ));
+apiRouter.post('/job/loadOar/:uuid', checkUser, LoadOarHandler(store));
+apiRouter.post('/job/upload/:id', checkUser, multer({ dest: uploadDir }).single('file'), UserUploadHandler(store));
+apiRouter.post('/job/saveOar/:uuid', checkUser, SaveOarHandler(store));
+apiRouter.get('/job/download/:id', checkUser, UserDownloadHandler(store));
 
 // User
 import {
@@ -134,18 +136,18 @@ import {
   DeleteUserHandler,
   CreateUserHandler
 } from './lib/Routes/UserHandler';
-apiRouter.get('/user', middleware.isUser(), GetUsersHandler(store));
-apiRouter.post('/user/password', middleware.isUser(), formParser, SetPasswordHandler(store));
-apiRouter.post('/user/accessLevel', formParser, middleware.isAdmin(), SetAccessLevelHandler(store));
-apiRouter.post('/user/email', formParser, middleware.isAdmin(), SetEmailHandler(store));
-apiRouter.post('/user/destroy/:uuid', middleware.isAdmin(), DeleteUserHandler(store));
-apiRouter.post('/user/create', formParser, middleware.isAdmin(), CreateUserHandler(store, conf.templates));
+apiRouter.get('/user', checkUser, GetUsersHandler(store));
+apiRouter.post('/user/password', checkUser, formParser, SetPasswordHandler(store));
+apiRouter.post('/user/accessLevel', formParser, checkAdmin, SetAccessLevelHandler(store));
+apiRouter.post('/user/email', formParser, checkAdmin, SetEmailHandler(store));
+apiRouter.post('/user/destroy/:uuid', checkAdmin, DeleteUserHandler(store));
+apiRouter.post('/user/create', formParser, checkAdmin, CreateUserHandler(store, conf.templates));
 
 
 // Pending User
 import { DenyPendingUserHandler, ApprovePendingUserHandler } from './lib/Routes/UserHandler';
-apiRouter.post('/user/deny', formParser, middleware.isAdmin(), DenyPendingUserHandler(store));
-apiRouter.post('/user/approve', formParser, middleware.isAdmin(), ApprovePendingUserHandler(store, conf.templates));
+apiRouter.post('/user/deny', formParser, checkAdmin, DenyPendingUserHandler(store));
+apiRouter.post('/user/approve', formParser, checkAdmin, ApprovePendingUserHandler(store, conf.templates));
 
 // Region
 import {
@@ -162,34 +164,34 @@ import {
 } from './lib/Routes/RegionHandler';
 import { RegionLogs } from './lib';
 let regionLogs = new RegionLogs(conf.main.log_dir);
-apiRouter.get('/region', middleware.isUser(), GetRegionsHandler(store));
-apiRouter.post('/region/create', formParser, middleware.isAdmin(), CreateRegionHandler(store));
-apiRouter.post('/region/destroy/:uuid', middleware.isAdmin(), DeleteRegionHandler(store));
-apiRouter.get('/region/logs/:uuid', middleware.isUser(), GetRegionLogsHandler(store, regionLogs));
-apiRouter.post('/region/start/:uuid', middleware.isUser(), StartRegionHandler(store));
-apiRouter.post('/region/stop/:uuid', middleware.isUser(), StopRegionHandler(store));
-apiRouter.post('/region/kill/:uuid', middleware.isUser(), KillRegionHandler(store));
-apiRouter.post('/region/estate/:uuid', formParser, middleware.isUser(), SetRegionEstateHandler(store));
-apiRouter.post('/region/setXY/:uuid', formParser, middleware.isUser(), SetRegionCoordinatesHandler(store));
-apiRouter.post('/region/host/:uuid', formParser, middleware.isUser(), SetRegionHostHandler(store));
+apiRouter.get('/region', checkUser, GetRegionsHandler(store));
+apiRouter.post('/region/create', formParser, checkAdmin, CreateRegionHandler(store));
+apiRouter.post('/region/destroy/:uuid', checkAdmin, DeleteRegionHandler(store));
+apiRouter.get('/region/logs/:uuid', checkUser, GetRegionLogsHandler(store, regionLogs));
+apiRouter.post('/region/start/:uuid', checkUser, StartRegionHandler(store));
+apiRouter.post('/region/stop/:uuid', checkUser, StopRegionHandler(store));
+apiRouter.post('/region/kill/:uuid', checkUser, KillRegionHandler(store));
+apiRouter.post('/region/estate/:uuid', formParser, checkUser, SetRegionEstateHandler(store));
+apiRouter.post('/region/setXY/:uuid', formParser, checkUser, SetRegionCoordinatesHandler(store));
+apiRouter.post('/region/host/:uuid', formParser, checkUser, SetRegionHostHandler(store));
 
 // Estate
 import { GetEstatesHandler, CreateEstateHandler, DeleteEstateHandler } from './lib/Routes/EstateHandler';
-apiRouter.get('/estate', middleware.isUser(), GetEstatesHandler(store));
-apiRouter.post('/estate/create', formParser, middleware.isAdmin(), CreateEstateHandler(store));
-apiRouter.post('/estate/destroy/:id', middleware.isAdmin(), DeleteEstateHandler(store));
+apiRouter.get('/estate', checkUser, GetEstatesHandler(store));
+apiRouter.post('/estate/create', formParser, checkAdmin, CreateEstateHandler(store));
+apiRouter.post('/estate/destroy/:id', checkAdmin, DeleteEstateHandler(store));
 
 // Group
 import { GetGroupsHandler, AddMemberHandler, RemoveMemberHandler } from './lib/Routes/GroupHandler';
-apiRouter.get('/group', middleware.isUser(), GetGroupsHandler(store));
-apiRouter.post('/group/addMember/:id', formParser, middleware.isAdmin(), AddMemberHandler(store));
-apiRouter.post('/group/removeMember/:id', formParser, middleware.isAdmin(), RemoveMemberHandler(store));
+apiRouter.get('/group', checkUser, GetGroupsHandler(store));
+apiRouter.post('/group/addMember/:id', formParser, checkAdmin, AddMemberHandler(store));
+apiRouter.post('/group/removeMember/:id', formParser, checkAdmin, RemoveMemberHandler(store));
 
 // Host
 import { GetHostHandler, AddHostHandler, RemoveHostHandler } from './lib/Routes/HostHandler';
-apiRouter.get('/host', middleware.isAdmin(), GetHostHandler(store));
-apiRouter.post('/host/add', formParser, middleware.isAdmin(), AddHostHandler(store));
-apiRouter.post('/host/remove', formParser, middleware.isAdmin(), RemoveHostHandler(store));
+apiRouter.get('/host', checkAdmin, GetHostHandler(store));
+apiRouter.post('/host/add', formParser, checkAdmin, AddHostHandler(store));
+apiRouter.post('/host/remove', formParser, checkAdmin, RemoveHostHandler(store));
 
 clientApp.use('/api', apiRouter);
 

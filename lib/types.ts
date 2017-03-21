@@ -43,7 +43,8 @@ export interface IHost {
   address: string
   port: number
   name: string
-  slots: number
+  slots: string
+  public_ip: string
   status: string
 }
 

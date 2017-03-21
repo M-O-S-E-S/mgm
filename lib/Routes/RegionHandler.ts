@@ -1,12 +1,14 @@
 import { Response, RequestHandler } from 'express';
 import { Store } from '../Store';
+import { Config } from '../Config';
 import { IRegion, IHost, IEstate, IUser } from '../types';
 import { AuthenticatedRequest } from '../Auth';
 import { Set } from 'immutable';
 import { RegionLogs } from '../regionLogs';
 import Promise = require('bluebird');
+import * as formstream from 'formstream';
 
-import { RemoveRegionFromHost, PutRegionOnHost, StopRegion, KillRegion, StartRegion, RegionINI } from '../Region';
+import { RemoveRegionFromHost, PutRegionOnHost, StopRegion, KillRegion, StartRegion } from '../Region';
 
 export function GetRegionsHandler(store: Store): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {
@@ -29,7 +31,7 @@ export function GetRegionsHandler(store: Store): RequestHandler {
   }
 }
 
-export function StartRegionHandler(store: Store): RequestHandler {
+export function StartRegionHandler(store: Store, conf: Config): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let regionID = req.params.uuid;
     let r: IRegion
@@ -41,7 +43,7 @@ export function StartRegionHandler(store: Store): RequestHandler {
       r = region;
       return store.Hosts.getByAddress(r.node);
     }).then((h: IHost) => {
-      return StartRegion(r, h);
+      return StartRegion(r, h, conf);
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {

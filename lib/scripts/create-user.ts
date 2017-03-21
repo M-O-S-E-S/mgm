@@ -56,10 +56,8 @@ if (userLevel < 0 || userLevel > 255) {
 }
 
 // create user
-import { Config, Validate } from '../Config';
-let conf: Config = require('../../settings.js');
-if (!Validate(conf)) {
-}
+import { Config, LoadConfig } from '../Config';
+let conf: Config = LoadConfig('../mgm.ini');
 
 import { getStore, Store } from '../Store';
 let store: Store = getStore(conf.mgmdb, conf.haldb);

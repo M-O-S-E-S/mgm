@@ -3,9 +3,10 @@ import { Config } from './Config';
 import { Store } from './Store';
 import * as urllib from 'urllib';
 import Promise = require('bluebird');
-import * as formstream from 'formstream';
+import formstream = require('formstream');
 import { RemoteAdmin } from './RemoteAdmin';
 import { HalcyonJWT } from './Auth';
+import { UUID } from './UUID';
 
 export function RemoveRegionFromHost(r: IRegion, h: IHost): Promise<void> {
   return urllib.request('http://' + h.address + ':' + h.port + '/remove/' + r.uuid);
@@ -58,10 +59,19 @@ export function KillRegion(r: IRegion, h: IHost): Promise<void> {
  * @param region
  * @param host
  */
-export function StartRegion(r: IRegion, h: IHost): Promise<void> {
+export function StartRegion(r: IRegion, h: IHost, conf: Config): Promise<void> {
   console.log('starting ' + r.uuid);
+
+  let form = formstream();
+  form.field('xml', RegionXML(r));
+  form.field('ini', RegionINI(r, conf));
+
   let url = 'http://' + h.address + ':' + h.port + '/start/' + r.uuid;
-  return urllib.request(url).then((body) => {
+  return urllib.request(url, {
+    method: 'POST',
+    headers: form.headers(),
+    stream: form
+  }).then((body) => {
     let result = JSON.parse(body.data);
     if (!result.Success) {
       throw new Error(result.Message);
@@ -145,7 +155,41 @@ export function LoadOar(r: IRegion, h: IHost, j: IJob, u: IUser, oarPath?: strin
 
 }
 
-export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: string]: string } } {
+
+import ini = require('ini');
+
+/**
+ * Get the string contents of the Regions/default.xml region configuration file
+ * @param region Region in question
+ */
+export function RegionXML(r: IRegion): string {
+  return [
+    '<Root>',
+    '<Config',
+    'allow_alternate_ports="false"',
+    'clamp_prim_size="false"',
+    'external_host_name="' + r.publicAddress + '"',
+    'internal_ip_address="0.0.0.0"',
+    'internal_ip_port="' + r.port + '"',
+    'master_avatar_first="' + UUID.random() + '"',
+    'master_avatar_last="' + UUID.random() + '"',
+    'master_avatar_pass="' + UUID.random().getShort() + '"',
+    'master_avatar_uuid="00000000-0000-0000-0000-000000000000"',
+    'nonphysical_prim_max="0"',
+    'object_capacity="0"',
+    'outside_ip="' + r.publicAddress + '"',
+    'physical_prim_max="0"',
+    'region_access="0"',
+    'region_product="0"',
+    'sim_UUID="' + r.uuid + '"',
+    'sim_location_x="' + r.x + '"',
+    'sim_location_y="' + r.y + '"',
+    'sim_name="' + r.name + '"',
+    '/>',
+    '</Root>'].join(' ');
+}
+
+export function RegionINI(r: IRegion, conf: Config): string {
   let connString: string = 'Data Source=' + conf.main.lanIP +
     ';Database=' + conf.haldb.database +
     ';User ID=' + conf.haldb.user +
@@ -281,5 +325,5 @@ export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: st
   config['FreeSwitchVoice']['enabled'] = 'true';
   config['FreeSwitchVoice']['account_service'] = conf.freeswitch.api_url;
 
-  return config;
+  return ini.stringify(config);
 }

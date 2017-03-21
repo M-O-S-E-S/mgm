@@ -26,11 +26,20 @@ export function NodeLogHandler(store: Store, logger: RegionLogs): RequestHandler
 }
 
 export function NodeHandler(store: Store): RequestHandler {
+  interface node_registration {
+    slots: string
+    public_ip: string
+    name: string
+    port: string
+  }
+
   return (req: AuthenticatedRequest, res) => {
-    let payload = req.body;
+    let payload: node_registration = req.body;
     let remoteIP: string = req.ip.split(':').pop();
-    store.Hosts.getByAddress(remoteIP).then( (node: IHost) => {
-      return store.Regions.getByNode(node);
+    store.Hosts.getByAddress(remoteIP).then((node: IHost) => {
+      return store.Hosts.updateHost(node, payload).then( () => {
+        return store.Regions.getByNode(node);
+      });
     }).then((regions: IRegion[]) => {
       let result = []
       for (let r of regions) {
@@ -83,7 +92,7 @@ export function NodeStatHandler(store: Store): RequestHandler {
 
     let remoteIP: string = req.ip.split(':').pop();
     store.Hosts.getByAddress(remoteIP).then((node: IHost) => {
-      return store.Hosts.setStatus(node, JSON.stringify(stats.host));
+      return Promise.resolve();//store.Hosts.setStatus(node, JSON.stringify(stats.host));
     }).then(() => {
       return Promise.all(
         stats.processes.map((proc: procStat) => {
@@ -92,7 +101,7 @@ export function NodeStatHandler(store: Store): RequestHandler {
           else
             halted++;
           return store.Regions.getByUUID(proc.id).then((r: IRegion) => {
-            return store.Regions.setStatus(r, proc.running, JSON.stringify(proc.stats));
+            return Promise.resolve();//store.Regions.setStatus(r, proc.running, JSON.stringify(proc.stats));
           });
         })
       );
@@ -100,62 +109,6 @@ export function NodeStatHandler(store: Store): RequestHandler {
       res.send('Stats recieved: ' + running + ' running processes, and ' + halted + ' halted processes');
     }).catch((err: Error) => {
       res.json({ Success: false, Message: err.message });
-    });
-  };
-}
-
-export function RegionConfigHandler(store: Store): RequestHandler {
-  return (req: AuthenticatedRequest, res) => {
-    let uuid = req.params.id;
-    //validate host
-    let remoteIP: string = req.ip.split(':').pop();
-    store.Hosts.getByAddress(remoteIP).then( () => {
-      return store.Regions.getByUUID(uuid.toString());
-    }).then((r: IRegion) => {
-      if (r.node === remoteIP) {
-        return r;
-      }
-      throw new Error('Requested region does not exist on the requesting host');
-    }).then((r: IRegion) => {
-      res.json({
-        Success: true,
-        Region: {
-          Name: r.name,
-          RegionUUID: r.uuid,
-          LocationX: r.x,
-          LocationY: r.y,
-          InternalPort: r.port,
-          ExternalHostName: r.node
-        }
-      });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-      return;
-    });
-  };
-}
-
-export function IniConfigHandler(store: Store, config: Config): RequestHandler {
-  return (req: AuthenticatedRequest, res) => {
-    let uuid = req.params.id;
-    let httpPort = req.query['httpPort'];
-    let externalAddress = req.query['externalAddress'];
-    //validate host
-    let remoteIP: string = req.ip.split(':').pop();
-    store.Hosts.getByAddress(remoteIP).then( () => {
-      return store.Regions.getByUUID(uuid.toString());
-    }).then((r: IRegion) => {
-      if (r.node === remoteIP) {
-        return store.Regions.setPortAndAddress(r, parseInt(httpPort), externalAddress);
-      }
-      throw new Error('Requested region does not exist on the requesting host');
-    }).then((r: IRegion) => {
-      return RegionINI(r, config);
-    }).then((config: { [key: string]: { [key: string]: string } }) => {
-      res.json({ Success: true, Region: config });
-    }).catch((err: Error) => {
-      res.json({ Success: false, Message: err.message });
-      return;
     });
   };
 }

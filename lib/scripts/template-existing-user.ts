@@ -14,8 +14,8 @@ if (process.argv.length !== 4) {
   help();
 }
 
-import { Config, Validate } from '../Config';
-let conf: Config = require('../../settings.js');
+import { Config, LoadConfig } from '../Config';
+let conf: Config = LoadConfig('../mgm.ini');
 
 let user: string
 let template: string

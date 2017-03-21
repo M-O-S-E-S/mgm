@@ -19,6 +19,12 @@ export interface Store {
     destroy(id: number): Promise<void>
     getByAddress(address: string): Promise<IHost>
     setStatus(host: IHost, status: string): Promise<IHost>
+    updateHost(host: IHost, reg: {
+      slots: string      
+      public_ip: string
+      name: string
+      port: string
+    }): Promise<IHost>
   },
   Regions: {
     getAll(): Promise<IRegion[]>

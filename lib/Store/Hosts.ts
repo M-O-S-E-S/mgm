@@ -56,4 +56,18 @@ export class Hosts {
   destroy(id: number): Promise<void> {
     return this.db.query('DELETE FROM hosts WHERE id=?', id);
   }
+
+  updateHost(host: IHost, reg: {
+    slots: string      
+    public_ip: string
+    name: string
+    port: string
+  }): Promise<IHost> {
+    return this.db.query('UPDATE hosts SET ? WHERE id=?', [reg, host.id]).then( () => {
+      host.name = reg.name;
+      host.port = parseInt(reg.port);
+      host.public_ip = reg.public_ip;
+      host.slots = reg.slots;
+    })
+  }
 }

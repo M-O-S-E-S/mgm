@@ -3,18 +3,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import Promise = require('bluebird');
 
-import { Config, Validate } from '../Config';
+import { Config, LoadConfig } from '../Config';
+let conf: Config = LoadConfig('../mgm.ini');
 
-
-let conf: Config = require('../../settings.js');
-if (!Validate(conf)) {
-  process.exit(1);
-}
+let sqlPath = process.argv[2] || '/mgm/sql/';
 
 let creds = conf.mgmdb;
 let conn: Connection
-
-let filesDir = path.resolve(__dirname, '../../serverFiles/');
 
 let maxVersion: number = -1;
 let sqlFiles: { [key: number]: string } = {};
@@ -31,11 +26,12 @@ function loadSqlFile(c: Connection, filePath: string): Promise<void> {
     console.log('loaded ' + filePath);
   }).catch( (err: Error) => {
     console.log('could not load ' + filePath);
+    console.log(err.message);
   })
 }
 
 new Promise((resolve, reject) => {
-  fs.readdir(filesDir, (err, files: string[]) => {
+  fs.readdir(sqlPath, (err, files: string[]) => {
     if (err) return reject(err);
     let sql = files.filter((f: string) => {
       return f.substr(f.length - 4) === '.sql';
@@ -73,7 +69,7 @@ new Promise((resolve, reject) => {
   let p = Promise.resolve();
   while (currentVersion < maxVersion) {
     let num = currentVersion += 1;
-    p = p.then(() => { return loadSqlFile(conn, path.resolve(__dirname, '../../serverFiles/' + sqlFiles[num])); })
+    p = p.then(() => { return loadSqlFile(conn, path.join(sqlPath, sqlFiles[num])); })
   }
   return p;
 }).then(() => {

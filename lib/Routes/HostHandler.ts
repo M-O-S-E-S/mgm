@@ -2,10 +2,18 @@ import { RequestHandler } from 'express';
 import { Store } from '../Store';
 import { IHost } from '../types';
 import { AuthenticatedRequest } from '../Auth';
+import Promise = require('bluebird');
+import { PerformanceStore } from '../Performance';
 
-export function GetHostHandler(store: Store): RequestHandler {
+export function GetHostHandler(store: Store, perf: PerformanceStore): RequestHandler {
   return function (req: AuthenticatedRequest, res) {
     store.Hosts.getAll().then((hosts: IHost[]) => {
+      return Promise.all(hosts.map((h: IHost) => {
+        return perf.getHostData(h).then((data: string) => {
+          h.status = data;
+        });
+      })).then(() => { return hosts; })
+    }).then((hosts: IHost[]) => {
       res.json({
         Success: true,
         Hosts: hosts

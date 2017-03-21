@@ -17,6 +17,9 @@ let store: Store = getStore(conf.mgmdb, conf.haldb);
 import { Session } from './lib/Auth';
 let session = new Session(conf.redis, store);
 
+import { PerformanceStore } from './lib/Performance';
+let perfData = new PerformanceStore(conf.redis);
+
 
 let clientApp = express();
 
@@ -118,7 +121,7 @@ import {
 } from './lib/Routes/RegionHandler';
 import { RegionLogs } from './lib';
 let regionLogs = new RegionLogs(conf.main.log_dir);
-apiRouter.get('/region', checkUser, GetRegionsHandler(store));
+apiRouter.get('/region', checkUser, GetRegionsHandler(store, perfData));
 apiRouter.post('/region/create', formParser, checkAdmin, CreateRegionHandler(store));
 apiRouter.post('/region/destroy/:uuid', checkAdmin, DeleteRegionHandler(store));
 apiRouter.get('/region/logs/:uuid', checkUser, GetRegionLogsHandler(store, regionLogs));
@@ -143,7 +146,7 @@ apiRouter.post('/group/removeMember/:id', formParser, checkAdmin, RemoveMemberHa
 
 // Host
 import { GetHostHandler, AddHostHandler, RemoveHostHandler } from './lib/Routes/HostHandler';
-apiRouter.get('/host', checkAdmin, GetHostHandler(store));
+apiRouter.get('/host', checkAdmin, GetHostHandler(store, perfData));
 apiRouter.post('/host/add', formParser, checkAdmin, AddHostHandler(store));
 apiRouter.post('/host/remove', formParser, checkAdmin, RemoveHostHandler(store));
 
@@ -202,7 +205,7 @@ clusterApp.get('/', (req, res) => { res.send('MGM Node Portal'); });
 
 clusterApp.post('/logs/:uuid', NodeLogHandler(store, regionLogs));
 clusterApp.post('/node', NodeHandler(store));
-clusterApp.post('/stats', formParser, NodeStatHandler(store));
+clusterApp.post('/stats', formParser, NodeStatHandler(store, perfData));
 clusterApp.get('/ready/:id', NodeDownloadHandler(store, path.join(conf.main.upload_dir, '00000000-0000-0000-0000-000000000000')));
 clusterApp.post('/report/:id', NodeReportHandler(store));
 clusterApp.post('/upload/:id', multer({ dest: uploadDir }).single('file'), NodeUploadHandler(store));

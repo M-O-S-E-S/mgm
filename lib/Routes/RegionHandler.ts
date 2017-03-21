@@ -6,28 +6,34 @@ import { AuthenticatedRequest } from '../Auth';
 import { Set } from 'immutable';
 import { RegionLogs } from '../regionLogs';
 import Promise = require('bluebird');
+import { PerformanceStore } from '../Performance';
 import * as formstream from 'formstream';
 
 import { RemoveRegionFromHost, PutRegionOnHost, StopRegion, KillRegion, StartRegion } from '../Region';
 
-export function GetRegionsHandler(store: Store): RequestHandler {
+export function GetRegionsHandler(store: Store, perf: PerformanceStore): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {
-    store.Regions.getAll()
-      .then((regions: IRegion[]) => {
-        return regions.filter((r: IRegion) => {
-          return req.user.isAdmin || req.user.regions.has(r.uuid);
-        });
-      }).then((regions: IRegion[]) => {
-        res.json({
-          Success: true,
-          Regions: regions
-        });
-      }).catch((err: Error) => {
-        res.json({
-          Success: false,
-          Message: err.message
-        });
+    store.Regions.getAll().then((regions: IRegion[]) => {
+      return regions.filter((r: IRegion) => {
+        return req.user.isAdmin || req.user.regions.has(r.uuid);
       });
+    }).then((regions: IRegion[]) => {
+      return Promise.all(regions.map((r: IRegion) => {
+        return perf.getRegionData(r).then((data: string) => {
+          r.status = data;
+        });
+      })).then(() => { return regions; })
+    }).then((regions: IRegion[]) => {
+      res.json({
+        Success: true,
+        Regions: regions
+      });
+    }).catch((err: Error) => {
+      res.json({
+        Success: false,
+        Message: err.message
+      });
+    });
   }
 }
 

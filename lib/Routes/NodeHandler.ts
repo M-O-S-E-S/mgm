@@ -6,6 +6,7 @@ import { RegionLogs } from '../regionLogs';
 import { RegionINI } from '../Region';
 import { Config } from '../Config';
 import Promise = require('bluebird');
+import { PerformanceStore } from '../Performance';
 
 export function NodeLogHandler(store: Store, logger: RegionLogs): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
@@ -72,8 +73,8 @@ interface hostStat {
 
 interface procStat {
   id: string
-  running: boolean,
   stats: {
+    isRunning: Boolean
     timestamp: Date
   }
 }
@@ -84,7 +85,7 @@ interface statUpload {
 }
 
 
-export function NodeStatHandler(store: Store): RequestHandler {
+export function NodeStatHandler(store: Store, perf: PerformanceStore): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let stats: statUpload = JSON.parse(req.body.json);
     let running = 0;
@@ -92,16 +93,16 @@ export function NodeStatHandler(store: Store): RequestHandler {
 
     let remoteIP: string = req.ip.split(':').pop();
     store.Hosts.getByAddress(remoteIP).then((node: IHost) => {
-      return Promise.resolve();//store.Hosts.setStatus(node, JSON.stringify(stats.host));
+      return perf.insertHostData(node, JSON.stringify(stats.host));
     }).then(() => {
       return Promise.all(
         stats.processes.map((proc: procStat) => {
-          if (proc.running)
+          if (proc.stats.isRunning)
             running++;
           else
             halted++;
           return store.Regions.getByUUID(proc.id).then((r: IRegion) => {
-            return Promise.resolve();//store.Regions.setStatus(r, proc.running, JSON.stringify(proc.stats));
+            return perf.insertRegionData(r, JSON.stringify(proc.stats));
           });
         })
       );

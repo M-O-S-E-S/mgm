@@ -1,8 +1,11 @@
-import { IRegion, IHost, IJob } from './types';
+import { IRegion, IHost, IJob, IUser } from './types';
 import { Config } from './Config';
 import { Store } from './Store';
 import * as urllib from 'urllib';
 import Promise = require('bluebird');
+import * as formstream from 'formstream';
+import { RemoteAdmin } from './RemoteAdmin';
+import { HalcyonJWT } from './Auth';
 
 export function RemoveRegionFromHost(r: IRegion, h: IHost): Promise<void> {
   return urllib.request('http://' + h.address + ':' + h.port + '/remove/' + r.uuid);
@@ -17,16 +20,27 @@ export function PutRegionOnHost(store: Store, r: IRegion, h: IHost): Promise<voi
   });
 }
 
-export function StopRegion(r: IRegion, h: IHost): Promise<void> {
-  console.log('halting ' + r.uuid);
-  let url = 'http://' + h.address + ':' + h.port + '/stop/' + r.uuid;
-  return urllib.request(url).then((body) => {
-    let result = JSON.parse(body.data);
-    if (!result.Success) {
-      throw new Error(result.Message);
-    }
+/**
+ * Stop a region by connecting to it's RemoteAdmin xmlrpc endpoint and issuing shutdown
+ * @param region The region to be halted
+ * @param user The user requesting the action
+ */
+export function StopRegion(region: IRegion, user: IUser): Promise<void> {
+  console.log('halting ' + region.uuid);
+  let admin: RemoteAdmin
+  return HalcyonJWT.instance().GetAdminToken(user).then((token: string) => {
+    admin = new RemoteAdmin(region);
+    return admin.login(token);
+  }).then(() => {
+    return admin.shutdown(region);
   });
 }
+
+/**
+ * Stop a region by connecting to it's mgmNode instance and killing the process
+ * @param region The region to be halted
+ * @param host the host containing the region
+ */
 
 export function KillRegion(r: IRegion, h: IHost): Promise<void> {
   console.log('killing ' + r.uuid);
@@ -39,6 +53,11 @@ export function KillRegion(r: IRegion, h: IHost): Promise<void> {
   });
 }
 
+/**
+ * Start a region by contacting it's mgmnode instance
+ * @param region
+ * @param host
+ */
 export function StartRegion(r: IRegion, h: IHost): Promise<void> {
   console.log('starting ' + r.uuid);
   let url = 'http://' + h.address + ':' + h.port + '/start/' + r.uuid;
@@ -50,26 +69,80 @@ export function StartRegion(r: IRegion, h: IHost): Promise<void> {
   });
 }
 
-export function SaveOar(r: IRegion, h: IHost, j: IJob): Promise<void> {
-  console.log('triggering oar save for ' + r.uuid);
-  let url = 'http://' + h.address + ':' + h.port + '/saveOar/' + r.uuid + '/' + j.id;
-  return urllib.request(url).then((body) => {
-    let result = JSON.parse(body.data);
-    if (!result.Success) {
-      throw new Error(result.Message);
-    }
+/**
+ * Save an oar file by connecting via RemoteAdmin, then asking mgmNode to track and upload the file
+ * @param region Save a regions oar by first triggering the save through RemoteAdmin, then queueing mgmNode to retrieve the file
+ * @param host
+ * @param user
+ * @param job
+ */
+
+export function SaveOar(region: IRegion, host: IHost, job: IJob, user: IUser): Promise<void> {
+  console.log('triggering oar save for ' + region.uuid);
+  let admin: RemoteAdmin;
+  return HalcyonJWT.instance().GetAdminToken(user).then((token: string) => {
+    admin = new RemoteAdmin(region);
+    return admin.login(token);
+  }).then(() => {
+    return admin.saveOar(region);
+  }).then(() => {
+    return admin.logout();
+  }).then(() => {
+    // ask mgmNode to watch the file and upload when complete
+    let url = 'http://' + host.address + ':' + host.port + '/saveOar/' + region.uuid + '/' + job.id;
+    return urllib.request(url).then((body) => {
+      let result = JSON.parse(body.data);
+      if (!result.Success) {
+        throw new Error(result.Message);
+      }
+    });
   });
 }
 
-export function LoadOar(r: IRegion, h: IHost, j: IJob): Promise<void> {
+/**
+ * 
+ * @param r Load on oar by pushing the file to mgmNode, then triggering th load over RemoteAdmin
+ * @param h 
+ * @param j 
+ */
+export function LoadOar(r: IRegion, h: IHost, j: IJob, u: IUser, oarPath?: string): Promise<void> {
   console.log('triggering oar load for ' + r.uuid);
-  let url = 'http://' + h.address + ':' + h.port + '/loadOar/' + r.uuid + '/' + j.id;
-  return urllib.request(url).then((body) => {
+  let admin: RemoteAdmin
+
+  let form = formstream();
+  switch (j.type) {
+    case 'nuke':
+      form.file('oarFile', oarPath, r.name + '.oar');
+      break;
+    default:
+      let datum = JSON.parse(j.data);
+      form.file('oarFile', datum.File, r.name + '.oar');
+      break;
+  }
+
+  form.field('jobID', j.id);
+
+  let url = 'http://' + h.address + ':' + h.port + '/loadOar/' + r.uuid + '/';
+  return urllib.request(url, {
+    method: 'POST',
+    headers: form.headers(),
+    stream: form
+  }).then((body) => {
     let result = JSON.parse(body.data);
     if (!result.Success) {
       throw new Error(result.Message);
     }
-  });
+  }).then(() => {
+    return HalcyonJWT.instance().GetAdminToken(u);
+  }).then((token: string) => {
+    admin = new RemoteAdmin(r);
+    return admin.login(token);
+  }).then(() => {
+    return admin.loadOar(r);
+  }).then(() => {
+    return admin.logout();
+  })
+
 }
 
 export function RegionINI(r: IRegion, conf: Config): { [key: string]: { [key: string]: string } } {

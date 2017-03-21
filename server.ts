@@ -57,10 +57,6 @@ conf = {
 
 Validate(conf);
 
-// initialize singletons
-import { EmailMgr } from './lib';
-new EmailMgr(conf.mail);
-
 import { getStore, Store } from './lib/Store';
 let store: Store = getStore(conf.mgmdb, conf.haldb);
 
@@ -77,6 +73,12 @@ import { Authorizer } from './lib/Auth';
 let certificate = fs.readFileSync(conf.main.privateKeyPath)
 let middleware: Authorizer = new Authorizer(store, session, certificate);
 let apiRouter = express.Router();
+
+// initialize singletons
+import { EmailMgr } from './lib';
+new EmailMgr(conf.mail);
+import { HalcyonJWT } from './lib/Auth';
+new HalcyonJWT(certificate);
 
 // multipart form parsing middleware
 import * as multer from 'multer'
@@ -117,7 +119,7 @@ apiRouter.get('/job', middleware.isUser(), GetJobsHandler(store));
 apiRouter.post('/job/delete/:id', formParser, middleware.isUser(), DeleteJobHandler(store));
 apiRouter.post('/job/resetCode', formParser, PasswordResetCodeHandler(store, certificate));
 apiRouter.post('/job/resetPassword', formParser, PasswordResetHandler(store, certificate));
-apiRouter.post('/job/nukeContent/:uuid', middleware.isUser(), NukeContentHandler(store));
+apiRouter.post('/job/nukeContent/:uuid', middleware.isUser(), NukeContentHandler(store, path.join(conf.main.upload_dir, '00000000-0000-0000-0000-000000000000') ));
 apiRouter.post('/job/loadOar/:uuid', middleware.isUser(), LoadOarHandler(store));
 apiRouter.post('/job/upload/:id', middleware.isUser(), multer({ dest: uploadDir }).single('file'), UserUploadHandler(store));
 apiRouter.post('/job/saveOar/:uuid', middleware.isUser(), SaveOarHandler(store));

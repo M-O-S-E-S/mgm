@@ -1,6 +1,6 @@
 import { Response, RequestHandler } from 'express';
 import { Store } from '../Store';
-import { IRegion, IHost, IEstate } from '../types';
+import { IRegion, IHost, IEstate, IUser } from '../types';
 import { AuthenticatedRequest } from '../Auth';
 import { Set } from 'immutable';
 import { RegionLogs } from '../regionLogs';
@@ -67,9 +67,9 @@ export function StopRegionHandler(store: Store): RequestHandler {
         throw new Error('Region ' + r.name + ' is marked as running, but is not assigned to a host');
       }
       region = r;
-      return store.Hosts.getByAddress(r.node);
-    }).then((h: IHost) => {
-      return StopRegion(region, h);
+      return store.Users.getByID(req.user.uuid);
+    }).then((u: IUser) => {
+      return StopRegion(region, u);
     }).then(() => {
       res.json({ Success: true });
     }).catch((err) => {

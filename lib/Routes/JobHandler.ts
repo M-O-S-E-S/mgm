@@ -115,7 +115,7 @@ export function DeleteJobHandler(store: Store): RequestHandler {
 
 import { LoadOar, SaveOar } from '../Region';
 
-export function NukeContentHandler(store: Store): RequestHandler {
+export function NukeContentHandler(store: Store, defaultOarPath: string): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let regionID: string = req.params.uuid;
     let userID: string = req.user.uuid;
@@ -148,7 +148,9 @@ export function NukeContentHandler(store: Store): RequestHandler {
         })
       )
     }).then((j: IJob) => {
-      return LoadOar(region, host, j);
+      return store.Users.getByID(req.user.uuid).then((u: IUser) => {
+        return LoadOar(region, host, j, u, defaultOarPath);
+      });
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
@@ -223,7 +225,9 @@ export function SaveOarHandler(store: Store): RequestHandler {
         })
       )
     }).then((j: IJob) => {
-      return SaveOar(region, host, j);
+      return store.Users.getByID(req.user.uuid).then((user: IUser) => {
+        return SaveOar(region, host, j, user);
+      });
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
@@ -263,7 +267,9 @@ export function UserUploadHandler(store: Store): RequestHandler {
             }
             return store.Hosts.getByAddress(r.node);
           }).then((h: IHost) => {
-            return LoadOar(region, h, j);
+            return store.Users.getByID(req.user.uuid).then((u: IUser) => {
+              return LoadOar(region, h, j, u);
+            });
           })
         default:
           throw new Error('invalid upload for job type: ' + j.type);

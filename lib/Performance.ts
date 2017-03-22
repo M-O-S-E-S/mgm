@@ -49,4 +49,12 @@ export class PerformanceStore {
     });
   }
 
+  isRegionRunning(r: IRegion): Promise<boolean> {
+    return this.getRegionData(r).then((data: string) => {
+      if (!data) return false;
+      let d = JSON.parse(data);
+      return d.isRunning;
+    });
+  }
+
 }

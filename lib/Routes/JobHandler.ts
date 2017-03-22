@@ -5,6 +5,7 @@ import { AuthenticatedRequest, Credential } from '../Auth';
 import { sign, verify } from 'jsonwebtoken';
 import { EmailMgr } from '../Email'
 import Promise = require('bluebird');
+import { PerformanceStore } from '../Performance';
 
 import * as fs from 'fs';
 
@@ -115,7 +116,7 @@ export function DeleteJobHandler(store: Store): RequestHandler {
 
 import { LoadOar, SaveOar } from '../Region';
 
-export function NukeContentHandler(store: Store, defaultOarPath: string): RequestHandler {
+export function NukeContentHandler(store: Store, perf: PerformanceStore, defaultOarPath: string): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let regionID: string = req.params.uuid;
     let userID: string = req.user.uuid;
@@ -132,11 +133,13 @@ export function NukeContentHandler(store: Store, defaultOarPath: string): Reques
       user = u;
       return store.Regions.getByUUID(regionID.toString())
     }).then((r: IRegion) => {
-      if (!r.isRunning) {
-        throw new Error('Region is not running');
-      }
       region = r;
-      return store.Hosts.getByAddress(r.node);
+      return perf.isRegionRunning(r).then((isRunning: boolean) => {
+        if (!isRunning)
+          throw new Error('Region is not running');
+      }).then(() => {
+        return store.Hosts.getByAddress(r.node);
+      });
     }).then((h: IHost) => {
       host = h;
       return store.Jobs.create(
@@ -159,7 +162,7 @@ export function NukeContentHandler(store: Store, defaultOarPath: string): Reques
   };
 }
 
-export function LoadOarHandler(store: Store): RequestHandler {
+export function LoadOarHandler(store: Store, perf: PerformanceStore): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let regionID = req.params.uuid;
 
@@ -173,17 +176,19 @@ export function LoadOarHandler(store: Store): RequestHandler {
       user = u;
       return store.Regions.getByUUID(regionID);
     }).then((r: IRegion) => {
-      if (!r.isRunning) {
-        throw new Error('Region is not running');
-      }
-      return store.Jobs.create(
-        'load_oar',
-        user,
-        JSON.stringify({
-          Status: 'Pending...',
-          Region: regionID.toString()
-        })
-      );
+      return perf.isRegionRunning(r).then((isRunning: boolean) => {
+        if (!isRunning)
+          throw new Error('Region is not running');
+      }).then(() => {
+        return store.Jobs.create(
+          'load_oar',
+          user,
+          JSON.stringify({
+            Status: 'Pending...',
+            Region: regionID.toString()
+          })
+        );
+      });
     }).then((j: IJob) => {
       res.json({ Success: true, ID: j.id });
     }).catch((err: Error) => {
@@ -192,7 +197,7 @@ export function LoadOarHandler(store: Store): RequestHandler {
   };
 }
 
-export function SaveOarHandler(store: Store): RequestHandler {
+export function SaveOarHandler(store: Store, perf: PerformanceStore): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let regionID: string = req.params.uuid;
 
@@ -208,11 +213,13 @@ export function SaveOarHandler(store: Store): RequestHandler {
       user = u;
       return store.Regions.getByUUID(regionID.toString());
     }).then((r: IRegion) => {
-      if (!r.isRunning) {
-        throw new Error('Region is not running');
-      }
       region = r;
-      return store.Hosts.getByAddress(r.node);
+      return perf.isRegionRunning(r).then((isRunning: boolean) => {
+        if (!isRunning)
+          throw new Error('Region is not running');
+      }).then(() => {
+        return store.Hosts.getByAddress(r.node);
+      });
     }).then((h: IHost) => {
       host = h;
 
@@ -242,7 +249,7 @@ interface uploadRequest extends AuthenticatedRequest {
   }
 }
 
-export function UserUploadHandler(store: Store): RequestHandler {
+export function UserUploadHandler(store: Store, perf: PerformanceStore): RequestHandler {
   return (req: uploadRequest, res) => {
     let taskID = parseInt(req.params.id);
 
@@ -262,10 +269,12 @@ export function UserUploadHandler(store: Store): RequestHandler {
             return store.Regions.getByUUID(datum.Region);
           }).then((r: IRegion) => {
             region = r;
-            if (!r.isRunning) {
-              throw new Error('Region is not running');
-            }
-            return store.Hosts.getByAddress(r.node);
+            return perf.isRegionRunning(r).then((isRunning: boolean) => {
+              if (!isRunning)
+                throw new Error('Region is not running');
+            }).then(() => {
+              return store.Hosts.getByAddress(r.node);
+            });
           }).then((h: IHost) => {
             return store.Users.getByID(req.user.uuid).then((u: IUser) => {
               return LoadOar(region, h, j, u);

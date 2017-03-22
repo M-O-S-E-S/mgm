@@ -31,9 +31,8 @@ export interface Store {
     create(name: string, x: number, y: number): Promise<IRegion>
     delete(r: IRegion): Promise<void>
     getByUUID(uuid: string): Promise<IRegion>
-    setStatus(region: IRegion, isRunning: boolean, status: string): Promise<IRegion>
     setHost(region: IRegion, host: IHost): Promise<IRegion>
-    setPortAndAddress(region: IRegion, port: number, address: string): Promise<IRegion>
+    setPort(region: IRegion, port: number): Promise<IRegion>
     setXY(region: IRegion, x: number, y: number): Promise<IRegion>
     getByNode(host: IHost): Promise<IRegion[]>
   }

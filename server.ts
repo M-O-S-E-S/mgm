@@ -78,10 +78,10 @@ apiRouter.get('/job', checkUser, GetJobsHandler(store));
 apiRouter.post('/job/delete/:id', formParser, checkUser, DeleteJobHandler(store));
 apiRouter.post('/job/resetCode', formParser, PasswordResetCodeHandler(store, certificate));
 apiRouter.post('/job/resetPassword', formParser, PasswordResetHandler(store, certificate));
-apiRouter.post('/job/nukeContent/:uuid', checkUser, NukeContentHandler(store, path.join(conf.main.upload_dir, '00000000-0000-0000-0000-000000000000') ));
-apiRouter.post('/job/loadOar/:uuid', checkUser, LoadOarHandler(store));
-apiRouter.post('/job/upload/:id', checkUser, multer({ dest: uploadDir }).single('file'), UserUploadHandler(store));
-apiRouter.post('/job/saveOar/:uuid', checkUser, SaveOarHandler(store));
+apiRouter.post('/job/nukeContent/:uuid', checkUser, NukeContentHandler(store, perfData, path.join(conf.main.upload_dir, '00000000-0000-0000-0000-000000000000') ));
+apiRouter.post('/job/loadOar/:uuid', checkUser, LoadOarHandler(store, perfData));
+apiRouter.post('/job/upload/:id', checkUser, multer({ dest: uploadDir }).single('file'), UserUploadHandler(store, perfData));
+apiRouter.post('/job/saveOar/:uuid', checkUser, SaveOarHandler(store, perfData));
 apiRouter.get('/job/download/:id', checkUser, UserDownloadHandler(store));
 
 // User
@@ -123,14 +123,14 @@ import { RegionLogs } from './lib';
 let regionLogs = new RegionLogs(conf.main.log_dir);
 apiRouter.get('/region', checkUser, GetRegionsHandler(store, perfData));
 apiRouter.post('/region/create', formParser, checkAdmin, CreateRegionHandler(store));
-apiRouter.post('/region/destroy/:uuid', checkAdmin, DeleteRegionHandler(store));
+apiRouter.post('/region/destroy/:uuid', checkAdmin, DeleteRegionHandler(store, perfData));
 apiRouter.get('/region/logs/:uuid', checkUser, GetRegionLogsHandler(store, regionLogs));
 apiRouter.post('/region/start/:uuid', checkUser, StartRegionHandler(store, conf));
-apiRouter.post('/region/stop/:uuid', checkUser, StopRegionHandler(store));
-apiRouter.post('/region/kill/:uuid', checkUser, KillRegionHandler(store));
+apiRouter.post('/region/stop/:uuid', checkUser, StopRegionHandler(store, perfData));
+apiRouter.post('/region/kill/:uuid', checkUser, KillRegionHandler(store, perfData));
 apiRouter.post('/region/estate/:uuid', formParser, checkUser, SetRegionEstateHandler(store));
-apiRouter.post('/region/setXY/:uuid', formParser, checkUser, SetRegionCoordinatesHandler(store));
-apiRouter.post('/region/host/:uuid', formParser, checkUser, SetRegionHostHandler(store));
+apiRouter.post('/region/setXY/:uuid', formParser, checkUser, SetRegionCoordinatesHandler(store, perfData));
+apiRouter.post('/region/host/:uuid', formParser, checkUser, SetRegionHostHandler(store, perfData));
 
 // Estate
 import { GetEstatesHandler, CreateEstateHandler, DeleteEstateHandler } from './lib/Routes/EstateHandler';

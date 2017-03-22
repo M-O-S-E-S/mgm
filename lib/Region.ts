@@ -63,8 +63,8 @@ export function StartRegion(r: IRegion, h: IHost, conf: Config): Promise<void> {
   console.log('starting ' + r.uuid);
 
   let form = formstream();
-  form.field('xml', RegionXML(r));
-  form.field('ini', RegionINI(r, conf));
+  form.field('xml', RegionXML(r, h));
+  form.field('ini', RegionINI(r, h, conf));
 
   let url = 'http://' + h.address + ':' + h.port + '/start/' + r.uuid;
   return urllib.request(url, {
@@ -162,13 +162,13 @@ import ini = require('ini');
  * Get the string contents of the Regions/default.xml region configuration file
  * @param region Region in question
  */
-export function RegionXML(r: IRegion): string {
+export function RegionXML(r: IRegion, h: IHost): string {
   return [
     '<Root>',
     '<Config',
     'allow_alternate_ports="false"',
     'clamp_prim_size="false"',
-    'external_host_name="' + r.publicAddress + '"',
+    'external_host_name="' + h.public_ip + '"',
     'internal_ip_address="0.0.0.0"',
     'internal_ip_port="' + r.port + '"',
     'master_avatar_first="' + UUID.random() + '"',
@@ -177,7 +177,7 @@ export function RegionXML(r: IRegion): string {
     'master_avatar_uuid="00000000-0000-0000-0000-000000000000"',
     'nonphysical_prim_max="0"',
     'object_capacity="0"',
-    'outside_ip="' + r.publicAddress + '"',
+    'outside_ip="' + h.public_ip + '"',
     'physical_prim_max="0"',
     'region_access="0"',
     'region_product="0"',
@@ -189,7 +189,7 @@ export function RegionXML(r: IRegion): string {
     '</Root>'].join(' ');
 }
 
-export function RegionINI(r: IRegion, conf: Config): string {
+export function RegionINI(r: IRegion, h: IHost, conf: Config): string {
   let connString: string = 'Data Source=' + conf.main.lanIP +
     ';Database=' + conf.haldb.database +
     ';User ID=' + conf.haldb.user +
@@ -239,7 +239,7 @@ export function RegionINI(r: IRegion, conf: Config): string {
   config['Network']['http_listener_port'] = '' + r.port;
   config['Network']['default_location_x'] = '' + r.x;
   config['Network']['default_location_y'] = '' + r.y;
-  config['Network']['hostname'] = r.publicAddress;
+  config['Network']['hostname'] = h.public_ip;
   config['Network']['http_listener_ssl'] = 'false';
   config['Network']['grid_server_url'] = conf.halcyon.grid_server;
   config['Network']['grid_send_key'] = 'null';

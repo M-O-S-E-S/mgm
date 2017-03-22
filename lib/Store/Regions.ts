@@ -7,17 +7,10 @@ import { UUID } from '../UUID';
 interface region_row {
   uuid: string
   name: string
-  size: number
   httpPort: number
-  consolePort: number
-  consoleUname: string
-  consolePass: string
   locX: number
   locY: number
-  externalAddress: string
   slaveAddress: string
-  isRunning: boolean
-  status: string
 }
 
 export class Regions {
@@ -37,11 +30,9 @@ export class Regions {
           name: r.name,
           x: r.locX,
           y: r.locY,
-          status: r.status,
           node: r.slaveAddress,
-          publicAddress: r.externalAddress,
           port: r.httpPort,
-          isRunning: r.isRunning ? true : false
+          status: null
         }
       });
     });
@@ -57,26 +48,15 @@ export class Regions {
         name: r.name,
         x: r.locX,
         y: r.locY,
-        status: r.status,
+        status: null,
         node: r.slaveAddress,
-        publicAddress: r.externalAddress,
-        port: r.httpPort,
-        isRunning: r.isRunning ? true : false
+        port: r.httpPort
       };
     });
   }
 
-  setStatus(region: IRegion, isRunning: boolean, status: string): Promise<IRegion> {
-    return this.db.query('UPDATE regions SET status=?, isRunning=?  WHERE uuid=?', [status, isRunning, region.uuid]).then(() => {
-      region.isRunning = isRunning;
-      region.status = status;
-      return region;
-    });
-  }
-
-  setPortAndAddress(region: IRegion, port: number, address: string): Promise<IRegion> {
-    return this.db.query('UPDATE regions SET externalAddress=?, httpPort=? WHERE uuid=?', [address, port, region.uuid]).then(() => {
-      region.publicAddress = address;
+  setPort(region: IRegion, port: number): Promise<IRegion> {
+    return this.db.query('UPDATE regions SET httpPort=? WHERE uuid=?', [port, region.uuid]).then(() => {
       region.port = port;
       return region;
     });
@@ -84,7 +64,7 @@ export class Regions {
 
   setHost(region: IRegion, host: IHost): Promise<IRegion> {
     let address: string = host ? host.address : '';
-    return this.db.query('UPDATE regions SET slaveAddress=? WHERE uuid=?', [address, region.uuid]).then(() => {
+    return this.db.query('UPDATE regions SET httpPort=?, slaveAddress=? WHERE uuid=?', [null, address, region.uuid]).then(() => {
       region.node = address;
       return region;
     });
@@ -106,11 +86,9 @@ export class Regions {
           name: r.name,
           x: r.locX,
           y: r.locY,
-          status: r.status,
+          status: null,
           node: r.slaveAddress,
-          publicAddress: r.externalAddress,
-          port: r.httpPort,
-          isRunning: r.isRunning ? true : false
+          port: r.httpPort
         }
       });
     });
@@ -122,15 +100,8 @@ export class Regions {
       name: name,
       locX: x,
       locY: y,
-      size: 1,
       httpPort: 0,
-      consolePort: 0,
-      consoleUname: '',
-      consolePass: '',
-      externalAddress: '',
-      slaveAddress: '',
-      isRunning: false,
-      status: ''
+      slaveAddress: ''
     }
     return this.db.query('INSERT INTO regions SET ?', r).then(() => {
       return {
@@ -138,18 +109,14 @@ export class Regions {
         name: r.name,
         x: r.locX,
         y: r.locY,
-        status: r.status,
+        status: null,
         node: r.slaveAddress,
-        publicAddress: r.externalAddress,
-        port: r.httpPort,
-        isRunning: r.isRunning ? true : false
+        port: r.httpPort
       };
     });
   }
 
   delete(r: IRegion): Promise<void> {
-    if (r.isRunning || r.node)
-      return Promise.reject('Refusing to delete region that is running or has a host assignment');
     return Promise.all([
       this.db.query('DELETE FROM regions WHERE uuid=?', r.uuid),
       this.simDB.query('DELETE FROM regionsettings WHERE regionUUID=?', r.uuid),

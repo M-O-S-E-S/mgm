@@ -72,9 +72,7 @@ export interface IRegion {
   y: number
   status: string
   node: string
-  publicAddress: string
   port: number
-  isRunning: Boolean
 }
 
 export interface IUser {

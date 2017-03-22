@@ -59,7 +59,7 @@ export function StartRegionHandler(store: Store, conf: Config): RequestHandler {
 }
 
 
-export function StopRegionHandler(store: Store): RequestHandler {
+export function StopRegionHandler(store: Store, perf: PerformanceStore): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let regionID = req.params.uuid;
     let region: IRegion
@@ -68,14 +68,15 @@ export function StopRegionHandler(store: Store): RequestHandler {
       return res.json({ Success: false, Message: 'Permission Denied' });
 
     store.Regions.getByUUID(regionID.toString()).then((r: IRegion) => {
-      if (!r.isRunning) {
-        throw new Error('Region ' + r.name + ' is not running');
-      }
-      if (!r.node) {
-        throw new Error('Region ' + r.name + ' is marked as running, but is not assigned to a host');
-      }
-      region = r;
-      return store.Users.getByID(req.user.uuid);
+      return perf.isRegionRunning(r).then((isRunning: boolean) => {
+        if (!isRunning)
+          throw new Error('Region ' + r.name + ' is not running');
+        if (!r.node) {
+          throw new Error('Region ' + r.name + ' is marked as running, but is not assigned to a host');
+        }
+        region = r;
+        return store.Users.getByID(req.user.uuid);
+      });
     }).then((u: IUser) => {
       return StopRegion(region, u);
     }).then(() => {
@@ -86,7 +87,7 @@ export function StopRegionHandler(store: Store): RequestHandler {
   };
 }
 
-export function KillRegionHandler(store: Store): RequestHandler {
+export function KillRegionHandler(store: Store, perf: PerformanceStore): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let regionID = req.params.uuid;
     let target: IRegion;
@@ -95,12 +96,14 @@ export function KillRegionHandler(store: Store): RequestHandler {
       return res.json({ Success: false, Message: 'Permission Denied' });
 
     store.Regions.getByUUID(regionID.toString()).then((r: IRegion) => {
-      if (!r.isRunning)
-        throw new Error('Region ' + r.name + ' is not running');
-      if (!r.node)
-        throw new Error('Region ' + r.name + ' is marked as running, but is not assigned to a host');
-      target = r;
-      return store.Hosts.getByAddress(r.node);
+      return perf.isRegionRunning(r).then((isRunning: boolean) => {
+        if (!isRunning)
+          throw new Error('Region ' + r.name + ' is not running');
+        if (!r.node)
+          throw new Error('Region ' + r.name + ' is marked as running, but is not assigned to a host');
+        target = r;
+        return store.Hosts.getByAddress(r.node);
+      });
     }).then((h: IHost) => {
       return KillRegion(target, h);
     }).then(() => {
@@ -110,6 +113,7 @@ export function KillRegionHandler(store: Store): RequestHandler {
     });
   };
 }
+
 
 export function GetRegionLogsHandler(store: Store, logger: RegionLogs): RequestHandler {
   return function (req: AuthenticatedRequest, res: Response) {
@@ -157,7 +161,7 @@ export function SetRegionEstateHandler(store: Store): RequestHandler {
   };
 }
 
-export function SetRegionCoordinatesHandler(store: Store): RequestHandler {
+export function SetRegionCoordinatesHandler(store: Store, perf: PerformanceStore): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let regionID = req.params.uuid;
     let x = parseInt(req.body.x);
@@ -174,8 +178,12 @@ export function SetRegionCoordinatesHandler(store: Store): RequestHandler {
       }
       return region;
     }).then((r: IRegion) => {
-      if (r.isRunning) throw new Error('Cannot move a region while it is running');
-      return store.Regions.setXY(r, x, y);
+      return perf.isRegionRunning(r).then((isRunning: boolean) => {
+        if (isRunning)
+          throw new Error('Cannot move a region while it is running');
+      }).then(() => {
+        return store.Regions.setXY(r, x, y);
+      });
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
@@ -184,7 +192,7 @@ export function SetRegionCoordinatesHandler(store: Store): RequestHandler {
   };
 }
 
-export function SetRegionHostHandler(store: Store): RequestHandler {
+export function SetRegionHostHandler(store: Store, perf: PerformanceStore): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let regionID = req.params.uuid;
     let hostAddress: string = req.body.host || '';
@@ -195,13 +203,13 @@ export function SetRegionHostHandler(store: Store): RequestHandler {
       return res.json({ Success: false, Message: 'Permission Denied' });
 
     store.Regions.getByUUID(regionID.toString()).then((r: IRegion) => {
-      if (r.isRunning) {
-        throw new Error('Region is currently running');
-      }
       region = r;
       if (r.node === hostAddress) {
         throw new Error('Region is already on that host');
       }
+      return perf.isRegionRunning(r).then((isRunning: boolean) => {
+        if (isRunning) throw new Error('Region is currently running');
+      });
     }).then(() => {
       if (hostAddress)
         return store.Hosts.getByAddress(hostAddress);
@@ -218,16 +226,22 @@ export function SetRegionHostHandler(store: Store): RequestHandler {
     }).then((fromHost: IHost) => {
       //if the old host does not exist, skip to the next step
       if (fromHost) {
-        // try to remove the host, but we dont care if we fail
-        // as the host may be unavailable or offline
-        RemoveRegionFromHost(region, fromHost);
+        return store.Regions.setHost(region, null).then(() => {
+          // try to remove the host, but we dont care if we fail
+          // as the host may be unavailable or offline
+          RemoveRegionFromHost(region, fromHost);
+        });
+
       }
     }).then(() => {
       //we are removed from the old host
-      if (newHost)
-        return PutRegionOnHost(store, region, newHost);
-      else
+      if (newHost) {
+        return store.Regions.setHost(region, newHost).then(() => {
+          return PutRegionOnHost(store, region, newHost);
+        });
+      } else {
         return Promise.resolve();
+      }
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {
@@ -279,16 +293,19 @@ export function CreateRegionHandler(store: Store): RequestHandler {
   };
 }
 
-export function DeleteRegionHandler(store: Store): RequestHandler {
+export function DeleteRegionHandler(store: Store, perf: PerformanceStore): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let regionID = req.params.uuid;
 
     store.Regions.getByUUID(regionID).then((r: IRegion) => {
-      if (r.isRunning)
-        throw new Error('cannot delete a running region');
       if (r.node)
         throw new Error('region is still allocated a host');
-      return store.Regions.delete(r);
+      return perf.isRegionRunning(regionID).then((isRunning: boolean) => {
+        if (isRunning)
+          throw new Error('cannot delete a running region');
+      }).then(() => {
+        return store.Regions.delete(r);
+      });
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {

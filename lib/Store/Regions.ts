@@ -55,16 +55,9 @@ export class Regions {
     });
   }
 
-  setPort(region: IRegion, port: number): Promise<IRegion> {
-    return this.db.query('UPDATE regions SET httpPort=? WHERE uuid=?', [port, region.uuid]).then(() => {
-      region.port = port;
-      return region;
-    });
-  }
-
-  setHost(region: IRegion, host: IHost): Promise<IRegion> {
+  setHost(region: IRegion, host: IHost, port: number): Promise<IRegion> {
     let address: string = host ? host.address : '';
-    return this.db.query('UPDATE regions SET httpPort=?, slaveAddress=? WHERE uuid=?', [null, address, region.uuid]).then(() => {
+    return this.db.query('UPDATE regions SET httpPort=?, slaveAddress=? WHERE uuid=?', [port, address, region.uuid]).then(() => {
       region.node = address;
       return region;
     });

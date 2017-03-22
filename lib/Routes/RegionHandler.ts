@@ -198,50 +198,76 @@ export function SetRegionHostHandler(store: Store, perf: PerformanceStore): Requ
     let hostAddress: string = req.body.host || '';
     let region: IRegion;
     let newHost: IHost;
+    let currentHost: IHost;
 
     if (!req.user.isAdmin && !req.user.regions.has(regionID))
       return res.json({ Success: false, Message: 'Permission Denied' });
 
+    // MGM Now assigns port numbers, check for available ports before making switch
     store.Regions.getByUUID(regionID.toString()).then((r: IRegion) => {
       region = r;
+      // easy out if no change
       if (r.node === hostAddress) {
         throw new Error('Region is already on that host');
       }
+
       return perf.isRegionRunning(r).then((isRunning: boolean) => {
         if (isRunning) throw new Error('Region is currently running');
       });
     }).then(() => {
+      // Lookup the new Host Record
       if (hostAddress)
         return store.Hosts.getByAddress(hostAddress);
       else
         return null
     }).then((h: IHost) => {
       newHost = h;
+      if (!h)
+        return Promise.resolve(null);
 
-      //try to get region's current host
+      console.log('checking ports for ' + h.address);
+
+      //check and assign port
+      let parts = h.slots.split('-');
+      let minPort = parseInt(parts[0]);
+      let maxPort = parseInt(parts[1]);
+      let availableports = []
+      for (let i = minPort; i <= maxPort; i++)
+        availableports.push(i);
+
+      return store.Regions.getByNode(h).then((regions: IRegion[]) => {
+        for (let rgn of regions) {
+          let idx = availableports.indexOf(rgn.port);
+          if (idx > -1)
+            availableports.splice(idx, 1);
+        }
+      }).then(() => {
+        if (availableports.length < 1)
+          throw new Error('No available ports on host');
+        return availableports[0];
+      });
+    }).then((port: number) => {
+      // we are clear to move, place region on new host
+      console.log('selected port: ' + port + ', moving to host');
+      if (newHost) {
+        return store.Regions.setHost(region, newHost, port).then(() => {
+          return PutRegionOnHost(store, region, newHost);
+        });
+      } else {
+        return store.Regions.setHost(region, null, null).then(() => { });
+      }
+    }).then(() => {
+      //look up the old host record
+      console.log('region on new host, trying to remove from old host');
       if (region.node)
         return store.Hosts.getByAddress(region.node);
       else
         return null;
     }).then((fromHost: IHost) => {
       //if the old host does not exist, skip to the next step
-      if (fromHost) {
-        return store.Regions.setHost(region, null).then(() => {
-          // try to remove the host, but we dont care if we fail
-          // as the host may be unavailable or offline
-          RemoveRegionFromHost(region, fromHost);
-        });
+      if (fromHost)
+        RemoveRegionFromHost(region, fromHost);
 
-      }
-    }).then(() => {
-      //we are removed from the old host
-      if (newHost) {
-        return store.Regions.setHost(region, newHost).then(() => {
-          return PutRegionOnHost(store, region, newHost);
-        });
-      } else {
-        return Promise.resolve();
-      }
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {

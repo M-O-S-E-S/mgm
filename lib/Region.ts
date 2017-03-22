@@ -13,12 +13,7 @@ export function RemoveRegionFromHost(r: IRegion, h: IHost): Promise<void> {
 }
 
 export function PutRegionOnHost(store: Store, r: IRegion, h: IHost): Promise<void> {
-  return store.Regions.setHost(r, h).then((r: IRegion) => {
-    if (h === null) {
-      return Promise.resolve();
-    }
-    return urllib.request('http://' + h.address + ':' + h.port + '/add/' + r.uuid + '/' + r.name, { timeout: 10000 });;
-  });
+  return urllib.request('http://' + h.address + ':' + h.port + '/add/' + r.uuid + '/' + r.name, { timeout: 10000 });
 }
 
 /**

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # create folders and compile the mgmt backend
 mkdir -p build/certs
 if [ ! -f build/certs/key.pem ]; then
@@ -13,8 +12,3 @@ cp serverFiles/*.sql build/sql
 cp serverFiles/mgm.sample.ini build/
 cp serverFiles/default.oar build/uploads/00000000-0000-0000-0000-000000000000
 node_modules/.bin/webpack --config ./script/server.config.js
-
-mkdir -p build/scripts
-node_modules/.bin/webpack --config ./script/create-user.config.js
-node_modules/.bin/webpack --config ./script/migrate-db.config.js
-node_modules/.bin/webpack --config ./script/template-existing-user.config.js

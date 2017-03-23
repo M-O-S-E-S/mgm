@@ -53,6 +53,7 @@ class UserObj implements IUser {
   email: string
   created: Date
   partner: string
+  online: boolean
   private passwordHash: string
 
   constructor(u: user_row) {
@@ -78,6 +79,20 @@ class UserObj implements IUser {
   authenticate(password: string): boolean {
     return Credential.fromHalcyon(this.passwordHash).compare(password)
   }
+  toJSON(): IUser {
+    return {
+      UUID: this.UUID,
+      username: this.username,
+      lastname: this.lastname,
+      email: this.email,
+      created: this.created,
+      partner: this.partner,
+      name: this.name,
+      isSuspended: this.isSuspended,
+      isAdmin: this.isAdmin,
+      authenticate: this.authenticate
+    }
+  }
 }
 
 export class Users {
@@ -88,7 +103,7 @@ export class Users {
   }
 
   getAll(): Promise<IUser[]> {
-    return this.db.query('SELECT * FROM users WHERE 1').then((rows: user_row[]) => {
+    return this.db.query('SELECT * FROM `users` join `agents` WHERE `agents`.`UUID` = `users`.`UUID`').then((rows: user_row[]) => {
       return rows.map((row: user_row): IUser => {
         return new UserObj(row);
       });

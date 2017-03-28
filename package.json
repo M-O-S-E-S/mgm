@@ -38,8 +38,8 @@
     "node": ">=5.8.0"
   },
   "scripts": {
-    "build": "script/build.sh",
-    "build-scripts": "script/build-scripts.sh",
-    "build-production": "script/build.sh -p"
+    "build": "./script/build.sh",
+    "build-scripts": "./script/build-scripts.sh",
+    "build-production": "./script/build.sh -p"
   }
 }

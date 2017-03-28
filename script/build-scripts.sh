@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 mkdir -p build/scripts
 node_modules/.bin/webpack --config ./script/create-user.config.js

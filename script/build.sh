@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # create folders and compile the mgmt backend
 mkdir -p build/certs

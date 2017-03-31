@@ -215,6 +215,12 @@ export function SetRegionHostHandler(store: Store, perf: PerformanceStore): Requ
         if (isRunning) throw new Error('Region is currently running');
       });
     }).then(() => {
+      // Lookup the current host record
+      if (region.node)
+        return store.Hosts.getByAddress(region.node)
+      return null;
+    }).then((h: IHost) => {
+      currentHost = h;
       // Lookup the new Host Record
       if (hostAddress)
         return store.Hosts.getByAddress(hostAddress);
@@ -249,25 +255,18 @@ export function SetRegionHostHandler(store: Store, perf: PerformanceStore): Requ
     }).then((port: number) => {
       // we are clear to move, place region on new host
       console.log('selected port: ' + port + ', moving to host');
+      if (currentHost) {
+        console.log('Removing region from host ' + currentHost.address);
+        RemoveRegionFromHost(region, currentHost);
+      }
       if (newHost) {
         return store.Regions.setHost(region, newHost, port).then(() => {
+          console.log('Adding region to host ' + newHost.address);
           return PutRegionOnHost(store, region, newHost);
         });
       } else {
         return store.Regions.setHost(region, null, null).then(() => { });
       }
-    }).then(() => {
-      //look up the old host record
-      console.log('region on new host, trying to remove from old host');
-      if (region.node)
-        return store.Hosts.getByAddress(region.node);
-      else
-        return null;
-    }).then((fromHost: IHost) => {
-      //if the old host does not exist, skip to the next step
-      if (fromHost)
-        RemoveRegionFromHost(region, fromHost);
-
     }).then(() => {
       res.json({ Success: true });
     }).catch((err: Error) => {

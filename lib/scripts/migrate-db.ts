@@ -2,11 +2,14 @@ import { createConnection, Connection } from 'promise-mysql';
 import * as fs from 'fs';
 import * as path from 'path';
 import Promise = require('bluebird');
+import { install } from 'source-map-support';
+
+install();
 
 import { Config, LoadConfig } from '../Config';
 let conf: Config = LoadConfig('../mgm.ini');
 
-let sqlPath = process.argv[2] || '/mgm/sql/';
+let sqlPath = process.argv[2] || './sql/';
 
 let creds = conf.mgmdb;
 let conn: Connection

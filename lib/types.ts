@@ -1,5 +1,4 @@
 
-
 export interface IEstate {
   EstateID: number
   EstateName: string
@@ -79,6 +78,7 @@ export interface IUser {
   UUID: string
   username: string
   lastname: string
+  godLevel: number
   email: string
   created: Date
   partner: string

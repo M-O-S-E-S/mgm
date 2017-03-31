@@ -84,6 +84,7 @@ class UserObj implements IUser {
       UUID: this.UUID,
       username: this.username,
       lastname: this.lastname,
+      godLevel: this.godLevel,
       email: this.email,
       created: this.created,
       partner: this.partner,

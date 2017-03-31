@@ -10,7 +10,6 @@ interface hosts_row {
   port: number
   name: string
   slots: number
-  status: string
 }
 
 export class Hosts {
@@ -32,20 +31,12 @@ export class Hosts {
     });
   }
 
-  setStatus(host: IHost, status: string): Promise<IHost> {
-    return this.db.query('UPDATE hosts SET status=? WHERE id=?', [status, host.id]).then(() => {
-      host.status = status;
-      return host;
-    });
-  }
-
   create(address: string): Promise<IHost> {
     let host: hosts_row = {
       address: address,
       port: 0,
       name: '',
-      slots: 0,
-      status: ''
+      slots: 0
     }
     return this.db.query('INSERT INTO hosts SET ?', host).then((result) => {
       host.id = result.insertId;

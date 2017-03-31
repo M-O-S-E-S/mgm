@@ -84,6 +84,7 @@ class UserObj implements IUser {
       UUID: this.UUID,
       username: this.username,
       lastname: this.lastname,
+      godLevel: this.godLevel,
       email: this.email,
       created: this.created,
       partner: this.partner,
@@ -103,7 +104,7 @@ export class Users {
   }
 
   getAll(): Promise<IUser[]> {
-    return this.db.query('SELECT * FROM `users` join `agents` WHERE `agents`.`UUID` = `users`.`UUID`').then((rows: user_row[]) => {
+    return this.db.query('SELECT * FROM `users`').then((rows: user_row[]) => {
       return rows.map((row: user_row): IUser => {
         return new UserObj(row);
       });

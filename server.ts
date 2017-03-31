@@ -23,7 +23,7 @@ let perfData = new PerformanceStore(conf.redis);
 
 let clientApp = express();
 
-clientApp.use(express.static(__dirname + '/public'));
+clientApp.use(express.static(conf.main.webroot));
 
 // jwt and host ip validation middleware
 import { Authorizer } from './lib/Auth';
@@ -174,7 +174,7 @@ clientApp.get('/get_grid_info', (req, res) => {
 });
 
 clientApp.get('*', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(conf.main.webroot + '/index.html');
 })
 
 clientApp.listen(3000, function () {

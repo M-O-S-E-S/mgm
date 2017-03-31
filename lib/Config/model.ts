@@ -16,6 +16,7 @@ export interface Config {
     privateKeyPath: string
     publicIP: string
     lanIP: string
+    webroot?: string
   }
 
   redis: {
@@ -104,13 +105,14 @@ export function LoadConfig(iniPath: string): Config {
       lanIP: conf.main.lanIP || process.env.LAN_IP,
       log_dir: conf.main.log_dir || process.env.LOG_DIR,
       upload_dir: conf.main.upload_dir || process.env.UPLOAD_DIR,
-      privateKeyPath: conf.main.privateKeyPath || process.env.PRIVATE_KEY
+      privateKeyPath: conf.main.privateKeyPath || process.env.PRIVATE_KEY,
+      webroot: conf.main.webroot
     },
     redis: { host: conf.redis.host || process.env.REDIS_HOST },
     freeswitch: { api_url: conf.freeswitch.api_url || process.env.FREESWITCH_API },
     offlinemessages: { api_url: conf.offlinemessages.api_url || process.env.OFFLINE_MESSAGES_API },
-    templates: conf.templates || process.env.TEMPLATES ? JSON.parse(process.env.TEMPLATES) : null,
-    mail: conf.mail || process.env.MAIL ? JSON.parse(process.env.MAIL) : null,
+    templates: conf.templates ? conf.templates : process.env.TEMPLATES ? JSON.parse(process.env.TEMPLATES) : null,
+    mail: conf.mail ? conf.mail : process.env.MAIL ? JSON.parse(process.env.MAIL) : null,
     halcyon: {
       grid_server: conf.halcyon.grid_server || process.env.GRID_SERVER,
       user_server: conf.halcyon.user_server || process.env.USER_SERVER,

@@ -16,7 +16,6 @@ export interface Config {
     privateKeyPath: string
     publicIP: string
     lanIP: string
-    webroot?: string
   }
 
   redis: {
@@ -105,8 +104,7 @@ export function LoadConfig(iniPath: string): Config {
       lanIP: conf.main.lanIP || process.env.LAN_IP,
       log_dir: conf.main.log_dir || process.env.LOG_DIR,
       upload_dir: conf.main.upload_dir || process.env.UPLOAD_DIR,
-      privateKeyPath: conf.main.privateKeyPath || process.env.PRIVATE_KEY,
-      webroot: conf.main.webroot
+      privateKeyPath: conf.main.privateKeyPath || process.env.PRIVATE_KEY
     },
     redis: { host: conf.redis.host || process.env.REDIS_HOST },
     freeswitch: { api_url: conf.freeswitch.api_url || process.env.FREESWITCH_API },

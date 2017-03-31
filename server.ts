@@ -23,8 +23,6 @@ let perfData = new PerformanceStore(conf.redis);
 
 let clientApp = express();
 
-clientApp.use(express.static(conf.main.webroot));
-
 // jwt and host ip validation middleware
 import { Authorizer } from './lib/Auth';
 let certificate = fs.readFileSync(conf.main.privateKeyPath)
@@ -172,10 +170,6 @@ clientApp.get('/get_grid_info', (req, res) => {
     grid_info.manage +
     '</economy></gridinfo>');
 });
-
-clientApp.get('*', (req, res) => {
-  res.sendFile(conf.main.webroot + '/index.html');
-})
 
 clientApp.listen(3000, function () {
   console.log('MGM listening for clients on port 3000!');

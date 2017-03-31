@@ -55,12 +55,13 @@ new Promise((resolve, reject) => {
 }).then((c: Connection) => {
   conn = c;
   return c.query('SELECT * from mgmDb ORDER BY version DESC LIMIT 1').catch((err: Error) => {
-    if (err.message.length > 16 && err.message.substr(0, 16) === 'ER_NO_SUCH_TABLE') {
+    if ( err.message.length > 16 && 
+      (err.message.substr(0, 16) === 'ER_NO_SUCH_TABLE' || err.message.substr(0,16) === 'ER_BAD_TABLE_ERROR')) {
       return [];
     } else {
       throw err;
     }
-  })
+  });
 }).then((rows: any[]) => {
   if (!rows || !rows.length || rows.length === 0)
     return -1;

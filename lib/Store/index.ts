@@ -18,7 +18,6 @@ export interface Store {
     create(address: string): Promise<IHost>
     destroy(id: number): Promise<void>
     getByAddress(address: string): Promise<IHost>
-    setStatus(host: IHost, status: string): Promise<IHost>
     updateHost(host: IHost, reg: {
       slots: string      
       public_ip: string

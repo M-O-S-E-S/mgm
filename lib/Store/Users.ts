@@ -103,7 +103,7 @@ export class Users {
   }
 
   getAll(): Promise<IUser[]> {
-    return this.db.query('SELECT * FROM `users` join `agents` WHERE `agents`.`UUID` = `users`.`UUID`').then((rows: user_row[]) => {
+    return this.db.query('SELECT * FROM `users`').then((rows: user_row[]) => {
       return rows.map((row: user_row): IUser => {
         return new UserObj(row);
       });

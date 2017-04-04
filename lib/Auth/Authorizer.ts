@@ -41,6 +41,8 @@ export class Authorizer {
       this.store.Users.getByID(result.uuid).then((u: IUser) => {
         return this.session.getSession(u);
       }).then((ud: UserDetail) => {
+        if(!ud)
+          throw new Error('Invalid Session');
         req.user = ud;
         // convert javascript arrays into Sets
         req.user.estates = Set<number>(req.user.estates);

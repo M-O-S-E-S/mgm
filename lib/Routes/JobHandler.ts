@@ -292,7 +292,7 @@ export function UserUploadHandler(store: Store, perf: PerformanceStore): Request
   };
 }
 
-export function UserDownloadHandler(store: Store): RequestHandler {
+export function UserDownloadHandler(store: Store, uploadFolder: string): RequestHandler {
   return (req: AuthenticatedRequest, res) => {
     let jobID = parseInt(req.params.id);
 
@@ -305,7 +305,7 @@ export function UserDownloadHandler(store: Store): RequestHandler {
           let datum = JSON.parse(j.data);
           res.setHeader('Content-Disposition', 'attachment; filename="' + datum.FileName + '.oar"');
           res.setHeader('Content-Type', 'application/octet-stream');
-          res.sendFile(datum.File);
+          res.sendFile(datum.File.split('/').pop(), { root: uploadFolder });
           break;
       }
     }).catch((err) => {

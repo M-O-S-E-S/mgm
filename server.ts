@@ -80,7 +80,7 @@ apiRouter.post('/job/nukeContent/:uuid', checkUser, NukeContentHandler(store, pe
 apiRouter.post('/job/loadOar/:uuid', checkUser, LoadOarHandler(store, perfData));
 apiRouter.post('/job/upload/:id', checkUser, multer({ dest: uploadDir }).single('file'), UserUploadHandler(store, perfData));
 apiRouter.post('/job/saveOar/:uuid', checkUser, SaveOarHandler(store, perfData));
-apiRouter.get('/job/download/:id', checkUser, UserDownloadHandler(store));
+apiRouter.get('/job/download/:id', checkUser, UserDownloadHandler(store, conf.main.upload_dir));
 
 // User
 import {
@@ -207,5 +207,3 @@ clusterApp.post('/upload/:id', multer({ dest: uploadDir }).single('file'), NodeU
 clusterApp.listen(3001, function () {
   console.log('MGM listening for nodes on port 3001!');
 });
-
-

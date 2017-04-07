@@ -10,6 +10,8 @@ export class EmailMgr {
   private gridName: string
   private uri: string
 
+  private enabled: boolean = false;
+
   constructor(mailConfig: any) {
     if (EmailMgr._instance) {
       throw new Error('MailMgr singleton has already been initialized');
@@ -37,7 +39,7 @@ export class EmailMgr {
       };
       this.transporter.sendMail(mailOptions, (err, info) => {
         if (err)
-          return reject(err);
+          return reject(new Error('Cannot send email: ' + err.message));
         resolve();
       });
     });
